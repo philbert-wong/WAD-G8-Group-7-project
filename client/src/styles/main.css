@@ -1,0 +1,323 @@
+/* Theme: Bootstrap 5 with a teal brand colour. Bootstrap's compiled component styles
+   hard-code the default blue, so the components we use are re-pointed at the brand tokens. */
+:root {
+  --brand: #0f766e;
+  --brand-rgb: 15, 118, 110;
+  --brand-dark: #0b5a54;
+  --brand-ink: #134e4a;
+  --brand-soft: #e6f4f1;
+  --accent: #f59e0b;
+  --surface: #f6f7f5;
+
+  --bs-primary: var(--brand);
+  --bs-primary-rgb: var(--brand-rgb);
+  --bs-link-color: var(--brand);
+  --bs-link-color-rgb: var(--brand-rgb);
+  --bs-link-hover-color: var(--brand-dark);
+  --bs-link-hover-color-rgb: 11, 90, 84;
+  --bs-body-bg: var(--surface);
+  --bs-focus-ring-color: rgba(var(--brand-rgb), 0.25);
+}
+
+html,
+body {
+  background: var(--surface);
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand-dark);
+  --bs-btn-hover-border-color: var(--brand-dark);
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-border-color: var(--brand-dark);
+  --bs-btn-disabled-bg: var(--brand);
+  --bs-btn-disabled-border-color: var(--brand);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand);
+  --bs-btn-hover-border-color: var(--brand);
+  --bs-btn-active-bg: var(--brand);
+  --bs-btn-active-border-color: var(--brand);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+}
+
+.btn-check:checked + .btn-outline-primary {
+  background-color: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(var(--brand-rgb), 0.6);
+  box-shadow: 0 0 0 0.25rem rgba(var(--brand-rgb), 0.2);
+}
+
+.form-range::-webkit-slider-thumb {
+  background-color: var(--brand);
+}
+.form-range::-moz-range-thumb {
+  background-color: var(--brand);
+}
+.form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 0.25rem rgba(var(--brand-rgb), 0.25);
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--brand);
+  --bs-nav-link-color: var(--brand-ink);
+  --bs-nav-link-hover-color: var(--brand);
+}
+
+.pagination {
+  --bs-pagination-color: var(--brand);
+  --bs-pagination-hover-color: var(--brand-dark);
+  --bs-pagination-active-bg: var(--brand);
+  --bs-pagination-active-border-color: var(--brand);
+  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(var(--brand-rgb), 0.25);
+}
+
+.list-group {
+  --bs-list-group-active-bg: var(--brand);
+  --bs-list-group-active-border-color: var(--brand);
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+/* Navbar & hero */
+.app-navbar {
+  background: var(--brand-ink);
+}
+
+.hero {
+  background:
+    radial-gradient(1200px 300px at 50% -40px, rgba(255, 255, 255, 0.12), transparent),
+    linear-gradient(160deg, var(--brand-ink), var(--brand));
+  color: #fff;
+}
+
+.hero__lead {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.1rem;
+}
+
+.search-input-group {
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+.search-input-group .input-group-text,
+.search-input-group .form-control {
+  background: #fff;
+  border: 0;
+}
+.search-input-group .form-control:focus {
+  box-shadow: none;
+}
+.search-input-group:focus-within {
+  outline: 3px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.address-search .suggestions {
+  position: absolute;
+  z-index: 1050;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  text-align: left;
+  max-height: 22rem;
+  overflow-y: auto;
+  border-radius: 0.75rem;
+}
+.address-search .suggestions .list-group-item {
+  cursor: pointer;
+}
+
+.location-chip {
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0.6rem 0.5rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  white-space: normal;
+}
+.location-chip .btn-close {
+  font-size: 0.6rem;
+}
+
+/* Filters */
+@media (min-width: 992px) {
+  .filter-sticky {
+    position: sticky;
+    top: 5rem;
+  }
+}
+
+/* Block cards */
+.block-card {
+  border-radius: 0.9rem;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.block-card:hover,
+.block-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+}
+.block-card--pinned {
+  outline: 2px solid var(--accent);
+}
+
+.block-card__media {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  background: var(--brand-soft);
+}
+.block-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+.block-card__type,
+.block-card__pin {
+  position: absolute;
+  top: 0.6rem;
+}
+.block-card__type {
+  left: 0.6rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+.block-card__pin {
+  right: 0.6rem;
+}
+
+.block-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: var(--brand);
+  background:
+    repeating-linear-gradient(135deg, transparent 0 12px, rgba(var(--brand-rgb), 0.05) 12px 24px),
+    var(--brand-soft);
+  font-weight: 600;
+}
+.block-card__placeholder .bi {
+  font-size: 2rem;
+}
+
+.block-card__skeleton {
+  aspect-ratio: 2 / 1;
+  height: auto;
+}
+
+.btn-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Block detail */
+.detail-map {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  max-height: 340px;
+  object-fit: cover;
+  display: flex;
+}
+@media (min-width: 768px) {
+  .detail-map {
+    max-height: none;
+  }
+}
+
+.dash-cell {
+  background: #fff;
+  border-radius: 0.9rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  padding: 1rem;
+}
+
+/* Highcharts Dashboards KPI tiles */
+.price-dashboard .highcharts-dashboards-component {
+  padding: 0;
+}
+.price-dashboard .highcharts-dashboards-component-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #52514e;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.25rem;
+  padding: 0;
+}
+.price-dashboard .highcharts-dashboards-component-kpi-value {
+  font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+  font-weight: 700;
+  color: #0b0b0b;
+  line-height: 1.2;
+  text-align: left;
+}
+.price-dashboard .highcharts-dashboards-component-kpi-subtitle {
+  font-size: 0.8rem;
+  color: #52514e;
+  text-align: left;
+}
+.price-dashboard .highcharts-dashboards-component-kpi-content {
+  align-items: flex-start;
+}
+.dash-kpi {
+  height: 100%;
+  min-height: 7.5rem;
+}
+
+/* Shortlist */
+.shortlist-thumb {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  object-fit: cover;
+}
+.note {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  background: #fff;
+  border-radius: 1rem;
+}
+
+.site-footer {
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block-card {
+    transition: none;
+  }
+}

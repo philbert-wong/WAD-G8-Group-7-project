@@ -1,0 +1,21 @@
+{
+  "name": "hdb-resale-explorer",
+  "private": true,
+  "description": "IS216 G8 Group 7 - search HDB resale blocks by real transaction prices",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \"npm run dev -w server\" \"npm run dev -w client\"",
+    "db:local": "npm run db:local -w server",
+    "seed": "npm run seed -w server",
+    "fit": "npm run fit -w server",
+    "build": "npm run build -w client",
+    "start": "npm start -w server",
+    "test": "npm test -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

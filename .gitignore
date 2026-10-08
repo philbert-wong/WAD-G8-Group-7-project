@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.DS_Store
+
+# server
+server/.localdb/
+server/data/*.csv
+
+# ml-service
+ml-service/.venv/
+__pycache__/
+.pytest_cache/
+
