@@ -1,0 +1,26 @@
+# Render "blueprint": describes the service so it can be recreated in one step.
+# OWNER: me (deployment).  New → Blueprint → pick this repo.
+# NOT TESTED against Render — check each field against https://render.com/docs/blueprint-spec
+#
+# Express serves BOTH the API and the built Vue app, so there is one service.
+services:
+  - type: web
+    name: hdb-scope-navigate
+    runtime: node
+    plan: free                      # free tier sleeps after ~15 min idle — see my-work/deploy.md
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      # `sync: false` = Render asks you for the value; it is never stored in git.
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ONEMAP_EMAIL
+        sync: false
+      - key: ONEMAP_PASSWORD
+        sync: false
+      - key: LTA_ACCOUNT_KEY
+        sync: false
+      # Do NOT set PORT: Render provides it and server/app.js already reads it.
