@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { computeScore, distanceScore, leaseScore, priceScore } from '../src/lib/score.js';
 import { blockIdFor, streetKey } from '../src/lib/streets.js';
 import {
   buildBlocks, median, minLeaseCommenceYear, monthToT, parseRemainingLease, remainingLeaseNow, shiftMonth, storeyMid,
@@ -20,6 +21,73 @@ describe('streetKey', () => {
     expect(streetKey('sumang lane')).toBe('SUMANG LANE');
   });
 });
+
+describe('distanceScore', () => {
+  it('gives 1 when amenity is close', () =>{
+    expect(distanceScore(300)).toBe(1);
+  });
+
+    it('gives 0 when the amenity is far', () => {
+    expect(distanceScore(2500)).toBe(0);
+  });
+
+  it('gives 0 when there is no amenity', () => {
+    expect(distanceScore(null)).toBe(0);
+  });
+
+  it('gives a value in between for a medium distance', () => {
+    expect(distanceScore(1150)).toBeCloseTo(0.5);
+  });
+});
+
+describe('priceScore', () => {
+  it('gives 1 at half the budget', () => {
+    expect(priceScore(300000, 600000)).toBe(1);
+  });
+
+  it('gives 0 at the budget', () => {
+    expect(priceScore(600000, 600000)).toBe(0);
+  });
+
+  it('gives 0 when the price or budget is missing', () => {
+    expect(priceScore(null, 600000)).toBe(0);
+    expect(priceScore(400000, null)).toBe(0);
+  });
+});
+
+describe('leaseScore', () => {
+  it('gives 0 at 40 years', () => {
+    expect(leaseScore(40)).toBe(0);
+  });
+
+  it('gives 1 at 90 years', () => {
+    expect(leaseScore(90)).toBe(1);
+  });
+
+  it('gives 0 when the lease is missing', () => {
+    expect(leaseScore(null)).toBe(0);
+  });
+});
+
+describe('computeScore', () => {
+  const block = { distances: { mrt: 300 }, price: 400000, budget: 600000, remainingLease: 80 };
+
+  it('gives 100 when only a perfect factor has a weight', () => {
+    const result = computeScore(block, { mrt: 5 });
+    expect(result.score).toBe(100);
+  });
+
+  it('gives 0 when every weight is 0', () => {
+    const result = computeScore(block, { mrt: 0, hawker: 0, park: 0, school: 0, price: 0, lease: 0 });
+    expect(result.score).toBe(0);
+  });
+
+  it('includes a breakdown for every factor', () => {
+    const result = computeScore(block);
+    expect(Object.keys(result.breakdown)).toEqual(['mrt', 'hawker', 'park', 'school', 'price', 'lease']);
+  });
+});
+
 
 describe('resale row parsing', () => {
   it('parses storey ranges, leases and months', () => {
@@ -46,6 +114,8 @@ describe('resale row parsing', () => {
     expect(remainingLeaseNow(year - 1, now)).toBeLessThan(60);
   });
 });
+
+
 
 describe('buildBlocks', () => {
   const blocks = buildBlocks(transactions);

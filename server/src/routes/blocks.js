@@ -4,6 +4,9 @@ import { streetKey } from '../lib/streets.js';
 import { minLeaseCommenceYear, remainingLeaseNow } from '../lib/resale.js';
 import { ensureGeocoded } from '../services/onemap.js';
 import { HttpError, optionalNumber } from '../lib/http.js';
+import { Amenity, CATEGORIES } from '../models/Amenity.js';
+import { computeScore, DEFAULT_WEIGHTS } from '../lib/score.js'
+
 
 const router = Router();
 
@@ -80,6 +83,90 @@ router.get('/', async (req, res) => {
 
   res.json({ total: total[0]?.n ?? 0, page, pageSize, results: results.map(toCard) });
 });
+
+// GET /api/blocks/nearby?lat=1.3&lng=103.8&radius=1000&limit=20
+router.get('/nearby', async (req, res) => {
+  const lat = optionalNumber(req.query.lat, 'lat');
+  const lng = optionalNumber(req.query.lng, 'lng');
+  if (lat == null || lng == null) throw new HttpError(400, 'lat and lng are required');
+  const radius = Math.min(5000, optionalNumber(req.query.radius, 'radius') ?? 1000);
+  const limit = Math.min(50, optionalNumber(req.query.limit, 'limit') ?? 20);
+
+  const blocks = await Block.aggregate([
+    { $geoNear: { near: { type: 'Point', coordinates: [lng, lat] }, distanceField: 'distance', maxDistance: radius, spherical: true } },
+    { $limit: limit },
+  ]);
+
+  const results = blocks.map((b) => ({
+    blockId: b._id,
+    block: b.block,
+    street: b.street,
+    town: b.town,
+    lat: b.location.coordinates[1],
+    lng: b.location.coordinates[0],
+    remainingLease: remainingLeaseNow(b.leaseCommenceYear),
+    flatTypes: b.flatTypes,
+    distance: Math.round(b.distance),
+  }));
+  res.json({ total: results.length, results });
+});
+
+// Find the block, make sure it has coordinates, and find the nearest amenity of each type
+async function loadBlockWithAmenities(id) {
+  const block = await Block.findById(id).lean();
+  if (!block) throw new HttpError(404, 'Block not found');
+  if (!block.location) throw new HttpError(422, 'Block has no coordinates yet');
+
+  const amenities = [];
+  for (const category of CATEGORIES) {
+    const [nearest] = await Amenity.aggregate([
+      { $geoNear: { near: block.location, distanceField: 'distance', spherical: true, query: { category } } },
+      { $limit: 1 },
+    ]);
+    if (nearest) {
+      amenities.push({ category, name: nearest.name, distance: Math.round(nearest.distance) });
+    }
+  }
+  return { block, amenities };
+}
+
+
+// GET /api/blocks/:id/amenities
+router.get('/:id/amenities', async (req, res) => {
+  const { block, amenities } = await loadBlockWithAmenities(req.params.id);
+  res.json({ blockId: block._id, amenities });
+});
+
+// GET /api/blocks/:id/score?flatType=4 ROOM&budget=600000
+router.get('/:id/score', async (req, res) => {
+  const { block, amenities } = await loadBlockWithAmenities(req.params.id);
+
+  const distances = {};
+  for (const a of amenities) {
+    distances[a.category] = a.distance;
+  }
+
+
+  const weights = { ...DEFAULT_WEIGHTS };
+  for (const name of Object.keys(weights)) {
+    const value = optionalNumber(req.query[name], name);
+    if (value !== null){
+      weights[name] = Math.min(5, Math.max(0,value));
+    }
+  }
+
+  const price = block.flatTypes.find((f) => f.flatType === req.query.flatType)?.medianPrice;
+  const result = computeScore({
+    distances,
+    price,
+    budget: optionalNumber(req.query.budget, 'budget'),
+    remainingLease: remainingLeaseNow(block.leaseCommenceYear),
+  }, weights);
+  res.json({ blockId: block._id, ...result });
+});
+
+
+
 
 // GET /api/blocks/:id - one block with its price summary per flat type
 router.get('/:id', async (req, res) => {

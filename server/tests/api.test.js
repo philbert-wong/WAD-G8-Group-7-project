@@ -9,7 +9,7 @@ import { Shortlist } from '../src/models/Shortlist.js';
 import { Transaction } from '../src/models/Transaction.js';
 import { buildBlocks } from '../src/lib/resale.js';
 import { transactions } from './fixtures.js';
-
+import { Amenity } from '../src/models/Amenity.js';
 // Keep tests offline and repeatable: never call the real OneMap API.
 vi.mock('../src/services/onemap.js', () => ({ ensureGeocoded: async (blocks) => blocks }));
 
@@ -21,6 +21,17 @@ beforeAll(async () => {
   await connectDb(mongo.getUri());
   await Transaction.insertMany(transactions);
   await Block.insertMany(buildBlocks(transactions));
+  await Block.updateOne(
+    { _id: '233c-sumang-lane' },
+    { $set: { location: { type: 'Point', coordinates: [103.9, 1.4] } } },
+  );
+  await Amenity.insertMany([
+    { category: 'mrt', name: 'Test MRT', location: { type: 'Point', coordinates: [103.901, 1.4] } },
+    { category: 'hawker', name: 'Test Hawker', location: { type: 'Point', coordinates: [103.905, 1.4] } },
+  ]);
+  await Block.init();    
+  await Amenity.init();
+
 });
 
 afterAll(async () => {
@@ -153,4 +164,67 @@ describe('/api/shortlist CRUD', () => {
     const tooLong = await add({ blockId: '233c-sumang-lane', flatType: '4 ROOM', note: 'x'.repeat(501) });
     expect(tooLong.status).toBe(400);
   });
+
+  describe('GET /api/blocks/nearby', () => {
+  const nearby = (query) => request(app).get('/api/blocks/nearby').query(query);
+
+  it('needs lat and lng', async () => {
+    const res = await nearby({});
+    expect(res.status).toBe(400);
+  });
+
+  it('finds the block with coordinates, with a distance', async () => {
+    const res = await nearby({ lat: 1.4, lng: 103.9, radius: 2000 });
+    expect(res.status).toBe(200);
+    expect(res.body.results[0].blockId).toBe(	'233c-sumang-lane');
+    expect(res.body.results[0]).toHaveProperty('distance');
+  });
+
+  it('finds nothing when the radius is too small', async () => {
+    const res = await nearby({ lat: 1.3, lng: 103.8, radius: 100 });
+    expect(res.body.total).toBe(0);
+  });
+});
+
+describe('GET /api/blocks/:id/amenities', () => {
+  it('returns the nearest amenity of each type', async () => {
+    const res = await request(app).get('/api/blocks/233c-sumang-lane/amenities');
+    expect(res.status).toBe(200);
+    const categories = res.body.amenities.map((a) => a.category);
+    expect(categories).toEqual(['mrt', 'hawker']);
+  });
+
+  it('returns 404 for an unknown block', async () => {
+    const res = await request(app).get('/api/blocks/does-not-exist/amenities');
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 422 for a block without coordinates', async () => {
+    const res = await request(app).get('/api/blocks/406-ang-mo-kio-ave-10/amenities');
+    expect(res.status).toBe(422);
+  });
+});
+
+describe('GET /api/blocks/:id/score', () => {
+  const score = (query) => request(app).get('/api/blocks/233c-sumang-lane/score').query(query);
+
+  it('returns a score between 0 and 100', async () => {
+    const res = await score({ flatType: '4 ROOM', budget: 800000 });
+    expect(res.status).toBe(200);
+    expect(res.body.score).toBeGreaterThan(0);
+    expect(res.body.score).toBeLessThanOrEqual(100);
+  });
+
+  it('changes when the weights change', async () => {
+    const a = await score({ flatType: '4 ROOM', budget: 800000, mrt: 5 });
+    const b = await score({ flatType: '4 ROOM', budget: 800000, mrt: 0 });
+    expect(a.body.score).not.toBe(b.body.score);
+  });
+
+  it('rejects a weight that is not a number', async () => {
+    const res = await score({ mrt: 'abc' });
+    expect(res.status).toBe(400);
+  });
+});
+
 });
