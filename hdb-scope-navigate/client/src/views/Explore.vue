@@ -4,7 +4,7 @@ import { useRoute } from "vue-router";
 import MapView from "../components/MapView.vue";
 import MapLegend from "../components/MapLegend.vue";
 import FilterPanel from "../components/FilterPanel.vue";
-import SearchBox from "../components/SearchBox.vue";
+// import SearchBox from "../components/SearchBox.vue";
 import ScorePanel from "../components/ScorePanel.vue";
 import AmenityToggles from "../components/AmenityToggles.vue";
 import PhgPanel from "../components/PhgPanel.vue";
@@ -62,7 +62,7 @@ const scopeText = computed(() =>
         <button class="btn-close" aria-label="Close filters" @click="panelOpen = false"></button>
       </div>
 
-      <SearchBox />
+      <!-- <SearchBox /> -->
 
       <PanelSection title="Filters" :badge="filterBadge" cy="section-filters">
         <FilterPanel />

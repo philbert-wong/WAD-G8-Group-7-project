@@ -28,19 +28,22 @@ async function onSearch() {
 </script>
 
 <template>
-  <form class="mb-3" @submit.prevent="onSearch">
-    <label for="search" class="form-label small text-muted mb-1">Postal code or address</label>
-    <div class="input-group">
-      <input id="search" v-model="query" class="form-control" placeholder="e.g. 560406"
-             data-cy="search-input" autocomplete="off" />
-      <button class="btn btn-primary" :disabled="busy" data-cy="search-submit">
-        {{ busy ? "…" : "Go" }}
-      </button>
+  <form class="search-form" @submit.prevent="onSearch">
+    <div class="d-flex align-items-center gap-2">
+      <label for="search" class="form-label small text-muted mb-1 text-nowrap">Postal code or address</label>
+      <div class="input-group">
+        <input id="search" v-model="query" class="form-control" placeholder="e.g. 560406"
+              data-cy="search-input" autocomplete="off" />
+        <button class="btn btn-primary" :disabled="busy" data-cy="search-submit">
+          {{ busy ? "…" : "Go" }}
+        </button>
+      </div>
     </div>
     <p v-if="mapStore.pin?.label && !error" class="small text-muted mt-2 mb-0 text-truncate" data-cy="search-found">
-      Showing {{ mapStore.pin.label }}
+        Showing {{ mapStore.pin.label }}
       <button type="button" class="btn btn-link btn-sm p-0 ms-1 align-baseline" @click="mapStore.clearPin()">clear</button>
     </p>
     <p v-if="error" class="text-danger small mt-2 mb-0" role="alert" data-cy="search-error">{{ error }}</p>
+    
   </form>
 </template>

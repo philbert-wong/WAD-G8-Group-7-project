@@ -4,6 +4,8 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth.js";
 import { useShortlistStore } from "../stores/shortlist.js";
 
+import SearchBox from "../components/SearchBox.vue";
+
 /** OWNER: Frontend — Shell & UI */
 const auth = useAuthStore();
 const shortlist = useShortlistStore();
@@ -53,6 +55,10 @@ function signOut() {
           </RouterLink>
         </li>
       </ul>
+
+      <div class="navbar-search me-auto mb-2 mb-md-0" v-if="route.path === '/explore'">
+        <SearchBox></SearchBox>
+      </div>
 
       <div class="d-flex gap-2 align-items-center flex-wrap">
         <template v-if="auth.isSignedIn">
