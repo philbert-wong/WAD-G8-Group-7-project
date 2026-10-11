@@ -9,7 +9,10 @@ export function toCard(block) {
     street: block.street,
     town: block.town,
     flatType: block.flatType,
-    price: block.price,
+    price: block.price, // median
+    priceLow: block.priceLow,
+    priceHigh: block.priceHigh,
+    salesCount: block.sales.length,
     remainingLease: remainingLease(block.leaseCommenceYear),
     mrtName: block.mrtName,
     mrtWalkMinutes: block.mrtWalkMinutes,

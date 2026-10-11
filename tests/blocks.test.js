@@ -105,6 +105,36 @@ describe('GET /api/blocks/:id', () => {
   });
 });
 
+describe('GET /api/blocks/:id/sales', () => {
+  it('returns the price range on the card', async () => {
+    const res = await request(app).get(`/api/blocks/${data.punggol._id}`);
+    expect(res.body.priceLow).toBe(650000);
+    expect(res.body.priceHigh).toBe(720000);
+    expect(res.body.salesCount).toBe(3);
+  });
+
+  it('returns each sale with its price per square metre, plus a summary', async () => {
+    const res = await request(app).get(`/api/blocks/${data.punggol._id}/sales`);
+    expect(res.status).toBe(200);
+    expect(res.body.count).toBe(3);
+    expect(res.body.lowest).toBe(650000);
+    expect(res.body.highest).toBe(720000);
+    expect(res.body.medianPrice).toBe(680000);
+    expect(res.body.medianPricePerSqm).toBe(7312); // 680000 / 93
+
+    const newest = res.body.sales[0];
+    expect(newest.month).toBe('2026-09');
+    expect(newest.storey).toBe('13 TO 15');
+    expect(newest.pricePerSqm).toBe(7742); // 720000 / 93
+  });
+
+  it('works for a block with no sales stored', async () => {
+    const res = await request(app).get(`/api/blocks/${data.bedok._id}/sales`);
+    expect(res.status).toBe(200);
+    expect(res.body.count).toBe(0);
+  });
+});
+
 describe('GET /api/blocks/:id/amenities', () => {
   it('returns the nearest amenity of each type with distance', async () => {
     const res = await request(app).get(`/api/blocks/${data.punggol._id}/amenities`);

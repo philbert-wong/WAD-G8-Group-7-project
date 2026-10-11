@@ -56,7 +56,6 @@ onMounted(search);
         <BlockCard
           :block="block"
           :saved="isSaved(block.id)"
-          :budget="filters.maxPrice"
           @toggle-save="isSaved(block.id) ? $emit('unsave', block) : $emit('save', block)"
         />
       </div>

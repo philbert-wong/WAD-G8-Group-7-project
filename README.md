@@ -4,11 +4,13 @@ Search HDB resale flats in a card layout, filter them, and keep a personal short
 
 - **Filters:** budget, flat type, remaining lease, maximum walking minutes to MRT
 - **Shortlist:** create, read, update (note) and delete
-- **Extras:** nearby search (geospatial), nearest amenities, personalised score out of 100
+- **Extras:** nearby search (geospatial), nearest amenities, price range with each recent sale
+  (the API also has a personalised score out of 100, not shown on the site yet)
 
 Built with Vue 3 (Vite, `.vue` components), Bootstrap 5, Express and MongoDB (Mongoose).
 
-**Data:** real HDB resale prices (median of the last 12 months, per block and flat type) for four towns:
+**Data:** real HDB resale sales from the last 12 months, grouped per block and flat type (price range, median,
+and each sale's month, storey, floor area and price per m²) for four towns:
 Ang Mo Kio, Bishan, Punggol and Tampines. Coordinates come from OneMap; MRT stations, hawker centres,
 parks and primary schools come from data.gov.sg. The app itself never calls those APIs: it reads two
 JSON files in `server/data/`.
@@ -60,6 +62,7 @@ Errors always look like `{ "error": "message" }`.
 | GET | `/api/blocks` | Search + filter. Query: `q`, `flatType`, `maxPrice`, `minLease`, `maxWalk`, `limit`. Returns `{ total, results: [card] }`, cheapest first |
 | GET | `/api/blocks/nearby` | Blocks near a point. Query: `lat`, `lng` (required), `radius` in metres (default 1000, max 5000), `limit`. Each result has `distance` in metres |
 | GET | `/api/blocks/:id` | One block |
+| GET | `/api/blocks/:id/sales` | The recent sales behind the price range. Returns `{ count, lowest, highest, medianPrice, medianPricePerSqm, sales: [{ month, storey, areaSqm, price, pricePerSqm }] }`, newest first |
 | GET | `/api/blocks/:id/amenities` | Nearest `mrt`, `hawker`, `park`, `school` with `distance` in metres |
 | GET | `/api/blocks/:id/score` | Personalised score. Query: `budget`, and weights `mrt`, `hawker`, `park`, `school`, `price`, `lease` (0 to 5). Returns `{ score, breakdown, distances }`; score is 0 to 100, breakdown values are 0 to 1. Price only counts when `budget` is given |
 | GET | `/api/shortlist` | All saved items, newest first |
@@ -72,7 +75,8 @@ A block card looks like:
 ```json
 {
   "id": "6711...", "block": "233C", "street": "SUMANG LANE", "town": "PUNGGOL",
-  "flatType": "4 ROOM", "price": 680000, "remainingLease": 91,
+  "flatType": "4 ROOM", "price": 680000, "priceLow": 650000, "priceHigh": 720000, "salesCount": 3,
+  "remainingLease": 91,
   "mrtName": "Punggol MRT", "mrtWalkMinutes": 4, "lat": 1.405, "lng": 103.903
 }
 ```
@@ -114,6 +118,11 @@ Express serves the website and the API from the same address, so there is nothin
 `node prep/makeData.js "/path/to/resale-prices.csv"` rebuilds the two JSON files from the resale CSV
 (download it from data.gov.sg). It looks up coordinates on OneMap and takes a few minutes. Answers are cached
 in `prep/geocode-cache.json`, so a second run is quick. Change `TOWNS` at the top of the script for other towns.
+
+`node prep/addSales.js "/path/to/resale-prices.csv"` only refreshes the sales and price ranges of the blocks
+already in `blocks.json` (same blocks, same 12 months, no OneMap calls). Run `npm run seed` afterwards.
+
+`price` (used by the budget filter, sorting and the score) is still the median; the card shows the range.
 
 ## Known limits
 
