@@ -12,7 +12,7 @@ export function toCard(block) {
     price: block.price, // median
     priceLow: block.priceLow,
     priceHigh: block.priceHigh,
-    salesCount: block.sales.length,
+    salesCount: block.sales ? block.sales.length : 0,
     remainingLease: remainingLease(block.leaseCommenceYear),
     mrtName: block.mrtName,
     mrtWalkMinutes: block.mrtWalkMinutes,

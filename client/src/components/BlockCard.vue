@@ -36,6 +36,9 @@ async function toggleDetails() {
 }
 
 function formatPrice(price) {
+  if (price == null) {
+    return 'N/A';
+  }
   return '$' + price.toLocaleString('en-SG');
 }
 
