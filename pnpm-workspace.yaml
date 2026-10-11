@@ -1,0 +1,7 @@
+# Used by pnpm only (npm ignores this file).
+# Install client/ together with the server in one `pnpm install`.
+packages:
+  - client
+
+allowBuilds:
+  mongodb-memory-server: true
