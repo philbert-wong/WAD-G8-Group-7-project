@@ -5,6 +5,7 @@ import { toCard } from '../lib/blockCard.js';
 import { findBlock } from '../lib/findBlock.js';
 import { findNearestAmenities } from '../lib/findNearestAmenities.js';
 import { computeScore } from '../lib/score.js';
+import { salesSummary } from '../lib/salesSummary.js';
 import { readWeights } from '../lib/readWeights.js';
 import { remainingLease } from '../lib/lease.js';
 import { toNumber } from '../lib/toNumber.js';
@@ -58,6 +59,15 @@ router.get('/:id/amenities', async (req, res) => {
   const block = await findBlock(req.params.id);
   const amenities = await findNearestAmenities(block.location);
   res.json({ blockId: block._id, amenities });
+});
+
+// GET /api/blocks/:id/sales
+// The recent sales behind the price range: month, storey, floor area, price and price per m2.
+router.get('/:id/sales', async (req, res) => {
+  const block = await findBlock(req.params.id);
+  const summary = salesSummary(block.sales);
+  summary.blockId = block._id;
+  res.json(summary);
 });
 
 // GET /api/blocks/:id/score?budget=600000&mrt=5&park=0

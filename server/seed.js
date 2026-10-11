@@ -39,6 +39,9 @@ const blockDocs = blocks.map((b) => ({
   town: b.town,
   flatType: b.flatType,
   price: b.price,
+  priceLow: b.priceLow,
+  priceHigh: b.priceHigh,
+  sales: b.sales,
   leaseCommenceYear: b.leaseCommenceYear,
   ...nearestStation(b),
   location: { type: 'Point', coordinates: [b.lng, b.lat] }, // [lng, lat]

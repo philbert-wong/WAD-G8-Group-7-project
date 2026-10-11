@@ -6,10 +6,21 @@ const blockSchema = new mongoose.Schema({
   street: { type: String, required: true },
   town: { type: String, required: true },
   flatType: { type: String, required: true }, // "3 ROOM", "4 ROOM", ...
-  price: { type: Number, required: true }, // typical resale price in dollars
+  price: { type: Number, required: true }, // typical (median) resale price in dollars
+  priceLow: Number, // cheapest recent sale
+  priceHigh: Number, // most expensive recent sale
   leaseCommenceYear: { type: Number, required: true },
   mrtName: String, // nearest MRT station
   mrtWalkMinutes: Number, // walking minutes to it
+
+  // The recent sales those prices come from, newest first
+  sales: [{
+    _id: false, // the sales do not need their own id
+    month: String, // "2026-08"
+    storey: String, // "04 TO 06"
+    areaSqm: Number, // floor area in square metres
+    price: Number,
+  }],
 
   // GeoJSON point. NOTE: MongoDB wants [longitude, latitude] (lng first!)
   location: {

@@ -1,19 +1,22 @@
 <script setup>
 import { ref } from 'vue';
 import * as api from '../api.js';
+import PriceDetails from './PriceDetails.vue';
 
 const props = defineProps({
   block: Object, // one card from /api/blocks
   saved: Boolean, // is it in the shortlist?
-  budget: [String, Number], // the budget filter, used for the score
+  showSave: { type: Boolean, default: true }, // the shortlist page hides the Save button
 });
 defineEmits(['toggle-save']);
 
-// Amenities + score are only fetched when you press the button
+// Price details (each sale) are shown when you press the "Price details" button
+const showPrices = ref(false);
+
+// Nearby amenities are only fetched when you press the button
 const open = ref(false);
 const loading = ref(false);
 const error = ref('');
-const score = ref(null);
 const amenities = ref([]);
 
 async function toggleDetails() {
@@ -23,12 +26,8 @@ async function toggleDetails() {
   loading.value = true;
   error.value = '';
   try {
-    const [amenityData, scoreData] = await Promise.all([
-      api.getAmenities(props.block.id),
-      api.getScore(props.block.id, props.budget),
-    ]);
+    const amenityData = await api.getAmenities(props.block.id);
     amenities.value = amenityData.amenities;
-    score.value = scoreData.score;
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -38,6 +37,14 @@ async function toggleDetails() {
 
 function formatPrice(price) {
   return '$' + price.toLocaleString('en-SG');
+}
+
+// "$600,000 – $720,000", or one price when every sale was the same
+function formatRange(low, high) {
+  if (low === high) {
+    return formatPrice(low);
+  }
+  return formatPrice(low) + ' – ' + formatPrice(high);
 }
 
 const categoryNames = { mrt: 'MRT', hawker: 'Hawker centre', park: 'Park', school: 'Primary school' };
@@ -54,44 +61,42 @@ const categoryNames = { mrt: 'MRT', hawker: 'Hawker centre', park: 'Park', schoo
         <span class="badge text-bg-secondary">{{ block.flatType }}</span>
       </div>
 
-      <p class="fs-4 fw-bold my-2">{{ formatPrice(block.price) }}</p>
+      <p class="fs-5 fw-bold mt-2 mb-0">{{ formatRange(block.priceLow, block.priceHigh) }}</p>
+      <p class="small text-muted mb-2">{{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}</p>
 
       <ul class="list-unstyled mb-3">
         <li>Remaining lease: <strong>{{ block.remainingLease }} years</strong></li>
         <li>{{ block.mrtWalkMinutes }} min walk to {{ block.mrtName }}</li>
       </ul>
 
-      <div class="d-flex gap-2">
+      <div class="d-flex flex-wrap gap-2">
         <button
+          v-if="showSave"
           class="btn btn-sm"
           :class="saved ? 'btn-warning' : 'btn-outline-warning'"
           @click="$emit('toggle-save', block)"
         >
           {{ saved ? '★ Saved' : '☆ Save' }}
         </button>
+        <button class="btn btn-sm btn-outline-secondary" @click="showPrices = !showPrices">
+          {{ showPrices ? 'Hide price details' : 'Price details' }}
+        </button>
         <button class="btn btn-sm btn-outline-secondary" @click="toggleDetails">
-          {{ open ? 'Hide details' : 'Amenities & score' }}
+          {{ open ? 'Hide amenities' : 'Nearby amenities' }}
         </button>
       </div>
+
+      <PriceDetails v-if="showPrices" :block-id="block.id" />
 
       <div v-if="open" class="mt-3 pt-3 border-top">
         <p v-if="loading" class="text-muted mb-0">Loading...</p>
         <p v-else-if="error" class="text-danger mb-0">{{ error }}</p>
 
-        <template v-else>
-          <p class="mb-1">Match score: <strong>{{ score }} / 100</strong></p>
-          <div class="progress mb-3" style="height: 8px">
-            <div class="progress-bar bg-success" :style="{ width: score + '%' }"></div>
-          </div>
-
-          <ul class="list-unstyled small mb-0">
-            <li v-for="a in amenities" :key="a.category">
-              {{ categoryNames[a.category] }}: {{ a.name }} ({{ a.distance }} m)
-            </li>
-          </ul>
-
-          <p v-if="!budget" class="small text-muted mt-2 mb-0">Enter a max budget to include price in the score.</p>
-        </template>
+        <ul v-else class="list-unstyled small mb-0">
+          <li v-for="a in amenities" :key="a.category">
+            {{ categoryNames[a.category] }}: {{ a.name }} ({{ a.distance }} m)
+          </li>
+        </ul>
       </div>
     </div>
   </div>

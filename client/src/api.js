@@ -35,8 +35,8 @@ export function getAmenities(blockId) {
   return request(`/api/blocks/${blockId}/amenities`);
 }
 
-export function getScore(blockId, budget) {
-  return request(`/api/blocks/${blockId}/score?` + toQueryString({ budget }));
+export function getSales(blockId) {
+  return request(`/api/blocks/${blockId}/sales`);
 }
 
 // Shortlist: create, read, update, delete
