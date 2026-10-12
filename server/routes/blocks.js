@@ -15,11 +15,11 @@ function compareByPrice(a, b) {
   return a.price - b.price;
 }
 
-// GET /api/blocks?q=punggol&flatType=4 ROOM&maxPrice=700000&minLease=60&maxWalk=10
+// GET /api/blocks?q=punggol&flatType=4 ROOM&maxPrice=700000&minLease=60
 // Search + filter. Sends every matching block (we only have a few hundred), cheapest first.
 async function searchBlocks(req, res) {
   // The number filters must be numbers (or left out)
-  const numberFields = ['maxPrice', 'minLease', 'maxWalk'];
+  const numberFields = ['maxPrice', 'minLease'];
   for (const field of numberFields) {
     const value = req.query[field];
     if (!isBlank(value) && !isNumber(value)) {
