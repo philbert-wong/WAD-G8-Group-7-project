@@ -1,14 +1,25 @@
 <script setup>
+// One saved flat on the Shortlist page: its card plus a note box
 import { ref } from 'vue'
 import BlockCard from './BlockCard.vue'
 
 const props = defineProps({
   item: Object, // { id, note, block }
 })
-defineEmits(['remove', 'change-note'])
+const emit = defineEmits(['remove', 'change-note'])
 
 // What is typed in the box. "item.note" is what is already saved.
 const draft = ref(props.item.note)
+
+// "Save note" button: send the item and the new note to the page
+function saveNote() {
+  emit('change-note', props.item, draft.value)
+}
+
+// "Remove" button: send the item to the page
+function removeItem() {
+  emit('remove', props.item)
+}
 </script>
 
 <template>
@@ -29,16 +40,10 @@ const draft = ref(props.item.note)
         ></textarea>
 
         <div class="d-flex gap-2">
-          <button
-            class="btn btn-sm btn-primary"
-            :disabled="draft === item.note"
-            @click="$emit('change-note', { item, note: draft })"
-          >
+          <button class="btn btn-sm btn-primary" :disabled="draft === item.note" @click="saveNote">
             Save note
           </button>
-          <button class="btn btn-sm btn-outline-danger" @click="$emit('remove', item)">
-            Remove
-          </button>
+          <button class="btn btn-sm btn-outline-danger" @click="removeItem">Remove</button>
         </div>
       </div>
     </div>

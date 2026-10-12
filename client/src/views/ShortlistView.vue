@@ -9,9 +9,9 @@ const shortlist = useShortlistStore()
 // When the page opens, get the latest shortlist from the server
 onMounted(shortlist.load)
 
-// ShortlistItem sends { item, note } when "Save note" is pressed
-function changeNote(data) {
-  shortlist.updateNote(data.item, data.note)
+// ShortlistItem sends the item and the new note when "Save note" is pressed
+function changeNote(item, note) {
+  shortlist.updateNote(item, note)
 }
 
 // ShortlistItem sends the item when "Remove" is pressed

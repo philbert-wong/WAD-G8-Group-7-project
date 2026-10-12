@@ -1,16 +1,31 @@
 <script setup>
-// The big search box. v-model works with the parent's value, so typing updates it directly.
-const text = defineModel({ type: String })
-defineEmits(['search', 'typing'])
+// The big search box.
+// The page (SearchView) owns the text and passes it in as a prop.
+// While the user types, we send the new text up with emit.
+defineProps({
+  text: String,
+})
+const emit = defineEmits(['change-text', 'search'])
+
+// Each key press: tell the page the new text
+function onInput(event) {
+  emit('change-text', event.target.value)
+}
+
+// Enter or the Search button: tell the page to search
+function onSubmit() {
+  emit('search')
+}
 </script>
 
 <template>
-  <form class="input-group input-group-lg mb-3" @submit.prevent="$emit('search')">
+  <form class="input-group input-group-lg mb-3" @submit.prevent="onSubmit">
     <input
-      v-model="text"
+      :value="text"
       type="search"
       class="form-control"
       placeholder="Search by town, street or block e.g. Punggol"
+      @input="onInput"
     />
     <button class="btn btn-primary" type="submit">Search</button>
   </form>

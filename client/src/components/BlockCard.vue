@@ -1,4 +1,5 @@
 <script setup>
+// One flat card: price, lease, MRT, match score, and buttons for Save, price details and amenities
 import { ref } from 'vue'
 import axios from 'axios'
 import { getErrorMessage } from '../utils/errorMessage.js'
@@ -90,16 +91,19 @@ const categoryNames = {
         <button
           v-if="showSave"
           class="btn btn-sm"
-          :class="saved ? 'btn-warning' : 'btn-outline-warning'"
+          :class="{ 'btn-warning': saved, 'btn-outline-warning': !saved }"
           @click="$emit('toggle-save', block)"
         >
-          {{ saved ? '★ Saved' : '☆ Save' }}
+          <span v-if="saved">★ Saved</span>
+          <span v-else>☆ Save</span>
         </button>
         <button class="btn btn-sm btn-outline-secondary" @click="showPrices = !showPrices">
-          {{ showPrices ? 'Hide price details' : 'Price details' }}
+          <span v-if="showPrices">Hide price details</span>
+          <span v-else>Price details</span>
         </button>
         <button class="btn btn-sm btn-outline-secondary" @click="toggleDetails">
-          {{ open ? 'Hide amenities' : 'Nearby amenities' }}
+          <span v-if="open">Hide amenities</span>
+          <span v-else>Nearby amenities</span>
         </button>
       </div>
 

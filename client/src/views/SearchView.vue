@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, reactive, ref, computed } from 'vue'
+// The Search page: search box, filters, "What matters to you?" panel and the flat cards
+import { onMounted, ref, computed } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
@@ -17,24 +18,39 @@ import { useShortlistStore } from '../stores/shortlist.js'
 
 const shortlist = useShortlistStore()
 
-const filters = reactive({ q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' })
+// The search box text (q) and the four filters. Empty = not used.
+const filters = ref({ q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' })
 const results = ref([])
 const total = ref(0)
 const loading = ref(false)
 const errorMessage = ref('')
-const area = ref([])
+const area = ref([]) // town names, for the suggestions under the search box
 const showSuggestions = ref(true)
 
-// find matching areas
-const suggestions = computed(() => {
-  return area.value.filter((a) => a.includes(filters.q.toUpperCase()))
+// Town names that contain what is typed in the search box
+const suggestions = computed(function () {
+  const typed = filters.value.q.toUpperCase()
+  return area.value.filter(function (town) {
+    return town.includes(typed)
+  })
 })
 
-// When user selects a area
-function selectArea(a) {
-  filters.q = a
+// The search box says the user typed something
+function setSearchText(text) {
+  filters.value.q = text
+  showSuggestions.value = true
+}
+
+// The user clicked a suggested town
+function selectArea(town) {
+  filters.value.q = town
   showSuggestions.value = false
   search()
+}
+
+// The filter panel says one filter changed, e.g. ('maxPrice', '600000')
+function setFilter(name, value) {
+  filters.value[name] = value
 }
 
 // Gets the town names from the server (for the search suggestions)
@@ -53,7 +69,7 @@ async function search() {
   loading.value = true
   errorMessage.value = ''
   try {
-    const response = await axios.get('/api/blocks', { params: filters })
+    const response = await axios.get('/api/blocks', { params: filters.value })
     results.value = response.data.results
     total.value = response.data.total
   } catch (error) {
@@ -62,8 +78,9 @@ async function search() {
   loading.value = false
 }
 
+// "Clear all": empty the search box and every filter, then search again
 function clearFilters() {
-  Object.assign(filters, { q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' })
+  filters.value = { q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' }
   search()
 }
 
@@ -172,19 +189,24 @@ onMounted(loadPage)
       {{ shortlist.errorMessage }}
     </div>
 
-    <SearchBar v-model="filters.q" @search="search" @typing="showSuggestions = true" />
+    <SearchBar :text="filters.q" @change-text="setSearchText" @search="search" />
     <div v-if="filters.q && showSuggestions && suggestions.length > 0" class="list-group mb-3">
       <button
-        v-for="a in suggestions"
-        :key="a"
-        @click="selectArea(a)"
+        v-for="town in suggestions"
+        :key="town"
+        @click="selectArea(town)"
         class="btn btn-light w-100 text-start"
       >
-        {{ a }}
+        {{ town }}
       </button>
     </div>
 
-    <FilterPanel :filters="filters" @search="search" @clear="clearFilters" />
+    <FilterPanel
+      :filters="filters"
+      @change-filter="setFilter"
+      @search="search"
+      @clear="clearFilters"
+    />
 
     <PreferencesPanel
       :preferences="preferences"
