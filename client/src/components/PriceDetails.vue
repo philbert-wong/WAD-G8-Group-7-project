@@ -1,4 +1,5 @@
 <script setup>
+// The "Price details" panel inside a card: median prices and a table of recent sales
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { formatPrice } from '../utils/format.js'
