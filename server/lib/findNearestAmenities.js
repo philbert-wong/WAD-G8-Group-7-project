@@ -8,20 +8,26 @@ export async function findNearestAmenities(location) {
   const results = [];
 
   for (const category of CATEGORIES) {
-    const [nearest] = await Amenity.aggregate([
+    // Ask MongoDB for the single closest amenity of this category
+    const found = await Amenity.aggregate([
       {
         $geoNear: {
           near: location,
           distanceField: 'distance',
           spherical: true,
-          query: { category },
+          query: { category: category },
         },
       },
       { $limit: 1 },
     ]);
 
-    if (nearest) {
-      results.push({ category, name: nearest.name, distance: Math.round(nearest.distance) });
+    if (found.length > 0) {
+      const nearest = found[0];
+      results.push({
+        category: category,
+        name: nearest.name,
+        distance: Math.round(nearest.distance),
+      });
     }
   }
 

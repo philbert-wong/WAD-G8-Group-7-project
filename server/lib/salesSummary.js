@@ -1,16 +1,39 @@
+// Used by .sort() to put numbers from small to big
+function compareNumbers(a, b) {
+  return a - b;
+}
+
 // The middle value of a list of numbers (average of the two middle ones when the count is even).
-// Same function as in prep/summariseResale.js.
+// Same idea as the median in prep/summariseResale.js.
 function median(numbers) {
-  const sorted = [...numbers].sort((a, b) => a - b);
+  // copy the list first, so sorting does not change the original
+  const sorted = [];
+  for (const number of numbers) {
+    sorted.push(number);
+  }
+  sorted.sort(compareNumbers);
+
   const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[middle] : Math.round((sorted[middle - 1] + sorted[middle]) / 2);
+  if (sorted.length % 2 === 1) {
+    // odd count, e.g. 5 numbers: the 3rd one is the middle
+    return sorted[middle];
+  }
+  // even count, e.g. 4 numbers: average of the 2nd and 3rd
+  return Math.round((sorted[middle - 1] + sorted[middle]) / 2);
 }
 
 // Turns a block's sales into the "price details" the frontend shows:
 // a summary (range, median, median price per m2) and each sale with its own price per m2.
 export function salesSummary(sales) {
   if (sales.length === 0) {
-    return { count: 0, lowest: null, highest: null, medianPrice: null, medianPricePerSqm: null, sales: [] };
+    return {
+      count: 0,
+      lowest: null,
+      highest: null,
+      medianPrice: null,
+      medianPricePerSqm: null,
+      sales: [],
+    };
   }
 
   const rows = [];
