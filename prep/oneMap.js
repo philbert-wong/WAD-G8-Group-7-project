@@ -1,44 +1,69 @@
 // Looks up a place on OneMap and remembers the answer in prep/geocode-cache.json,
 // so running the prep script again does not call OneMap again.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { wait } from './wait.js';
 
 const CACHE_FILE = new URL('./geocode-cache.json', import.meta.url);
-const cache = existsSync(CACHE_FILE) ? JSON.parse(readFileSync(CACHE_FILE, 'utf8')) : {};
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// Answers we already got: { "406 ANG MO KIO AVE 10": { lat, lng, postal }, "NOWHERE": null, ... }
+let cache = {};
+if (existsSync(CACHE_FILE)) {
+  cache = JSON.parse(readFileSync(CACHE_FILE, 'utf8'));
+}
+
 let callsSinceSave = 0;
 
 export function saveCache() {
   writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 1));
 }
 
-// searchText: what to type into OneMap, e.g. "406 ANG MO KIO AVE 10" or "560406"
-// accept: a function that says whether a result is the one we want
-// returns { lat, lng, postal } or null when OneMap found nothing suitable
-export async function findPoint(searchText, accept = () => true) {
-  if (searchText in cache) return cache[searchText];
+// Goes through OneMap's results and returns the first one we want, as { lat, lng, postal }.
+// accept is a function that says yes/no to one result. No accept function = take the first result.
+function firstAcceptedHit(hits, accept) {
+  if (!hits) {
+    return null;
+  }
+  for (const hit of hits) {
+    if (accept === undefined || accept(hit)) {
+      return { lat: Number(hit.LATITUDE), lng: Number(hit.LONGITUDE), postal: hit.POSTAL };
+    }
+  }
+  return null;
+}
 
-  const url = 'https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&searchVal='
-    + encodeURIComponent(searchText);
+// searchText: what to type into OneMap, e.g. "406 ANG MO KIO AVE 10" or "560406"
+// accept (optional): a function that says whether a result is the one we want
+// returns { lat, lng, postal } or null when OneMap found nothing suitable
+export async function findPoint(searchText, accept) {
+  // Already looked this up before? (null also counts: it means "OneMap found nothing")
+  if (cache[searchText] !== undefined) {
+    return cache[searchText];
+  }
+
+  const url =
+    'https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&searchVal=' +
+    encodeURIComponent(searchText);
 
   let result = null;
   for (let attempt = 1; attempt <= 4; attempt++) {
-    await sleep(1000); // OneMap asks for about one request per second
+    await wait(1000); // OneMap asks for about one request per second
     const response = await fetch(url);
     if (response.ok) {
       const data = await response.json();
-      const hit = (data.results ?? []).find(accept);
-      if (hit) {
-        result = { lat: Number(hit.LATITUDE), lng: Number(hit.LONGITUDE), postal: hit.POSTAL };
-      }
+      result = firstAcceptedHit(data.results, accept);
       break;
     }
-    console.log(`  OneMap said ${response.status}, waiting before retry ${attempt}/4`);
-    await sleep(5000 * attempt);
-    if (attempt === 4) throw new Error(`OneMap failed for "${searchText}" (${response.status})`);
+    console.log('  OneMap said ' + response.status + ', waiting before retry ' + attempt + '/4');
+    await wait(5000 * attempt);
+    if (attempt === 4) {
+      throw new Error('OneMap failed for "' + searchText + '" (' + response.status + ')');
+    }
   }
 
   cache[searchText] = result;
-  if (++callsSinceSave % 20 === 0) saveCache();
+  callsSinceSave = callsSinceSave + 1;
+  if (callsSinceSave % 20 === 0) {
+    saveCache();
+  }
   return result;
 }
