@@ -14,9 +14,10 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
-import { useShortlistStore } from '../stores/shortlist.js'
 
-const shortlist = useShortlistStore()
+// This page's own copy of the shortlist, so each card knows if it shows ☆ Save or ★ Saved
+const savedItems = ref([])
+const shortlistErrorMessage = ref('')
 
 // The search box text (q) and the four filters. Empty = not used.
 const filters = ref({ q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' })
@@ -162,12 +163,70 @@ const scoredResults = computed(function () {
   return list
 })
 
+// Gets the saved flats from the server
+async function loadShortlist() {
+  try {
+    const response = await axios.get('/api/shortlist')
+    savedItems.value = response.data
+  } catch (error) {
+    shortlistErrorMessage.value = getErrorMessage(error)
+  }
+}
+
+// Finds the saved item that holds this block, or null if the block is not saved
+function findSavedItem(blockId) {
+  for (const item of savedItems.value) {
+    if (item.block.id === blockId) {
+      return item
+    }
+  }
+  return null
+}
+
+// Is this block saved? (decides ☆ Save or ★ Saved on its card)
+function isSaved(blockId) {
+  return findSavedItem(blockId) !== null
+}
+
+// Saves a flat. The server sends back the new item, so we add it to our list.
+async function saveBlock(block) {
+  shortlistErrorMessage.value = ''
+  try {
+    const response = await axios.post('/api/shortlist', { blockId: block.id })
+    savedItems.value.push(response.data)
+  } catch (error) {
+    shortlistErrorMessage.value = getErrorMessage(error)
+  }
+}
+
+// Un-saves a flat, then rebuilds our list without it
+async function unsaveBlock(block) {
+  const item = findSavedItem(block.id)
+  if (item === null) {
+    return
+  }
+
+  shortlistErrorMessage.value = ''
+  try {
+    await axios.delete('/api/shortlist/' + item.id)
+    const remaining = []
+    for (const savedItem of savedItems.value) {
+      if (savedItem.id !== item.id) {
+        remaining.push(savedItem)
+      }
+    }
+    savedItems.value = remaining
+  } catch (error) {
+    shortlistErrorMessage.value = getErrorMessage(error)
+  }
+}
+
 // ☆ Save / ★ Saved button on a card: saves the flat, or un-saves it if it is already saved
 function toggleSave(block) {
-  if (shortlist.isSaved(block.id)) {
-    shortlist.removeByBlock(block)
+  if (isSaved(block.id)) {
+    unsaveBlock(block)
   } else {
-    shortlist.add(block)
+    saveBlock(block)
   }
 }
 
@@ -177,7 +236,7 @@ function loadPage() {
   loadChoices()
   search()
   loadAreas()
-  shortlist.load()
+  loadShortlist()
 }
 
 onMounted(loadPage)
@@ -185,8 +244,8 @@ onMounted(loadPage)
 
 <template>
   <section>
-    <div v-if="shortlist.errorMessage" class="alert alert-danger">
-      {{ shortlist.errorMessage }}
+    <div v-if="shortlistErrorMessage" class="alert alert-danger">
+      {{ shortlistErrorMessage }}
     </div>
 
     <SearchBar :text="filters.q" @change-text="setSearchText" @search="search" />
@@ -236,7 +295,7 @@ onMounted(loadPage)
       <div v-for="item in scoredResults" :key="item.block.id" class="col">
         <BlockCard
           :block="item.block"
-          :saved="shortlist.isSaved(item.block.id)"
+          :saved="isSaved(item.block.id)"
           :score="item.score"
           show-match
           @toggle-save="toggleSave"
