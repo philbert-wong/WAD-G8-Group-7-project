@@ -6,6 +6,7 @@ import BlockCard from '../components/BlockCard.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
 import * as api from '../api.js'
 import {
+  CATEGORIES,
   getWeights,
   makeDefaultPreferences,
   matchScore,
@@ -65,10 +66,51 @@ function clearFilters() {
 }
 
 // "What matters to you?" panel: all ticked, Important (3) to start with
-const preferences = reactive(makeDefaultPreferences())
+const preferences = ref(makeDefaultPreferences())
 
 // 'price' = cheapest first (the order the server sends), 'match' = best match first
 const sortBy = ref('price')
+
+// The panel's choices and the sort are remembered in the browser (localStorage),
+// so they are still there when you come back from the Shortlist page.
+function saveChoices() {
+  localStorage.setItem('matchPreferences', JSON.stringify(preferences.value))
+  localStorage.setItem('sortBy', sortBy.value)
+}
+
+// Puts back the remembered choices, if there are any
+function loadChoices() {
+  const savedPreferences = localStorage.getItem('matchPreferences')
+  if (savedPreferences !== null) {
+    const saved = JSON.parse(savedPreferences)
+    // Copy only the categories we know, so a category added later still gets its default
+    const choices = makeDefaultPreferences()
+    for (let i = 0; i < CATEGORIES.length; i++) {
+      const key = CATEGORIES[i].key
+      if (saved[key]) {
+        choices[key] = saved[key]
+      }
+    }
+    preferences.value = choices
+  }
+
+  const savedSort = localStorage.getItem('sortBy')
+  if (savedSort !== null) {
+    sortBy.value = savedSort
+  }
+}
+
+// The panel says a tick box changed
+function changeTicked(key, ticked) {
+  preferences.value[key].ticked = ticked
+  saveChoices()
+}
+
+// The panel says an importance level changed
+function changeLevel(key, level) {
+  preferences.value[key].level = level
+  saveChoices()
+}
 
 // Puts the best match first. Blocks with no score ("–") go to the end.
 // Returning a negative number puts a before b, a positive number puts b before a.
@@ -88,7 +130,7 @@ function compareByMatch(a, b) {
 // computed() re-runs by itself whenever the panel, the sort or the results change,
 // so the scores update straight away without calling the server.
 const scoredResults = computed(function () {
-  const weights = getWeights(preferences)
+  const weights = getWeights(preferences.value)
   const list = []
   for (let i = 0; i < results.value.length; i++) {
     const block = results.value[i]
@@ -110,8 +152,10 @@ function toggleSave(block) {
   }
 }
 
-// When the page opens: load the flats, the town names for the suggestions, and the shortlist
+// When the page opens: put back remembered choices, then load the flats,
+// the town names for the suggestions, and the shortlist
 function loadPage() {
+  loadChoices()
   search()
   loadAreas()
   shortlist.load()
@@ -140,7 +184,11 @@ onMounted(loadPage)
 
     <FilterPanel :filters="filters" @search="search" @clear="clearFilters" />
 
-    <PreferencesPanel :preferences="preferences" />
+    <PreferencesPanel
+      :preferences="preferences"
+      @change-ticked="changeTicked"
+      @change-level="changeLevel"
+    />
 
     <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
     <p v-else-if="loading" class="text-muted mt-3">Loading...</p>
@@ -148,7 +196,12 @@ onMounted(loadPage)
       <p class="text-muted mb-0">{{ total }} flat(s) found</p>
       <div class="d-flex align-items-center gap-2">
         <label for="sort-by" class="small text-muted">Sort</label>
-        <select id="sort-by" v-model="sortBy" class="form-select form-select-sm w-auto">
+        <select
+          id="sort-by"
+          v-model="sortBy"
+          class="form-select form-select-sm w-auto"
+          @change="saveChoices"
+        >
           <option value="price">Cheapest first</option>
           <option value="match">Best match first</option>
         </select>
