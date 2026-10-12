@@ -2,10 +2,6 @@
 // The dark bar at the top with links to the two pages
 import { RouterLink, useRoute } from 'vue-router'
 
-defineProps({
-  savedCount: Number, // how many flats are in the shortlist
-})
-
 // The current URL, so we can highlight the page we are on
 const route = useRoute()
 </script>
@@ -31,7 +27,7 @@ const route = useRoute()
             'btn-outline-light': route.path !== '/shortlist',
           }"
         >
-          Shortlist <span class="badge text-bg-warning">{{ savedCount }}</span>
+          Shortlist
         </RouterLink>
       </div>
     </div>

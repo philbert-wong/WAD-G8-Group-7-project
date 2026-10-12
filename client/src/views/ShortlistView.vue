@@ -1,39 +1,71 @@
 <script setup>
 // The Shortlist page: every saved flat with its note
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import axios from 'axios'
 import ShortlistItem from '../components/ShortlistItem.vue'
-import { useShortlistStore } from '../stores/shortlist.js'
+import { getErrorMessage } from '../utils/errorMessage.js'
 
-const shortlist = useShortlistStore()
+// Each item looks like { id, note, createdAt, block: { id, block, street, ... } }
+const items = ref([])
+const errorMessage = ref('')
 
-// When the page opens, get the latest shortlist from the server
-onMounted(shortlist.load)
+// Gets every saved flat from the server
+async function load() {
+  try {
+    const response = await axios.get('/api/shortlist')
+    items.value = response.data
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
+  }
+}
 
 // ShortlistItem sends the item and the new note when "Save note" is pressed
-function changeNote(item, note) {
-  shortlist.updateNote(item, note)
+async function changeNote(item, note) {
+  errorMessage.value = ''
+  try {
+    const response = await axios.patch('/api/shortlist/' + item.id, { note: note })
+    item.note = response.data.note
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
+  }
 }
 
-// ShortlistItem sends the item when "Remove" is pressed
-function removeItem(item) {
-  shortlist.remove(item)
+// ShortlistItem sends the item when "Remove" is pressed.
+// After the server deletes it, we rebuild the list without that item.
+async function removeItem(item) {
+  errorMessage.value = ''
+  try {
+    await axios.delete('/api/shortlist/' + item.id)
+    const remaining = []
+    for (const savedItem of items.value) {
+      if (savedItem.id !== item.id) {
+        remaining.push(savedItem)
+      }
+    }
+    items.value = remaining
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
+  }
 }
+
+// When the page opens, get the latest shortlist from the server
+onMounted(load)
 </script>
 
 <template>
   <section>
-    <h2 class="h4 mb-3">My shortlist</h2>
+    <h2 class="h4 mb-3">My shortlist ({{ items.length }})</h2>
 
-    <div v-if="shortlist.errorMessage" class="alert alert-danger">
-      {{ shortlist.errorMessage }}
+    <div v-if="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
     </div>
 
-    <p v-if="shortlist.count === 0" class="text-muted">
+    <p v-if="items.length === 0" class="text-muted">
       Nothing saved yet. Go to Search and press "Save" on a flat.
     </p>
 
     <div class="row row-cols-1 row-cols-md-2 g-3">
-      <div v-for="item in shortlist.items" :key="item.id" class="col">
+      <div v-for="item in items" :key="item.id" class="col">
         <ShortlistItem :item="item" @remove="removeItem" @change-note="changeNote" />
       </div>
     </div>
