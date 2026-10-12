@@ -1,17 +1,13 @@
-// Any error thrown inside a route ends up here and becomes { "message": "..." } JSON.
+// The last safety net. Our routes catch their own errors, but some errors happen
+// before a route even runs, for example when the request body is broken JSON.
+// Express sends those here. (Express knows this is an error handler because it has 4 inputs.)
 export function errorHandler(err, req, res, next) {
-  // Errors we threw on purpose (HttpError) or that Express raised (e.g. bad JSON body) carry a status
-  if (err.status && err.status < 500) {
-    return res.status(err.status).json({ message: err.message });
+  // Problems with the request itself (like broken JSON) come with a 4xx status
+  if (err.status >= 400 && err.status < 500) {
+    res.status(err.status).json({ message: err.message });
+    return;
   }
-  // MongoDB could not understand an id, e.g. /api/blocks/abc
-  if (err.name === 'CastError') {
-    return res.status(404).json({ message: 'Not found' });
-  }
-  // Mongoose rejected the data, e.g. note too long
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({ message: err.message });
-  }
+
   console.error(err);
   res.status(500).json({ message: 'Something went wrong' });
 }

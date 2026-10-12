@@ -1,65 +1,122 @@
+// The /api/shortlist routes: list, save, change the note of, and remove saved flats
 import { Router } from 'express';
 import { Shortlist } from '../models/Shortlist.js';
-import { findBlock } from '../lib/findBlock.js';
+import { Block } from '../models/Block.js';
 import { toCard } from '../lib/blockCard.js';
-import { HttpError } from '../lib/HttpError.js';
+import { sendError } from '../lib/sendError.js';
 
 const router = Router();
 
 // Shape of one shortlist item sent to the frontend
 function toItem(item, block) {
-  return { id: item._id, note: item.note, createdAt: item.createdAt, block: toCard(block) };
+  return {
+    id: item._id,
+    note: item.note,
+    createdAt: item.createdAt,
+    block: toCard(block),
+  };
+}
+
+// Used by .sort() to put the most recently saved item first
+function compareNewestFirst(a, b) {
+  return b.createdAt - a.createdAt;
 }
 
 // READ   GET /api/shortlist
-router.get('/', async (req, res) => {
-  const items = await Shortlist.find().sort({ createdAt: -1 }).populate('block').lean();
-  // populate('block') swaps the saved block id for the full block document
-  res.json(items.filter((item) => item.block).map((item) => toItem(item, item.block)));
-});
+// Every saved flat, newest first
+async function listShortlist(req, res) {
+  try {
+    const items = await Shortlist.find();
+    items.sort(compareNewestFirst);
+
+    const results = [];
+    for (const item of items) {
+      // A saved item only stores the block's id, so look up the full block
+      const block = await Block.findById(item.block);
+      // Skip items whose block no longer exists (for example after re-seeding)
+      if (block !== null) {
+        results.push(toItem(item, block));
+      }
+    }
+    res.json(results);
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
 // CREATE POST /api/shortlist   body: { "blockId": "...", "note": "near my parents" }
-router.post('/', async (req, res) => {
-  const { blockId, note } = req.body;
-  if (!blockId) {
-    throw new HttpError(400, 'blockId is required');
+// Saves a flat. The note is optional.
+async function addToShortlist(req, res) {
+  if (req.body === undefined || !req.body.blockId) {
+    return res.status(400).json({ message: 'blockId is required' });
   }
 
-  const block = await findBlock(blockId); // 404 if it does not exist
-
-  const alreadySaved = await Shortlist.findOne({ block: block._id });
-  if (alreadySaved) {
-    throw new HttpError(409, 'Already in your shortlist');
+  let note = '';
+  if (req.body.note !== undefined && req.body.note !== null) {
+    note = req.body.note;
   }
 
-  const item = await Shortlist.create({ block: block._id, note: note ?? '' });
-  res.status(201).json(toItem(item, block));
-});
+  try {
+    const block = await Block.findById(req.body.blockId);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    }
+
+    const alreadySaved = await Shortlist.findOne({ block: block._id });
+    if (alreadySaved !== null) {
+      return res.status(409).json({ message: 'Already in your shortlist' });
+    }
+
+    const item = await Shortlist.create({ block: block._id, note: note });
+    res.status(201).json(toItem(item, block));
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
 // UPDATE PATCH /api/shortlist/:id   body: { "note": "visited on Sunday" }
-router.patch('/:id', async (req, res) => {
-  const item = await Shortlist.findById(req.params.id);
-  if (!item) {
-    throw new HttpError(404, 'Shortlist item not found');
+// Changes the note of one saved flat
+async function updateNote(req, res) {
+  if (req.body === undefined || typeof req.body.note !== 'string') {
+    return res.status(400).json({ message: 'note must be text' });
   }
 
-  if (typeof req.body.note !== 'string') {
-    throw new HttpError(400, 'note must be text');
-  }
-  item.note = req.body.note;
-  await item.save();
+  try {
+    const item = await Shortlist.findById(req.params.id);
+    if (item === null) {
+      return res.status(404).json({ message: 'Shortlist item not found' });
+    }
 
-  const block = await findBlock(item.block);
-  res.json(toItem(item, block));
-});
+    item.note = req.body.note;
+    await item.save();
+
+    const block = await Block.findById(item.block);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    }
+    res.json(toItem(item, block));
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
 // DELETE DELETE /api/shortlist/:id
-router.delete('/:id', async (req, res) => {
-  const item = await Shortlist.findByIdAndDelete(req.params.id);
-  if (!item) {
-    throw new HttpError(404, 'Shortlist item not found');
+// Removes one saved flat. 204 means "done, nothing to send back".
+async function removeFromShortlist(req, res) {
+  try {
+    const item = await Shortlist.findByIdAndDelete(req.params.id);
+    if (item === null) {
+      return res.status(404).json({ message: 'Shortlist item not found' });
+    }
+    res.status(204).end();
+  } catch (error) {
+    sendError(res, error);
   }
-  res.status(204).end();
-});
+}
+
+router.get('/', listShortlist);
+router.post('/', addToShortlist);
+router.patch('/:id', updateNote);
+router.delete('/:id', removeFromShortlist);
 
 export default router;
