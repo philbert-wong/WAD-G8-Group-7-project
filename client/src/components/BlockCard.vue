@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import * as api from '../api.js'
+import axios from 'axios'
+import { getErrorMessage } from '../utils/errorMessage.js'
 import PriceDetails from './PriceDetails.vue'
 import { formatPrice } from '../utils/format.js'
 
@@ -19,23 +20,25 @@ const showPrices = ref(false)
 // Nearby amenities are only fetched when you press the button
 const open = ref(false)
 const loading = ref(false)
-const error = ref('')
+const errorMessage = ref('')
 const amenities = ref([])
 
+// "Nearby amenities" button: opens the list and gets it from the server, or closes it
 async function toggleDetails() {
   open.value = !open.value
-  if (!open.value) return
+  if (!open.value) {
+    return
+  }
 
   loading.value = true
-  error.value = ''
+  errorMessage.value = ''
   try {
-    const amenityData = await api.getAmenities(props.block.id)
-    amenities.value = amenityData.amenities
-  } catch (err) {
-    error.value = err.message
-  } finally {
-    loading.value = false
+    const response = await axios.get('/api/blocks/' + props.block.id + '/amenities')
+    amenities.value = response.data.amenities
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
   }
+  loading.value = false
 }
 
 // "$600,000 – $720,000", or one price when every sale was the same
@@ -104,7 +107,7 @@ const categoryNames = {
 
       <div v-if="open" class="mt-3 pt-3 border-top">
         <p v-if="loading" class="text-muted mb-0">Loading...</p>
-        <p v-else-if="error" class="text-danger mb-0">{{ error }}</p>
+        <p v-else-if="errorMessage" class="text-danger mb-0">{{ errorMessage }}</p>
 
         <ul v-else class="list-unstyled small mb-0">
           <li v-for="a in amenities" :key="a.category">
