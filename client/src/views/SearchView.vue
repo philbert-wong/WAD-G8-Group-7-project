@@ -4,7 +4,8 @@ import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
-import * as api from '../api.js'
+import axios from 'axios'
+import { getErrorMessage } from '../utils/errorMessage.js'
 import {
   CATEGORIES,
   getWeights,
@@ -20,7 +21,7 @@ const filters = reactive({ q: '', flatType: '', maxPrice: '', minLease: '', maxW
 const results = ref([])
 const total = ref(0)
 const loading = ref(false)
-const error = ref('')
+const errorMessage = ref('')
 const area = ref([])
 const showSuggestions = ref(true)
 
@@ -36,28 +37,29 @@ function selectArea(a) {
   search()
 }
 
-// get areas from backend
+// Gets the town names from the server (for the search suggestions)
 async function loadAreas() {
   try {
-    const response = await fetch('/api/blocks/area')
-    area.value = await response.json()
-  } catch (err) {
-    console.log(err.message)
+    const response = await axios.get('/api/blocks/area')
+    area.value = response.data
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
   }
 }
 
+// Gets the flats that match the search box and filters.
+// Empty filters are ignored by the server, so we can send them all.
 async function search() {
   loading.value = true
-  error.value = ''
+  errorMessage.value = ''
   try {
-    const data = await api.searchBlocks(filters)
-    results.value = data.results
-    total.value = data.total
-  } catch (err) {
-    error.value = err.message
-  } finally {
-    loading.value = false
+    const response = await axios.get('/api/blocks', { params: filters })
+    results.value = response.data.results
+    total.value = response.data.total
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
   }
+  loading.value = false
 }
 
 function clearFilters() {
@@ -190,7 +192,7 @@ onMounted(loadPage)
       @change-level="changeLevel"
     />
 
-    <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
+    <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
     <p v-else-if="loading" class="text-muted mt-3">Loading...</p>
     <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 mb-2">
       <p class="text-muted mb-0">{{ total }} flat(s) found</p>

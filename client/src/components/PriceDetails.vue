@@ -1,26 +1,30 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import * as api from '../api.js'
+import axios from 'axios'
 import { formatPrice } from '../utils/format.js'
+import { getErrorMessage } from '../utils/errorMessage.js'
 
 const props = defineProps({
   blockId: String,
 })
 
-// Fetched once, when the panel is first opened
 const loading = ref(true)
-const error = ref('')
+const errorMessage = ref('')
 const details = ref(null)
 
-onMounted(async () => {
+// Gets the recent sales of this block from the server
+async function load() {
   try {
-    details.value = await api.getSales(props.blockId)
-  } catch (err) {
-    error.value = err.message
-  } finally {
-    loading.value = false
+    const response = await axios.get('/api/blocks/' + props.blockId + '/sales')
+    details.value = response.data
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
   }
-})
+  loading.value = false
+}
+
+// Fetched once, when the panel is first opened
+onMounted(load)
 
 const monthNames = [
   'Jan',
@@ -55,7 +59,7 @@ function formatStorey(storey) {
 <template>
   <div class="mt-3 pt-3 border-top">
     <p v-if="loading" class="text-muted mb-0">Loading...</p>
-    <p v-else-if="error" class="text-danger mb-0">{{ error }}</p>
+    <p v-else-if="errorMessage" class="text-danger mb-0">{{ errorMessage }}</p>
 
     <template v-else>
       <ul class="list-unstyled small mb-2">
