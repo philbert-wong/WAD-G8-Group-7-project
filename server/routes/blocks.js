@@ -4,10 +4,7 @@ import { buildFilter } from '../lib/buildFilter.js';
 import { toCard } from '../lib/blockCard.js';
 import { findBlock } from '../lib/findBlock.js';
 import { findNearestAmenities } from '../lib/findNearestAmenities.js';
-import { computeScore } from '../lib/score.js';
 import { salesSummary } from '../lib/salesSummary.js';
-import { readWeights } from '../lib/readWeights.js';
-import { remainingLease } from '../lib/lease.js';
 import { toNumber } from '../lib/toNumber.js';
 import { HttpError } from '../lib/HttpError.js';
 
@@ -75,31 +72,6 @@ router.get('/:id/sales', async (req, res) => {
   const summary = salesSummary(block.sales);
   summary.blockId = block._id;
   res.json(summary);
-});
-
-// GET /api/blocks/:id/score?budget=600000&mrt=5&park=0
-// Personalised score out of 100. Weights (mrt, hawker, park, school, price, lease) are 0 to 5.
-router.get('/:id/score', async (req, res) => {
-  const block = await findBlock(req.params.id);
-  const amenities = await findNearestAmenities(block.location);
-
-  // turn [{category:'mrt', distance:350}, ...] into { mrt: 350, ... }
-  const distances = {};
-  for (const amenity of amenities) {
-    distances[amenity.category] = amenity.distance;
-  }
-
-  const { score, breakdown } = computeScore(
-    {
-      distances,
-      price: block.price,
-      budget: toNumber(req.query.budget, 'budget'),
-      remainingLease: remainingLease(block.leaseCommenceYear),
-    },
-    readWeights(req.query),
-  );
-
-  res.json({ blockId: block._id, score, breakdown, distances });
 });
 
 // GET /api/blocks/:id

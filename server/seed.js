@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { mongoUri } from './config.js';
 import { connectDb, disconnectDb } from './db.js';
 import { Block } from './models/Block.js';
-import { Amenity } from './models/Amenity.js';
+import { Amenity, CATEGORIES } from './models/Amenity.js';
 import { straightLineDistance } from './lib/straightLineDistance.js';
 
 const WALKING_METRES_PER_MINUTE = 80;
@@ -33,6 +33,34 @@ function nearestStation(block) {
   };
 }
 
+// Straight-line metres from a block to the closest amenity of one category (e.g. 'park')
+function nearestDistance(block, category) {
+  let best = null;
+  for (let i = 0; i < amenities.length; i++) {
+    const amenity = amenities[i];
+    if (amenity.category === category) {
+      const metres = straightLineDistance([block.lat, block.lng], [amenity.lat, amenity.lng]);
+      if (best === null || metres < best) {
+        best = metres;
+      }
+    }
+  }
+  if (best === null) {
+    return null; // no amenities of this category in the data
+  }
+  return Math.round(best);
+}
+
+// Nearest distance for every category: { mrt: 350, hawker: 620, park: 180, school: 410 }
+function nearestDistances(block) {
+  const distances = {};
+  for (let i = 0; i < CATEGORIES.length; i++) {
+    const category = CATEGORIES[i];
+    distances[category] = nearestDistance(block, category);
+  }
+  return distances;
+}
+
 const blockDocs = blocks.map((b) => ({
   block: b.block,
   street: b.street,
@@ -44,6 +72,7 @@ const blockDocs = blocks.map((b) => ({
   sales: b.sales,
   leaseCommenceYear: b.leaseCommenceYear,
   ...nearestStation(b),
+  distances: nearestDistances(b),
   location: { type: 'Point', coordinates: [b.lng, b.lat] }, // [lng, lat]
 }));
 
