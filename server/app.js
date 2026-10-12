@@ -13,7 +13,7 @@ export function createApp() {
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
   app.use('/api/blocks', blocksRouter);
   app.use('/api/shortlist', shortlistRouter);
-  app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
+  app.use('/api', (req, res) => res.status(404).json({ message: 'Not found' }));
 
   app.use(errorHandler); // must be last
 
