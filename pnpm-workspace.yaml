@@ -3,3 +3,5 @@
 packages:
   - client
 
+allowBuilds:
+  mongodb-memory-server: true

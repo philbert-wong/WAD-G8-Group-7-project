@@ -25,6 +25,7 @@ pnpm install             # installs the server AND client/ (see pnpm-workspace.y
 pnpm format              # tidies the client code with Prettier
 pnpm seed                # loads server/data/*.json into MongoDB
 pnpm dev                 # website: http://localhost:5173   API: http://localhost:3030
+pnpm test                # runs the tests (uses a temporary in-memory database)
 ```
 
 With no `.env` file the app uses a MongoDB running on your own computer. To use Atlas instead,
@@ -53,6 +54,7 @@ server/                 the API
   data/                 blocks.json and amenities.json (the real data)
   seed.js               loads the JSON files into MongoDB
 prep/                   one-time script that BUILT the JSON files (you do not need to run it)
+tests/                  automated tests
 ```
 
 ## API contract

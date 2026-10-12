@@ -1,4 +1,4 @@
-// Builds the Express app: JSON body reading, the API routes and the error handler. index.js starts it.
+// Builds the Express app. Kept separate from index.js so the tests can use it without starting a server.
 import express from 'express';
 import blocksRouter from './routes/blocks.js';
 import shortlistRouter from './routes/shortlist.js';
