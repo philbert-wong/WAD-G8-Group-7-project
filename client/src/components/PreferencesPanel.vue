@@ -1,12 +1,23 @@
 <script setup>
 // "What matters to you?" panel.
-// "preferences" is an object owned by the parent ({ school: { ticked, level }, ... });
-// we change its fields directly with v-model, so the parent's match scores update straight away.
+// The page (SearchView) owns the choices and passes them in as a prop.
+// When the user clicks something, this panel tells the page with emit, and the page updates the choices.
 import { CATEGORIES, IMPORTANCE_LEVELS } from '../utils/matchScore.js'
 
 defineProps({
-  preferences: Object,
+  preferences: Object, // { school: { ticked: true, level: 3 }, mrt: { ... }, ... }
 })
+const emit = defineEmits(['change-ticked', 'change-level'])
+
+// A tick box was clicked: send the category and whether it is now ticked
+function onTickChange(key, event) {
+  emit('change-ticked', key, event.target.checked)
+}
+
+// An importance button was clicked: send the category and the new level (1 to 5)
+function onLevelChange(key, level) {
+  emit('change-level', key, level)
+}
 </script>
 
 <template>
@@ -24,9 +35,10 @@ defineProps({
           <div class="form-check">
             <input
               :id="'matters-' + category.key"
-              v-model="preferences[category.key].ticked"
               type="checkbox"
               class="form-check-input"
+              :checked="preferences[category.key].ticked"
+              @change="onTickChange(category.key, $event)"
             />
             <label :for="'matters-' + category.key" class="form-check-label">{{
               category.label
@@ -40,12 +52,12 @@ defineProps({
             <template v-for="level in IMPORTANCE_LEVELS" :key="level.value">
               <input
                 :id="'level-' + category.key + '-' + level.value"
-                v-model="preferences[category.key].level"
                 type="radio"
                 class="btn-check"
                 :name="'level-' + category.key"
-                :value="level.value"
+                :checked="preferences[category.key].level === level.value"
                 :disabled="!preferences[category.key].ticked"
+                @change="onLevelChange(category.key, level.value)"
               />
               <label
                 class="btn btn-outline-primary"
