@@ -1,9 +1,13 @@
 <script setup>
+// The dark bar at the top with links to the two pages
+import { RouterLink, useRoute } from 'vue-router'
+
 defineProps({
-  page: String,
-  savedCount: Number,
+  savedCount: Number, // how many flats are in the shortlist
 })
-defineEmits(['change-page'])
+
+// The current URL, so we can highlight the page we are on
+const route = useRoute()
 </script>
 
 <template>
@@ -12,20 +16,23 @@ defineEmits(['change-page'])
       <span class="navbar-brand">HDB Resale Finder</span>
 
       <div class="btn-group">
-        <button
+        <RouterLink
+          to="/"
           class="btn btn-sm"
-          :class="page === 'search' ? 'btn-light' : 'btn-outline-light'"
-          @click="$emit('change-page', 'search')"
+          :class="{ 'btn-light': route.path === '/', 'btn-outline-light': route.path !== '/' }"
         >
           Search
-        </button>
-        <button
+        </RouterLink>
+        <RouterLink
+          to="/shortlist"
           class="btn btn-sm"
-          :class="page === 'shortlist' ? 'btn-light' : 'btn-outline-light'"
-          @click="$emit('change-page', 'shortlist')"
+          :class="{
+            'btn-light': route.path === '/shortlist',
+            'btn-outline-light': route.path !== '/shortlist',
+          }"
         >
           Shortlist <span class="badge text-bg-warning">{{ savedCount }}</span>
-        </button>
+        </RouterLink>
       </div>
     </div>
   </nav>

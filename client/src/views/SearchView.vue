@@ -110,14 +110,22 @@ function toggleSave(block) {
   }
 }
 
-onMounted(() => {
+// When the page opens: load the flats, the town names for the suggestions, and the shortlist
+function loadPage() {
   search()
   loadAreas()
-})
+  shortlist.load()
+}
+
+onMounted(loadPage)
 </script>
 
 <template>
   <section>
+    <div v-if="shortlist.errorMessage" class="alert alert-danger">
+      {{ shortlist.errorMessage }}
+    </div>
+
     <SearchBar v-model="filters.q" @search="search" @typing="showSuggestions = true" />
     <div v-if="filters.q && showSuggestions && suggestions.length > 0" class="list-group mb-3">
       <button
