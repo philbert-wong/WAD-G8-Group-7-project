@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import * as api from '../api.js'
 import PriceDetails from './PriceDetails.vue'
+import { formatPrice } from '../utils/format.js'
 
 const props = defineProps({
   block: Object, // one card from /api/blocks
@@ -35,13 +36,6 @@ async function toggleDetails() {
   } finally {
     loading.value = false
   }
-}
-
-function formatPrice(price) {
-  if (price == null) {
-    return 'N/A'
-  }
-  return '$' + price.toLocaleString('en-SG')
 }
 
 // "$600,000 – $720,000", or one price when every sale was the same

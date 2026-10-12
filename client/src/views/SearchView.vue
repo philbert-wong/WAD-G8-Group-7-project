@@ -5,7 +5,12 @@ import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
 import * as api from '../api.js'
-import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../matchScore.js'
+import {
+  getWeights,
+  makeDefaultPreferences,
+  matchScore,
+  MAX_DISTANCES,
+} from '../utils/matchScore.js'
 
 const props = defineProps({
   shortlist: Array,

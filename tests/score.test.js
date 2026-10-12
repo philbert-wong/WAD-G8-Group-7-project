@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getWeights, makeDefaultPreferences, matchScore, subScore } from '../client/src/matchScore.js';
+import { getWeights, makeDefaultPreferences, matchScore, subScore } from '../client/src/utils/matchScore.js';
 import { earliestCommenceYear, remainingLease } from '../server/lib/lease.js';
 import { straightLineDistance } from '../server/lib/straightLineDistance.js';
 

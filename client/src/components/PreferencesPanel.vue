@@ -2,7 +2,7 @@
 // "What matters to you?" panel.
 // "preferences" is an object owned by the parent ({ school: { ticked, level }, ... });
 // we change its fields directly with v-model, so the parent's match scores update straight away.
-import { CATEGORIES, IMPORTANCE_LEVELS } from '../matchScore.js'
+import { CATEGORIES, IMPORTANCE_LEVELS } from '../utils/matchScore.js'
 
 defineProps({
   preferences: Object,

@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import * as api from '../api.js'
+import { formatPrice } from '../utils/format.js'
 
 const props = defineProps({
   blockId: String,
@@ -20,10 +21,6 @@ onMounted(async () => {
     loading.value = false
   }
 })
-
-function formatPrice(price) {
-  return '$' + price.toLocaleString('en-SG')
-}
 
 const monthNames = [
   'Jan',
