@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "concurrently -k -n api,web \"node --watch server/index.js\" \"npm --prefix client run dev\"",
-    "build": "npm --prefix client install && npm --prefix client run build",
+    "dev": "concurrently -k -n api,web \"node --watch server/index.js\" \"pnpm --dir client dev\"",
+    "format": "pnpm --dir client format",
     "seed": "node server/seed.js",
     "test": "vitest run"
   },

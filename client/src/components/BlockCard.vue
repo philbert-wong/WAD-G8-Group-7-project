@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue';
-import * as api from '../api.js';
-import PriceDetails from './PriceDetails.vue';
+import { ref } from 'vue'
+import * as api from '../api.js'
+import PriceDetails from './PriceDetails.vue'
 
 const props = defineProps({
   block: Object, // one card from /api/blocks
@@ -9,50 +9,55 @@ const props = defineProps({
   showSave: { type: Boolean, default: true }, // the shortlist page hides the Save button
   showMatch: { type: Boolean, default: false }, // only the search page shows the match score
   score: { type: Number, default: null }, // match score 0 to 100, or null for "–"
-});
-defineEmits(['toggle-save']);
+})
+defineEmits(['toggle-save'])
 
 // Price details (each sale) are shown when you press the "Price details" button
-const showPrices = ref(false);
+const showPrices = ref(false)
 
 // Nearby amenities are only fetched when you press the button
-const open = ref(false);
-const loading = ref(false);
-const error = ref('');
-const amenities = ref([]);
+const open = ref(false)
+const loading = ref(false)
+const error = ref('')
+const amenities = ref([])
 
 async function toggleDetails() {
-  open.value = !open.value;
-  if (!open.value) return;
+  open.value = !open.value
+  if (!open.value) return
 
-  loading.value = true;
-  error.value = '';
+  loading.value = true
+  error.value = ''
   try {
-    const amenityData = await api.getAmenities(props.block.id);
-    amenities.value = amenityData.amenities;
+    const amenityData = await api.getAmenities(props.block.id)
+    amenities.value = amenityData.amenities
   } catch (err) {
-    error.value = err.message;
+    error.value = err.message
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
 function formatPrice(price) {
   if (price == null) {
-    return 'N/A';
+    return 'N/A'
   }
-  return '$' + price.toLocaleString('en-SG');
+  return '$' + price.toLocaleString('en-SG')
 }
 
 // "$600,000 – $720,000", or one price when every sale was the same
 function formatRange(low, high) {
   if (low === high) {
-    return formatPrice(low);
+    return formatPrice(low)
   }
-  return formatPrice(low) + ' – ' + formatPrice(high);
+  return formatPrice(low) + ' – ' + formatPrice(high)
 }
 
-const categoryNames = { mrt: 'MRT', hawker: 'Hawker centre', park: 'Park', school: 'Primary school' };
+const categoryNames = {
+  mrt: 'MRT',
+  hawker: 'Hawker centre',
+  park: 'Park',
+  school: 'Primary school',
+}
 </script>
 
 <template>
@@ -73,10 +78,14 @@ const categoryNames = { mrt: 'MRT', hawker: 'Hawker centre', park: 'Park', schoo
       </div>
 
       <p class="fs-5 fw-bold mt-2 mb-0">{{ formatRange(block.priceLow, block.priceHigh) }}</p>
-      <p class="small text-muted mb-2">{{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}</p>
+      <p class="small text-muted mb-2">
+        {{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}
+      </p>
 
       <ul class="list-unstyled mb-3">
-        <li>Remaining lease: <strong>{{ block.remainingLease }} years</strong></li>
+        <li>
+          Remaining lease: <strong>{{ block.remainingLease }} years</strong>
+        </li>
         <li>{{ block.mrtWalkMinutes }} min walk to {{ block.mrtName }}</li>
       </ul>
 

@@ -1,14 +1,14 @@
 <script setup>
-import { ref } from 'vue';
-import BlockCard from './BlockCard.vue';
+import { ref } from 'vue'
+import BlockCard from './BlockCard.vue'
 
 const props = defineProps({
   item: Object, // { id, note, block }
-});
-defineEmits(['remove', 'change-note']);
+})
+defineEmits(['remove', 'change-note'])
 
 // What is typed in the box. "item.note" is what is already saved.
-const draft = ref(props.item.note);
+const draft = ref(props.item.note)
 </script>
 
 <template>
@@ -36,7 +36,9 @@ const draft = ref(props.item.note);
           >
             Save note
           </button>
-          <button class="btn btn-sm btn-outline-danger" @click="$emit('remove', item)">Remove</button>
+          <button class="btn btn-sm btn-outline-danger" @click="$emit('remove', item)">
+            Remove
+          </button>
         </div>
       </div>
     </div>

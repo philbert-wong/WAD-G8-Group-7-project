@@ -6,17 +6,17 @@
 // It runs in the browser, so the cards update straight away without asking the server.
 
 // How far away still counts. At this distance (or further) the sub-score is 0.
-const SCHOOL_MAX_DISTANCE = 1000; // metres
-const MRT_MAX_DISTANCE = 1000;
-const HAWKER_MAX_DISTANCE = 800;
-const PARK_MAX_DISTANCE = 800;
+const SCHOOL_MAX_DISTANCE = 1000 // metres
+const MRT_MAX_DISTANCE = 1000
+const HAWKER_MAX_DISTANCE = 800
+const PARK_MAX_DISTANCE = 800
 
 export const MAX_DISTANCES = {
   school: SCHOOL_MAX_DISTANCE,
   mrt: MRT_MAX_DISTANCE,
   hawker: HAWKER_MAX_DISTANCE,
   park: PARK_MAX_DISTANCE,
-};
+}
 
 // The categories, in the order the panel shows them.
 // "key" must match the amenity category stored on each block (block.distances.school, ...).
@@ -26,7 +26,7 @@ export const CATEGORIES = [
   { key: 'mrt', label: 'Transport (MRT stations)' },
   { key: 'hawker', label: 'Food (hawker centres)' },
   { key: 'park', label: 'Greenery (parks)' },
-];
+]
 
 // The 5 importance levels a user can pick
 export const IMPORTANCE_LEVELS = [
@@ -35,43 +35,43 @@ export const IMPORTANCE_LEVELS = [
   { value: 3, label: 'Important' },
   { value: 4, label: 'Very' },
   { value: 5, label: 'Extremely' },
-];
+]
 
 // Starting panel: every category ticked and set to Important (3).
 // Gives { school: { ticked: true, level: 3 }, mrt: { ... }, ... }
 export function makeDefaultPreferences() {
-  const preferences = {};
+  const preferences = {}
   for (let i = 0; i < CATEGORIES.length; i++) {
-    const key = CATEGORIES[i].key;
-    preferences[key] = { ticked: true, level: 3 };
+    const key = CATEGORIES[i].key
+    preferences[key] = { ticked: true, level: 3 }
   }
-  return preferences;
+  return preferences
 }
 
 // Turns the panel into plain weights: an unticked category has weight 0.
 // Gives { school: 3, mrt: 0, ... }
 export function getWeights(preferences) {
-  const weights = {};
+  const weights = {}
   for (let i = 0; i < CATEGORIES.length; i++) {
-    const key = CATEGORIES[i].key;
+    const key = CATEGORIES[i].key
     if (preferences[key].ticked) {
-      weights[key] = preferences[key].level;
+      weights[key] = preferences[key].level
     } else {
-      weights[key] = 0;
+      weights[key] = 0
     }
   }
-  return weights;
+  return weights
 }
 
 // Sub-score for one category: 100 when the amenity is right next door, 0 at maxDistance or further.
 // Written as (max - distance) / max rather than 1 - distance / max: it is the same maths,
 // but avoids tiny rounding errors (1 - 0.9 is 0.09999999999999998 in JavaScript).
 export function subScore(distance, maxDistance) {
-  const score = (100 * (maxDistance - distance)) / maxDistance;
+  const score = (100 * (maxDistance - distance)) / maxDistance
   if (score < 0) {
-    return 0;
+    return 0
   }
-  return score;
+  return score
 }
 
 // distances    = { school: 900, mrt: 400, hawker: 300, park: 600 }  (metres, from the block)
@@ -81,36 +81,36 @@ export function subScore(distance, maxDistance) {
 export function matchScore(distances, weights, maxDistances) {
   // A block seeded before this feature has no distances, so we cannot score it
   if (distances === undefined || distances === null) {
-    return null;
+    return null
   }
 
-  let weightedSum = 0; // sum of weight * subScore
-  let totalWeight = 0; // sum of weights
+  let weightedSum = 0 // sum of weight * subScore
+  let totalWeight = 0 // sum of weights
 
   for (let i = 0; i < CATEGORIES.length; i++) {
-    const key = CATEGORIES[i].key;
-    const weight = weights[key];
+    const key = CATEGORIES[i].key
+    const weight = weights[key]
 
     // Step 1: skip categories the user does not care about (unticked = weight 0)
     if (weight > 0) {
-      const distance = distances[key];
+      const distance = distances[key]
 
       // Step 2: a missing distance means we cannot score this block fairly
       if (distance === undefined || distance === null) {
-        return null;
+        return null
       }
 
       // Step 3: add this category's sub-score, multiplied by how much it matters
-      weightedSum = weightedSum + weight * subScore(distance, maxDistances[key]);
-      totalWeight = totalWeight + weight;
+      weightedSum = weightedSum + weight * subScore(distance, maxDistances[key])
+      totalWeight = totalWeight + weight
     }
   }
 
   // Step 4: every weight was 0, so there is nothing to score
   if (totalWeight === 0) {
-    return null;
+    return null
   }
 
   // Step 5: weighted average, rounded to a whole number
-  return Math.round(weightedSum / totalWeight);
+  return Math.round(weightedSum / totalWeight)
 }

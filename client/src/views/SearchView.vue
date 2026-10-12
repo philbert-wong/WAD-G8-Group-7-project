@@ -1,28 +1,28 @@
 <script setup>
-import { onMounted, reactive, ref, computed } from 'vue';
-import SearchBar from '../components/SearchBar.vue';
-import FilterPanel from '../components/FilterPanel.vue';
-import BlockCard from '../components/BlockCard.vue';
-import PreferencesPanel from '../components/PreferencesPanel.vue';
-import * as api from '../api.js';
-import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../matchScore.js';
+import { onMounted, reactive, ref, computed } from 'vue'
+import SearchBar from '../components/SearchBar.vue'
+import FilterPanel from '../components/FilterPanel.vue'
+import BlockCard from '../components/BlockCard.vue'
+import PreferencesPanel from '../components/PreferencesPanel.vue'
+import * as api from '../api.js'
+import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../matchScore.js'
 
 const props = defineProps({
   shortlist: Array,
-});
-defineEmits(['save', 'unsave']);
+})
+defineEmits(['save', 'unsave'])
 
-const filters = reactive({ q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' });
-const results = ref([]);
-const total = ref(0);
-const loading = ref(false);
-const error = ref('');
-const area = ref([]);
+const filters = reactive({ q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' })
+const results = ref([])
+const total = ref(0)
+const loading = ref(false)
+const error = ref('')
+const area = ref([])
 const showSuggestions = ref(true)
 
 // find matching areas
 const suggestions = computed(() => {
-  return area.value.filter(a => a.includes(filters.q.toUpperCase()))
+  return area.value.filter((a) => a.includes(filters.q.toUpperCase()))
 })
 
 // When user selects a area
@@ -43,41 +43,41 @@ async function loadAreas() {
 }
 
 async function search() {
-  loading.value = true;
-  error.value = '';
+  loading.value = true
+  error.value = ''
   try {
-    const data = await api.searchBlocks(filters);
-    results.value = data.results;
-    total.value = data.total;
+    const data = await api.searchBlocks(filters)
+    results.value = data.results
+    total.value = data.total
   } catch (err) {
-    error.value = err.message;
+    error.value = err.message
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
 function clearFilters() {
-  Object.assign(filters, { q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' });
-  search();
+  Object.assign(filters, { q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' })
+  search()
 }
 
 // "What matters to you?" panel: all ticked, Important (3) to start with
-const preferences = reactive(makeDefaultPreferences());
+const preferences = reactive(makeDefaultPreferences())
 
 // 'price' = cheapest first (the order the server sends), 'match' = best match first
-const sortBy = ref('price');
+const sortBy = ref('price')
 
 // Puts the best match first. Blocks with no score ("–") go to the end.
 // Returning a negative number puts a before b, a positive number puts b before a.
 function compareByMatch(a, b) {
   if (a.score === null && b.score === null) {
-    return 0;
+    return 0
   } else if (a.score === null) {
-    return 1;
+    return 1
   } else if (b.score === null) {
-    return -1;
+    return -1
   } else {
-    return b.score - a.score;
+    return b.score - a.score
   }
 }
 
@@ -85,21 +85,21 @@ function compareByMatch(a, b) {
 // computed() re-runs by itself whenever the panel, the sort or the results change,
 // so the scores update straight away without calling the server.
 const scoredResults = computed(function () {
-  const weights = getWeights(preferences);
-  const list = [];
+  const weights = getWeights(preferences)
+  const list = []
   for (let i = 0; i < results.value.length; i++) {
-    const block = results.value[i];
-    const score = matchScore(block.distances, weights, MAX_DISTANCES);
-    list.push({ block: block, score: score });
+    const block = results.value[i]
+    const score = matchScore(block.distances, weights, MAX_DISTANCES)
+    list.push({ block: block, score: score })
   }
   if (sortBy.value === 'match') {
-    list.sort(compareByMatch);
+    list.sort(compareByMatch)
   }
-  return list;
-});
+  return list
+})
 
 function isSaved(blockId) {
-  return props.shortlist.some((item) => item.block.id === blockId);
+  return props.shortlist.some((item) => item.block.id === blockId)
 }
 
 onMounted(() => {
@@ -112,7 +112,14 @@ onMounted(() => {
   <section>
     <SearchBar v-model="filters.q" @search="search" @typing="showSuggestions = true" />
     <div v-if="filters.q && showSuggestions && suggestions.length > 0" class="list-group mb-3">
-      <button v-for="a in suggestions" :key="a" @click="selectArea(a)" class="btn btn-light w-100 text-start"> {{ a }} </button>
+      <button
+        v-for="a in suggestions"
+        :key="a"
+        @click="selectArea(a)"
+        class="btn btn-light w-100 text-start"
+      >
+        {{ a }}
+      </button>
     </div>
 
     <FilterPanel :filters="filters" @search="search" @clear="clearFilters" />
@@ -139,7 +146,9 @@ onMounted(() => {
           :saved="isSaved(item.block.id)"
           :score="item.score"
           show-match
-          @toggle-save="isSaved(item.block.id) ? $emit('unsave', item.block) : $emit('save', item.block)"
+          @toggle-save="
+            isSaved(item.block.id) ? $emit('unsave', item.block) : $emit('save', item.block)
+          "
         />
       </div>
     </div>

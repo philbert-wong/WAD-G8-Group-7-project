@@ -18,18 +18,20 @@ JSON files in `server/data/`.
 
 ## Run it
 
-You need Node 20+ and a MongoDB (Atlas or local).
+You need Node 22+, pnpm (`npm install -g pnpm` once) and a MongoDB (Atlas or local).
 
 ```bash
-npm install
-npm --prefix client install
-cp .env.example .env     # then put your MONGODB_URI in .env
-npm run seed             # loads server/data/*.json into MongoDB
-npm run dev              # website: http://localhost:5173   API: http://localhost:3030
-npm test                 # runs the tests (uses a temporary in-memory database)
+pnpm install             # installs the server AND client/ (see pnpm-workspace.yaml)
+pnpm format              # tidies the client code with Prettier
+pnpm seed                # loads server/data/*.json into MongoDB
+pnpm dev                 # website: http://localhost:5173   API: http://localhost:3030
+pnpm test                # runs the tests (uses a temporary in-memory database)
 ```
 
-`npm run dev` starts two things: Vite (the Vue site, port 5173, with hot reload) and Express (the API, port 3030).
+With no `.env` file the app uses a MongoDB running on your own computer. To use Atlas instead,
+copy `.env.example` to `.env` and put your `MONGODB_URI` in it.
+
+`pnpm dev` starts two things: Vite (the Vue site, port 5173, with hot reload) and Express (the API, port 3030).
 Vite passes every `/api/...` request on to Express, so the Vue code never mentions a port.
 
 ## Folders
@@ -104,17 +106,6 @@ so changing the panel updates the scores straight away without calling the serve
 - Weights: unticked = 0, Low 1, Moderate 2, Important 3, Very 4, Extremely 5
 - Score = (sum of weight x sub-score) / (sum of weights), rounded. All weights 0 = no score ("–")
 
-## Deploy (Render, free)
-
-1. Push this folder to its own GitHub repo (`.env` is ignored, so your password is not pushed).
-2. On [render.com](https://render.com): **New > Web Service**, pick the repo.
-3. Build command: `npm install && npm run build`   Start command: `npm start`
-4. Under **Environment**, add `MONGODB_URI` (your Atlas string).
-5. In Atlas **Network Access**, allow `0.0.0.0/0` so Render can connect.
-6. Run `npm run seed` once on your own computer (it fills the same Atlas database).
-
-Express serves the website and the API from the same address, so there is nothing else to configure.
-
 ## Refreshing the data (optional)
 
 `node prep/makeData.js "/path/to/resale-prices.csv"` rebuilds the two JSON files from the resale CSV
@@ -122,7 +113,7 @@ Express serves the website and the API from the same address, so there is nothin
 in `prep/geocode-cache.json`, so a second run is quick. Change `TOWNS` at the top of the script for other towns.
 
 `node prep/addSales.js "/path/to/resale-prices.csv"` only refreshes the sales and price ranges of the blocks
-already in `blocks.json` (same blocks, same 12 months, no OneMap calls). Run `npm run seed` afterwards.
+already in `blocks.json` (same blocks, same 12 months, no OneMap calls). Run `pnpm seed` afterwards.
 
 `price` (used by the budget filter and sorting) is still the median; the card shows the range.
 
