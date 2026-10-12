@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, computed } from 'vue';
 import SearchBar from '../components/SearchBar.vue';
 import FilterPanel from '../components/FilterPanel.vue';
 import BlockCard from '../components/BlockCard.vue';
@@ -15,6 +15,30 @@ const results = ref([]);
 const total = ref(0);
 const loading = ref(false);
 const error = ref('');
+const area = ref([]);
+const showSuggestions = ref(true)
+
+// find matching areas
+const suggestions = computed(() => {
+  return area.value.filter(a => a.includes(filters.q.toUpperCase()))
+})
+
+// When user selects a area
+function selectArea(a) {
+  filters.q = a
+  showSuggestions.value = false
+  search()
+}
+
+// get areas from backend
+async function loadAreas() {
+  try {
+    const response = await fetch('/api/blocks/area')
+    area.value = await response.json()
+  } catch (err) {
+    console.log(err.message)
+  }
+}
 
 async function search() {
   loading.value = true;
@@ -39,12 +63,19 @@ function isSaved(blockId) {
   return props.shortlist.some((item) => item.block.id === blockId);
 }
 
-onMounted(search);
+onMounted(() => {
+  search()
+  loadAreas()
+})
 </script>
 
 <template>
   <section>
-    <SearchBar v-model="filters.q" @search="search" />
+    <SearchBar v-model="filters.q" @search="search" @typing="showSuggestions = true" />
+    <div v-if="filters.q && showSuggestions && suggestions.length > 0" class="list-group mb-3">
+      <button v-for="a in suggestions" :key="a" @click="selectArea(a)" class="btn btn-light w-100 text-start"> {{ a }} </button>
+    </div>
+
     <FilterPanel :filters="filters" @search="search" @clear="clearFilters" />
 
     <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
