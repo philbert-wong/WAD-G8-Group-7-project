@@ -55,13 +55,8 @@ describe('GET /api/blocks (search and filter)', () => {
     expect(res.body.results.map((b) => b.town)).toEqual(['PUNGGOL']);
   });
 
-  it('filters by walking minutes to MRT', async () => {
-    const res = await search({ maxWalk: 5 });
-    expect(res.body.results.map((b) => b.town)).toEqual(['PUNGGOL']);
-  });
-
   it('combines filters', async () => {
-    const res = await search({ flatType: '4 ROOM', maxPrice: 600000, maxWalk: 10 });
+    const res = await search({ flatType: '4 ROOM', maxPrice: 600000 });
     expect(res.body.results.map((b) => b.town)).toEqual(['ANG MO KIO']);
   });
 

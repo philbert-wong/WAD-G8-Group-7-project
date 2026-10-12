@@ -24,7 +24,6 @@ function escapeSearchText(text) {
 //   flatType   e.g. "4 ROOM"
 //   maxPrice   budget in dollars
 //   minLease   minimum remaining lease in years
-//   maxWalk    maximum walking minutes to the MRT
 export function buildFilter(query) {
   const filter = {};
 
@@ -49,10 +48,6 @@ export function buildFilter(query) {
   if (!isBlank(query.minLease)) {
     // $gte = greater than or equal
     filter.leaseCommenceYear = { $gte: earliestCommenceYear(Number(query.minLease)) };
-  }
-
-  if (!isBlank(query.maxWalk)) {
-    filter.mrtWalkMinutes = { $lte: Number(query.maxWalk) };
   }
 
   return filter;

@@ -1,9 +1,10 @@
 <script setup>
-// The four filters from the proposal: flat type, budget, remaining lease, walk to MRT.
+// The three filters: flat type, budget and remaining lease.
+// (Closeness to MRT is handled by the "What matters to you?" panel instead.)
 // The page (SearchView) owns the filter values and passes them in as a prop.
 // When the user changes a box, we send the change up with emit.
 const props = defineProps({
-  filters: Object, // { flatType, maxPrice, minLease, maxWalk, ... }
+  filters: Object, // { flatType, maxPrice, minLease, ... }
 })
 const emit = defineEmits(['change-filter', 'search', 'clear'])
 
@@ -33,7 +34,7 @@ function onClear() {
 
 <template>
   <form class="row g-2 mb-2" @submit.prevent="onSubmit">
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-md-4">
       <label class="form-label small mb-1">Flat type</label>
       <select :value="props.filters.flatType" class="form-select" @change="onFlatTypeChange">
         <option value="">Any</option>
@@ -41,7 +42,7 @@ function onClear() {
       </select>
     </div>
 
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-md-4">
       <label class="form-label small mb-1">Max budget ($)</label>
       <input
         :value="props.filters.maxPrice"
@@ -54,7 +55,7 @@ function onClear() {
       />
     </div>
 
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-md-4">
       <label class="form-label small mb-1">Min remaining lease (years)</label>
       <input
         :value="props.filters.minLease"
@@ -64,18 +65,6 @@ function onClear() {
         class="form-control"
         placeholder="e.g. 60"
         @input="onChange('minLease', $event)"
-      />
-    </div>
-
-    <div class="col-6 col-md-3">
-      <label class="form-label small mb-1">Max walk to MRT (mins)</label>
-      <input
-        :value="props.filters.maxWalk"
-        type="number"
-        min="0"
-        class="form-control"
-        placeholder="e.g. 10"
-        @input="onChange('maxWalk', $event)"
       />
     </div>
 

@@ -2,7 +2,7 @@
 
 Search HDB resale flats in a card layout, filter them, and keep a personal shortlist.
 
-- **Filters:** budget, flat type, remaining lease, maximum walking minutes to MRT
+- **Filters:** budget, flat type, remaining lease (closeness to MRT is in the "What matters to you?" panel)
 - **Shortlist:** create, read, update (note) and delete
 - **What matters to you?** tick and weight schools, MRT, hawker centres and parks; each card shows a match score
   and you can sort by best match
@@ -63,7 +63,7 @@ Errors always look like `{ "error": "message" }`.
 | Method | URL | What it does |
 |---|---|---|
 | GET | `/api/health` | `{ "status": "ok" }` |
-| GET | `/api/blocks` | Search + filter. Query: `q`, `flatType`, `maxPrice`, `minLease`, `maxWalk`, `limit`. Returns `{ total, results: [card] }`, cheapest first. Each card has `distances: { school, mrt, hawker, park }` in metres |
+| GET | `/api/blocks` | Search + filter. Query: `q`, `flatType`, `maxPrice`, `minLease`. Returns `{ total, results: [card] }`, cheapest first. Each card has `distances: { school, mrt, hawker, park }` in metres |
 | GET | `/api/blocks/nearby` | Blocks near a point. Query: `lat`, `lng` (required), `radius` in metres (default 1000, max 5000), `limit`. Each result has `distance` in metres |
 | GET | `/api/blocks/:id` | One block |
 | GET | `/api/blocks/:id/sales` | The recent sales behind the price range. Returns `{ count, lowest, highest, medianPrice, medianPricePerSqm, sales: [{ month, storey, areaSqm, price, pricePerSqm }] }`, newest first |
@@ -93,7 +93,7 @@ MongoDB's `$geoNear` then sorts by distance for us:
 - `/api/blocks/:id/amenities` uses `$geoNear` on **amenities** (once per category, `$limit: 1`).
 
 Walking minutes to the nearest MRT are worked out once, when seeding
-(straight-line distance x 1.3 / 80 metres per minute), so the "max walk" filter is just a number comparison.
+(straight-line distance x 1.3 / 80 metres per minute) and shown on each card.
 
 ## Match score ("What matters to you?")
 
