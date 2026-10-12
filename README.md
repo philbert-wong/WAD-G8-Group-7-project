@@ -37,14 +37,12 @@ Vite passes every `/api/...` request on to Express, so the Vue code never mentio
 ## Folders
 
 ```
-client/                 the website (made with `pnpm create vue@latest`: Vue, Vue Router, Pinia, axios, Bootstrap)
-  src/main.js           starts the app: Bootstrap, Pinia and the router
-  src/App.vue           the navbar + <RouterView /> (the current page)
-  src/router/           which page to show for each URL: / = Search, /shortlist = Shortlist
+client/                 the website (Vue + Bootstrap)
+  src/App.vue           owns the shortlist, switches between the two pages
+  src/api.js            all fetch() calls to the API
   src/views/            SearchView.vue, ShortlistView.vue  (the two pages)
-  src/components/       NavBar, SearchBar, FilterPanel, PreferencesPanel, BlockCard, PriceDetails, ShortlistItem
-  src/stores/           shortlist.js: the saved flats (Pinia), shared by both pages and the navbar
-  src/utils/            matchScore.js (the "What matters to you?" score), format.js, errorMessage.js
+  src/components/       NavBar, SearchBar, FilterPanel, PreferencesPanel, BlockCard, ShortlistItem
+  src/matchScore.js     the "What matters to you?" match score (runs in the browser)
 server/                 the API
   index.js              starts the server
   app.js                sets up Express and mounts the routes
@@ -100,7 +98,7 @@ Walking minutes to the nearest MRT are worked out once, when seeding
 ## Match score ("What matters to you?")
 
 The seed script stores the straight-line distance from each block to its nearest school, MRT, hawker centre
-and park (`block.distances`). The browser then scores every card itself (`client/src/utils/matchScore.js`),
+and park (`block.distances`). The browser then scores every card itself (`client/src/matchScore.js`),
 so changing the panel updates the scores straight away without calling the server.
 
 - Sub-score per category: `100 x (max - distance) / max`, and 0 if the amenity is further than `max`
