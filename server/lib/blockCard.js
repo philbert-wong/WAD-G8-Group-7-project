@@ -2,7 +2,16 @@ import { remainingLease } from './lease.js';
 
 // Turns a block from MongoDB into the simple object the frontend shows on a card.
 export function toCard(block) {
-  const [lng, lat] = block.location.coordinates;
+  // MongoDB stores the position as [longitude, latitude]
+  const lng = block.location.coordinates[0];
+  const lat = block.location.coordinates[1];
+
+  // How many recent sales the price range is based on
+  let salesCount = 0;
+  if (block.sales) {
+    salesCount = block.sales.length;
+  }
+
   return {
     id: block._id,
     block: block.block,
@@ -12,12 +21,12 @@ export function toCard(block) {
     price: block.price, // median
     priceLow: block.priceLow,
     priceHigh: block.priceHigh,
-    salesCount: block.sales ? block.sales.length : 0,
+    salesCount: salesCount,
     remainingLease: remainingLease(block.leaseCommenceYear),
     mrtName: block.mrtName,
     mrtWalkMinutes: block.mrtWalkMinutes,
     distances: block.distances, // nearest school, mrt, hawker, park in metres (for the match score)
-    lat,
-    lng,
+    lat: lat,
+    lng: lng,
   };
 }
