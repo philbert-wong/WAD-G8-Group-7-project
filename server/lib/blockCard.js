@@ -16,6 +16,7 @@ export function toCard(block) {
     remainingLease: remainingLease(block.leaseCommenceYear),
     mrtName: block.mrtName,
     mrtWalkMinutes: block.mrtWalkMinutes,
+    distances: block.distances, // nearest school, mrt, hawker, park in metres (for the match score)
     lat,
     lng,
   };

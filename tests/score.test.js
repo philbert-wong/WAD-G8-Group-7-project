@@ -1,59 +1,59 @@
 import { describe, expect, it } from 'vitest';
-import { computeScore, distanceScore, leaseScore, priceScore } from '../server/lib/score.js';
+import { getWeights, makeDefaultPreferences, matchScore, subScore } from '../client/src/matchScore.js';
 import { earliestCommenceYear, remainingLease } from '../server/lib/lease.js';
 import { straightLineDistance } from '../server/lib/straightLineDistance.js';
 
-describe('score parts', () => {
-  it('gives a high distance score to close places', () => {
-    expect(distanceScore(100)).toBe(1);
-    expect(distanceScore(1000)).toBeGreaterThan(0);
-    expect(distanceScore(1000)).toBeLessThan(1);
-    expect(distanceScore(3000)).toBe(0);
+// Same max distance (1000 m) for all 4 categories, so the numbers are easy to check by hand
+const maxDistances = { school: 1000, mrt: 1000, hawker: 1000, park: 1000 };
+const distances = { school: 900, mrt: 400, hawker: 300, park: 600 };
+
+describe('subScore', () => {
+  it('gives 10, 60, 70 and 40 for the example distances', () => {
+    expect(subScore(900, 1000)).toBe(10);
+    expect(subScore(400, 1000)).toBe(60);
+    expect(subScore(300, 1000)).toBe(70);
+    expect(subScore(600, 1000)).toBe(40);
   });
 
-  it('gives 0 when something is missing', () => {
-    expect(distanceScore(null)).toBe(0);
-    expect(priceScore(null, 600000)).toBe(0);
-    expect(leaseScore(null)).toBe(0);
-  });
-
-  it('likes prices well under budget', () => {
-    expect(priceScore(300000, 600000)).toBe(1);
-    expect(priceScore(600000, 600000)).toBe(0);
-    expect(priceScore(700000, 600000)).toBe(0);
-  });
-
-  it('likes long leases', () => {
-    expect(leaseScore(95)).toBe(1);
-    expect(leaseScore(40)).toBe(0);
+  it('gives 0 when the distance is beyond the max distance', () => {
+    expect(subScore(1500, 1000)).toBe(0);
   });
 });
 
-describe('computeScore', () => {
-  const close = { mrt: 100, hawker: 100, park: 100, school: 100 };
-
-  it('is 100 when everything is perfect', () => {
-    const { score } = computeScore({ distances: close, price: 300000, budget: 600000, remainingLease: 95 });
-    expect(score).toBe(100);
+describe('matchScore', () => {
+  it('scores 37 for a young family', () => {
+    // (5*10 + 3*60 + 2*70 + 1*40) / (5+3+2+1) = 410 / 11 = 37.27
+    const weights = { school: 5, mrt: 3, hawker: 2, park: 1 };
+    expect(matchScore(distances, weights, maxDistances)).toBe(37);
   });
 
-  it('is 0 when everything is bad', () => {
-    const far = { mrt: 5000, hawker: 5000, park: 5000, school: 5000 };
-    const { score } = computeScore({ distances: far, price: 700000, budget: 600000, remainingLease: 30 });
-    expect(score).toBe(0);
+  it('scores 58 for a retired couple', () => {
+    // (0*10 + 3*60 + 5*70 + 4*40) / (0+3+5+4) = 690 / 12 = 57.5
+    const weights = { school: 0, mrt: 3, hawker: 5, park: 4 };
+    expect(matchScore(distances, weights, maxDistances)).toBe(58);
   });
 
-  it('leaves price out when there is no budget', () => {
-    const { score } = computeScore({ distances: close, price: 900000, budget: null, remainingLease: 95 });
-    expect(score).toBe(100);
+  it('has no score when every weight is 0', () => {
+    const weights = { school: 0, mrt: 0, hawker: 0, park: 0 };
+    expect(matchScore(distances, weights, maxDistances)).toBe(null);
   });
 
-  it('follows the weights', () => {
-    const input = { distances: { mrt: 100, hawker: 5000, park: 5000, school: 5000 }, price: null, budget: null, remainingLease: 40 };
-    const mrtMatters = computeScore(input, { mrt: 5, hawker: 0, park: 0, school: 0, price: 0, lease: 0 });
-    const mrtIgnored = computeScore(input, { mrt: 0, hawker: 5, park: 0, school: 0, price: 0, lease: 0 });
-    expect(mrtMatters.score).toBe(100);
-    expect(mrtIgnored.score).toBe(0);
+  it('has no score when the block has no distances stored', () => {
+    const weights = { school: 3, mrt: 3, hawker: 3, park: 3 };
+    expect(matchScore(undefined, weights, maxDistances)).toBe(null);
+  });
+});
+
+describe('panel to weights', () => {
+  it('starts with every category ticked at Important (3)', () => {
+    expect(getWeights(makeDefaultPreferences())).toEqual({ school: 3, mrt: 3, hawker: 3, park: 3 });
+  });
+
+  it('gives weight 0 to an unticked category', () => {
+    const preferences = makeDefaultPreferences();
+    preferences.park.ticked = false;
+    preferences.school.level = 5;
+    expect(getWeights(preferences)).toEqual({ school: 5, mrt: 3, hawker: 3, park: 0 });
   });
 });
 

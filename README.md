@@ -4,8 +4,9 @@ Search HDB resale flats in a card layout, filter them, and keep a personal short
 
 - **Filters:** budget, flat type, remaining lease, maximum walking minutes to MRT
 - **Shortlist:** create, read, update (note) and delete
+- **What matters to you?** tick and weight schools, MRT, hawker centres and parks; each card shows a match score
+  and you can sort by best match
 - **Extras:** nearby search (geospatial), nearest amenities, price range with each recent sale
-  (the API also has a personalised score out of 100, not shown on the site yet)
 
 Built with Vue 3 (Vite, `.vue` components), Bootstrap 5, Express and MongoDB (Mongoose).
 
@@ -38,13 +39,14 @@ client/                 the website (Vue + Bootstrap)
   src/App.vue           owns the shortlist, switches between the two pages
   src/api.js            all fetch() calls to the API
   src/views/            SearchView.vue, ShortlistView.vue  (the two pages)
-  src/components/       NavBar, SearchBar, FilterPanel, BlockCard, ShortlistItem
+  src/components/       NavBar, SearchBar, FilterPanel, PreferencesPanel, BlockCard, ShortlistItem
+  src/matchScore.js     the "What matters to you?" match score (runs in the browser)
 server/                 the API
   index.js              starts the server
   app.js                sets up Express and mounts the routes
   routes/               blocks.js, shortlist.js
   models/               what a Block, Amenity and Shortlist item look like in MongoDB
-  lib/                  small helpers (filter, score, lease, nearest amenities...)
+  lib/                  small helpers (filter, lease, nearest amenities...)
   data/                 blocks.json and amenities.json (the real data)
   seed.js               loads the JSON files into MongoDB
 prep/                   one-time script that BUILT the JSON files (you do not need to run it)
@@ -59,12 +61,11 @@ Errors always look like `{ "error": "message" }`.
 | Method | URL | What it does |
 |---|---|---|
 | GET | `/api/health` | `{ "status": "ok" }` |
-| GET | `/api/blocks` | Search + filter. Query: `q`, `flatType`, `maxPrice`, `minLease`, `maxWalk`, `limit`. Returns `{ total, results: [card] }`, cheapest first |
+| GET | `/api/blocks` | Search + filter. Query: `q`, `flatType`, `maxPrice`, `minLease`, `maxWalk`, `limit`. Returns `{ total, results: [card] }`, cheapest first. Each card has `distances: { school, mrt, hawker, park }` in metres |
 | GET | `/api/blocks/nearby` | Blocks near a point. Query: `lat`, `lng` (required), `radius` in metres (default 1000, max 5000), `limit`. Each result has `distance` in metres |
 | GET | `/api/blocks/:id` | One block |
 | GET | `/api/blocks/:id/sales` | The recent sales behind the price range. Returns `{ count, lowest, highest, medianPrice, medianPricePerSqm, sales: [{ month, storey, areaSqm, price, pricePerSqm }] }`, newest first |
 | GET | `/api/blocks/:id/amenities` | Nearest `mrt`, `hawker`, `park`, `school` with `distance` in metres |
-| GET | `/api/blocks/:id/score` | Personalised score. Query: `budget`, and weights `mrt`, `hawker`, `park`, `school`, `price`, `lease` (0 to 5). Returns `{ score, breakdown, distances }`; score is 0 to 100, breakdown values are 0 to 1. Price only counts when `budget` is given |
 | GET | `/api/shortlist` | All saved items, newest first |
 | POST | `/api/shortlist` | Save a block. Body: `{ "blockId": "...", "note": "optional" }` |
 | PATCH | `/api/shortlist/:id` | Change the note. Body: `{ "note": "text" }` |
@@ -92,15 +93,16 @@ MongoDB's `$geoNear` then sorts by distance for us:
 Walking minutes to the nearest MRT are worked out once, when seeding
 (straight-line distance x 1.3 / 80 metres per minute), so the "max walk" filter is just a number comparison.
 
-## Score formula
+## Match score ("What matters to you?")
 
-Each factor becomes a number from 0 to 1, then we take a weighted average x 100.
+The seed script stores the straight-line distance from each block to its nearest school, MRT, hawker centre
+and park (`block.distances`). The browser then scores every card itself (`client/src/matchScore.js`),
+so changing the panel updates the scores straight away without calling the server.
 
-| Factor | 0 | 1 |
-|---|---|---|
-| mrt / hawker / park / school | 2000 m or more | 300 m or less |
-| price | at your budget | half your budget or less |
-| lease | 40 years or less | 90 years or more |
+- Sub-score per category: `100 x (max - distance) / max`, and 0 if the amenity is further than `max`
+- Max distances: school 1000 m, MRT 1000 m, hawker 800 m, park 800 m
+- Weights: unticked = 0, Low 1, Moderate 2, Important 3, Very 4, Extremely 5
+- Score = (sum of weight x sub-score) / (sum of weights), rounded. All weights 0 = no score ("–")
 
 ## Deploy (Render, free)
 
@@ -122,7 +124,7 @@ in `prep/geocode-cache.json`, so a second run is quick. Change `TOWNS` at the to
 `node prep/addSales.js "/path/to/resale-prices.csv"` only refreshes the sales and price ranges of the blocks
 already in `blocks.json` (same blocks, same 12 months, no OneMap calls). Run `npm run seed` afterwards.
 
-`price` (used by the budget filter, sorting and the score) is still the median; the card shows the range.
+`price` (used by the budget filter and sorting) is still the median; the card shows the range.
 
 ## Known limits
 

@@ -3,7 +3,9 @@ import { onMounted, reactive, ref, computed } from 'vue';
 import SearchBar from '../components/SearchBar.vue';
 import FilterPanel from '../components/FilterPanel.vue';
 import BlockCard from '../components/BlockCard.vue';
+import PreferencesPanel from '../components/PreferencesPanel.vue';
 import * as api from '../api.js';
+import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../matchScore.js';
 
 const props = defineProps({
   shortlist: Array,
@@ -59,6 +61,43 @@ function clearFilters() {
   search();
 }
 
+// "What matters to you?" panel: all ticked, Important (3) to start with
+const preferences = reactive(makeDefaultPreferences());
+
+// 'price' = cheapest first (the order the server sends), 'match' = best match first
+const sortBy = ref('price');
+
+// Puts the best match first. Blocks with no score ("–") go to the end.
+// Returning a negative number puts a before b, a positive number puts b before a.
+function compareByMatch(a, b) {
+  if (a.score === null && b.score === null) {
+    return 0;
+  } else if (a.score === null) {
+    return 1;
+  } else if (b.score === null) {
+    return -1;
+  } else {
+    return b.score - a.score;
+  }
+}
+
+// Every result paired with its match score: [{ block, score }, ...]
+// computed() re-runs by itself whenever the panel, the sort or the results change,
+// so the scores update straight away without calling the server.
+const scoredResults = computed(function () {
+  const weights = getWeights(preferences);
+  const list = [];
+  for (let i = 0; i < results.value.length; i++) {
+    const block = results.value[i];
+    const score = matchScore(block.distances, weights, MAX_DISTANCES);
+    list.push({ block: block, score: score });
+  }
+  if (sortBy.value === 'match') {
+    list.sort(compareByMatch);
+  }
+  return list;
+});
+
 function isSaved(blockId) {
   return props.shortlist.some((item) => item.block.id === blockId);
 }
@@ -78,16 +117,29 @@ onMounted(() => {
 
     <FilterPanel :filters="filters" @search="search" @clear="clearFilters" />
 
+    <PreferencesPanel :preferences="preferences" />
+
     <div v-if="error" class="alert alert-danger mt-3">{{ error }}</div>
     <p v-else-if="loading" class="text-muted mt-3">Loading...</p>
-    <p v-else class="text-muted mt-3">{{ total }} flat(s) found</p>
+    <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 mb-2">
+      <p class="text-muted mb-0">{{ total }} flat(s) found</p>
+      <div class="d-flex align-items-center gap-2">
+        <label for="sort-by" class="small text-muted">Sort</label>
+        <select id="sort-by" v-model="sortBy" class="form-select form-select-sm w-auto">
+          <option value="price">Cheapest first</option>
+          <option value="match">Best match first</option>
+        </select>
+      </div>
+    </div>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-      <div v-for="block in results" :key="block.id" class="col">
+      <div v-for="item in scoredResults" :key="item.block.id" class="col">
         <BlockCard
-          :block="block"
-          :saved="isSaved(block.id)"
-          @toggle-save="isSaved(block.id) ? $emit('unsave', block) : $emit('save', block)"
+          :block="item.block"
+          :saved="isSaved(item.block.id)"
+          :score="item.score"
+          show-match
+          @toggle-save="isSaved(item.block.id) ? $emit('unsave', item.block) : $emit('save', item.block)"
         />
       </div>
     </div>

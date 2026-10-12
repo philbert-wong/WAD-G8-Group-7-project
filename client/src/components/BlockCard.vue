@@ -7,6 +7,8 @@ const props = defineProps({
   block: Object, // one card from /api/blocks
   saved: Boolean, // is it in the shortlist?
   showSave: { type: Boolean, default: true }, // the shortlist page hides the Save button
+  showMatch: { type: Boolean, default: false }, // only the search page shows the match score
+  score: { type: Number, default: null }, // match score 0 to 100, or null for "–"
 });
 defineEmits(['toggle-save']);
 
@@ -61,7 +63,13 @@ const categoryNames = { mrt: 'MRT', hawker: 'Hawker centre', park: 'Park', schoo
           <h5 class="card-title mb-0">Blk {{ block.block }} {{ block.street }}</h5>
           <small class="text-muted">{{ block.town }}</small>
         </div>
-        <span class="badge text-bg-secondary">{{ block.flatType }}</span>
+        <div class="text-end">
+          <span class="badge text-bg-secondary">{{ block.flatType }}</span>
+          <div v-if="showMatch" class="small fw-semibold mt-1">
+            <span v-if="score === null">Match: –</span>
+            <span v-else>Match: {{ score }}</span>
+          </div>
+        </div>
       </div>
 
       <p class="fs-5 fw-bold mt-2 mb-0">{{ formatRange(block.priceLow, block.priceHigh) }}</p>

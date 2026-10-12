@@ -30,6 +30,11 @@ describe('GET /api/blocks (search and filter)', () => {
     expect(res.body.results[0]).toHaveProperty('remainingLease');
   });
 
+  it('includes the nearest amenity distances on each card (for the match score)', async () => {
+    const res = await search({ q: 'punggol' });
+    expect(res.body.results[0].distances).toEqual({ school: 900, mrt: 110, hawker: 560, park: 600 });
+  });
+
   it('searches by text', async () => {
     const res = await search({ q: 'punggol' });
     expect(res.body.results.map((b) => b.town)).toEqual(['PUNGGOL']);
@@ -143,28 +148,5 @@ describe('GET /api/blocks/:id/amenities', () => {
     expect(mrt.name).toBe('Test MRT');
     expect(mrt.distance).toBeGreaterThan(50);
     expect(mrt.distance).toBeLessThan(200);
-  });
-});
-
-describe('GET /api/blocks/:id/score', () => {
-  const score = (id, query) => request(app).get(`/api/blocks/${id}/score`).query(query);
-
-  it('returns a score between 0 and 100 with a breakdown', async () => {
-    const res = await score(data.punggol._id, { budget: 800000 });
-    expect(res.status).toBe(200);
-    expect(res.body.score).toBeGreaterThan(0);
-    expect(res.body.score).toBeLessThanOrEqual(100);
-    expect(res.body.breakdown).toHaveProperty('mrt');
-  });
-
-  it('changes when the weights change', async () => {
-    const a = await score(data.punggol._id, { budget: 800000, mrt: 5 });
-    const b = await score(data.punggol._id, { budget: 800000, mrt: 0 });
-    expect(a.body.score).not.toBe(b.body.score);
-  });
-
-  it('rejects a weight that is not a number', async () => {
-    const res = await score(data.punggol._id, { mrt: 'abc' });
-    expect(res.status).toBe(400);
   });
 });
