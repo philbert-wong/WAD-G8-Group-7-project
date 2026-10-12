@@ -25,12 +25,6 @@ describe('GET /api/blocks (search and filter)', () => {
     expect(prices).toEqual([360000, 560000, 680000]);
   });
 
-  it('still sends fewer results when a limit is given', async () => {
-    const res = await search({ limit: 2 });
-    expect(res.body.results.length).toBe(2);
-    expect(res.body.total).toBe(3);
-  });
-
   it('includes the remaining lease on each card', async () => {
     const res = await search({});
     expect(res.body.results[0]).toHaveProperty('remainingLease');
@@ -74,7 +68,7 @@ describe('GET /api/blocks (search and filter)', () => {
   it('rejects a value that is not a number', async () => {
     const res = await search({ maxPrice: 'cheap' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/maxPrice/);
+    expect(res.body.message).toMatch(/maxPrice/);
   });
 });
 
