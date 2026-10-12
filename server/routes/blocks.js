@@ -25,6 +25,13 @@ router.get('/', async (req, res) => {
   res.json({ total, results: blocks.map(toCard) });
 });
 
+// GET area names from database
+router.get('/area', async (req, res) => {
+  const area = await Block.distinct('town')
+  res.json(area)
+})
+
+
 // GET /api/blocks/nearby?lat=1.40&lng=103.90&radius=1000&limit=20
 // GEOSPATIAL: blocks within `radius` metres of a point, closest first.
 router.get('/nearby', async (req, res) => {
