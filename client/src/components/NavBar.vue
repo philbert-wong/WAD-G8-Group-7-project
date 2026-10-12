@@ -2,8 +2,8 @@
 defineProps({
   page: String,
   savedCount: Number,
-});
-defineEmits(['change-page']);
+})
+defineEmits(['change-page'])
 </script>
 
 <template>

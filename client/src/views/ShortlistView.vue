@@ -1,10 +1,10 @@
 <script setup>
-import ShortlistItem from '../components/ShortlistItem.vue';
+import ShortlistItem from '../components/ShortlistItem.vue'
 
 defineProps({
   shortlist: Array,
-});
-defineEmits(['remove', 'change-note']);
+})
+defineEmits(['remove', 'change-note'])
 </script>
 
 <template>

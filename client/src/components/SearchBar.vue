@@ -1,7 +1,7 @@
 <script setup>
 // The big search box. v-model works with the parent's value, so typing updates it directly.
-const text = defineModel({ type: String });
-defineEmits(['search', 'typing']);
+const text = defineModel({ type: String })
+defineEmits(['search', 'typing'])
 </script>
 
 <template>

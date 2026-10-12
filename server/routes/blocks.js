@@ -14,7 +14,8 @@ const router = Router();
 // Search + filter. Cheapest first.
 router.get('/', async (req, res) => {
   const filter = buildFilter(req.query);
-  const limit = Math.min(100, toNumber(req.query.limit, 'limit') ?? 24);
+  // Send every match (we only have a few hundred blocks), so "Best match first" can sort all of them
+  const limit = Math.min(500, toNumber(req.query.limit, 'limit') ?? 500);
 
   const blocks = await Block.find(filter).sort({ price: 1 }).limit(limit).lean();
   const total = await Block.countDocuments(filter);
