@@ -1,84 +1,182 @@
+// The /api/blocks routes: search, town names, nearby blocks, and one block's details
 import { Router } from 'express';
 import { Block } from '../models/Block.js';
 import { buildFilter } from '../lib/buildFilter.js';
 import { toCard } from '../lib/blockCard.js';
-import { findBlock } from '../lib/findBlock.js';
 import { findNearestAmenities } from '../lib/findNearestAmenities.js';
 import { salesSummary } from '../lib/salesSummary.js';
-import { toNumber } from '../lib/toNumber.js';
-import { HttpError } from '../lib/HttpError.js';
+import { isBlank, isNumber } from '../lib/numberCheck.js';
+import { sendError } from '../lib/sendError.js';
 
 const router = Router();
 
+// Used by .sort() to put the cheapest block first
+function compareByPrice(a, b) {
+  return a.price - b.price;
+}
+
 // GET /api/blocks?q=punggol&flatType=4 ROOM&maxPrice=700000&minLease=60&maxWalk=10
-// Search + filter. Cheapest first.
-router.get('/', async (req, res) => {
-  const filter = buildFilter(req.query);
-  // Send every match (we only have a few hundred blocks), so "Best match first" can sort all of them
-  const limit = Math.min(500, toNumber(req.query.limit, 'limit') ?? 500);
+// Search + filter. Sends every matching block (we only have a few hundred), cheapest first.
+async function searchBlocks(req, res) {
+  // The number filters must be numbers (or left out)
+  const numberFields = ['maxPrice', 'minLease', 'maxWalk'];
+  for (const field of numberFields) {
+    const value = req.query[field];
+    if (!isBlank(value) && !isNumber(value)) {
+      return res.status(400).json({ message: field + ' must be a number' });
+    }
+  }
 
-  const blocks = await Block.find(filter).sort({ price: 1 }).limit(limit).lean();
-  const total = await Block.countDocuments(filter);
+  try {
+    const filter = buildFilter(req.query);
+    const blocks = await Block.find(filter);
+    blocks.sort(compareByPrice);
 
-  res.json({ total, results: blocks.map(toCard) });
-});
+    const results = [];
+    for (const block of blocks) {
+      results.push(toCard(block));
+    }
+    res.json({ total: results.length, results: results });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
-// GET area names from database
-router.get('/area', async (req, res) => {
-  const area = await Block.distinct('town')
-  res.json(area)
-})
-
+// GET /api/blocks/area
+// Every town name in the database, for the search suggestions
+async function listTowns(req, res) {
+  try {
+    const towns = await Block.distinct('town');
+    res.json(towns);
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
 // GET /api/blocks/nearby?lat=1.40&lng=103.90&radius=1000&limit=20
 // GEOSPATIAL: blocks within `radius` metres of a point, closest first.
-router.get('/nearby', async (req, res) => {
-  const lat = toNumber(req.query.lat, 'lat');
-  const lng = toNumber(req.query.lng, 'lng');
-  if (lat === null || lng === null) {
-    throw new HttpError(400, 'lat and lng are required');
+async function nearbyBlocks(req, res) {
+  // lat and lng must be numbers, and both must be sent
+  const pointFields = ['lat', 'lng'];
+  for (const field of pointFields) {
+    const value = req.query[field];
+    if (!isBlank(value) && !isNumber(value)) {
+      return res.status(400).json({ message: field + ' must be a number' });
+    }
   }
-  const radius = Math.min(5000, toNumber(req.query.radius, 'radius') ?? 1000);
-  const limit = Math.min(50, toNumber(req.query.limit, 'limit') ?? 20);
+  if (isBlank(req.query.lat) || isBlank(req.query.lng)) {
+    return res.status(400).json({ message: 'lat and lng are required' });
+  }
 
-  // $geoNear sorts by distance and adds a "distance" field in metres. Remember: [lng, lat].
-  const blocks = await Block.aggregate([
-    {
-      $geoNear: {
-        near: { type: 'Point', coordinates: [lng, lat] },
-        distanceField: 'distance',
-        maxDistance: radius,
-        spherical: true,
+  // radius and limit are optional, but must be numbers if sent
+  const optionalFields = ['radius', 'limit'];
+  for (const field of optionalFields) {
+    const value = req.query[field];
+    if (!isBlank(value) && !isNumber(value)) {
+      return res.status(400).json({ message: field + ' must be a number' });
+    }
+  }
+
+  const lat = Number(req.query.lat);
+  const lng = Number(req.query.lng);
+
+  // How far to look: 1000 m unless the URL says otherwise, and never more than 5000 m
+  let radius = 1000;
+  if (!isBlank(req.query.radius)) {
+    radius = Number(req.query.radius);
+  }
+  if (radius > 5000) {
+    radius = 5000;
+  }
+
+  // How many blocks to send: 20 unless the URL says otherwise, and never more than 50
+  let limit = 20;
+  if (!isBlank(req.query.limit)) {
+    limit = Number(req.query.limit);
+  }
+  if (limit > 50) {
+    limit = 50;
+  }
+
+  try {
+    // $geoNear sorts by distance and adds a "distance" field in metres. Remember: [lng, lat].
+    const blocks = await Block.aggregate([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [lng, lat] },
+          distanceField: 'distance',
+          maxDistance: radius,
+          spherical: true,
+        },
       },
-    },
-    { $limit: limit },
-  ]);
+      { $limit: limit },
+    ]);
 
-  const results = blocks.map((block) => ({ ...toCard(block), distance: Math.round(block.distance) }));
-  res.json({ total: results.length, results });
-});
+    const results = [];
+    for (const block of blocks) {
+      const card = toCard(block);
+      card.distance = Math.round(block.distance);
+      results.push(card);
+    }
+    res.json({ total: results.length, results: results });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
 // GET /api/blocks/:id/amenities
 // Nearest MRT, hawker centre, park and school, with distance in metres.
-router.get('/:id/amenities', async (req, res) => {
-  const block = await findBlock(req.params.id);
-  const amenities = await findNearestAmenities(block.location);
-  res.json({ blockId: block._id, amenities });
-});
+async function blockAmenities(req, res) {
+  try {
+    const block = await Block.findById(req.params.id);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    }
+
+    const amenities = await findNearestAmenities(block.location);
+    res.json({ blockId: block._id, amenities: amenities });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
 // GET /api/blocks/:id/sales
 // The recent sales behind the price range: month, storey, floor area, price and price per m2.
-router.get('/:id/sales', async (req, res) => {
-  const block = await findBlock(req.params.id);
-  const summary = salesSummary(block.sales);
-  summary.blockId = block._id;
-  res.json(summary);
-});
+async function blockSales(req, res) {
+  try {
+    const block = await Block.findById(req.params.id);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    }
+
+    const summary = salesSummary(block.sales);
+    summary.blockId = block._id;
+    res.json(summary);
+  } catch (error) {
+    sendError(res, error);
+  }
+}
 
 // GET /api/blocks/:id
-router.get('/:id', async (req, res) => {
-  const block = await findBlock(req.params.id);
-  res.json(toCard(block));
-});
+// One block, in the same shape as a search result card
+async function oneBlock(req, res) {
+  try {
+    const block = await Block.findById(req.params.id);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    }
+
+    res.json(toCard(block));
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
+router.get('/', searchBlocks);
+router.get('/area', listTowns);
+router.get('/nearby', nearbyBlocks);
+router.get('/:id/amenities', blockAmenities);
+router.get('/:id/sales', blockSales);
+router.get('/:id', oneBlock);
 
 export default router;
