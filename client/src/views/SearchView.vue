@@ -11,11 +11,9 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
+import { useShortlistStore } from '../stores/shortlist.js'
 
-const props = defineProps({
-  shortlist: Array,
-})
-defineEmits(['save', 'unsave'])
+const shortlist = useShortlistStore()
 
 const filters = reactive({ q: '', flatType: '', maxPrice: '', minLease: '', maxWalk: '' })
 const results = ref([])
@@ -103,8 +101,13 @@ const scoredResults = computed(function () {
   return list
 })
 
-function isSaved(blockId) {
-  return props.shortlist.some((item) => item.block.id === blockId)
+// ☆ Save / ★ Saved button on a card: saves the flat, or un-saves it if it is already saved
+function toggleSave(block) {
+  if (shortlist.isSaved(block.id)) {
+    shortlist.removeByBlock(block)
+  } else {
+    shortlist.add(block)
+  }
 }
 
 onMounted(() => {
@@ -148,12 +151,10 @@ onMounted(() => {
       <div v-for="item in scoredResults" :key="item.block.id" class="col">
         <BlockCard
           :block="item.block"
-          :saved="isSaved(item.block.id)"
+          :saved="shortlist.isSaved(item.block.id)"
           :score="item.score"
           show-match
-          @toggle-save="
-            isSaved(item.block.id) ? $emit('unsave', item.block) : $emit('save', item.block)
-          "
+          @toggle-save="toggleSave"
         />
       </div>
     </div>
