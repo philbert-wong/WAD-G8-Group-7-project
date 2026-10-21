@@ -3,6 +3,7 @@ import express from 'express';
 import blocksRouter from './routes/blocks.js';
 import shortlistRouter from './routes/shortlist.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import authRouter from './routes/auth.js';
 
 // GET /api/health: a quick "is the server running?" check
 function healthCheck(req, res) {
@@ -23,6 +24,7 @@ export function createApp() {
   app.get('/api/health', healthCheck);
   app.use('/api/blocks', blocksRouter);
   app.use('/api/shortlist', shortlistRouter);
+  app.use('/api/auth', authRouter);
   app.use('/api', notFound);
 
   app.use(errorHandler); // must be last

@@ -4,4 +4,5 @@ packages:
   - client
 
 allowBuilds:
+  bcrypt: false
   mongodb-memory-server: true
