@@ -13,3 +13,9 @@ export let mongoUri = 'mongodb://127.0.0.1:27017/check-in';
 if (process.env.MONGODB_URI) {
   mongoUri = process.env.MONGODB_URI;
 }
+
+export let jwtSecret = 'dev-secret-change-me'
+if (process.env.JWT_SECRET){
+  jwtSecret = process.env.JWT_SECRET
+}
+

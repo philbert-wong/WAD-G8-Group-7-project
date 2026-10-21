@@ -4,8 +4,9 @@ import { Shortlist } from '../models/Shortlist.js';
 import { Block } from '../models/Block.js';
 import { toCard } from '../lib/blockCard.js';
 import { sendError } from '../lib/sendError.js';
-
+import { requireAuth } from '../middleware/requireAuth.js';
 const router = Router();
+router.use(requireAuth);
 
 // Shape of one shortlist item sent to the frontend
 function toItem(item, block) {
@@ -26,7 +27,7 @@ function compareNewestFirst(a, b) {
 // Every saved flat, newest first
 async function listShortlist(req, res) {
   try {
-    const items = await Shortlist.find();
+    const items = await Shortlist.find({ user: req.user.id});
     items.sort(compareNewestFirst);
 
     const results = [];
@@ -62,12 +63,11 @@ async function addToShortlist(req, res) {
       return res.status(404).json({ message: 'Block not found' });
     }
 
-    const alreadySaved = await Shortlist.findOne({ block: block._id });
+    const alreadySaved = await Shortlist.findOne({ block: block._id, user: req.user.id});
     if (alreadySaved !== null) {
       return res.status(409).json({ message: 'Already in your shortlist' });
     }
-
-    const item = await Shortlist.create({ block: block._id, note: note });
+    const item = await Shortlist.create({ block: block._id, note: note, user: req.user.id });
     res.status(201).json(toItem(item, block));
   } catch (error) {
     sendError(res, error);
@@ -82,7 +82,7 @@ async function updateNote(req, res) {
   }
 
   try {
-    const item = await Shortlist.findById(req.params.id);
+    const item = await Shortlist.findOne({_id:req.params.id, user:req.user.id});
     if (item === null) {
       return res.status(404).json({ message: 'Shortlist item not found' });
     }
@@ -104,7 +104,7 @@ async function updateNote(req, res) {
 // Removes one saved flat. 204 means "done, nothing to send back".
 async function removeFromShortlist(req, res) {
   try {
-    const item = await Shortlist.findByIdAndDelete(req.params.id);
+    const item = await Shortlist.findOneAndDelete({_id: req.params.id, user: req.user.id});
     if (item === null) {
       return res.status(404).json({ message: 'Shortlist item not found' });
     }

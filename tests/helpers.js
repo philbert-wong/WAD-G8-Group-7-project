@@ -8,6 +8,17 @@ import { Amenity } from '../server/models/Amenity.js';
 //   A  Ang Mo Kio  4 ROOM  $560,000  old lease (1979)  6 min walk
 //   B  Punggol     4 ROOM  $680,000  new lease (2018)  3 min walk   <- has an MRT and hawker centre next to it
 //   C  Bedok       3 ROOM  $360,000  old lease (1979)  15 min walk
+
+import request from 'supertest';
+import { createApp } from '../server/app.js';
+
+export async function getToken(email = 'test@example.com') {
+  const res = await request(createApp())
+    .post('/api/auth/register')
+    .send({ email: email, password: 'password123' });
+  return res.body.token;
+}
+
 const testBlocks = [
   { block: '406', street: 'ANG MO KIO AVE 10', town: 'ANG MO KIO', flatType: '4 ROOM', price: 560000, priceLow: 560000, priceHigh: 560000, leaseCommenceYear: 1979, mrtName: 'Ang Mo Kio MRT', mrtWalkMinutes: 6, location: { type: 'Point', coordinates: [103.85, 1.37] } },
   {
