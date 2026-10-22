@@ -20,7 +20,7 @@ const savedItems = ref([])
 const shortlistErrorMessage = ref('')
 
 // The search box text (q) and the four filters. Empty = not used.
-const filters = ref({ q: '', flatType: '', maxPrice: '', minLease: '' })
+const filters = ref({ q: '', flatType: '', maxPrice: '650000', minLease: '60' })
 const results = ref([])
 const total = ref(0)
 const loading = ref(false)
@@ -81,7 +81,7 @@ async function search() {
 
 // "Clear all": empty the search box and every filter, then search again
 function clearFilters() {
-  filters.value = { q: '', flatType: '', maxPrice: '', minLease: '' }
+  filters.value = { q: '', flatType: '', maxPrice: '650000', minLease: '60' }
   search()
 }
 
