@@ -3,6 +3,14 @@
 // (Closeness to MRT is handled by the "What matters to you?" panel instead.)
 // The page (SearchView) owns the filter values and passes them in as a prop.
 // When the user changes a box, we send the change up with emit.
+
+
+import { useRouter } from 'vue-router' // allow nav between pages
+const router = useRouter()
+function goToCal() {
+  router.push('/CPFCal') // nav to here 
+}
+
 const props = defineProps({
   filters: Object, // { flatType, maxPrice, minLease, ... }
 })
@@ -74,6 +82,7 @@ function onClear() {
               maximumFractionDigits: 0
             }) }}
           </span>
+
         </div>
 
         <div class="slider-wrapper">
@@ -84,7 +93,7 @@ function onClear() {
                 width: `${((Number(props.filters.maxPrice || 300000) - 300000) / 700000) * 100}%`
               }"
             ></div>
-
+              
             
           </div>
 
@@ -98,6 +107,9 @@ function onClear() {
             @input="onChange('maxPrice', $event)"
           />
         </div>
+         <button
+            type="button" class="btn btn-outline-primary mt-3" @click="goToCal"> Calculate My Affordability
+          </button>
 
         
       </div>
