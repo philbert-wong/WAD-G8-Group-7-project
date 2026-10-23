@@ -1,0 +1,341 @@
+// AFFORDABILITY CALCULATOR + GRANT RULES (runs in the browser)
+// Combined version: Yujia's household input (co-owners, first/second-timers, joint singles)
+// + Jihao's loan maths and all three grants.
+//
+// Every number (grant amounts, ceilings, loan rules) comes from affordabilityRules.js.
+// This file only does the maths, so if HDB changes a number we only edit the rules file.
+//
+// "inputs" (from CPFCalView.vue) looks like:
+// {
+//   buyerType: 'single', 'couple' or 'joint',
+//   owners: [                                   // owners[0] is the main owner
+//     { status: 'first', income: 4000, cpf: 50000, cash: 20000 },
+//     { status: 'first', income: 3000, cpf: 30000, cash: 10000 },
+//   ],
+//   employed12Months: true,      // needed for the EHG
+//   flatType: '4 ROOM',
+//   phgOption: 'none', 'with' or 'near',   // living with / near parents or child
+//   loanYears: 25,
+// }
+
+import {
+  HDB_LOAN_INTEREST_RATE,
+  HDB_LOAN_ASSESSMENT_RATE,
+  HDB_LOAN_LTV_PERCENT,
+  MSR_PERCENT,
+  MAX_LOAN_YEARS,
+  HDB_LOAN_INCOME_CEILING,
+  CPF_HOUSING_GRANT_INCOME_CEILING,
+  CPF_HOUSING_GRANT,
+  EHG_INCOME_CEILING,
+  EHG_MONTHS_EMPLOYED,
+  EHG_TIERS,
+  PHG_AMOUNT,
+  PHG_SINGLE_NEAR_FLAT_TYPES,
+  UP_TO_4_ROOM_FLAT_TYPES,
+} from './affordabilityRules.js'
+
+// ---------- Loan maths ----------
+
+// Monthly repayment for a loan (standard loan formula).
+// loan = 400000, ratePercent = 2.6, years = 25  ->  about 1815
+export function monthlyRepayment(loan, ratePercent, years) {
+  const months = years * 12
+  const monthlyRate = ratePercent / 100 / 12
+
+  // A 0% loan is just the loan split evenly over the months
+  if (monthlyRate === 0) {
+    return loan / months
+  }
+
+  return (loan * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months))
+}
+
+// The opposite of monthlyRepayment: how big a loan this monthly repayment can pay off.
+// payment = 1800, ratePercent = 3, years = 25  ->  about 379000
+export function loanForRepayment(payment, ratePercent, years) {
+  const months = years * 12
+  const monthlyRate = ratePercent / 100 / 12
+
+  if (monthlyRate === 0) {
+    return payment * months
+  }
+
+  return (payment * (1 - Math.pow(1 + monthlyRate, -months))) / monthlyRate
+}
+
+// Rough monthly repayment for a flat at this price, if you borrow the most an HDB loan allows.
+// Used by the Compare page, which does not know the user's savings.
+export function estimateMonthlyCost(price) {
+  const loan = (price * HDB_LOAN_LTV_PERCENT) / 100
+  return monthlyRepayment(loan, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS)
+}
+
+// ---------- The household ----------
+
+// Adds up everyone's income, CPF and cash, and counts first- and second-timers.
+// (Yujia's totalIncome / totalOA / totalCashSaving / firstTimers / secondTimers, as one function)
+export function householdTotals(owners) {
+  const totals = { buyers: 0, income: 0, cpf: 0, cash: 0, firstTimers: 0, secondTimers: 0 }
+
+  for (const owner of owners) {
+    totals.buyers = totals.buyers + 1
+    totals.income = totals.income + owner.income
+    totals.cpf = totals.cpf + owner.cpf
+    totals.cash = totals.cash + owner.cash
+    if (owner.status === 'first') {
+      totals.firstTimers = totals.firstTimers + 1
+    } else {
+      totals.secondTimers = totals.secondTimers + 1
+    }
+  }
+
+  return totals
+}
+
+// Which grant rules apply to this household:
+//   'family' = couple / family, all first-timers
+//   'single' = one single first-timer
+//   'joint'  = joint singles, all first-timers
+//   'mixed'  = couple of exactly 2: one first-timer + one second-timer
+//   'second' = everyone is a second-timer (only the PHG is possible)
+//   'other'  = a mix we have no rules for (e.g. 3 people, or joint singles with a second-timer)
+export function householdType(buyerType, totals) {
+  if (totals.firstTimers === 0) {
+    return 'second'
+  }
+
+  if (buyerType === 'single') {
+    return 'single'
+  }
+
+  if (buyerType === 'couple') {
+    if (totals.firstTimers === totals.buyers) {
+      return 'family'
+    }
+    if (totals.buyers === 2 && totals.firstTimers === 1) {
+      return 'mixed'
+    }
+    return 'other'
+  }
+
+  // Joint singles: only when everyone is a first-timer
+  if (totals.firstTimers === totals.buyers) {
+    return 'joint'
+  }
+  return 'other'
+}
+
+// ---------- Grants ----------
+// Each grant function gives back one row for the results table:
+// { name, amount, status, reason }
+//   status 'yes'     = eligible, amount is counted in the budget
+//   status 'no'      = not eligible (reason says why), amount 0
+//   status 'unknown' = no rule for this case yet (see affordabilityRules.js), amount 0
+
+// Shows a number as money in a reason, e.g. 9000 -> "$9,000"
+function money(amount) {
+  return '$' + amount.toLocaleString('en-SG')
+}
+
+// Enhanced CPF Housing Grant (EHG): first-timers, 12 months' work, amount depends on income band
+export function enhancedHousingGrant(inputs, totals, type) {
+  const name = 'Enhanced CPF Housing Grant (EHG)'
+
+  if (type === 'second') {
+    return { name: name, amount: 0, status: 'no', reason: 'Only for first-timers' }
+  }
+  if (type === 'other') {
+    return { name: name, amount: 0, status: 'unknown', reason: 'No rule for this mix of buyers yet' }
+  }
+  if (!inputs.employed12Months) {
+    return { name: name, amount: 0, status: 'no', reason: 'Needs ' + EHG_MONTHS_EMPLOYED + ' months of continuous work' }
+  }
+
+  const ceiling = EHG_INCOME_CEILING[type]
+  if (totals.income > ceiling) {
+    return { name: name, amount: 0, status: 'no', reason: 'Household income is above ' + money(ceiling) }
+  }
+
+  // Couples and joint singles use the family table; one single and mixed couples use the singles table
+  let tiers = EHG_TIERS.family
+  if (type === 'single' || type === 'mixed') {
+    tiers = EHG_TIERS.single
+  }
+
+  // The income bands are not filled in, so we do not guess an amount
+  if (tiers.length === 0) {
+    return { name: name, amount: 0, status: 'unknown', reason: 'Income bands not filled in yet, so not counted' }
+  }
+
+  // Tiers are lowest income first: take the first band the income fits into
+  for (const tier of tiers) {
+    if (totals.income <= tier.maxIncome) {
+      return { name: name, amount: tier.amount, status: 'yes', reason: 'Income band up to ' + money(tier.maxIncome) }
+    }
+  }
+  return { name: name, amount: 0, status: 'no', reason: 'Income is above every band' }
+}
+
+// CPF Housing Grant: first-timers, fixed amount by flat size, has an income ceiling
+export function cpfHousingGrant(inputs, totals, type) {
+  const name = 'CPF Housing Grant'
+
+  if (type === 'second') {
+    return { name: name, amount: 0, status: 'no', reason: 'Only for first-timers' }
+  }
+  // Amounts for these households are not in the rules file yet
+  if (type === 'other' || type === 'mixed' || type === 'joint') {
+    return { name: name, amount: 0, status: 'unknown', reason: 'Amount for this household not filled in yet' }
+  }
+
+  const ceiling = CPF_HOUSING_GRANT_INCOME_CEILING[type]
+  if (totals.income > ceiling) {
+    return { name: name, amount: 0, status: 'no', reason: 'Household income is above ' + money(ceiling) }
+  }
+
+  // Bigger flats get a smaller grant
+  let amount = 0
+  if (UP_TO_4_ROOM_FLAT_TYPES.includes(inputs.flatType)) {
+    amount = CPF_HOUSING_GRANT[type].upTo4Room
+  } else {
+    amount = CPF_HOUSING_GRANT[type].room5OrBigger
+  }
+  return { name: name, amount: amount, status: 'yes', reason: 'First-timer, income within ceiling' }
+}
+
+// Proximity Housing Grant (PHG): live with / near (within 4 km of) parents or child.
+// No income ceiling, and second-timers can get it too.
+export function proximityHousingGrant(inputs) {
+  const name = 'Proximity Housing Grant (PHG)'
+
+  // Couples get the family amount; singles (one or joint) get the singles amount
+  let group = 'single'
+  if (inputs.buyerType === 'couple') {
+    group = 'family'
+  }
+
+  if (inputs.phgOption === 'with') {
+    return { name: name, amount: PHG_AMOUNT[group].liveWith, status: 'yes', reason: 'Living with parents / child' }
+  }
+
+  if (inputs.phgOption === 'near') {
+    // Singles living near parents can only get it for a 2- to 5-room flat
+    if (group === 'single' && !PHG_SINGLE_NEAR_FLAT_TYPES.includes(inputs.flatType)) {
+      return { name: name, amount: 0, status: 'no', reason: 'Singles living near parents: 2- to 5-room only' }
+    }
+    return { name: name, amount: PHG_AMOUNT[group].liveNear, status: 'yes', reason: 'Living within 4 km of parents / child' }
+  }
+
+  return { name: name, amount: 0, status: 'no', reason: 'Not living with or near parents / child' }
+}
+
+// All three grants, in the order the results table shows them
+export function checkGrants(inputs, totals, type) {
+  return [
+    enhancedHousingGrant(inputs, totals, type),
+    cpfHousingGrant(inputs, totals, type),
+    proximityHousingGrant(inputs),
+  ]
+}
+
+// ---------- Max budget ----------
+
+// Works out the most the household can pay for a resale flat with an HDB loan.
+// Returns everything the wizard shows:
+// { totals, type, grants, grantsTotal, maxBudget, loan, monthlyRepayment,
+//   fromGrants, fromCpf, fromCash, maxLoanByIncome, loanAllowed, limitedBy, hasUnknownGrant }
+export function calculateBudget(inputs) {
+  // Step 1: the household and its grants
+  const totals = householdTotals(inputs.owners)
+  const type = householdType(inputs.buyerType, totals)
+  const grants = checkGrants(inputs, totals, type)
+
+  let grantsTotal = 0
+  let hasUnknownGrant = false
+  for (const grant of grants) {
+    grantsTotal = grantsTotal + grant.amount
+    if (grant.status === 'unknown') {
+      hasUnknownGrant = true
+    }
+  }
+
+  // Step 2: the money the household already has (savings + grants)
+  const ownMoney = totals.cash + totals.cpf + grantsTotal
+
+  // Step 3: the biggest loan the income allows.
+  // MSR: the monthly repayment can be at most 30% of income.
+  // HDB checks this at its 3% "floor" rate, not the 2.6% you actually pay.
+  let loanGroup = 'family'
+  if (inputs.buyerType === 'single') {
+    loanGroup = 'single'
+  } else if (inputs.buyerType === 'joint') {
+    loanGroup = 'joint'
+  }
+
+  let loanAllowed = true
+  let maxLoanByIncome = 0
+  if (totals.income > HDB_LOAN_INCOME_CEILING[loanGroup]) {
+    // Above the ceiling: no HDB loan (a bank loan has different rules, not built yet)
+    loanAllowed = false
+  } else {
+    const maxPayment = (totals.income * MSR_PERCENT) / 100
+    maxLoanByIncome = loanForRepayment(maxPayment, HDB_LOAN_ASSESSMENT_RATE, inputs.loanYears)
+  }
+
+  // Step 4: two limits on the price. The budget is whichever is lower.
+  //  (a) Loan-to-Value: the loan is at most 75% of the price, so your own money must cover 25%.
+  //      price x 25% <= ownMoney   ->   price <= ownMoney / 25%
+  //  (b) Income: price <= ownMoney + the biggest loan your income allows
+  const ownShare = (100 - HDB_LOAN_LTV_PERCENT) / 100
+  const limitByLtv = ownMoney / ownShare
+  const limitByIncome = ownMoney + maxLoanByIncome
+
+  let maxBudget = 0
+  let limitedBy = ''
+  if (limitByLtv < limitByIncome) {
+    maxBudget = limitByLtv
+    limitedBy = 'savings'
+  } else {
+    maxBudget = limitByIncome
+    limitedBy = 'income'
+  }
+
+  // Round down to the nearest $1,000 so we never promise more than you can afford
+  maxBudget = Math.floor(maxBudget / 1000) * 1000
+
+  // Step 5: how the budget is paid for. Loan first, then grants, then CPF, then cash.
+  let loan = maxBudget - ownMoney
+  if (loan < 0) {
+    loan = 0
+  }
+  let stillToPay = maxBudget - loan
+
+  const fromGrants = Math.min(grantsTotal, stillToPay)
+  stillToPay = stillToPay - fromGrants
+
+  const fromCpf = Math.min(totals.cpf, stillToPay)
+  stillToPay = stillToPay - fromCpf
+
+  const fromCash = stillToPay
+
+  // Step 6: the real monthly repayment, at the rate HDB actually charges
+  const repayment = monthlyRepayment(loan, HDB_LOAN_INTEREST_RATE, inputs.loanYears)
+
+  return {
+    totals: totals,
+    type: type,
+    grants: grants,
+    grantsTotal: grantsTotal,
+    hasUnknownGrant: hasUnknownGrant,
+    maxBudget: maxBudget,
+    loan: Math.round(loan),
+    monthlyRepayment: Math.round(repayment),
+    fromGrants: Math.round(fromGrants),
+    fromCpf: Math.round(fromCpf),
+    fromCash: Math.round(fromCash),
+    maxLoanByIncome: Math.round(maxLoanByIncome),
+    loanAllowed: loanAllowed,
+    limitedBy: limitedBy,
+  }
+}
