@@ -66,7 +66,7 @@ Rules for my part:
 - Adding a route in router/index.js or a link in NavBar.vue touches shared files: tell me first,
   keep the change to a few lines.
 - PHG on the map plugs into Jiun Wei's Leaflet work; any new endpoint must follow Philbert's API contract.
-- Write Vitest tests for the calculator and grant logic (tests/affordability.test.js).
+- Ask me before writing tests (Vitest is not taught in my course).
 
 ## How I want you to work
 - Plan first and wait for my OK before editing files
@@ -78,3 +78,17 @@ Rules for my part:
   - Summary (one line, under 60 characters), e.g. "Add affordability calculator page"
   - Description: what I added/changed (file by file), how to test it, and anything a teammate
     must know (e.g. "touched NavBar.vue: added 1 link — Wingyee FYI", "run pnpm install again")
+
+## Course-only rule (IMPORTANT)
+For MY part, only use what my course (SMU IS216 WAD2) has taught so far:
+- HTML, CSS (selectors, box model, Flexbox, Grid)
+- Bootstrap 5.3 (grid, utilities, components such as cards, forms, buttons, tables)
+- JavaScript basics (variables, if/else, for...of, functions, arrays, objects, template strings)
+- Vue 3 Composition API with <script setup>: ref, v-bind/:, v-on/@, v-model, v-if/v-else, v-for with :key
+- Axios for GET/POST requests
+Things my teammates already set up (.vue files, Vite, Vue Router, Express, MongoDB, props/emit)
+can be used as they are, but explain them to me the first time they appear in my code.
+If you need ANYTHING else (computed, watch, a new library, a new npm package, Vitest,
+a new Express route, localStorage, etc.):
+STOP, tell me what it is, why it's needed, and whether there's a course-only way to do it,
+and wait for my OK before using it.
