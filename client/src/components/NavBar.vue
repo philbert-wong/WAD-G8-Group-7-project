@@ -9,9 +9,45 @@ const route = useRoute()
 <template>
   <nav class="top-nav navbar">
     <div class="container">
-      <span class="brand navbar-brand">HDB Resale Finder</span>
-
-      <div class="nav-pills-group">
+      <span class="navbar-brand">
+        <RouterLink to="/" style="text-decoration: none;" class="brand">
+          HDB Resale Finder
+        </RouterLink>
+      </span>
+      <div class="left-group">
+        <div class="nav-pills-group">
+          <RouterLink
+            to="/"
+            class="nav-pill"
+            :class="{ 'active': route.path === '/' }"
+          >
+            Search
+          </RouterLink>
+          <RouterLink
+            to="/shortlist"
+            class="nav-pill"
+            :class="{
+              'active': route.path === '/shortlist'}"
+          >
+            Shortlist
+          </RouterLink>
+        </div>
+        <div>
+          <RouterLink to="/login">
+            <svg 
+            xmlns="http://w3.org" 
+            viewBox="0 0 24 24" 
+            width="24" 
+            height="24" 
+            fill="currentColor"
+          >
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+          <span>Login</span>
+          </RouterLink>
+        </div>
+      </div>
+      <!-- <div class="nav-pills-group">
         <RouterLink
           to="/"
           class="nav-pill"
@@ -28,16 +64,37 @@ const route = useRoute()
           Shortlist
         </RouterLink>
       </div>
+      <div>
+        <RouterLink to="/login">
+          <svg 
+          xmlns="http://w3.org" 
+          viewBox="0 0 24 24" 
+          width="24" 
+          height="24" 
+          fill="currentColor"
+        >
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+        <span>Login</span>
+        </RouterLink>
+      </div> -->
     </div>
   </nav>
 </template>
 <style scoped>
 
 .top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+
   padding: 20px 0;
-  background: #d6eaff;
-  border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  background: rgba(214, 234, 255, 0.45);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  
 }
 
 
@@ -46,7 +103,7 @@ const route = useRoute()
   align-items: center;
   gap: 10px;
   color: #111827;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
 }
 
@@ -60,6 +117,11 @@ const route = useRoute()
   letter-spacing: 0.04em;
 } */
 
+.left-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
 
 .nav-pills-group {
   display: flex;
@@ -83,7 +145,7 @@ const route = useRoute()
   color: #111827;
 }
 
-/* the page you are on: white pill with a soft shadow */
+
 .nav-pill.active {
   background: #ffffff;
   color: #4f46e5;
@@ -93,5 +155,12 @@ const route = useRoute()
 .nav-pill:focus-visible {
   outline: 2px solid #4f46e5;
   outline-offset: 2px;
+}
+
+.account-pill {
+  
+  padding: 4px;
+  border-radius: 999px;
+  background: #f3f4f6;
 }
 </style>

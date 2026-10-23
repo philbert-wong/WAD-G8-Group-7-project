@@ -148,11 +148,13 @@ const categoryNames = {
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  /* for glass effect */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   padding: 22px;
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
  
@@ -246,8 +248,12 @@ const categoryNames = {
   margin-bottom: 18px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: #f9fafb;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
+
  
 .fact-row {
   display: flex;

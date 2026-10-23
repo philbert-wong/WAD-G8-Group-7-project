@@ -329,9 +329,13 @@ onMounted(loadPage)
 
 <style>
 html, body{
-background-color: #f3f9ff;
+  background: linear-gradient(135deg, #f3f9ff 0%, #deebfb 50%, #b9c9f2 100%);
+  background-attachment: fixed; 
+  min-height: 100vh;
 }
 .error-alert {
+  /* think if i should change the position */
+
   padding: 14px 20px;
   border: 1.5px solid #fecaca;
   border-left: 5px solid #ef4444;   
@@ -342,6 +346,7 @@ background-color: #f3f9ff;
   font-size: 15px;
   font-weight: 500;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  /* text-align: center; */
 }
 
 .view-switcher {

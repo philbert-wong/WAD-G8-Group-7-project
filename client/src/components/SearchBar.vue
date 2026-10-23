@@ -35,12 +35,12 @@ function onSubmit() {
 <style scoped>
 /* The form is the pill; the input and button sit inside it */
 .search-bar {
-  background: #ffffff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 17px;            /* fully rounded, like the chips and sort box */
-  overflow: hidden;                /* clips the button to the rounded ends */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  border-radius: 17px;            
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(229, 231, 235, 0.6);
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* when the user clicks into the input, the whole bar gets the indigo outline */
