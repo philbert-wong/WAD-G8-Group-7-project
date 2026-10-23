@@ -4,6 +4,7 @@ import { onMounted, ref, computed } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
+import MapView from '../components/MapView.vue'
 import axios from 'axios'
 import { getErrorMessage } from '../utils/errorMessage.js'
 import {
@@ -229,6 +230,9 @@ function toggleSave(block) {
   }
 }
 
+//toggle
+const showBlockCard = ref(true)
+
 // When the page opens: put back remembered choices, then load the flats,
 // the town names for the suggestions, and the shortlist
 function loadPage() {
@@ -238,12 +242,13 @@ function loadPage() {
   loadShortlist()
 }
 
+
 onMounted(loadPage)
 </script>
 
 <template>
   <section>
-    <div v-if="shortlistErrorMessage" class="alert alert-danger">
+    <div v-if="shortlistErrorMessage" class="error-alert alert alert-danger">
       {{ shortlistErrorMessage }}
     </div>
 
@@ -268,17 +273,32 @@ onMounted(loadPage)
       @change-ticked="changeTicked"
       @change-level="changeLevel"
     />
+    
 
     <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
-    <p v-else-if="loading" class="text-muted mt-3">Loading...</p>
+    <p v-else-if="loading" class="label">Loading...</p>
     <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 mb-2">
-      <p class="text-muted mb-0">{{ total }} flat(s) found</p>
+      <p class="label">{{ total }} flat(s) found</p>
+      <label class="view-switcher">
+        <button type="button" 
+        class="switch-btn" 
+        :class="{ active: showBlockCard }" 
+        @click="showBlockCard = true"
+        >Blocks</button>
+        <span class="divider">|</span>
+        <button type="button" 
+        class="switch-btn" 
+        :class="{ active: !showBlockCard }" 
+        @click="showBlockCard = false"
+        >Map</button>
+        <span class="slider"></span>
+      </label>
       <div class="d-flex align-items-center gap-2">
-        <label for="sort-by" class="small text-muted">Sort</label>
+        <label for="sort-by" class="label">Sort by</label>
         <select
           id="sort-by"
           v-model="sortBy"
-          class="form-select form-select-sm w-auto"
+          class="form-select form-select-sm w-auto sort-select"
           @change="saveChoices"
         >
           <option value="price">Cheapest first</option>
@@ -286,17 +306,115 @@ onMounted(loadPage)
         </select>
       </div>
     </div>
-
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-      <div v-for="item in scoredResults" :key="item.block.id" class="col">
-        <BlockCard
-          :block="item.block"
-          :saved="isSaved(item.block.id)"
-          :score="item.score"
-          show-match
-          @toggle-save="toggleSave"
-        />
-      </div>
+      <template v-if="showBlockCard">
+        <div v-for="item in scoredResults" :key="item.block.id" class="col">
+          <BlockCard
+            :block="item.block"
+            :saved="isSaved(item.block.id)"
+            :score="item.score"
+            show-match
+            @toggle-save="toggleSave"
+          />
+        </div>
+      </template>
+      <template v-else>
+        <div>
+          <MapView/>
+        </div>
+      </template>
     </div>
   </section>
 </template>
+
+<style>
+html, body{
+background-color: #f3f9ff;
+}
+.error-alert {
+  padding: 14px 20px;
+  border: 1.5px solid #fecaca;
+  border-left: 5px solid #ef4444;   
+  border-right: 5px solid #ef4444;
+  border-radius: 14px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.view-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.switch-btn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+  
+}
+
+.switch-btn:hover {
+  color: #1e293b;
+}
+
+.switch-btn.active {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Underline indicator for active state */
+.switch-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #4f46e5;
+  border-radius: 2px;
+}
+
+.divider {
+  color: #cbd5e1;
+  user-select: none;
+}
+
+.label {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sort-select {
+  padding: 7px 36px 7px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 999px;          /* fully rounded, like the chips */
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sort-select:hover {
+  border-color: #c7d2fe;
+}
+
+.sort-select:focus {
+  border-color: #4f46e5;         /* the indigo used across the app */
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+</style>

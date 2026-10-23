@@ -60,66 +60,6 @@ const categoryNames = {
 
 <template>
   <div class="block-card h-100">
-    <!-- <div class="card-body">
-      <div class="d-flex justify-content-between align-items-start">
-        <div>
-          <h5 class="title mb-0">Blk {{ block.block }} {{ block.street }}</h5>
-          <small class="text-muted">{{ block.town }}</small>
-        </div>
-        <div class="text-end">
-          <span class="badge text-bg-secondary">{{ block.flatType }}</span>
-          <div v-if="showMatch" class="small fw-semibold mt-1">
-            <span v-if="score === null">Match: –</span>
-            <span v-else>Match: {{ score }}</span>
-          </div>
-        </div>
-      </div>
-
-      <p class="fs-5 fw-bold mt-2 mb-0">{{ formatRange(block.priceLow, block.priceHigh) }}</p>
-      <p class="small text-muted mb-2">
-        {{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}
-      </p>
-
-      <ul class="list-unstyled mb-3">
-        <li>
-          Remaining lease: <strong>{{ block.remainingLease }} years</strong>
-        </li>
-        <li>{{ block.mrtWalkMinutes }} min walk to {{ block.mrtName }}</li>
-      </ul>
-
-      <div class="d-flex flex-wrap gap-2">
-        <button
-          v-if="showSave"
-          class="btn btn-sm"
-          :class="{ 'btn-warning': saved, 'btn-outline-warning': !saved }"
-          @click="$emit('toggle-save', block)"
-        >
-          <span v-if="saved">★ Saved</span>
-          <span v-else>☆ Save</span>
-        </button>
-        <button class="btn btn-sm btn-outline-secondary" @click="showPrices = !showPrices">
-          <span v-if="showPrices">Hide price details</span>
-          <span v-else>Price details</span>
-        </button>
-        <button class="btn btn-sm btn-outline-secondary" @click="toggleDetails">
-          <span v-if="open">Hide amenities</span>
-          <span v-else>Nearby amenities</span>
-        </button>
-      </div>
-
-      <PriceDetails v-if="showPrices" :block-id="block.id" />
-
-      <div v-if="open" class="mt-3 pt-3 border-top">
-        <p v-if="loading" class="text-muted mb-0">Loading...</p>
-        <p v-else-if="errorMessage" class="text-danger mb-0">{{ errorMessage }}</p>
-
-        <ul v-else class="list-unstyled small mb-0">
-          <li v-for="a in amenities" :key="a.category">
-            {{ categoryNames[a.category] }}: {{ a.name }} ({{ a.distance }} m)
-          </li>
-        </ul>
-      </div>
-    </div> -->
     <div class="top">
       <div class="address">
         <h5 class="title">Blk {{ block.block }} {{ block.street }}</h5>
@@ -146,9 +86,9 @@ const categoryNames = {
           <span class="fact-label">Remaining lease</span>
           <strong class="fact-value">{{ block.remainingLease }} years</strong>
         </div>
-        <!-- <div class="lease-bar" role="presentation">
-          <div class="lease-fill" :style="{ width: leasePercent + '%' }"></div>
-        </div> -->
+        <div class="lease-bar" role="presentation">
+          <div class="lease-fill" :style="{ width: block.remainingLease + '%' }"></div>
+        </div>
       </div>
  
       <div class="fact-row mrt-row">
@@ -205,7 +145,7 @@ const categoryNames = {
   --ink: #111827;
   --ink-soft: #6b7280;
   --line: #e5e7eb;
- 
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   padding: 22px;
@@ -222,7 +162,7 @@ const categoryNames = {
   box-shadow: 0 10px 28px rgba(79, 70, 229, 0.12);
 }
  
-/* ---------- top ---------- */
+
 .top {
   display: flex;
   justify-content: space-between;
@@ -278,7 +218,7 @@ const categoryNames = {
   color: var(--ink-soft);
 }
  
-/* ---------- price ---------- */
+
 .price-block {
   margin: 18px 0 16px;
 }
@@ -298,7 +238,7 @@ const categoryNames = {
   font-size: 13px;
 }
  
-/* ---------- facts ---------- */
+
 .facts {
   display: flex;
   flex-direction: column;
@@ -341,12 +281,12 @@ const categoryNames = {
   background: var(--accent);
 }
  
-/* ---------- buttons ---------- */
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: auto; /* keeps the buttons at the bottom when cards in a row differ in height */
+  margin-top: auto; 
 }
  
 .pill-btn {
@@ -389,7 +329,7 @@ const categoryNames = {
   color: #78350f;
 }
  
-/* ---------- expanding panels ---------- */
+
 .panel {
   margin-top: 16px;
   padding-top: 16px;
@@ -434,14 +374,5 @@ const categoryNames = {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
- 
-@media (prefers-reduced-motion: reduce) {
-  .block-card,
-  .pill-btn {
-    transition: none;
-  }
-  .block-card:hover {
-    transform: none;
-  }
-}
+
 </style>

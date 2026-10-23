@@ -198,7 +198,7 @@ function onLevelChange(key, level) {
     <!-- pressing Enter in any box searches; this button is for people who prefer clicking -->
         <div class="col-12 d-flex gap-2">
           <button type="submit" class="btn btn-outline-primary btn-sm">Apply filters</button>
-          <button type="button" class="btn btn-link btn-sm" @click="onClear">Clear all</button>
+          <button type="button" class="btn btn-link btn-sm" @click="onClear">Reset</button>
         </div>
       </div>
     </div>
@@ -358,6 +358,11 @@ function onLevelChange(key, level) {
   font-family: inherit;
 }
 
+.zoom-control:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.12);
+}
+
 .zoom-header {
   display: flex;
   justify-content: space-between;
@@ -420,6 +425,7 @@ function onLevelChange(key, level) {
   cursor: pointer;
 }
 
+/* keep track of thumb */
 .zoom-slider::-webkit-slider-runnable-track {
   height: 8px;
   background: transparent;
@@ -460,16 +466,14 @@ function onLevelChange(key, level) {
 }
 
 .zoom-slider:hover::-moz-range-thumb,
+
+/* make thumb bigger */
 .zoom-slider:focus-visible::-moz-range-thumb {
   transform: scale(1.4);
   box-shadow: 0 0 0 7px rgba(79, 70, 229, 0.13);
 }
 
-.zoom-slider:focus-visible {
-  outline: 2px solid #4f46e5;
-  outline-offset: 7px;
-  border-radius: 20px;
-}
+
 
 /* for hamburger */
 .menu-btn {
@@ -479,7 +483,7 @@ function onLevelChange(key, level) {
   padding: 8px 16px 8px 14px;
   border: 1.5px solid var(--line);
   border-radius: 999px;
-  background: #fff;
+  background: #f3f9ff;
   color: #374151;
   font-size: 14px;
   font-weight: 600;
