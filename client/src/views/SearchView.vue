@@ -4,7 +4,6 @@ import { onMounted, ref, computed } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
-import PreferencesPanel from '../components/PreferencesPanel.vue'
 import axios from 'axios'
 import { getErrorMessage } from '../utils/errorMessage.js'
 import {
@@ -265,9 +264,6 @@ onMounted(loadPage)
       @change-filter="setFilter"
       @search="search"
       @clear="clearFilters"
-    />
-
-    <PreferencesPanel
       :preferences="preferences"
       @change-ticked="changeTicked"
       @change-level="changeLevel"

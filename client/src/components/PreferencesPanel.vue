@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 // "What matters to you?" panel.
 // The page (SearchView) owns the choices and passes them in as a prop.
 // When the user clicks something, this panel tells the page with emit, and the page updates the choices.
@@ -18,9 +18,9 @@ function onTickChange(key, event) {
 function onLevelChange(key, level) {
   emit('change-level', key, level)
 }
-</script>
+</script> -->
 
-<template>
+<!-- <template>
   <div class="card shadow-sm mt-3">
     <div class="card-body">
       <h6 class="card-title">What matters to you?</h6>
@@ -30,7 +30,7 @@ function onLevelChange(key, level) {
         :key="category.key"
         class="row g-2 align-items-center mb-2"
       >
-        <!-- Tick box: unticked means this category is ignored (weight 0) -->
+        Tick box: unticked means this category is ignored (weight 0) 
         <div class="col-12 col-md-4">
           <div class="form-check">
             <input
@@ -46,7 +46,7 @@ function onLevelChange(key, level) {
           </div>
         </div>
 
-        <!-- How important it is: Low (1) to Extremely (5). Greyed out when unticked. -->
+How important it is: Low (1) to Extremely (5). Greyed out when unticked. 
         <div class="col-12 col-md-8">
           <div class="btn-group btn-group-sm flex-wrap" role="group">
             <template v-for="level in IMPORTANCE_LEVELS" :key="level.value">
@@ -71,4 +71,4 @@ function onLevelChange(key, level) {
       </div>
     </div>
   </div>
-</template>
+</template> -->
