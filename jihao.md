@@ -73,3 +73,8 @@ Rules for my part:
 - One feature at a time; after each, tell me exactly how to test it in the browser
 - I'm learning: explain what you changed and why, so I can present and defend it in the demo
 - Do not commit or push; I commit myself in GitHub Desktop
+- After every finished change, give me a ready-to-paste commit message for GitHub Desktop so my
+  teammates know what changed:
+  - Summary (one line, under 60 characters), e.g. "Add affordability calculator page"
+  - Description: what I added/changed (file by file), how to test it, and anything a teammate
+    must know (e.g. "touched NavBar.vue: added 1 link — Wingyee FYI", "run pnpm install again")
