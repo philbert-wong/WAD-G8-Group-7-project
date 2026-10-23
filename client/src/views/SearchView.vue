@@ -7,6 +7,7 @@ import BlockCard from '../components/BlockCard.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
 import axios from 'axios'
 import { getErrorMessage } from '../utils/errorMessage.js'
+import { isLoggedIn } from '../utils/auth.js'
 import {
   CATEGORIES,
   getWeights,
@@ -93,31 +94,65 @@ const sortBy = ref('price')
 
 // The panel's choices and the sort are remembered in the browser (localStorage),
 // so they are still there when you come back from the Shortlist page.
-function saveChoices() {
+// When you are logged in they are ALSO saved to your account, so they follow you to other computers.
+async function saveChoices() {
   localStorage.setItem('matchPreferences', JSON.stringify(preferences.value))
   localStorage.setItem('sortBy', sortBy.value)
+
+  if (isLoggedIn()) {
+    try {
+      await axios.put('/api/auth/preferences', {
+        preferences: { panel: preferences.value, sortBy: sortBy.value },
+      })
+    } catch (error) {
+      // Shown in the top alert (with shortlist errors), so the search results stay visible
+      shortlistErrorMessage.value = getErrorMessage(error)
+    }
+  }
 }
 
-// Puts back the remembered choices, if there are any
-function loadChoices() {
-  const savedPreferences = localStorage.getItem('matchPreferences')
-  if (savedPreferences !== null) {
-    const saved = JSON.parse(savedPreferences)
+// Puts saved choices onto the panel.
+// savedPanel = { school: { ticked, level }, ... } or null, savedSort = 'price' / 'match' or null
+function applyChoices(savedPanel, savedSort) {
+  if (savedPanel) {
     // Copy only the categories we know, so a category added later still gets its default
     const choices = makeDefaultPreferences()
     for (let i = 0; i < CATEGORIES.length; i++) {
       const key = CATEGORIES[i].key
-      if (saved[key]) {
-        choices[key] = saved[key]
+      if (savedPanel[key]) {
+        choices[key] = savedPanel[key]
       }
     }
     preferences.value = choices
   }
 
-  const savedSort = localStorage.getItem('sortBy')
-  if (savedSort !== null) {
+  if (savedSort) {
     sortBy.value = savedSort
   }
+}
+
+// Puts back the remembered choices, if there are any.
+// Logged in and something saved on the account: use that. Otherwise use this browser's copy.
+async function loadChoices() {
+  if (isLoggedIn()) {
+    try {
+      const response = await axios.get('/api/auth/preferences')
+      const saved = response.data.preferences
+      if (saved && saved.panel) {
+        applyChoices(saved.panel, saved.sortBy)
+        return
+      }
+    } catch (error) {
+      shortlistErrorMessage.value = getErrorMessage(error)
+    }
+  }
+
+  let savedPanel = null
+  const savedPreferences = localStorage.getItem('matchPreferences')
+  if (savedPreferences !== null) {
+    savedPanel = JSON.parse(savedPreferences)
+  }
+  applyChoices(savedPanel, localStorage.getItem('sortBy'))
 }
 
 // The panel says a tick box changed
@@ -223,6 +258,12 @@ async function unsaveBlock(block) {
 
 // ☆ Save / ★ Saved button on a card: saves the flat, or un-saves it if it is already saved
 function toggleSave(block) {
+  // The shortlist belongs to an account, so you must log in first
+  if (!isLoggedIn()) {
+    shortlistErrorMessage.value = 'Please log in to save flats'
+    return
+  }
+
   if (isSaved(block.id)) {
     unsaveBlock(block)
   } else {
@@ -231,12 +272,14 @@ function toggleSave(block) {
 }
 
 // When the page opens: put back remembered choices, then load the flats,
-// the town names for the suggestions, and the shortlist
+// the town names for the suggestions, and (only when logged in) the shortlist
 function loadPage() {
   loadChoices()
   search()
   loadAreas()
-  loadShortlist()
+  if (isLoggedIn()) {
+    loadShortlist()
+  }
 }
 
 onMounted(loadPage)
