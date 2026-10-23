@@ -1,5 +1,7 @@
 <script setup>
 // One flat card: price, lease, MRT, match score, and buttons for Save, price details and amenities
+// DESIGN PREVIEW (Cosy Professional): new look. The props, emits and logic are the SAME as before,
+// so SearchView and ShortlistItem did not need to change how they use this card.
 import { ref } from 'vue'
 import axios from 'axios'
 import { getErrorMessage } from '../utils/errorMessage.js'
@@ -24,7 +26,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 const amenities = ref([])
 
-// "Nearby amenities" button: opens the list and gets it from the server, or closes it
+// "Amenities" button: opens the list and gets it from the server, or closes it
 async function toggleDetails() {
   open.value = !open.value
   if (!open.value) {
@@ -56,54 +58,108 @@ const categoryNames = {
   park: 'Park',
   school: 'Primary school',
 }
+
+// NEW (design): the little "✓ Near MRT" tags. Worked out from the block's own data.
+// The limits (10 min, 70 years, 1 km, 500 m) are our own choice, not an HDB rule.
+function makeTags(block) {
+  const tags = []
+  if (block.mrtWalkMinutes <= 10) {
+    tags.push('Near MRT')
+  }
+  if (block.remainingLease >= 70) {
+    tags.push('Long lease')
+  }
+  if (block.distances) {
+    if (block.distances.school <= 1000) {
+      tags.push('Near schools')
+    }
+    if (block.distances.hawker <= 500) {
+      tags.push('Hawker centre')
+    }
+    if (block.distances.park <= 500) {
+      tags.push('Near a park')
+    }
+  }
+  return tags
+}
+
+// NEW (design): width of the match bar, e.g. score 87 -> "87%"
+function barWidth(score) {
+  if (score === null) {
+    return '0%'
+  }
+  return score + '%'
+}
 </script>
 
 <template>
-  <div class="card h-100 shadow-sm">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-start">
+  <article class="bcard">
+    <!-- Photo area. We have no real photos, so it is a coloured placeholder. -->
+    <div class="photo">
+      <span class="photo-icon">🏢</span>
+      <span class="ph-tag">{{ block.town }}</span>
+    </div>
+
+    <div class="cbody">
+      <!-- Title + match score -->
+      <div class="d-flex justify-content-between gap-3 flex-wrap">
         <div>
-          <h5 class="card-title mb-0">Blk {{ block.block }} {{ block.street }}</h5>
-          <small class="text-muted">{{ block.town }}</small>
+          <h3 class="serif">Blk {{ block.block }} {{ block.street }}</h3>
+          <div class="meta">{{ block.town }} · {{ block.flatType }}</div>
         </div>
-        <div class="text-end">
-          <span class="badge text-bg-secondary">{{ block.flatType }}</span>
-          <div v-if="showMatch" class="small fw-semibold mt-1">
-            <span v-if="score === null">Match: –</span>
-            <span v-else>Match: {{ score }}</span>
+        <div v-if="showMatch" class="match">
+          <div class="row1">
+            <span>Match</span>
+            <b v-if="score === null">–</b>
+            <b v-else>{{ score }}/100</b>
           </div>
+          <div class="bar"><i :style="{ width: barWidth(score) }"></i></div>
         </div>
       </div>
 
-      <p class="fs-5 fw-bold mt-2 mb-0">{{ formatRange(block.priceLow, block.priceHigh) }}</p>
-      <p class="small text-muted mb-2">
-        {{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}
-      </p>
+      <!-- Price box -->
+      <div class="pricebox">
+        <div class="lab">Resale price range · last 12 months</div>
+        <div class="price serif">{{ formatRange(block.priceLow, block.priceHigh) }}</div>
+        <span class="pill green">{{ block.salesCount }} sale(s)</span>
+        <span class="pill dark ms-1">Median {{ formatPrice(block.price) }}</span>
+      </div>
 
-      <ul class="list-unstyled mb-3">
-        <li>
-          Remaining lease: <strong>{{ block.remainingLease }} years</strong>
-        </li>
-        <li>{{ block.mrtWalkMinutes }} min walk to {{ block.mrtName }}</li>
-      </ul>
+      <!-- Lease + MRT -->
+      <div class="d-flex gap-4 flex-wrap mb-3">
+        <div class="stat">
+          <span class="ic">⏳</span>
+          <div><b>{{ block.remainingLease }} years</b>Remaining lease</div>
+        </div>
+        <div class="stat">
+          <span class="ic">🚆</span>
+          <div><b>{{ block.mrtWalkMinutes }} min walk</b>to {{ block.mrtName }}</div>
+        </div>
+      </div>
 
-      <div class="d-flex flex-wrap gap-2">
+      <!-- Tags -->
+      <div class="d-flex gap-2 flex-wrap mb-3">
+        <span v-for="tag in makeTags(block)" :key="tag" class="tag"><b>✓</b> {{ tag }}</span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex gap-2 flex-wrap">
         <button
           v-if="showSave"
-          class="btn btn-sm"
-          :class="{ 'btn-warning': saved, 'btn-outline-warning': !saved }"
+          class="act-btn"
+          :class="{ saved: saved, primary: !saved }"
           @click="$emit('toggle-save', block)"
         >
-          <span v-if="saved">★ Saved</span>
-          <span v-else>☆ Save</span>
+          <span v-if="saved">✓ Saved</span>
+          <span v-else>+ Save to Shortlist</span>
         </button>
-        <button class="btn btn-sm btn-outline-secondary" @click="showPrices = !showPrices">
+        <button class="act-btn" @click="showPrices = !showPrices">
           <span v-if="showPrices">Hide price details</span>
           <span v-else>Price details</span>
         </button>
-        <button class="btn btn-sm btn-outline-secondary" @click="toggleDetails">
-          <span v-if="open">Hide amenities</span>
-          <span v-else>Nearby amenities</span>
+        <button class="act-btn ghost" @click="toggleDetails">
+          <span v-if="open">Hide amenities ▴</span>
+          <span v-else>Amenities ▾</span>
         </button>
       </div>
 
@@ -112,7 +168,6 @@ const categoryNames = {
       <div v-if="open" class="mt-3 pt-3 border-top">
         <p v-if="loading" class="text-muted mb-0">Loading...</p>
         <p v-else-if="errorMessage" class="text-danger mb-0">{{ errorMessage }}</p>
-
         <ul v-else class="list-unstyled small mb-0">
           <li v-for="a in amenities" :key="a.category">
             {{ categoryNames[a.category] }}: {{ a.name }} ({{ a.distance }} m)
@@ -120,5 +175,157 @@ const categoryNames = {
         </ul>
       </div>
     </div>
-  </div>
+  </article>
 </template>
+
+<style scoped>
+/* [COURSE] The card: white, rounded, photo on the left and text on the right (Flexbox) */
+.bcard {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 22px;
+}
+/* [AI-ASSISTED] Soft shadow, and the card lifts up a little on hover (transform + transition) */
+.bcard {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 14px 34px -18px rgba(80, 50, 30, 0.25);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.bcard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 44px -20px rgba(80, 50, 30, 0.35);
+}
+
+/* [COURSE] Photo area: fixed width, icon centred with Grid */
+.photo {
+  width: 32%;
+  min-height: 300px;
+  flex-shrink: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.photo-icon {
+  font-size: 64px;
+}
+/* [AI-ASSISTED] Warm gradient as a stand-in for a real photo */
+.photo {
+  background: linear-gradient(160deg, #f3d9c4, #e7b89a 55%, #c98c6a);
+}
+/* [COURSE] Town label in the bottom-left corner of the photo (position: absolute) */
+.ph-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 3px 8px;
+  font-weight: 600;
+}
+
+/* [COURSE] Text side of the card */
+.cbody {
+  padding: 22px 24px;
+  flex: 1;
+  min-width: 0;
+}
+.cbody h3 {
+  font-size: 26px;
+  line-height: 1.15;
+  margin: 0;
+}
+.meta {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* [COURSE] Match score label and the bar behind it */
+.match {
+  min-width: 150px;
+}
+.row1 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.row1 b {
+  color: var(--terra);
+}
+.bar {
+  height: 7px;
+  background: var(--beige);
+  border-radius: 9px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: 9px;
+}
+/* [AI-ASSISTED] Gradient fill that slides to its width (transition) */
+.bar i {
+  background: linear-gradient(90deg, #d98a63, var(--terra));
+  transition: width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* [COURSE] Beige price box */
+.pricebox {
+  background: var(--beige);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin: 16px 0 14px;
+}
+.lab {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.price {
+  font-size: 32px;
+  line-height: 1.1;
+  margin: 4px 0 10px;
+}
+
+/* [COURSE] Lease / MRT facts with an icon square */
+.stat {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+.stat .ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #fbede7;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+.stat b {
+  display: block;
+  color: var(--char);
+  font-size: 15px;
+}
+
+/* [COURSE] Phones and tablets: photo on top instead of on the left (media query) */
+@media (max-width: 991px) {
+  .bcard {
+    flex-direction: column;
+  }
+  .photo {
+    width: 100%;
+    min-height: 160px;
+  }
+}
+</style>
