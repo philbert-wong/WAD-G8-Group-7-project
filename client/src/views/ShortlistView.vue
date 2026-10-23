@@ -54,7 +54,10 @@ onMounted(load)
 
 <template>
   <section>
-    <h2 class="h4 mb-3">My shortlist ({{ items.length }})</h2>
+    <!-- DESIGN PREVIEW (Cosy Professional): serif title, one wide card per row -->
+    <span class="eyebrow">Your favourites</span>
+    <h1 class="page-title serif">My <em>shortlist</em> ({{ items.length }})</h1>
+    <p class="page-sub mb-4">Keep notes on the flats you like and compare them later.</p>
 
     <div v-if="errorMessage" class="alert alert-danger">
       {{ errorMessage }}
@@ -64,7 +67,7 @@ onMounted(load)
       Nothing saved yet. Go to Search and press "Save" on a flat.
     </p>
 
-    <div class="row row-cols-1 row-cols-md-2 g-3">
+    <div class="row row-cols-1 g-3">
       <div v-for="item in items" :key="item.id" class="col">
         <ShortlistItem :item="item" @remove="removeItem" @change-note="changeNote" />
       </div>
