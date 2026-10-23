@@ -4,6 +4,7 @@ import SearchView from '../views/SearchView.vue'
 import ShortlistView from '../views/ShortlistView.vue'
 import LoginView from '../views/LoginView.vue'
 import CPFCalView from '../views/CPFCalView.vue'
+import CompareView from '../views/CompareView.vue' // FEATURE 7 (Jihao): compare shortlisted flats
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,7 +28,13 @@ const router = createRouter({
       path: '/CPFCal',
       name: 'cpfcal',
       component: CPFCalView,
-    }
+    },
+    {
+      // FEATURE 7 (Jihao): compare 2-3 shortlisted flats side by side
+      path: '/compare',
+      name: 'compare',
+      component: CompareView,
+    },
   ],
 })
 
