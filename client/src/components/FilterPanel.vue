@@ -483,7 +483,7 @@ function onLevelChange(key, level) {
   padding: 8px 16px 8px 14px;
   border: 1.5px solid var(--line);
   border-radius: 999px;
-  background: #f3f9ff;
+  background: #f3f9ff00;
   color: #374151;
   font-size: 14px;
   font-weight: 600;

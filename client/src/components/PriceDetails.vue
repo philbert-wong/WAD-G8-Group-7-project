@@ -58,12 +58,13 @@ function formatStorey(storey) {
 </script>
 
 <template>
-  <div class="mt-3 pt-3 border-top">
+  <div class="price-details">
     <p v-if="loading" class="text-muted mb-0">Loading...</p>
-    <p v-else-if="errorMessage" class="text-danger mb-0">{{ errorMessage }}</p>
+    <p v-else-if="errorMessage" class="note text-danger mb-0">{{ errorMessage }}</p>
 
     <template v-else>
-      <ul class="list-unstyled small mb-2">
+      <!-- <ul class="stats">
+
         <li>
           Median price: <strong>{{ formatPrice(details.medianPrice) }}</strong>
         </li>
@@ -71,10 +72,21 @@ function formatStorey(storey) {
           Median price per m²: <strong>{{ formatPrice(details.medianPricePerSqm) }}</strong>
         </li>
         <li class="text-muted">Based on {{ details.count }} sale(s) in the last 12 months</li>
-      </ul>
+      </ul> -->
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Median price</span>
+          <strong class="stat-value">{{ formatPrice(details.medianPrice) }}</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Median price per m²</span>
+          <strong class="stat-value">{{ formatPrice(details.medianPricePerSqm) }}</strong>
+        </div>
+      </div>
+      <p class="note">Based on {{ details.count }} sale(s) in the last 12 months</p>
 
-      <div class="table-responsive">
-        <table class="table table-sm small mb-0">
+      <div class="table-wrap">
+        <table class="sales-table">
           <thead>
             <tr>
               <th>Month</th>
@@ -98,3 +110,87 @@ function formatStorey(storey) {
     </template>
   </div>
 </template>
+
+<style scoped>
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(249, 250, 251, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.stat-value {
+  color: #111827;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Small grey text: "Loading...", "Based on ..." */
+.note {
+  margin: 10px 0 14px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* The table sits in a rounded box; it scrolls sideways on narrow screens */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: rgba(249, 250, 251, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.sales-table th {
+  padding: 10px 14px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sales-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  font-variant-numeric: tabular-nums; /* digits line up in columns */
+}
+
+.sales-table tbody tr:last-child td {
+  border-bottom: 0; /* no line under the final row */
+}
+
+.sales-table tbody tr:hover {
+  background: #f8f9ff;
+}
+
+.price-cell {
+  color: #111827;
+  font-weight: 700;
+}
+</style>

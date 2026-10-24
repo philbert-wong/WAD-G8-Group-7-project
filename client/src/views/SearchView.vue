@@ -248,7 +248,7 @@ onMounted(loadPage)
 
 <template>
   <section>
-    <div v-if="shortlistErrorMessage" class="error-alert alert alert-danger">
+    <div v-if="shortlistErrorMessage" class="error-alert alert alert-danger" @click="$router.push('/login')">
       {{ shortlistErrorMessage }}
     </div>
 
@@ -329,7 +329,7 @@ onMounted(loadPage)
 
 <style>
 html, body{
-  background: linear-gradient(135deg, #f3f9ff 0%, #deebfb 50%, #b9c9f2 100%);
+  background: linear-gradient(135deg, #f5fcd0 0%, #fbd6d6 50%, #b9c9f2 100%);
   background-attachment: fixed; 
   min-height: 100vh;
 }
@@ -346,7 +346,11 @@ html, body{
   font-size: 15px;
   font-weight: 500;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  /* text-align: center; */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  cursor: pointer;
 }
 
 .view-switcher {

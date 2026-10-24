@@ -56,7 +56,7 @@ onMounted(load)
   <section>
     <h2 class="h4 mb-3">My shortlist ({{ items.length }})</h2>
 
-    <div v-if="errorMessage" class="error-alert alert alert-danger">
+    <div v-if="errorMessage" class="error-alert alert alert-danger" @click="$router.push('/login')">
       {{ errorMessage }}
     </div>
 
@@ -84,5 +84,6 @@ onMounted(load)
   font-size: 15px;
   font-weight: 500;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
 }
 </style>

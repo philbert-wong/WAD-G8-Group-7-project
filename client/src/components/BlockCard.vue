@@ -59,83 +59,85 @@ const categoryNames = {
 </script>
 
 <template>
-  <div class="block-card h-100">
-    <div class="top">
-      <div class="address">
-        <h5 class="title">Blk {{ block.block }} {{ block.street }}</h5>
-        <span class="town">{{ block.town }}</span>
+  <RouterLink :to="`/block/${block.id}`" class="block-card-link">
+    <div class="block-card h-100">
+      <div class="top">
+        <div class="address">
+          <h5 class="title">Blk {{ block.block }} {{ block.street }}</h5>
+          <span class="town">{{ block.town }}</span>
+        </div>
+      
+        <div class="badges">
+            <span class="type-badge">{{ block.flatType }}</span>
+            <span v-if="showMatch" class="match" :class="{ 'match-none': score === null }">
+              <template v-if="score === null">Match –</template>
+              <template v-else>Match {{ score }}</template>
+            </span>
+        </div>
       </div>
-    
-      <div class="badges">
-          <span class="type-badge">{{ block.flatType }}</span>
-          <span v-if="showMatch" class="match" :class="{ 'match-none': score === null }">
-            <template v-if="score === null">Match –</template>
-            <template v-else>Match {{ score }}</template>
+      <div class="price-block">
+        <p class="price">{{ formatRange(block.priceLow, block.priceHigh) }}</p>
+        <p class="price-note">
+          {{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}
+        </p>
+      </div>
+      <div class="facts">
+        <div class="fact">
+          <div class="fact-row">
+            <span class="fact-label">Remaining lease</span>
+            <strong class="fact-value">{{ block.remainingLease }} years</strong>
+          </div>
+          <div class="lease-bar" role="presentation">
+            <div class="lease-fill" :style="{ width: block.remainingLease + '%' }"></div>
+          </div>
+        </div>
+  
+        <div class="fact-row mrt-row">
+          <span class="fact-label">Nearest MRT</span>
+          <span class="fact-value">
+            <strong>{{ block.mrtWalkMinutes }} min</strong> walk to {{ block.mrtName }}
           </span>
-      </div>
-    </div>
-    <div class="price-block">
-      <p class="price">{{ formatRange(block.priceLow, block.priceHigh) }}</p>
-      <p class="price-note">
-        {{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}
-      </p>
-    </div>
-    <div class="facts">
-      <div class="fact">
-        <div class="fact-row">
-          <span class="fact-label">Remaining lease</span>
-          <strong class="fact-value">{{ block.remainingLease }} years</strong>
-        </div>
-        <div class="lease-bar" role="presentation">
-          <div class="lease-fill" :style="{ width: block.remainingLease + '%' }"></div>
         </div>
       </div>
- 
-      <div class="fact-row mrt-row">
-        <span class="fact-label">Nearest MRT</span>
-        <span class="fact-value">
-          <strong>{{ block.mrtWalkMinutes }} min</strong> walk to {{ block.mrtName }}
-        </span>
+      <div class="actions">
+        <button
+          v-if="showSave"
+          type="button"
+          class="pill-btn save-btn"
+          :class="{ 'is-saved': saved }"
+          @click.stop.prevent="$emit('toggle-save', block)"
+        >
+          <span v-if="saved">★ Saved</span>
+          <span v-else>☆ Save</span>
+        </button>
+        <button type="button" class="pill-btn" @click.stop.prevent="showPrices = !showPrices">
+          <span v-if="showPrices">Hide price details</span>
+          <span v-else>Price details</span>
+        </button>
+        <button type="button" class="pill-btn" @click.stop.prevent="toggleDetails">
+          <span v-if="open">Hide amenities</span>
+          <span v-else>Nearby amenities</span>
+        </button>
+      </div>
+  
+      <div v-if="showPrices" class="panel">
+        <PriceDetails :block-id="block.id" />
+      </div>
+  
+      <div v-if="open" class="panel">
+        <p v-if="loading" class="panel-note">Loading...</p>
+        <p v-else-if="errorMessage" class="panel-note text-danger">{{ errorMessage }}</p>
+  
+        <ul v-else class="amenity-list">
+          <li v-for="a in amenities" :key="a.category">
+            <span class="amenity-category">{{ categoryNames[a.category] }}</span>
+            <span class="amenity-name">{{ a.name }}</span>
+            <span class="amenity-distance">{{ a.distance }} m</span>
+          </li>
+        </ul>
       </div>
     </div>
-    <div class="actions">
-      <button
-        v-if="showSave"
-        type="button"
-        class="pill-btn save-btn"
-        :class="{ 'is-saved': saved }"
-        @click="$emit('toggle-save', block)"
-      >
-        <span v-if="saved">★ Saved</span>
-        <span v-else>☆ Save</span>
-      </button>
-      <button type="button" class="pill-btn" @click="showPrices = !showPrices">
-        <span v-if="showPrices">Hide price details</span>
-        <span v-else>Price details</span>
-      </button>
-      <button type="button" class="pill-btn" @click="toggleDetails">
-        <span v-if="open">Hide amenities</span>
-        <span v-else>Nearby amenities</span>
-      </button>
-    </div>
- 
-    <div v-if="showPrices" class="panel">
-      <PriceDetails :block-id="block.id" />
-    </div>
- 
-    <div v-if="open" class="panel">
-      <p v-if="loading" class="panel-note">Loading...</p>
-      <p v-else-if="errorMessage" class="panel-note text-danger">{{ errorMessage }}</p>
- 
-      <ul v-else class="amenity-list">
-        <li v-for="a in amenities" :key="a.category">
-          <span class="amenity-category">{{ categoryNames[a.category] }}</span>
-          <span class="amenity-name">{{ a.name }}</span>
-          <span class="amenity-distance">{{ a.distance }} m</span>
-        </li>
-      </ul>
-    </div>
-  </div>
+  </RouterLink>
 </template>
 
 <style scoped>
@@ -164,6 +166,11 @@ const categoryNames = {
   box-shadow: 0 10px 28px rgba(79, 70, 229, 0.12);
 }
  
+.block-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
 
 .top {
   display: flex;
@@ -305,6 +312,8 @@ const categoryNames = {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
  
 .pill-btn:hover {
