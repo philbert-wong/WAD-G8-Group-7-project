@@ -2,6 +2,7 @@
 // The dark bar at the top with links to the two pages
 import { RouterLink, useRoute } from 'vue-router'
 
+
 // The current URL, so we can highlight the page we are on
 const route = useRoute()
 </script>
@@ -14,7 +15,7 @@ const route = useRoute()
           HDB Resale Finder
         </RouterLink>
       </span>
-      <div class="left-group">
+      <div v-if="showLinks" class="left-group">
         <div class="nav-pills-group">
           <RouterLink
             to="/"
@@ -33,7 +34,7 @@ const route = useRoute()
           </RouterLink>
         </div>
         <div>
-          <RouterLink to="/login">
+          <RouterLink to="/login" style="text-decoration: none;">
             <svg 
             xmlns="http://w3.org" 
             viewBox="0 0 24 24" 
