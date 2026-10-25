@@ -6,6 +6,8 @@
 // DESIGN PREVIEW (Cosy Professional): now a sidebar card. Flat type became "chips" (buttons);
 // props and emits are the same as before.
 import { formatPrice } from '../utils/format.js'
+// FINAL DRAFT: Yujia's "Calculate My Affordability" button is now a link under the budget slider
+import { RouterLink } from 'vue-router'
 
 const props = defineProps({
   filters: Object, // { flatType, maxPrice, minLease, ... }
@@ -78,6 +80,7 @@ function onClear() {
       class="form-range"
       @input="onChange('maxPrice', $event)"
     />
+    <RouterLink to="/CPFCal" class="calc-link">Not sure? Calculate my budget →</RouterLink>
 
     <!-- Lease slider -->
     <label for="filter-lease" class="flab d-flex justify-content-between align-items-end">
@@ -167,6 +170,15 @@ function onClear() {
 }
 .form-range::-moz-range-track {
   background: var(--beige);
+}
+
+/* [COURSE] Small terracotta link to the affordability calculator */
+.calc-link {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--terra);
+  margin-top: 2px;
 }
 
 /* [COURSE] Full-width "Apply Filters" button and the "Clear all" link-button */
