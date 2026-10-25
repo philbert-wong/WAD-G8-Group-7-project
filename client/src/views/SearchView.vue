@@ -14,6 +14,9 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 // This page's own copy of the shortlist, so each card knows if it shows ☆ Save or ★ Saved
 const savedItems = ref([])
@@ -234,6 +237,13 @@ function toggleSave(block) {
 // the town names for the suggestions, and the shortlist
 function loadPage() {
   loadChoices()
+
+  const budget = route.query.maxPrice
+
+  if (budget !== undefined) {
+    filters.value.maxPrice = String(budget)
+  }
+
   search()
   loadAreas()
   loadShortlist()
@@ -266,6 +276,12 @@ onMounted(loadPage)
       @search="search"
       @clear="clearFilters"
     />
+
+    <div class="mb-3">
+      <router-link to="/CPFCal" class="btn btn-outline-primary">
+        Calculate Affordability
+      </router-link>
+    </div>
 
     <PreferencesPanel
       :preferences="preferences"

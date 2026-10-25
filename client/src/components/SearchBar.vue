@@ -12,7 +12,7 @@ function onInput(event) {
   emit('change-text', event.target.value)
 }
 
-// Enter or the Search button: tell the page to search
+// Enter or the Search button: tell thAe page to search
 function onSubmit() {
   emit('search')
 }
