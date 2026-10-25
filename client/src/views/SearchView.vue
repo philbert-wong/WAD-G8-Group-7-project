@@ -328,77 +328,6 @@ onMounted(loadPage)
 </template>
 
 <style>
-html, body{
-  background: linear-gradient(135deg, #d0f2fc 0%, #ffffff 50%, #b9c9f2 100%);
-  background-attachment: fixed; 
-  min-height: 100vh;
-}
-.error-alert {
-  /* think if i should change the position */
-
-  padding: 14px 20px;
-  border: 1.5px solid #fecaca;
-  border-left: 5px solid #ef4444;   
-  border-right: 5px solid #ef4444;
-  border-radius: 14px;
-  background: #fef2f2;
-  color: #991b1b;
-  font-size: 15px;
-  font-weight: 500;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  cursor: pointer;
-}
-
-.view-switcher {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-}
-
-.switch-btn {
-  background: none;
-  border: none;
-  padding: 2px 4px;
-  color: #6c757d;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.2s ease;
-  
-}
-
-.switch-btn:hover {
-  color: #1e293b;
-}
-
-.switch-btn.active {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-/* Underline indicator for active state */
-.switch-btn.active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #4f46e5;
-  border-radius: 2px;
-}
-
-.divider {
-  color: #cbd5e1;
-  user-select: none;
-}
-
 .label {
   color: #6b7280;
   font-size: 14px;
@@ -407,23 +336,7 @@ html, body{
 }
 
 .sort-select {
-  padding: 7px 36px 7px 16px;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 18px;         
-  background-color: #ffffff;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.sort-select:hover {
-  border-color: #c7d2fe;
-}
-
-.sort-select:focus {
-  border-color: #4f46e5;         /* the indigo used across the app */
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-}
 </style>

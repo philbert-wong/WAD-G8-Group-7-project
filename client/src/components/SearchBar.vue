@@ -28,7 +28,6 @@ function onSubmit() {
       placeholder="Search by town, street or block e.g. Punggol"
       @input="onInput"
     />
-    <!-- <button class="btn btn-primary search-btn" type="submit">Search</button> -->
   </form>
 </template>
 
@@ -43,33 +42,18 @@ function onSubmit() {
   box-shadow:0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* when the user clicks into the input, the whole bar gets the indigo outline */
-.search-bar:focus-within {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-}
 
 /* remove the input's own border so only the bar's border shows */
 .search-input {
   padding-left: 24px;
-  border: 0;
+  border: 1px solid lightgrey;
   box-shadow: none;
   font-size: 16px;
 }
+/* I WANT THE INPUT TO HAVE BORDER! come back ltr */
 
 .search-input:focus {
   box-shadow: none;
 }
-
-/* .search-btn {
-  --bs-btn-bg: #4f46e5;
-  --bs-btn-border-color: #4f46e5;
-  --bs-btn-hover-bg: #4338ca;
-  --bs-btn-hover-border-color: #4338ca;
-  --bs-btn-active-bg: #3730a3;
-  --bs-btn-active-border-color: #3730a3;
-  padding: 0 28px;
-  font-weight: 600;
-} */
 
 </style>

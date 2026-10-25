@@ -124,14 +124,13 @@ function formatStorey(storey) {
   gap: 2px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(249, 250, 251, 0.45);
+  background: rgba(248, 220, 220, 0.45);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .stat-label {
-  color: #6b7280;
+  color: var(--ink-soft);
   font-size: 12px;
 }
 
@@ -144,14 +143,14 @@ function formatStorey(storey) {
 /* Small grey text: "Loading...", "Based on ..." */
 .note {
   margin: 10px 0 14px;
-  color: #6b7280;
+  color: var(--ink-soft);
   font-size: 13px;
 }
 
 /* The table sits in a rounded box; it scrolls sideways on narrow screens */
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 12px;
 }
 
@@ -159,25 +158,25 @@ function formatStorey(storey) {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  background: rgba(249, 250, 251, 0.45);
-  backdrop-filter: blur(8px);
+  background: rgba(248, 220, 220, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
 }
 
 .sales-table th {
   padding: 10px 14px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-  color: #6b7280;
+  background: rgba(248, 220, 220, 0.45);
+  color: var(--ink-soft);
   font-size: 12px;
   font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .sales-table td {
   padding: 10px 14px;
-  border-bottom: 1px solid #f3f4f6;
-  color: #374151;
+  
+  color: var(--ink-soft);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   font-variant-numeric: tabular-nums; /* digits line up in columns */
 }
 
@@ -186,11 +185,7 @@ function formatStorey(storey) {
 }
 
 .sales-table tbody tr:hover {
-  background: #f8f9ff;
+  background: rgba(248, 220, 220, 0.45);
 }
 
-.price-cell {
-  color: #111827;
-  font-weight: 700;
-}
 </style>

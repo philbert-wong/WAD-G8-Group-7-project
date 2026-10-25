@@ -72,18 +72,4 @@ onMounted(load)
   </section>
 </template>
 
-<style scoped>
-.error-alert {
-  padding: 14px 20px;
-  border: 1.5px solid #fecaca;
-  border-left: 5px solid #ef4444;   
-  border-right: 5px solid #ef4444;
-  border-radius: 14px;
-  background: #fef2f2;
-  color: #991b1b;
-  font-size: 15px;
-  font-weight: 500;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-}
-</style>
+

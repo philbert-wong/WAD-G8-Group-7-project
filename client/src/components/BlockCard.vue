@@ -127,14 +127,15 @@ const categoryNames = {
       <div v-if="open" class="panel">
         <p v-if="loading" class="panel-note">Loading...</p>
         <p v-else-if="errorMessage" class="panel-note text-danger">{{ errorMessage }}</p>
-  
-        <ul v-else class="amenity-list">
-          <li v-for="a in amenities" :key="a.category">
-            <span class="amenity-category">{{ categoryNames[a.category] }}</span>
-            <span class="amenity-name">{{ a.name }}</span>
-            <span class="amenity-distance">{{ a.distance }} m</span>
-          </li>
-        </ul>
+        <div v-else class="amenity-block">
+          <ul class="amenity-list">
+            <li v-for="a in amenities" :key="a.category">
+              <span class="amenity-category">{{ categoryNames[a.category] }}</span>
+              <span class="amenity-name">{{ a.name }}</span>
+              <span class="amenity-distance">{{ a.distance }} m</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </RouterLink>
@@ -142,28 +143,21 @@ const categoryNames = {
 
 <style scoped>
 .block-card {
-  --accent: #4f46e5;
-  --accent-soft: #eef2ff;
-  --ink: #111827;
-  --ink-soft: #6b7280;
-  --line: #e5e7eb;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  /* for glass effect */
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(203, 213, 225, 0.395);
   padding: 22px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
  
 .block-card:hover {
   transform: translateY(-3px);
-  border-color: #c7d2fe;
-  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.12);
+  border-color: var(--accent-soft);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
 }
  
 .block-card-link {
@@ -181,6 +175,7 @@ const categoryNames = {
  
 .address {
   min-width: 0;
+  color: var(--ink);
 }
  
 .title {
@@ -255,10 +250,9 @@ const categoryNames = {
   margin-bottom: 18px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(248, 220, 220, 0.45);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
  
@@ -311,15 +305,13 @@ const categoryNames = {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  
 }
  
 .pill-btn:hover {
-  border-color: #c7d2fe;
-  background: #f8f9ff;
-  color: var(--accent);
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-dark);
 }
  
 .pill-btn:focus-visible {
@@ -355,6 +347,13 @@ const categoryNames = {
   margin: 0;
   color: var(--ink-soft);
   font-size: 14px;
+}
+
+.amenity-block{
+  background: rgba(248, 220, 220, 0.45);
+  padding: 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
  
 .amenity-list {

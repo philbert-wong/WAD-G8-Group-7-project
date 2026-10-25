@@ -116,8 +116,8 @@ onMounted(function () {
         <!-- header -->
         <div class="detail-header">
             <div>
-            <h1 class="detail-title">Blk {{ block.block }} {{ block.street }}</h1>
-            <p class="detail-sub">{{ block.town }} · {{ block.flatType }}</p>
+            <h1 class="address">Blk {{ block.block }} {{ block.street }}</h1>
+            <p class="town">{{ block.town }} · {{ block.flatType }}</p>
             </div>
             <button
             type="button"
@@ -131,7 +131,7 @@ onMounted(function () {
         </div>
     
         <!-- price -->
-        <div class="price-section">
+        <div class="price-block">
             <p class="price">{{ formatRange(block.priceLow, block.priceHigh) }}</p>
             <p class="price-note">
             {{ block.salesCount }} recent sale(s) · median {{ formatPrice(block.price) }}
@@ -139,19 +139,22 @@ onMounted(function () {
         </div>
     
         <!-- lease and MRT -->
-        <div class="specs-grid">
-            <div class="spec-box">
-            <span class="spec-label">Remaining lease</span>
-            <strong class="spec-value">{{ block.remainingLease }} years</strong>
-            <div class="lease-bar">
-                <div class="lease-fill" :style="{ width: leasePercent(block.remainingLease) + '%' }"></div>
+        <div class="facts">
+            <div class="fact">
+            <div class="fact-row">
+              <span class="fact-label">Remaining lease</span>
+              <strong class="fact-value">{{ block.remainingLease }} years</strong>
             </div>
+            <div class="lease-bar" role="presentation">
+              <div class="lease-fill" :style="{ width: block.remainingLease + '%' }"></div>
             </div>
+          </div>
     
-            <div class="spec-box">
-            <span class="spec-label">Nearest MRT</span>
-            <strong class="spec-value">{{ block.mrtName }}</strong>
-            <span class="spec-note">{{ block.mrtWalkMinutes }} min walk</span>
+            <div class="fact-row">
+            <span class="fact-label">Nearest MRT</span>
+            <span class="fact-value">
+              <strong>{{ block.mrtWalkMinutes }} min</strong> walk to {{ block.mrtName }}
+            </span>
             </div>
         </div>
     
@@ -163,40 +166,23 @@ onMounted(function () {
     
         <!-- amenities -->
         <div class="section-block">
-            <h3 class="section-title">Nearby amenities</h3>
-            <ul class="amenity-list">
-            <li v-for="a in amenities" :key="a.category">
-                <span class="amenity-category">{{ categoryNames[a.category] }}</span>
-                <span class="amenity-name">{{ a.name }}</span>
-                <span class="amenity-distance">{{ a.distance }} m</span>
-            </li>
-            </ul>
+          <h3 class="section-title">Nearby amenities</h3>
+            <div class="amenity-block">
+              
+              <ul class="amenity-list">
+              <li v-for="a in amenities" :key="a.category">
+                  <span class="amenity-category">{{ categoryNames[a.category] }}</span>
+                  <span class="amenity-name">{{ a.name }}</span>
+                  <span class="amenity-distance">{{ a.distance }} m</span>
+              </li>
+              </ul>
+            </div>
         </div>
         </div>
     </div>
 </template>
  
 <style scoped>
-.error-alert {
-  /* think if i should change the position */
-
-  padding: 14px 20px;
-  border: 1.5px solid #fecaca;
-  border-left: 5px solid #ef4444;   
-  border-right: 5px solid #ef4444;
-  border-radius: 14px;
-  background: #fef2f2;
-  color: #991b1b;
-  font-size: 15px;
-  font-weight: 500;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  cursor: pointer;
-
-}
 .detail-page {
   max-width: 820px;
   margin: 0 auto;
@@ -204,23 +190,21 @@ onMounted(function () {
  
 .back-btn {
   margin-bottom: 16px;
-  padding: 6px 14px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--line);
   border-radius: 999px;
+  background: #ffffff;
   color: #374151;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(229, 231, 235, 0.25);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
 }
  
 .back-btn:hover {
-  border-color: #c7d2fe;
-  color: #4f46e5;
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-dark);
 }
  
 .state-note {
@@ -229,11 +213,10 @@ onMounted(function () {
 }
  
 .detail-card {
-  padding: 28px;
+  padding: 22px;
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(229, 231, 235, 0.25);
+  border: 1px solid rgba(203, 213, 225, 0.395);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -245,18 +228,16 @@ onMounted(function () {
   gap: 16px;
 }
  
-.detail-title {
-  margin: 0 0 4px;
-  color: #111827;
-  font-size: 26px;
-  font-weight: 800;
+.address {
+  min-width: 0;
+  color: var(--ink);
 }
  
-.detail-sub {
-  margin: 0;
-  color: #6b7280;
-  font-size: 14px;
+.town {
+  color: var(--ink-soft);
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.04em;
 }
  
 .pill-btn {
@@ -285,66 +266,68 @@ onMounted(function () {
   color: #78350f;
 }
  
-.price-section {
-  margin: 24px 0;
+.price-block {
+  margin: 18px 0 16px;
 }
  
 .price {
   margin: 0;
-  color: #111827;
-  font-size: 30px;
+  color: var(--ink);
+  font-size: 22px;
   font-weight: 800;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
  
 .price-note {
   margin: 2px 0 0;
-  color: #6b7280;
-  font-size: 14px;
-}
- 
-.specs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
- 
-.spec-box {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border-radius: 12px;
-  background: rgba(249, 250, 251, 0.45);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-}
- 
-.spec-label,
-.spec-note {
-  color: #6b7280;
+  color: var(--ink-soft);
   font-size: 13px;
 }
  
-.spec-value {
-  color: #111827;
-  font-size: 18px;
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(248, 220, 220, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+} 
+
+ 
+.fact-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+ 
+.fact-label {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+ 
+.fact-value {
+  color: var(--ink);
+  font-size: 14px;
+  text-align: right;
 }
  
 .lease-bar {
   height: 6px;
-  margin-top: 6px;
+  margin-top: 8px;
   overflow: hidden;
   border-radius: 999px;
   background: #e5e7eb;
-  
 }
  
 .lease-fill {
   height: 100%;
   border-radius: 999px;
-  background: #4f46e5;
+  background: var(--accent);
 }
  
 .section-block {
@@ -353,39 +336,46 @@ onMounted(function () {
  
 .section-title {
   margin: 0 0 8px;
-  color: #111827;
+  color: var(--ink);
   font-size: 17px;
   font-weight: 700;
 }
- 
+
+.amenity-block{
+  background: rgba(248, 220, 220, 0.45);
+  padding: 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
 .amenity-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 14px;
+  font-size: 13px;
 }
  
 .amenity-list li {
   display: grid;
-  grid-template-columns: 120px 1fr auto;
+  grid-template-columns: 110px 1fr auto;
   align-items: baseline;
   gap: 10px;
 }
  
 .amenity-category {
-  color: #6b7280;
+  color: var(--ink-soft);
 }
  
 .amenity-name {
-  color: #111827;
+  min-width: 0;
+  color: var(--ink);
   font-weight: 500;
 }
  
 .amenity-distance {
-  color: #4f46e5;
+  color: var(--accent);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }

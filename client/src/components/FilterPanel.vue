@@ -76,92 +76,58 @@ function onLevelChange(key, level) {
     </button>
     <div id="filter-body" class="collapse-wrap" :class="{ open: openFilters }">
       <div class="collapse-inner" :inert="!openFilters">
-        <div class="row g-2">
-          <div class="col-12 col-md-4 mb-2">
-            <div class="zoom-control">
-              <div class="zoom-header">
-                <span class="zoom-title">Room Type</span>
-              </div>
-              <div class="type-chips" role="radiogroup">
-                <label class="type-chip">
-                  <input
-                    type="radio"
-                    name="flatType"
-                    class="type-input"
-                    value=""
-                    :checked="!props.filters.flatType"
-                    @change="onFlatTypeChange"
-                  />
-                  <span class="type-face">
-                    <span class="type-text">Any</span>
-                  </span>
-                </label>
-
-                <label
-                  v-for="type in flatTypes"
-                  :key="type"
-                  class="type-chip"
-                >
-                  <input
-                    type="radio"
-                    name="flatType"
-                    class="type-input"
-                    :value="type"
-                    :checked="props.filters.flatType === type"
-                    @change="onFlatTypeChange"
-                  />
-                  <span class="type-face">
-                    <span class="type-text">{{ type }}</span>
-                  </span>
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4 mb-2">
-            <div class="zoom-control">
-              <div class="zoom-header">
-                <span class="zoom-title">Max budget</span>
-                <span class="zoom-value">
-                  {{ Number(props.filters.maxPrice).toLocaleString('en-SG', {
-                    style: 'currency',
-                    currency: 'SGD',
-                    maximumFractionDigits: 0
-                  }) }}
-                </span>
-              </div>
-
-              <div class="slider-wrapper">
-                <div class="slider-track">
-                  <div
-                    class="slider-progress"
-                    :style="{
-                      width: `${((Number(props.filters.maxPrice || 300000) - 300000) / 700000) * 100}%`
-                    }"
-                  ></div>
-
-                  
+        <div class="zoom-control">
+          <div class="row g-3 w-100">
+            <div class="col-12 col-md-4">
+              
+                <div class="zoom-header">
+                  <span class="zoom-title">Room Type</span>
                 </div>
+                <div class="type-chips" role="radiogroup">
+                  <label class="type-chip">
+                    <input
+                      type="radio"
+                      name="flatType"
+                      class="type-input"
+                      value=""
+                      :checked="!props.filters.flatType"
+                      @change="onFlatTypeChange"
+                    />
+                    <span class="type-face">
+                      <span class="type-text">Any</span>
+                    </span>
+                  </label>
 
-                <input
-                  :value="props.filters.maxPrice"
-                  type="range"
-                  min="300000"
-                  max="1000000"
-                  step="10000"
-                  class="zoom-slider"
-                  @input="onChange('maxPrice', $event)"
-                />
-              </div>
-
+                  <label
+                    v-for="type in flatTypes"
+                    :key="type"
+                    class="type-chip"
+                  >
+                    <input
+                      type="radio"
+                      name="flatType"
+                      class="type-input"
+                      :value="type"
+                      :checked="props.filters.flatType === type"
+                      @change="onFlatTypeChange"
+                    />
+                    <span class="type-face">
+                      <span class="type-text">{{ type }}</span>
+                    </span>
+                  </label>
+                </div>
               
             </div>
-          </div>
-          <div class="col-12 col-md-4 mb-2">
-            <div class="zoom-control">
+            <div class="col-12 col-md-4">
+              
                 <div class="zoom-header">
-                  <span class="zoom-title">Min Remaining Lease (years)</span>
+                  <span class="zoom-title">Max budget</span>
                   <span class="zoom-value">
-                    {{ Number(props.filters.minLease) }}
+                    {{ Number(props.filters.maxPrice).toLocaleString('en-SG', {
+                      style: 'currency',
+                      currency: 'SGD',
+                      maximumFractionDigits: 0
+                    }) }}
                   </span>
                 </div>
 
@@ -170,7 +136,7 @@ function onLevelChange(key, level) {
                     <div
                       class="slider-progress"
                       :style="{
-                        width: `${((Number(props.filters.minLease || 20) - 20) / 79) * 100}%`
+                        width: `${((Number(props.filters.maxPrice || 300000) - 300000) / 700000) * 100}%`
                       }"
                     ></div>
 
@@ -178,27 +144,63 @@ function onLevelChange(key, level) {
                   </div>
 
                   <input
-                    :value="props.filters.minLease"
+                    :value="props.filters.maxPrice"
                     type="range"
-                    min="20"
-                    max="99"
-                    step="1"
+                    min="300000"
+                    max="1000000"
+                    step="10000"
                     class="zoom-slider"
-                    @input="onChange('minLease', $event)"
+                    @input="onChange('maxPrice', $event)"
                   />
                 </div>
 
+                
               
             </div>
+            <div class="col-12 col-md-4">
+              
+                  <div class="zoom-header">
+                    <span class="zoom-title">Min Remaining Lease (years)</span>
+                    <span class="zoom-value">
+                      {{ Number(props.filters.minLease) }}
+                    </span>
+                  </div>
 
+                  <div class="slider-wrapper">
+                    <div class="slider-track">
+                      <div
+                        class="slider-progress"
+                        :style="{
+                          width: `${((Number(props.filters.minLease || 20) - 20) / 79) * 100}%`
+                        }"
+                      ></div>
+
+                      
+                    </div>
+
+                    <input
+                      :value="props.filters.minLease"
+                      type="range"
+                      min="20"
+                      max="99"
+                      step="1"
+                      class="zoom-slider"
+                      @input="onChange('minLease', $event)"
+                    />
+                  </div>
+
+                
+              
+
+            </div>
           </div>
         </div>
     
 
     <!-- pressing Enter in any box searches; this button is for people who prefer clicking -->
         <div class="col-12 d-flex gap-2">
-          <button type="submit" class="btn btn-outline-primary btn-sm">Apply filters</button>
-          <button type="button" class="btn btn-link btn-sm" @click="onClear">Reset</button>
+          <button type="submit" class="btn btn-outline-primary btn-sm" style="border-radius:9px;">Apply filters</button>
+          <button type="button" class="btn btn-link btn-sm" style="color: var(--brand);" @click="onClear">Reset</button>
         </div>
       </div>
     </div>
@@ -210,7 +212,7 @@ function onLevelChange(key, level) {
       class="menu-btn"
       :class="{ 'is-open': openPreferences }"
       :aria-expanded="openPreferences"
-      aria-controls="filter-body"
+      aria-controls="prefs-body"
       @click="openPreferences = !openPreferences"
     >
       <span class="burger" aria-hidden="true">
@@ -220,7 +222,7 @@ function onLevelChange(key, level) {
       </span>
       <span>Preferences</span>
     </button>
-    <div id="filter-body" class="collapse-wrap" :class="{ open: openPreferences }">
+    <div id="prefs-body" class="collapse-wrap" :class="{ open: openPreferences }">
       <div class="collapse-inner" :inert="!openPreferences">
         <div class="zoom-control">
           <div class="card-body">
@@ -329,38 +331,37 @@ function onLevelChange(key, level) {
 }
 
 .type-input:checked + .type-face {
-  background: #dbeafe;
-  border-color: #60a5fa;
-  color: #1d4ed8;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.18);
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand-dark);
+  box-shadow: 0 2px 6px rgba(180, 69, 90, 0.18);
 }
 
 .type-chip:hover .type-face {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-dark);
 }
 
 .type-input:focus-visible + .type-face {
-  outline: 2px solid  #4f46e5;
+  outline: 2px solid  var(--brand);
   outline-offset: 3px;
 }
 
 /* mostly for sliders */
 .zoom-control {
-  height: 100%; /* fill the column, so all three bottoms line up */
+  margin: 3px;
+
   display: flex;
-  flex-direction: column;
   padding: 24px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(203, 213, 225, 0.395);
+  border-radius: 9px;
   font-family: inherit;
 }
 
 .zoom-control:hover {
-  border-color: #c7d2fe;
-  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.12);
+  border-color: var(--brand-soft);
 }
 
 .zoom-header {
@@ -409,7 +410,7 @@ function onLevelChange(key, level) {
 .slider-progress {
   height: 100%;
   border-radius: 20px;
-  background: #4f46e5;
+  background: var(--brand);
   transition: width 0.12s ease;
 }
 
@@ -444,7 +445,7 @@ function onLevelChange(key, level) {
   margin-top: -7px;
   border: 2px solid #ffffff;
   border-radius: 50%;
-  background: #4f46e5;
+  background: var(--brand);
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -454,7 +455,7 @@ function onLevelChange(key, level) {
   height: 18px;
   border: 2px solid #ffffff;
   border-radius: 50%;
-  background: #4f46e5;
+  background: var(--brand);
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -462,10 +463,9 @@ function onLevelChange(key, level) {
 .zoom-slider:hover::-webkit-slider-thumb,
 .zoom-slider:focus-visible::-webkit-slider-thumb {
   transform: scale(1.4);
-  box-shadow: 0 0 0 7px rgba(79, 70, 229, 0.13);
+  box-shadow: 0 0 0 7px rgba(180, 69, 90, 0.15);
 }
 
-.zoom-slider:hover::-moz-range-thumb,
 
 /* make thumb bigger */
 .zoom-slider:focus-visible::-moz-range-thumb {
@@ -481,8 +481,8 @@ function onLevelChange(key, level) {
   align-items: center;
   gap: 10px;
   padding: 8px 16px 8px 14px;
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
+  border: 1.5px solid var(--bs-body-bg);
+  border-radius: 9px;
   background: #f3f9ff00;
   color: #374151;
   font-size: 14px;
@@ -492,7 +492,7 @@ function onLevelChange(key, level) {
 }
  
 .menu-btn:hover {
-  border-color: #c7d2fe;
+  border-color: var(--brand-soft);
   background: #f8f9ff;
 }
  
@@ -551,6 +551,17 @@ function onLevelChange(key, level) {
 .collapse-wrap.open .collapse-inner {
   visibility: visible;
   transition-delay: 0s;
+}
+
+input[type="checkbox"].form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.25rem rgba(var(--accent-rgb), 0.25);
+}
+
+input[type="checkbox"].form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(255, 213, 213, 0.25);
+  outline: 1px solid var(--accent);
 }
 
 </style>

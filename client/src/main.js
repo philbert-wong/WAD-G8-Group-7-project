@@ -1,6 +1,7 @@
 // Starts the website: loads Bootstrap, creates the Vue app and puts it inside <div id="app"> in index.html
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+import './assets/theme.css'
 
 import { createApp } from 'vue'
 
