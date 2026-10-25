@@ -58,6 +58,7 @@ tests/                  automated tests
 ## API contract
 
 Errors always look like `{ "error": "message" }`.
+🔒 = needs the login token in the header `Authorization: Bearer <token>` (all `/api/shortlist` routes need it too), otherwise 401.
 `400` = a value is wrong (e.g. `maxPrice=abc`), `404` = not found, `409` = already exists.
 
 | Method | URL | What it does |
@@ -68,6 +69,10 @@ Errors always look like `{ "error": "message" }`.
 | GET | `/api/blocks/:id` | One block |
 | GET | `/api/blocks/:id/sales` | The recent sales behind the price range. Returns `{ count, lowest, highest, medianPrice, medianPricePerSqm, sales: [{ month, storey, areaSqm, price, pricePerSqm }] }`, newest first |
 | GET | `/api/blocks/:id/amenities` | Nearest `mrt`, `hawker`, `park`, `school` with `distance` in metres |
+| POST | `/api/auth/register` | Create an account. Body: `{ "email": "...", "password": "at least 8 chars" }`. Returns `{ token, user: { id, email } }` (201). 409 if the email is taken |
+| POST | `/api/auth/login` | Body: `{ "email": "...", "password": "..." }`. Returns `{ token, user: { id, email } }`. 401 if wrong |
+| GET | `/api/auth/preferences` | 🔒 The user's saved choices: `{ preferences: { panel, sortBy } }` (`{}` if none saved) |
+| PUT | `/api/auth/preferences` | 🔒 Replace the saved choices. Body: `{ "preferences": { "panel": { "school": { "ticked": true, "level": 3 }, ... }, "sortBy": "match" } }` |
 | GET | `/api/shortlist` | All saved items, newest first |
 | POST | `/api/shortlist` | Save a block. Body: `{ "blockId": "...", "note": "optional" }` |
 | PATCH | `/api/shortlist/:id` | Change the note. Body: `{ "note": "text" }` |
@@ -119,5 +124,6 @@ already in `blocks.json` (same blocks, same 12 months, no OneMap calls). Run `pn
 
 ## Known limits
 
-- The shortlist is shared by everyone who opens the site (there are no user accounts).
+- You must log in to use the shortlist. Each account has its own shortlist and saved "What matters to you?" choices.
+- The login token is kept in the browser's localStorage and lasts 7 days; after that, log in again.
 - Only four towns, and the 40 busiest blocks in each. Walking time is a straight-line estimate, not a real route.
