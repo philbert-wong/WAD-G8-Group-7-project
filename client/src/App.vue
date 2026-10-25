@@ -2,9 +2,12 @@
 // The root component: the navbar on every page, and the current page underneath it
 // DESIGN PREVIEW (Cosy Professional): adds a preview bar (choose the guide pet), the pet, and a footer.
 import { ref } from 'vue'
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import GuidePet from './components/GuidePet.vue'
+
+// FINAL DRAFT: the pet only appears on the Search page (its tour points at Search page parts)
+const route = useRoute()
 
 // Which guide pet to show: 'none', 'cat' (Mochi) or 'dog' (Biscuit)
 const guideMode = ref('cat')
@@ -19,7 +22,7 @@ function chooseGuide(mode) {
   <!-- Preview bar: only for showing the design to the team -->
   <div class="demo-bar">
     <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
-      <span class="lbl">Design preview · Cosy Professional</span>
+      <span class="lbl">Final draft preview · Cosy Professional</span>
       <div class="seg">
         <button :class="{ on: guideMode === 'none' }" @click="chooseGuide('none')">Without Guide</button>
         <button :class="{ on: guideMode === 'cat' }" @click="chooseGuide('cat')">🐱 Cat (Mochi)</button>
@@ -36,13 +39,13 @@ function chooseGuide(mode) {
 
   <footer class="cosy-footer">
     <div class="container d-flex justify-content-between flex-wrap gap-2">
-      <span>Design preview. Prices are real HDB resale sales from data.gov.sg (last 12 months).</span>
+      <span>Final draft preview. Prices are real HDB resale sales from data.gov.sg (last 12 months).</span>
       <span>HDB Resale Finder · Cosy Professional</span>
     </div>
   </footer>
 
   <!-- :key makes Vue rebuild the pet when the choice changes, so the tour starts again -->
-  <GuidePet v-if="guideMode !== 'none'" :key="guideMode" :mode="guideMode" />
+  <GuidePet v-if="guideMode !== 'none' && route.path === '/'" :key="guideMode" :mode="guideMode" />
 </template>
 
 <style scoped>
