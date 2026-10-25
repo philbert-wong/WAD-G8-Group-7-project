@@ -80,7 +80,10 @@ loadShortlist()
 
 <template>
   <section>
-    <h2 class="h4 mb-3">Compare flats</h2>
+    <!-- FINAL DRAFT: cosy page heading -->
+    <span class="eyebrow">Side by side</span>
+    <h1 class="page-title serif">Compare <em>flats</em></h1>
+    <p class="page-sub mb-4">Tick 2 or 3 flats from your shortlist.</p>
 
     <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
     <p v-else-if="loading" class="text-muted">Loading...</p>

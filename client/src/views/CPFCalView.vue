@@ -221,8 +221,10 @@ function applyBudget() {
 </script>
 
 <template>
-  <div class="container mt-4 mb-5">
-    <h2 class="mb-1">HDB Affordability Calculator</h2>
+  <div class="mb-5">
+    <!-- FINAL DRAFT: cosy page heading -->
+    <span class="eyebrow">Affordability</span>
+    <h1 class="page-title serif">How much can I <em>afford?</em></h1>
     <p class="text-muted small mb-4">Step {{ currentStep }} of 3 · an estimate for a resale flat with an HDB loan</p>
 
     <!-- ===================== STEP 1: Household (FEATURE 1 + FEATURE 2) ===================== -->
