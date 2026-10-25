@@ -71,6 +71,12 @@ async function submit() {
 
 <template>
   <section class="row justify-content-center">
+    <!-- FINAL DRAFT: cosy page heading -->
+    <div class="col-12 text-center mb-4">
+      <span class="eyebrow">Your account</span>
+      <h1 class="page-title serif">Welcome <em>home</em></h1>
+      <p class="page-sub">Log in to keep a shortlist and save your priorities.</p>
+    </div>
     <div class="col-12 col-md-8 col-lg-5">
       <div class="card shadow-sm">
         <div class="card-body">

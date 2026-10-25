@@ -196,3 +196,32 @@ body {
     font-size: 34px;
   }
 }
+
+/* FINAL DRAFT: Bootstrap's blue buttons, tabs and tick boxes in terracotta, so the calculator,
+   Compare and Login pages match the cosy design.
+   [COURSE] overriding Bootstrap classes with our own CSS (loaded after Bootstrap) */
+.btn-primary,
+.btn-primary:disabled {
+  background: var(--terra);
+  border-color: var(--terra);
+}
+.btn-primary:hover,
+.btn-primary:active {
+  background: var(--terra-d) !important;
+  border-color: var(--terra-d) !important;
+}
+.btn-link,
+.nav-tabs .nav-link {
+  color: var(--terra);
+}
+.nav-tabs .nav-link.active {
+  color: var(--char);
+}
+.form-check-input:checked {
+  background-color: var(--sage);
+  border-color: var(--sage);
+}
+.card {
+  border-color: var(--line);
+  border-radius: 18px;
+}
