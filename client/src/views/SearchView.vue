@@ -16,6 +16,10 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
+import { useRoute } from 'vue-router'
+
+// get the current route
+const route = useRoute() 
 
 // This page's own copy of the shortlist, so each card knows if it shows ☆ Save or ★ Saved
 const savedItems = ref([])
@@ -276,6 +280,11 @@ function toggleSave(block) {
 // the town names for the suggestions, and (only when logged in) the shortlist
 function loadPage() {
   loadChoices()
+  const budget = route.query.maxPrice
+
+  if (budget !== undefined) {
+    filters.value.maxPrice = String(budget)
+  }
   search()
   loadAreas()
   if (isLoggedIn()) {
@@ -284,6 +293,7 @@ function loadPage() {
 }
 
 onMounted(loadPage)
+
 </script>
 
 <template>
