@@ -153,7 +153,7 @@ const categoryNames = {
   /* for glass effect */
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-  border-radius: 16px;
+  border-radius: 5px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   padding: 22px;

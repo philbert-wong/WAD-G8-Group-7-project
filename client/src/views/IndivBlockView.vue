@@ -230,7 +230,7 @@ onMounted(function () {
  
 .detail-card {
   padding: 28px;
-  border-radius: 18px;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
   border: 1.5px solid rgba(229, 231, 235, 0.25);

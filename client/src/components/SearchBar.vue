@@ -35,7 +35,7 @@ function onSubmit() {
 <style scoped>
 /* The form is the pill; the input and button sit inside it */
 .search-bar {
-  border-radius: 17px;            
+  border-radius: 5px;            
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(10px);

@@ -329,7 +329,7 @@ onMounted(loadPage)
 
 <style>
 html, body{
-  background: linear-gradient(135deg, #f5fcd0 0%, #fbd6d6 50%, #b9c9f2 100%);
+  background: linear-gradient(135deg, #d0f2fc 0%, #ffffff 50%, #b9c9f2 100%);
   background-attachment: fixed; 
   min-height: 100vh;
 }
@@ -409,7 +409,7 @@ html, body{
 .sort-select {
   padding: 7px 36px 7px 16px;
   border: 1.5px solid #e5e7eb;
-  border-radius: 999px;          /* fully rounded, like the chips */
+  border-radius: 18px;         
   background-color: #ffffff;
   color: #374151;
   font-size: 14px;
