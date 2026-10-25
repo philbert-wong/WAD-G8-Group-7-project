@@ -1,26 +1,57 @@
 <script setup>
-// DESIGN PREVIEW (Cosy Professional): the white bar at the top with the logo and page tabs
-import { RouterLink, useRoute } from 'vue-router'
+// FINAL DRAFT: the white bar at the top with the logo, page tabs, and Login / Logout on the right
+// (Cosy Professional design + the login from feature/accounts-jihao)
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { currentUser, logout } from '../utils/auth.js'
 
 // The current URL, so we can underline the page we are on
 const route = useRoute()
+const router = useRouter()
+
+// The page tabs, in order
+const tabs = [
+  { to: '/', label: 'Search' },
+  { to: '/map', label: 'Map' },
+  { to: '/CPFCal', label: 'Affordability' },
+  { to: '/compare', label: 'Compare' },
+  { to: '/shortlist', label: 'Shortlist' },
+]
+
+// "Logout" button: forget the login, then go to the Login page
+function onLogout() {
+  logout()
+  router.push('/login')
+}
 </script>
 
 <template>
   <nav class="navx">
-    <div class="container d-flex align-items-center justify-content-between">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap">
       <RouterLink to="/" class="logo">
         <span class="mark">🏠</span>
         <span><b>HDB</b> Resale Finder</span>
       </RouterLink>
 
-      <!-- Page tabs: hidden on phones (Bootstrap d-none d-md-block) -->
-      <div class="tabs d-none d-md-block">
-        <RouterLink to="/" :class="{ act: route.path === '/' }">Search</RouterLink>
-        <RouterLink to="/shortlist" :class="{ act: route.path === '/shortlist' }">Shortlist</RouterLink>
+      <!-- Page tabs: hidden on small screens (Bootstrap d-none d-lg-block) -->
+      <div class="tabs d-none d-lg-block">
+        <RouterLink v-for="tab in tabs" :key="tab.to" :to="tab.to" :class="{ act: route.path === tab.to }">
+          {{ tab.label }}
+        </RouterLink>
       </div>
 
-      <RouterLink to="/shortlist" class="btn-short">My Shortlist</RouterLink>
+      <!-- Logged in: email + Logout. Logged out: a Login button. -->
+      <div v-if="currentUser" class="d-flex align-items-center gap-2">
+        <span class="small text-muted d-none d-sm-inline">{{ currentUser.email }}</span>
+        <button class="btn-short" @click="onLogout">Logout</button>
+      </div>
+      <RouterLink v-else to="/login" class="btn-short">Login</RouterLink>
+
+      <!-- Small screens: the tabs as a scrollable row under the logo -->
+      <div class="tabs-small d-lg-none w-100">
+        <RouterLink v-for="tab in tabs" :key="tab.to" :to="tab.to" :class="{ act: route.path === tab.to }">
+          {{ tab.label }}
+        </RouterLink>
+      </div>
     </div>
   </nav>
 </template>
@@ -65,16 +96,28 @@ const route = useRoute()
 }
 
 /* [COURSE] Tabs: grey links, the current one is dark with a terracotta underline (border-bottom) */
-.tabs a {
+.tabs a,
+.tabs-small a {
   color: var(--muted);
   text-decoration: none;
   font-weight: 500;
-  padding: 20px 4px;
-  margin: 0 14px;
   display: inline-block;
   border-bottom: 2px solid transparent;
 }
-.tabs a.act {
+.tabs a {
+  padding: 20px 4px;
+  margin: 0 12px;
+}
+.tabs-small {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.tabs-small a {
+  padding: 6px 2px 10px;
+  margin-right: 16px;
+}
+.tabs a.act,
+.tabs-small a.act {
   color: var(--char);
   border-color: var(--terra);
 }
@@ -82,7 +125,7 @@ const route = useRoute()
   color: var(--terra);
 }
 
-/* [COURSE] "My Shortlist" pill button */
+/* [COURSE] Login / Logout pill button */
 .btn-short {
   border: 1.5px solid var(--char);
   border-radius: 999px;
