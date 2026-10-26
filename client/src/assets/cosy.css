@@ -1,0 +1,231 @@
+/* =====================================================================================
+   "COSY PROFESSIONAL" DESIGN: shared styles for the whole site (DESIGN PREVIEW BRANCH)
+
+   Every block below is tagged:
+     [COURSE]       = we could write this ourselves with what IS216 taught
+                      (selectors, colours, fonts, box model, borders, Flexbox, Grid, Bootstrap)
+     [AI-ASSISTED]  = written with AI help; uses CSS we were NOT taught
+                      (CSS variables, gradients, shadows, transitions, transforms,
+                       animations, pseudo-elements, sticky positioning, custom range sliders)
+
+   Based on Jihao's mockup hdb_cosy_professional.html (its own comments say "AI-assisted (UI styling)").
+   ===================================================================================== */
+
+/* [AI-ASSISTED] Design tokens: CSS custom properties ("variables") so every colour is defined once.
+   Not taught: var(--name). The course way would be to repeat the hex colour everywhere. */
+:root {
+  --cream: #faf5ee;
+  --terra: #c0614a; /* terracotta, the main accent */
+  --terra-d: #a44e39; /* darker terracotta for hover */
+  --sage: #6b8c6b; /* green for "good" things */
+  --char: #2d2d2d; /* charcoal text */
+  --beige: #f0e8d8;
+  --line: #e7dccb; /* light border colour */
+  --muted: #7a7166; /* grey-brown secondary text */
+}
+
+/* [COURSE] Page background, font and text colour.
+   The fonts (DM Sans, DM Serif Display) come from Google Fonts, linked in index.html. */
+body {
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--char);
+}
+
+/* [COURSE] The serif headline font, used with class="serif" */
+.serif {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+}
+
+/* [COURSE] Small rounded label above a page title, e.g. "4 towns · real sales" */
+.eyebrow {
+  display: inline-block;
+  border: 1px solid #e3c3b5;
+  color: var(--terra);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 14px;
+  background: #fff;
+}
+
+/* [COURSE] Big page title, with the <em> part in terracotta */
+.page-title {
+  font-size: 46px;
+  line-height: 1.1;
+  margin: 14px 0 6px;
+}
+.page-title em {
+  color: var(--terra);
+}
+.page-sub {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* [COURSE] White rounded card used for panels (filters, shortlist notes, calculator...) */
+.cosy-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+/* [AI-ASSISTED] Soft brown shadow under cards (box-shadow with a negative spread) */
+.cosy-shadow {
+  box-shadow: 0 14px 34px -18px rgba(80, 50, 30, 0.25);
+}
+
+/* [COURSE] Action buttons: rounded, dark outline */
+.act-btn {
+  border-radius: 11px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 9px 16px;
+  border: 1.5px solid var(--char);
+  background: #fff;
+  color: var(--char);
+}
+.act-btn:hover {
+  background: var(--char);
+  color: #fff;
+}
+/* [COURSE] Main (terracotta) button, "saved" (sage) button and plain "ghost" button */
+.act-btn.primary {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: #fff;
+}
+.act-btn.primary:hover {
+  background: var(--terra-d);
+}
+.act-btn.saved {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #fff;
+}
+.act-btn.ghost {
+  border-color: transparent;
+  color: var(--muted);
+}
+.act-btn.ghost:hover {
+  background: var(--beige);
+  color: var(--char);
+}
+/* [AI-ASSISTED] Smooth colour change on hover + glow under the main button */
+.act-btn {
+  transition: 0.2s;
+}
+.act-btn.primary {
+  box-shadow: 0 8px 18px -8px rgba(192, 97, 74, 0.8);
+}
+
+/* [COURSE] Pills (small rounded labels) and tags */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+.pill.green {
+  background: var(--sage);
+  color: #fff;
+}
+.pill.dark {
+  background: var(--char);
+  color: #fff;
+}
+.tag {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 3px 11px;
+  color: #5c5449;
+  background: #fffdf9;
+}
+.tag b {
+  color: var(--sage);
+}
+
+/* [COURSE] Form boxes in the cosy style (used on top of Bootstrap's form-select / form-control) */
+.cosy-input {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  padding: 9px 12px;
+  background-color: #fffdf9;
+}
+/* The padding above removes the room Bootstrap keeps for the dropdown arrow, so put it back on selects */
+.form-select.cosy-input {
+  padding-right: 2.25rem;
+}
+/* [AI-ASSISTED] Terracotta glow ring when a box is clicked into (box-shadow on :focus) */
+.cosy-input:focus {
+  border-color: var(--terra);
+  box-shadow: 0 0 0 3px rgba(192, 97, 74, 0.15);
+}
+
+/* [AI-ASSISTED] Spotlight for the guide pet's tour: pulsing outline (keyframe animation) */
+.tour-hl {
+  position: relative;
+  z-index: 40;
+  outline: 3px solid var(--terra);
+  outline-offset: 6px;
+  border-radius: 14px;
+  animation: tour-pulse 1.6s ease-in-out infinite;
+}
+@keyframes tour-pulse {
+  50% {
+    outline-color: rgba(192, 97, 74, 0.35);
+    outline-offset: 10px;
+  }
+}
+
+/* [COURSE] Footer */
+.cosy-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  padding: 26px 0 120px;
+  margin-top: 30px;
+}
+
+/* [COURSE] Smaller title on phones (media query) */
+@media (max-width: 560px) {
+  .page-title {
+    font-size: 34px;
+  }
+}
+
+/* FINAL DRAFT: Bootstrap's blue buttons, tabs and tick boxes in terracotta, so the calculator,
+   Compare and Login pages match the cosy design.
+   [COURSE] overriding Bootstrap classes with our own CSS (loaded after Bootstrap) */
+.btn-primary,
+.btn-primary:disabled {
+  background: var(--terra);
+  border-color: var(--terra);
+}
+.btn-primary:hover,
+.btn-primary:active {
+  background: var(--terra-d) !important;
+  border-color: var(--terra-d) !important;
+}
+.btn-link,
+.nav-tabs .nav-link {
+  color: var(--terra);
+}
+.nav-tabs .nav-link.active {
+  color: var(--char);
+}
+.form-check-input:checked {
+  background-color: var(--sage);
+  border-color: var(--sage);
+}
+.card {
+  border-color: var(--line);
+  border-radius: 18px;
+}

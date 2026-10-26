@@ -28,24 +28,32 @@ function removeItem() {
     <BlockCard :block="item.block" :show-save="false" />
 
     <!-- The note box, in its own card underneath -->
-    <div class="card shadow-sm mt-2">
-      <div class="card-body">
+    <!-- DESIGN PREVIEW: note box in the cosy card style, sitting under the flat card -->
+    <div class="cosy-card note-card">
+      <div>
         <label class="form-label d-block small mb-1">My note</label>
         <textarea
           v-model="draft"
-          class="form-control mb-2"
+          class="form-control cosy-input mb-2"
           rows="2"
           maxlength="500"
           placeholder="e.g. near my parents, viewing on Sunday"
         ></textarea>
 
         <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-primary" :disabled="draft === item.note" @click="saveNote">
+          <button class="act-btn primary" :disabled="draft === item.note" @click="saveNote">
             Save note
           </button>
-          <button class="btn btn-sm btn-outline-danger" @click="removeItem">Remove</button>
+          <button class="act-btn ghost" @click="removeItem">Remove</button>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* [COURSE] Pull the note box up so it tucks under the flat card */
+.note-card {
+  margin-top: -10px;
+}
+</style>

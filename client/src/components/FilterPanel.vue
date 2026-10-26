@@ -3,280 +3,207 @@
 // (Closeness to MRT is handled by the "What matters to you?" panel instead.)
 // The page (SearchView) owns the filter values and passes them in as a prop.
 // When the user changes a box, we send the change up with emit.
+// DESIGN PREVIEW (Cosy Professional): now a sidebar card. Flat type became "chips" (buttons);
+// props and emits are the same as before.
+import { formatPrice } from '../utils/format.js'
+// FINAL DRAFT: Yujia's "Calculate My Affordability" button is now a link under the budget slider
+import { RouterLink } from 'vue-router'
+
 const props = defineProps({
   filters: Object, // { flatType, maxPrice, minLease, ... }
 })
 const emit = defineEmits(['change-filter', 'search', 'clear'])
 
-const flatTypes = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM', 'EXECUTIVE']
+// '' = any flat type
+const flatTypes = [
+  { value: '', label: 'Any' },
+  { value: '2 ROOM', label: '2-Rm' },
+  { value: '3 ROOM', label: '3-Rm' },
+  { value: '4 ROOM', label: '4-Rm' },
+  { value: '5 ROOM', label: '5-Rm' },
+  { value: 'EXECUTIVE', label: 'Exec' },
+]
 
-// A box changed: send which filter it was and its new value
+// A slider moved: send which filter it was and its new value
 function onChange(name, event) {
   emit('change-filter', name, event.target.value)
 }
 
-// Choosing a flat type searches straight away
-function onFlatTypeChange(event) {
-  emit('change-filter', 'flatType', event.target.value)
+// A flat type chip was clicked: set it and search straight away
+function chooseFlatType(value) {
+  emit('change-filter', 'flatType', value)
   emit('search')
 }
 
-// Enter in any box, or the "Apply filters" button
+// The "Apply filters" button
 function onSubmit() {
   emit('search')
 }
 
-// The "Clear all" button
+// The "Clear all" link
 function onClear() {
   emit('clear')
 }
 </script>
 
 <template>
-  <form class="row g-2 mb-2" @submit.prevent="onSubmit">
-    <div class="col-12 col-md-4">
-      <label class="form-label small mb-1">Flat type</label>
-      <select :value="props.filters.flatType" class="form-select" @change="onFlatTypeChange">
-        <option value="">Any</option>
-        <option v-for="type in flatTypes" :key="type" :value="type">{{ type }}</option>
-      </select>
-      <!-- <label class="form-label small mb-1">Flat type</label>
-      <div v-for="type in flatTypes" :key="type">
-        <input 
-          type="checkbox" 
-          :id="type"
-          :value="type" 
-          :checked="props.filters.flatType.includes(type)"
-          @change="onFlatTypeChange"
-        />
-        <label :for="type" class="small ms-1">{{ type }}</label>
-      </div> -->
-    </div> 
+  <form id="filters-panel" class="filters" @submit.prevent="onSubmit">
+    <h4 class="serif">Filter Results</h4>
+    <div class="hint">Refine by what matters to you.</div>
 
-    <div class="col-12 col-md-4">
-      <!-- <label class="form-label small mb-1">Max budget ($)</label>
-      <input
-        :value="props.filters.maxPrice"
-        type="number"
-        min="0"
-        step="10000"
-        class="form-control"
-        placeholder="e.g. 600000"
-        @input="onChange('maxPrice', $event)"
-      /> -->
-      <div class="zoom-control">
-        <div class="zoom-header">
-          <span class="zoom-title">Max budget</span>
-          <span class="zoom-value">
-            {{ Number(props.filters.maxPrice).toLocaleString('en-SG', {
-              style: 'currency',
-              currency: 'SGD',
-              maximumFractionDigits: 0
-            }) }}
-          </span>
-        </div>
-
-        <div class="slider-wrapper">
-          <div class="slider-track">
-            <div
-              class="slider-progress"
-              :style="{
-                width: `${((Number(props.filters.maxPrice || 300000) - 300000) / 700000) * 100}%`
-              }"
-            ></div>
-
-            
-          </div>
-
-          <input
-            :value="props.filters.maxPrice"
-            type="range"
-            min="300000"
-            max="1000000"
-            step="10000"
-            class="zoom-slider"
-            @input="onChange('maxPrice', $event)"
-          />
-        </div>
-
-        
-      </div>
+    <!-- Flat type chips -->
+    <label class="flab">Flat type</label>
+    <div class="chips">
+      <button
+        v-for="type in flatTypes"
+        :key="type.value"
+        type="button"
+        class="chip"
+        :class="{ on: props.filters.flatType === type.value }"
+        @click="chooseFlatType(type.value)"
+      >
+        {{ type.label }}
+      </button>
     </div>
 
-    <div class="col-12 col-md-4">
-      <!-- <label class="form-label small mb-1">Min remaining lease (years)</label>
-      <input
-        :value="props.filters.minLease"
-        type="number"
-        min="0"
-        max="99"
-        class="form-control"
-        placeholder="e.g. 60"
-        @input="onChange('minLease', $event)"
-      /> -->
-    
-      <div class="zoom-control">
-          <div class="zoom-header">
-            <span class="zoom-title">Min Remaining Lease (years)</span>
-            <span class="zoom-value">
-              {{ Number(props.filters.minLease) }}
-            </span>
-          </div>
+    <!-- Budget slider -->
+    <label for="filter-budget" class="flab d-flex justify-content-between align-items-end">
+      Max budget <span class="big-val serif">{{ formatPrice(Number(props.filters.maxPrice)) }}</span>
+    </label>
+    <input
+      id="filter-budget"
+      :value="props.filters.maxPrice"
+      type="range"
+      min="300000"
+      max="1000000"
+      step="10000"
+      class="form-range"
+      @input="onChange('maxPrice', $event)"
+    />
+    <RouterLink to="/CPFCal" class="calc-link">Not sure? Calculate my budget →</RouterLink>
 
-          <div class="slider-wrapper">
-            <div class="slider-track">
-              <div
-                class="slider-progress"
-                :style="{
-                  width: `${((Number(props.filters.minLease || 20) - 20) / 79) * 100}%`
-                }"
-              ></div>
+    <!-- Lease slider -->
+    <label for="filter-lease" class="flab d-flex justify-content-between align-items-end">
+      Min remaining lease <span class="big-val serif">{{ props.filters.minLease }} yrs</span>
+    </label>
+    <input
+      id="filter-lease"
+      :value="props.filters.minLease"
+      type="range"
+      min="20"
+      max="99"
+      step="1"
+      class="form-range"
+      @input="onChange('minLease', $event)"
+    />
 
-              
-            </div>
-
-            <input
-              :value="props.filters.minLease"
-              type="range"
-              min="20"
-              max="99"
-              step="1"
-              class="zoom-slider"
-              @input="onChange('minLease', $event)"
-            />
-          </div>
-
-        
-      </div>
-
-    </div>
-
-    <!-- pressing Enter in any box searches; this button is for people who prefer clicking -->
-    <div class="col-12 d-flex gap-2">
-      <button type="submit" class="btn btn-outline-primary btn-sm">Apply filters</button>
-      <button type="button" class="btn btn-link btn-sm" @click="onClear">Clear all</button>
-    </div>
+    <button type="submit" class="apply">Apply Filters</button>
+    <button type="button" class="clear" @click="onClear">Clear all</button>
   </form>
 </template>
 
 <style scoped>
-.zoom-control {
-  padding: 24px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+/* [COURSE] Sidebar card with a thick terracotta top border */
+.filters {
+  background: #fff;
+  border: 1px solid var(--line);
   border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  font-family: inherit;
+  padding: 22px;
+  border-top: 4px solid var(--terra);
+  margin-bottom: 18px;
 }
-
-.zoom-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
+/* [AI-ASSISTED] Shadow under the sidebar */
+.filters {
+  box-shadow: 0 14px 34px -20px rgba(80, 50, 30, 0.25);
 }
-
-.zoom-title {
-  color: #374151;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.zoom-value {
-  padding: 7px 13px;
-  border-radius: 10px;
-  background: #f3f4f6;
-  color: #111827;
-  font-size: 18px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.slider-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 24px;
-  margin: 0 10px;
-}
-
-.slider-track {
-  position: absolute;
-  width: 100%;
-  height: 8px;
-  overflow: hidden;
-  border-radius: 20px;
-  background: #e5e7eb;
-}
-
-.slider-progress {
-  height: 100%;
-  border-radius: 20px;
-  background: #4f46e5;
-  transition: width 0.12s ease;
-}
-
-.zoom-slider {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.filters h4 {
+  font-size: 26px;
   margin: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  cursor: pointer;
+}
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.flab {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 16px 0 6px;
+  display: block;
+}
+.big-val {
+  font-size: 19px;
 }
 
-.zoom-slider::-webkit-slider-runnable-track {
-  height: 8px;
-  background: transparent;
+/* [COURSE] Chips: a row of equal buttons (Flexbox + flex-wrap); the chosen one is dark */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  flex: 1 1 28%;
+  border: 1px solid var(--line);
+  background: #fffdf9;
+  border-radius: 10px;
+  padding: 7px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5c5449;
+}
+.chip.on {
+  background: var(--char);
+  color: #fff;
+  border-color: var(--char);
 }
 
-.zoom-slider::-moz-range-track {
-  height: 8px;
-  background: transparent;
+/* [AI-ASSISTED] Terracotta slider handle (browser-specific ::-webkit / ::-moz selectors, not taught) */
+.form-range::-webkit-slider-thumb {
+  background: var(--terra);
+}
+.form-range::-moz-range-thumb {
+  background: var(--terra);
+}
+/* (kept as two rules: a browser ignores a whole rule if it does not know one of its selectors) */
+.form-range::-webkit-slider-runnable-track {
+  background: var(--beige);
+}
+.form-range::-moz-range-track {
+  background: var(--beige);
 }
 
-.zoom-slider::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
-  margin-top: -7px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  background: #4f46e5;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* [COURSE] Small terracotta link to the affordability calculator */
+.calc-link {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--terra);
+  margin-top: 2px;
 }
 
-.zoom-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  background: #4f46e5;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* [COURSE] Full-width "Apply Filters" button and the "Clear all" link-button */
+.apply {
+  width: 100%;
+  background: var(--terra);
+  color: #fff;
+  border: 0;
+  border-radius: 11px;
+  padding: 11px;
+  font-weight: 600;
+  margin-top: 18px;
 }
-
-.zoom-slider:hover::-webkit-slider-thumb,
-.zoom-slider:focus-visible::-webkit-slider-thumb {
-  transform: scale(1.4);
-  box-shadow: 0 0 0 7px rgba(79, 70, 229, 0.13);
+.apply:hover {
+  background: var(--terra-d);
 }
-
-.zoom-slider:hover::-moz-range-thumb,
-.zoom-slider:focus-visible::-moz-range-thumb {
-  transform: scale(1.4);
-  box-shadow: 0 0 0 7px rgba(79, 70, 229, 0.13);
+.clear {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 10px;
+  text-decoration: underline;
 }
-
-.zoom-slider:focus-visible {
-  outline: 2px solid #4f46e5;
-  outline-offset: 7px;
-  border-radius: 20px;
-}
-
 </style>
