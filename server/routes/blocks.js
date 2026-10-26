@@ -7,6 +7,7 @@ import { findNearestAmenities } from '../lib/findNearestAmenities.js';
 import { salesSummary } from '../lib/salesSummary.js';
 import { isBlank, isNumber } from '../lib/numberCheck.js';
 import { sendError } from '../lib/sendError.js';
+import { getOneMapToken } from '../lib/oneMapToken.js';
 
 const router = Router();
 
@@ -172,11 +173,110 @@ async function oneBlock(req, res) {
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// EXTERNAL API ENDPOINTS: STARTER CODE (AI-generated boilerplate). Finish every TODO yourself.
+// Until a TODO is done, the handler answers 501 so the server never hangs.
+// Remember: these routes must stay ABOVE router.get('/:id', ...) or Express treats "place" as an id.
+// ---------------------------------------------------------------------------------------------
+
+// 1. GET /api/blocks/place?q=560406
+// OneMap search: turns an address / postal code / place name into { name, lat, lng }.
+// The frontend then calls /api/blocks/nearby?lat=..&lng=.. with it.
+async function findPlace(req, res) {
+  // TODO 1: q is required. If isBlank(req.query.q), answer 400 { message: 'q is required' }.
+  const url =
+    'https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&searchVal=' +
+    encodeURIComponent(req.query.q);
+
+  try {
+    const response = await fetch(url, { headers: { Authorization: await getOneMapToken() } });
+    // TODO 2: if !response.ok, answer 502 { message: 'Place search is unavailable' }.
+    const data = await response.json();
+    // TODO 3: if data.results is empty, answer 404 { message: 'Place not found' }.
+    // TODO 4: take the first result and answer { name, lat, lng }.
+    //   Hint: the fields are SEARCHVAL, LATITUDE and LONGITUDE, and they arrive as TEXT (use Number).
+    res.status(501).json({ message: 'TODO: findPlace is not finished' });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
+// 2. GET /api/blocks/:id/live-sales
+// Latest sales for this block straight from data.gov.sg, in the same shape as /sales.
+async function liveSales(req, res) {
+  try {
+    const block = await Block.findById(req.params.id);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    }
+
+    const params = new URLSearchParams({
+      resource_id: 'd_8b84c4ee58e3cfc0ece0d773c8ca6abc',
+      filters: JSON.stringify({
+        block: block.block,
+        street_name: block.street,
+        flat_type: block.flatType,
+      }),
+      sort: 'month desc',
+      limit: '50',
+    });
+    const response = await fetch('https://data.gov.sg/api/action/datastore_search?' + params);
+    // TODO 1: if !response.ok, fall back to the stored block.sales instead of failing.
+    const data = await response.json();
+
+    // TODO 2: turn data.result.records into the same shape as block.sales: { month, storey, areaSqm, price }.
+    //   Hint: the API calls them month, storey_range, floor_area_sqm, resale_price.
+    //   floor_area_sqm and resale_price can arrive as text, so use Number(...).
+    const sales = [];
+
+    const summary = salesSummary(sales);
+    summary.blockId = block._id;
+    // TODO 3: add a field (for example source: 'live' or 'stored') so the page can say where the data came from.
+    res.status(501).json({ message: 'TODO: liveSales is not finished', preview: summary });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
+// 3. GET /api/blocks/:id/walk-to-mrt
+// Real walking time to the nearest MRT from OneMap's routing service.
+async function walkToMrt(req, res) {
+  try {
+    const block = await Block.findById(req.params.id);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    }
+
+    // OneMap wants "lat,lng". MongoDB stores [lng, lat], so the order flips here.
+    const start = block.location.coordinates[1] + ',' + block.location.coordinates[0];
+
+    // TODO 1: you need the station's coordinates. findNearestAmenities only returns name and distance,
+    //   so extend it or query the Amenity model yourself (find the nearest 'mrt', remember [lng, lat]).
+    const end = ''; // TODO 2: the station's "lat,lng"
+
+    const url =
+      'https://www.onemap.gov.sg/api/public/routingsvc/route?start=' + start +
+      '&end=' + end + '&routeType=walk';
+    const response = await fetch(url, { headers: { Authorization: await getOneMapToken() } });
+    // TODO 3: if !response.ok, answer { minutes: block.mrtWalkMinutes, source: 'estimate' } instead of failing.
+    const data = await response.json();
+    // TODO 4: read the walking time from data (check OneMap's routing docs for the exact field names;
+    //   I only saw the 401, not a successful reply). Time is in SECONDS: convert to whole minutes.
+    //   Answer { minutes, metres, source: 'onemap' }.
+    res.status(501).json({ message: 'TODO: walkToMrt is not finished' });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
 router.get('/', searchBlocks);
 router.get('/area', listTowns);
 router.get('/nearby', nearbyBlocks);
+router.get('/place', findPlace);
 router.get('/:id/amenities', blockAmenities);
 router.get('/:id/sales', blockSales);
+router.get('/:id/live-sales', liveSales);
+router.get('/:id/walk-to-mrt', walkToMrt);
 router.get('/:id', oneBlock);
 
 export default router;
