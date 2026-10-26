@@ -1,6 +1,9 @@
 <script setup>
 // The "Price details" panel inside a card: median prices and a table of recent sales
-import { onMounted, ref } from 'vue'
+// FINAL DRAFT, FEATURE: PRICE CHART (Shaun's area, first draft by Jihao + AI): a line of every sale's price.
+// ⚠️ NOT IN OUR COURSE: the Chart.js library (new npm package), nextTick, and drawing on a <canvas>.
+import { onMounted, onUnmounted, ref, nextTick } from 'vue'
+import { Chart, registerables } from 'chart.js'
 import axios from 'axios'
 import { formatPrice } from '../utils/format.js'
 import { getErrorMessage } from '../utils/errorMessage.js'
@@ -9,7 +12,12 @@ const props = defineProps({
   blockId: String,
 })
 
+// Chart.js needs its parts registered once before it can draw
+Chart.register(...registerables)
+
 const loading = ref(true)
+const chartCanvas = ref(null)
+let chart = null // a normal variable, not a ref (Chart.js does not like Vue's ref)
 const errorMessage = ref('')
 const details = ref(null)
 
@@ -22,7 +30,51 @@ async function load() {
     errorMessage.value = getErrorMessage(error)
   }
   loading.value = false
+
+  // The <canvas> only exists after Vue has shown the results, so wait for that (nextTick)
+  if (details.value !== null) {
+    await nextTick()
+    drawChart()
+  }
 }
+
+// Draws each sale's price, oldest on the left (the server sends newest first, so we go backwards)
+function drawChart() {
+  const labels = []
+  const prices = []
+  for (let i = details.value.sales.length - 1; i >= 0; i--) {
+    const sale = details.value.sales[i]
+    labels.push(formatMonth(sale.month))
+    prices.push(sale.price)
+  }
+
+  chart = new Chart(chartCanvas.value, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Sale price',
+          data: prices,
+          borderColor: '#c0614a',
+          backgroundColor: '#c0614a',
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { ticks: { callback: function (value) { return '$' + value / 1000 + 'k' } } } },
+    },
+  })
+}
+
+// Remove the chart when the panel closes
+onUnmounted(function () {
+  if (chart !== null) {
+    chart.destroy()
+  }
+})
 
 // Fetched once, when the panel is first opened
 onMounted(load)
@@ -73,6 +125,9 @@ function formatStorey(storey) {
         <li class="text-muted">Based on {{ details.count }} recent sales</li>
         <li class="text-muted">Source: {{ details.source === 'live' ? 'data.gov.sg (live)' : 'Stored data' }}</li>
       </ul>
+
+      <!-- FINAL DRAFT: price chart -->
+      <div class="mb-3"><canvas ref="chartCanvas" height="140"></canvas></div>
 
       <div class="table-responsive">
         <table class="table table-sm small mb-0">

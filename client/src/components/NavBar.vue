@@ -1,35 +1,145 @@
 <script setup>
-// The dark bar at the top with links to the two pages
-import { RouterLink, useRoute } from 'vue-router'
+// FINAL DRAFT: the white bar at the top with the logo, page tabs, and Login / Logout on the right
+// (Cosy Professional design + the login from feature/accounts-jihao)
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { currentUser, logout } from '../utils/auth.js'
 
-// The current URL, so we can highlight the page we are on
+// The current URL, so we can underline the page we are on
 const route = useRoute()
+const router = useRouter()
+
+// The page tabs, in order
+const tabs = [
+  { to: '/', label: 'Search' },
+  { to: '/map', label: 'Map' },
+  { to: '/CPFCal', label: 'Affordability' },
+  { to: '/compare', label: 'Compare' },
+  { to: '/shortlist', label: 'Shortlist' },
+]
+
+// "Logout" button: forget the login, then go to the Login page
+function onLogout() {
+  logout()
+  router.push('/login')
+}
 </script>
 
 <template>
-  <nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-      <span class="navbar-brand">HDB Resale Finder</span>
+  <nav class="navx">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap">
+      <RouterLink to="/" class="logo">
+        <span class="mark">🏠</span>
+        <span><b>HDB</b> Resale Finder</span>
+      </RouterLink>
 
-      <div class="btn-group">
-        <RouterLink
-          to="/"
-          class="btn btn-sm"
-          :class="{ 'btn-light': route.path === '/', 'btn-outline-light': route.path !== '/' }"
-        >
-          Search
+      <!-- Page tabs: hidden on small screens (Bootstrap d-none d-lg-block) -->
+      <div class="tabs d-none d-lg-block">
+        <RouterLink v-for="tab in tabs" :key="tab.to" :to="tab.to" :class="{ act: route.path === tab.to }">
+          {{ tab.label }}
         </RouterLink>
-        <RouterLink
-          to="/shortlist"
-          class="btn btn-sm"
-          :class="{
-            'btn-light': route.path === '/shortlist',
-            'btn-outline-light': route.path !== '/shortlist',
-          }"
-        >
-          Shortlist
+      </div>
+
+      <!-- Logged in: email + Logout. Logged out: a Login button. -->
+      <div v-if="currentUser" class="d-flex align-items-center gap-2">
+        <span class="small text-muted d-none d-sm-inline">{{ currentUser.email }}</span>
+        <button class="btn-short" @click="onLogout">Logout</button>
+      </div>
+      <RouterLink v-else to="/login" class="btn-short">Login</RouterLink>
+
+      <!-- Small screens: the tabs as a scrollable row under the logo -->
+      <div class="tabs-small d-lg-none w-100">
+        <RouterLink v-for="tab in tabs" :key="tab.to" :to="tab.to" :class="{ act: route.path === tab.to }">
+          {{ tab.label }}
         </RouterLink>
       </div>
     </div>
   </nav>
 </template>
+
+<style scoped>
+/* [COURSE] White bar with a bottom border */
+.navx {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+/* [COURSE] Logo: bold text, "HDB" in the serif font and terracotta */
+.logo {
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--char);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0;
+}
+.logo b {
+  color: var(--terra);
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: 22px;
+}
+/* [COURSE] Square logo mark, centred with Grid */
+.logo .mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+/* [AI-ASSISTED] Gradient fill and glow on the logo mark */
+.logo .mark {
+  background: linear-gradient(140deg, var(--terra), #d98a63);
+  box-shadow: 0 4px 10px rgba(192, 97, 74, 0.35);
+}
+
+/* [COURSE] Tabs: grey links, the current one is dark with a terracotta underline (border-bottom) */
+.tabs a,
+.tabs-small a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-block;
+  border-bottom: 2px solid transparent;
+}
+.tabs a {
+  padding: 20px 4px;
+  margin: 0 12px;
+}
+.tabs-small {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.tabs-small a {
+  padding: 6px 2px 10px;
+  margin-right: 16px;
+}
+.tabs a.act,
+.tabs-small a.act {
+  color: var(--char);
+  border-color: var(--terra);
+}
+.tabs a:hover {
+  color: var(--terra);
+}
+
+/* [COURSE] Login / Logout pill button */
+.btn-short {
+  border: 1.5px solid var(--char);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  background: #fff;
+  color: var(--char);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.btn-short:hover {
+  background: var(--char);
+  color: #fff;
+}
+</style>

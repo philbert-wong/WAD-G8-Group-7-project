@@ -260,10 +260,23 @@ async function liveSales(req, res) {
       price: Number(record.resale_price)
     }));
 
-    const summary = salesSummary(sales);
+    const d = new Date();
+    d.setMonth(d.getMonth() - 12);
+    const cutoff = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+    const filteredSales = sales.filter(sale => sale.month >= cutoff);
+
+    if (filteredSales.length === 0) {
+      const summary = salesSummary(block.sales);
+      summary.blockId = block._id;
+      summary.source = 'stored';
+      return res.json(summary);
+    };
+    
+    const summary = salesSummary(filteredSales);
     summary.blockId = block._id;
     summary.source = 'live';
-    res.json(summary);  
+    res.json(summary);
 
   } catch (error) {
     sendError(res, error);

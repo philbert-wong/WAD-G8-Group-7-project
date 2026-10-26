@@ -2,8 +2,10 @@
 // The Shortlist page: every saved flat with its note
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
+import { RouterLink } from 'vue-router'
 import ShortlistItem from '../components/ShortlistItem.vue'
 import { getErrorMessage } from '../utils/errorMessage.js'
+import { currentUser, isLoggedIn } from '../utils/auth.js'
 
 // Each item looks like { id, note, createdAt, block: { id, block, street, ... } }
 const items = ref([])
@@ -48,23 +50,35 @@ async function removeItem(item) {
   }
 }
 
-// When the page opens, get the latest shortlist from the server
-onMounted(load)
+// When the page opens, get the latest shortlist from the server (only when logged in)
+onMounted(function () {
+  if (isLoggedIn()) {
+    load()
+  }
+})
 </script>
 
 <template>
   <section>
-    <h2 class="h4 mb-3">My shortlist ({{ items.length }})</h2>
+    <!-- DESIGN PREVIEW (Cosy Professional): serif title, one wide card per row -->
+    <span class="eyebrow">Your favourites</span>
+    <h1 class="page-title serif">My <em>shortlist</em> ({{ items.length }})</h1>
+    <p class="page-sub mb-4">Keep notes on the flats you like and compare them later.</p>
+
+    <!-- The shortlist belongs to an account -->
+    <p v-if="!currentUser" class="text-muted">
+      Please <RouterLink to="/login">log in</RouterLink> to see your shortlist.
+    </p>
 
     <div v-if="errorMessage" class="alert alert-danger">
       {{ errorMessage }}
     </div>
 
-    <p v-if="items.length === 0" class="text-muted">
+    <p v-if="currentUser && items.length === 0" class="text-muted">
       Nothing saved yet. Go to Search and press "Save" on a flat.
     </p>
 
-    <div class="row row-cols-1 row-cols-md-2 g-3">
+    <div class="row row-cols-1 g-3">
       <div v-for="item in items" :key="item.id" class="col">
         <ShortlistItem :item="item" @remove="removeItem" @change-note="changeNote" />
       </div>

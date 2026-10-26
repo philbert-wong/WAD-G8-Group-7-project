@@ -1,4 +1,5 @@
-// The /api/auth routes: register and login. Both answer with a token the frontend sends back later.
+// The /api/auth routes: register and login (both answer with a token the frontend sends back later),
+// and the logged-in user's saved preferences.
 import { Router } from 'express';
 // TODO 1: first run   pnpm add bcrypt jsonwebtoken   then uncomment these imports
 import bcrypt from 'bcrypt';
@@ -6,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import { User} from '../models/User.js';
 import { jwtSecret } from '../config.js';
 import { sendError } from '../lib/sendError.js';
+import { requireAuth } from '../middleware/requireAuth.js';
 
 const router = Router();
 
@@ -91,7 +93,54 @@ async function login(req, res) {
   }
 }
 
+// READ   GET /api/auth/preferences   (needs a token)
+// The logged-in user's saved "What matters to you?" choices. {} if nothing is saved yet.
+async function getPreferences(req, res) {
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ preferences: user.preferences });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
+// UPDATE PUT /api/auth/preferences   (needs a token)
+// body: { "preferences": { "panel": { "school": { "ticked": true, "level": 3 }, ... }, "sortBy": "match" } }
+// Replaces the saved choices with the ones sent.
+async function savePreferences(req, res) {
+  // preferences must be an object like { ... } (not missing, not text, not a list)
+  if (
+    req.body === undefined ||
+    typeof req.body.preferences !== 'object' ||
+    req.body.preferences === null ||
+    Array.isArray(req.body.preferences)
+  ) {
+    return res.status(400).json({ message: 'preferences must be an object' });
+  }
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.preferences = req.body.preferences;
+    // "preferences" can hold anything, so tell Mongoose it changed before saving
+    user.markModified('preferences');
+    await user.save();
+
+    res.json({ preferences: user.preferences });
+  } catch (error) {
+    sendError(res, error);
+  }
+}
+
 router.post('/register', register);
 router.post('/login', login);
+router.get('/preferences', requireAuth, getPreferences);
+router.put('/preferences', requireAuth, savePreferences);
 
 export default router;

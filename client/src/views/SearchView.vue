@@ -1,5 +1,6 @@
 <script setup>
 // The Search page: search box, filters, "What matters to you?" panel and the flat cards
+// DESIGN PREVIEW (Cosy Professional): only the <template> layout and <style> changed; the logic is the same.
 import { onMounted, ref, computed } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
@@ -7,6 +8,7 @@ import BlockCard from '../components/BlockCard.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
 import axios from 'axios'
 import { getErrorMessage } from '../utils/errorMessage.js'
+import { isLoggedIn } from '../utils/auth.js'
 import {
   CATEGORIES,
   getWeights,
@@ -14,6 +16,10 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
+import { useRoute } from 'vue-router'
+
+// get the current route
+const route = useRoute() 
 
 // This page's own copy of the shortlist, so each card knows if it shows ☆ Save or ★ Saved
 const savedItems = ref([])
@@ -130,31 +136,65 @@ const sortBy = ref('price')
 
 // The panel's choices and the sort are remembered in the browser (localStorage),
 // so they are still there when you come back from the Shortlist page.
-function saveChoices() {
+// When you are logged in they are ALSO saved to your account, so they follow you to other computers.
+async function saveChoices() {
   localStorage.setItem('matchPreferences', JSON.stringify(preferences.value))
   localStorage.setItem('sortBy', sortBy.value)
+
+  if (isLoggedIn()) {
+    try {
+      await axios.put('/api/auth/preferences', {
+        preferences: { panel: preferences.value, sortBy: sortBy.value },
+      })
+    } catch (error) {
+      // Shown in the top alert (with shortlist errors), so the search results stay visible
+      shortlistErrorMessage.value = getErrorMessage(error)
+    }
+  }
 }
 
-// Puts back the remembered choices, if there are any
-function loadChoices() {
-  const savedPreferences = localStorage.getItem('matchPreferences')
-  if (savedPreferences !== null) {
-    const saved = JSON.parse(savedPreferences)
+// Puts saved choices onto the panel.
+// savedPanel = { school: { ticked, level }, ... } or null, savedSort = 'price' / 'match' or null
+function applyChoices(savedPanel, savedSort) {
+  if (savedPanel) {
     // Copy only the categories we know, so a category added later still gets its default
     const choices = makeDefaultPreferences()
     for (let i = 0; i < CATEGORIES.length; i++) {
       const key = CATEGORIES[i].key
-      if (saved[key]) {
-        choices[key] = saved[key]
+      if (savedPanel[key]) {
+        choices[key] = savedPanel[key]
       }
     }
     preferences.value = choices
   }
 
-  const savedSort = localStorage.getItem('sortBy')
-  if (savedSort !== null) {
+  if (savedSort) {
     sortBy.value = savedSort
   }
+}
+
+// Puts back the remembered choices, if there are any.
+// Logged in and something saved on the account: use that. Otherwise use this browser's copy.
+async function loadChoices() {
+  if (isLoggedIn()) {
+    try {
+      const response = await axios.get('/api/auth/preferences')
+      const saved = response.data.preferences
+      if (saved && saved.panel) {
+        applyChoices(saved.panel, saved.sortBy)
+        return
+      }
+    } catch (error) {
+      shortlistErrorMessage.value = getErrorMessage(error)
+    }
+  }
+
+  let savedPanel = null
+  const savedPreferences = localStorage.getItem('matchPreferences')
+  if (savedPreferences !== null) {
+    savedPanel = JSON.parse(savedPreferences)
+  }
+  applyChoices(savedPanel, localStorage.getItem('sortBy'))
 }
 
 // The panel says a tick box changed
@@ -260,6 +300,12 @@ async function unsaveBlock(block) {
 
 // ☆ Save / ★ Saved button on a card: saves the flat, or un-saves it if it is already saved
 function toggleSave(block) {
+  // The shortlist belongs to an account, so you must log in first
+  if (!isLoggedIn()) {
+    shortlistErrorMessage.value = 'Please log in to save flats'
+    return
+  }
+
   if (isSaved(block.id)) {
     unsaveBlock(block)
   } else {
@@ -268,20 +314,33 @@ function toggleSave(block) {
 }
 
 // When the page opens: put back remembered choices, then load the flats,
-// the town names for the suggestions, and the shortlist
+// the town names for the suggestions, and (only when logged in) the shortlist
 function loadPage() {
   loadChoices()
+  const budget = route.query.maxPrice
+
+  if (budget !== undefined) {
+    filters.value.maxPrice = String(budget)
+  }
   search()
   loadAreas()
-  loadShortlist()
+  if (isLoggedIn()) {
+    loadShortlist()
+  }
 }
 
 onMounted(loadPage)
+
 </script>
 
 <template>
   <section>
-    <div v-if="shortlistErrorMessage" class="alert alert-danger">
+    <!-- DESIGN PREVIEW (Cosy Professional): hero title, then results (left) + sidebar (right) -->
+    <span class="eyebrow">4 towns · real resale prices · last 12 months</span>
+    <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
+    <p class="page-sub">Search blocks, compare real sale prices, and keep a shortlist.</p>
+
+    <div v-if="shortlistErrorMessage" class="alert alert-warning">
       {{ shortlistErrorMessage }}
     </div>
 
@@ -312,41 +371,28 @@ onMounted(loadPage)
       Showing flats near {{ placeName }} (place search by OneMap)
     </p>
 
+    <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->
+    <div class="row g-4 mt-1">
+      <div class="col-lg-8 order-2 order-lg-1">
+        <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <p v-else-if="loading" class="text-muted">Loading...</p>
+        <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
+          <span><b>{{ total }} flat(s)</b> match your filters</span>
+          <select
+            id="sort-by"
+            v-model="sortBy"
+            class="form-select form-select-sm cosy-input w-auto"
+            aria-label="Sort"
+            @change="saveChoices"
+          >
+            <option value="price">Sort: Cheapest first</option>
+            <option value="match">Sort: Best match</option>
+          </select>
+        </div>
 
-    <FilterPanel
-      :filters="filters"
-      @change-filter="setFilter"
-      @search="search"
-      @clear="clearFilters"
-    />
-
-    <PreferencesPanel
-      :preferences="preferences"
-      @change-ticked="changeTicked"
-      @change-level="changeLevel"
-    />
-
-    <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
-    <p v-else-if="loading" class="text-muted mt-3">Loading...</p>
-    <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 mb-2">
-      <p class="text-muted mb-0">{{ total }} flat(s) found</p>
-      <div class="d-flex align-items-center gap-2">
-        <label for="sort-by" class="small text-muted">Sort</label>
-        <select
-          id="sort-by"
-          v-model="sortBy"
-          class="form-select form-select-sm w-auto"
-          @change="saveChoices"
-        >
-          <option value="price">Cheapest first</option>
-          <option value="match">Best match first</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-      <div v-for="item in scoredResults" :key="item.block.id" class="col">
         <BlockCard
+          v-for="item in scoredResults"
+          :key="item.block.id"
           :block="item.block"
           :saved="isSaved(item.block.id)"
           :score="item.score"
@@ -354,6 +400,41 @@ onMounted(loadPage)
           @toggle-save="toggleSave"
         />
       </div>
+
+      <div class="col-lg-4 order-1 order-lg-2">
+        <div class="sidebar">
+          <FilterPanel
+            :filters="filters"
+            @change-filter="setFilter"
+            @search="search"
+            @clear="clearFilters"
+          />
+
+          <PreferencesPanel
+            :preferences="preferences"
+            @change-ticked="changeTicked"
+            @change-level="changeLevel"
+          />
+        </div>
+      </div>
     </div>
   </section>
 </template>
+
+<style>
+/* [COURSE] Results count line */
+.resbar {
+  font-size: 14px;
+  color: var(--muted);
+}
+.resbar b {
+  color: var(--char);
+}
+/* [AI-ASSISTED] The sidebar stays on screen while you scroll the results (position: sticky) */
+@media (min-width: 992px) {
+  .sidebar {
+    position: sticky;
+    top: 20px;
+  }
+}
+</style>
