@@ -16,7 +16,7 @@ const details = ref(null)
 // Gets the recent sales of this block from the server
 async function load() {
   try {
-    const response = await axios.get('/api/blocks/' + props.blockId + '/sales')
+    const response = await axios.get('/api/blocks/' + props.blockId + '/live-sales')
     details.value = response.data
   } catch (error) {
     errorMessage.value = getErrorMessage(error)
@@ -70,7 +70,8 @@ function formatStorey(storey) {
         <li>
           Median price per m²: <strong>{{ formatPrice(details.medianPricePerSqm) }}</strong>
         </li>
-        <li class="text-muted">Based on {{ details.count }} sale(s) in the last 12 months</li>
+        <li class="text-muted">Based on {{ details.count }} recent sales</li>
+        <li class="text-muted">Source: {{ details.source === 'live' ? 'data.gov.sg (live)' : 'Stored data' }}</li>
       </ul>
 
       <div class="table-responsive">
