@@ -21,7 +21,10 @@ export async function getOneMapToken() {
 
   const data = await response.json();
   token = data.access_token;
-  // TODO: set expiresAt. data.expiry_timestamp is in SECONDS (Date.now() is in milliseconds).
-  //   Subtract a safety margin (for example one hour) so we never use a token that is about to expire.
+  
+  // Convert expiry_timestamp from seconds to milliseconds, then subtract 1 hour (3,600,000 ms)
+  const safetyMarginMs = 60 * 60 * 1000; // 1 hour
+  expiresAt = (data.expiry_timestamp * 1000) - safetyMarginMs;
+
   return token;
 }

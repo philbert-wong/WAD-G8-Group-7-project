@@ -79,6 +79,43 @@ async function search() {
   loading.value = false
 }
 
+// ---------------------------------------------------------------------------------------------
+// "Near a place" search: STARTER CODE (AI-generated boilerplate). Finish every TODO yourself.
+// OneMap turns the text into a point (/api/blocks/place), then /api/blocks/nearby finds the flats.
+// ---------------------------------------------------------------------------------------------
+const placeText = ref('') // what the user typed in the "near a place" box
+const placeName = ref('') // the place OneMap found, shown above the results
+
+async function searchNearPlace() {
+  if (placeText.value.trim() === "") {
+    errorMessage.value = 'Type an address or postal code';
+    return;
+  }
+  loading.value = true
+  errorMessage.value = '';
+  placeName.value = '';
+
+  try {
+    // Bug 3 fix: Use axios for consistency, getting response.data
+    const placeResponse = await axios.get('/api/blocks/place', { 
+      params: { q: placeText.value } 
+    });
+    const place = placeResponse.data;
+    const nearbyResponse = await axios.get('/api/blocks/nearby', { 
+      params: { lat: place.lat, lng: place.lng } 
+    });
+    const nearbyData = nearbyResponse.data;
+
+    results.value = nearbyData.results;
+    total.value = nearbyData.total;
+    placeName.value = place.name;
+
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error);
+  }
+  loading.value = false;
+}
+
 // "Clear all": empty the search box and every filter, then search again
 function clearFilters() {
   filters.value = { q: '', flatType: '', maxPrice: '650000', minLease: '60' }
@@ -259,6 +296,22 @@ onMounted(loadPage)
         {{ town }}
       </button>
     </div>
+
+    <!-- Near a place (OneMap): STARTER CODE, AI-generated boilerplate -->
+    <form class="input-group mb-3" @submit.prevent="searchNearPlace">
+      <input
+        v-model="placeText"
+        type="search"
+        class="form-control"
+        placeholder="Or find flats near an address or postal code e.g. 560406"
+      />
+      <button class="btn btn-outline-primary" type="submit">Find near me</button>
+    </form>
+
+    <p v-if="placeName" class="text-muted mb-3">
+      Showing flats near {{ placeName }} (place search by OneMap)
+    </p>
+
 
     <FilterPanel
       :filters="filters"
