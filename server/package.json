@@ -1,5 +1,5 @@
 {
-  "name": "check-in",
+  "name": "server",
   "private": true,
   "description": "Simple HDB resale finder: search, filters and a shortlist (Vue + Express + MongoDB)",
   "type": "commonjs",
