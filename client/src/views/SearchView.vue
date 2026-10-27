@@ -7,7 +7,6 @@ import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
 import axios from 'axios'
-import { getErrorMessage } from '../utils/errorMessage.js'
 import { isLoggedIn } from '../utils/auth.js'
 import {
   CATEGORIES,
@@ -69,7 +68,12 @@ async function loadAreas() {
     const response = await axios.get(`${BASE_URL}/api/blocks/area`)
     area.value = response.data
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 
@@ -83,7 +87,12 @@ async function search() {
     results.value = response.data.results
     total.value = response.data.total
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false
 }
@@ -120,7 +129,12 @@ async function searchNearPlace() {
     placeName.value = place.name;
 
   } catch (error) {
-    errorMessage.value = getErrorMessage(error);
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false;
 }
@@ -151,7 +165,12 @@ async function saveChoices() {
       })
     } catch (error) {
       // Shown in the top alert (with shortlist errors), so the search results stay visible
-      shortlistErrorMessage.value = getErrorMessage(error)
+      // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+      if (error.response && error.response.data && error.response.data.message) {
+        shortlistErrorMessage.value = error.response.data.message
+      } else {
+        shortlistErrorMessage.value = error.message
+      }
     }
   }
 }
@@ -188,7 +207,12 @@ async function loadChoices() {
         return
       }
     } catch (error) {
-      shortlistErrorMessage.value = getErrorMessage(error)
+      // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+      if (error.response && error.response.data && error.response.data.message) {
+        shortlistErrorMessage.value = error.response.data.message
+      } else {
+        shortlistErrorMessage.value = error.message
+      }
     }
   }
 
@@ -249,7 +273,12 @@ async function loadShortlist() {
     const response = await axios.get(`${BASE_URL}/api/shortlist`)
     savedItems.value = response.data
   } catch (error) {
-    shortlistErrorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      shortlistErrorMessage.value = error.response.data.message
+    } else {
+      shortlistErrorMessage.value = error.message
+    }
   }
 }
 
@@ -275,7 +304,12 @@ async function saveBlock(block) {
     const response = await axios.post(`${BASE_URL}/api/shortlist`, { blockId: block.id })
     savedItems.value.push(response.data)
   } catch (error) {
-    shortlistErrorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      shortlistErrorMessage.value = error.response.data.message
+    } else {
+      shortlistErrorMessage.value = error.message
+    }
   }
 }
 
@@ -297,7 +331,12 @@ async function unsaveBlock(block) {
     }
     savedItems.value = remaining
   } catch (error) {
-    shortlistErrorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      shortlistErrorMessage.value = error.response.data.message
+    } else {
+      shortlistErrorMessage.value = error.message
+    }
   }
 }
 

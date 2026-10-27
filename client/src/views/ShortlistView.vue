@@ -4,7 +4,6 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { RouterLink } from 'vue-router'
 import ShortlistItem from '../components/ShortlistItem.vue'
-import { getErrorMessage } from '../utils/errorMessage.js'
 import { currentUser, isLoggedIn } from '../utils/auth.js'
 
 // Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
@@ -20,7 +19,12 @@ async function load() {
     const response = await axios.get(`${BASE_URL}/api/shortlist`)
     items.value = response.data
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 
@@ -31,7 +35,12 @@ async function changeNote(item, note) {
     const response = await axios.patch(`${BASE_URL}/api/shortlist/${item.id}`, { note: note })
     item.note = response.data.note
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 
@@ -49,7 +58,12 @@ async function removeItem(item) {
     }
     items.value = remaining
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 

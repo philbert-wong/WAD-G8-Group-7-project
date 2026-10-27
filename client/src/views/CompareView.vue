@@ -5,8 +5,6 @@
 // (price range, lease, MRT, match score and an estimated monthly repayment).
 import { ref } from 'vue'
 import axios from 'axios'
-import { getErrorMessage } from '../utils/errorMessage.js'
-import { formatPrice } from '../utils/format.js'
 import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
 import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
@@ -34,7 +32,12 @@ async function loadShortlist() {
     const response = await axios.get(`${BASE_URL}/api/shortlist`)
     items.value = response.data
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false
 }
@@ -58,9 +61,9 @@ function isDisabled(itemId) {
 // "$600,000 – $720,000", or one price when every sale was the same
 function formatRange(low, high) {
   if (low === high) {
-    return formatPrice(low)
+    return '$' + low.toLocaleString('en-SG')
   }
-  return formatPrice(low) + ' – ' + formatPrice(high)
+  return '$' + low.toLocaleString('en-SG') + ' – ' + '$' + high.toLocaleString('en-SG')
 }
 
 // Match score for one block, or "–" when it cannot be scored
@@ -74,7 +77,7 @@ function scoreText(block) {
 
 // Estimated monthly repayment for the median price, rounded to the dollar
 function monthlyText(block) {
-  return formatPrice(Math.round(estimateMonthlyCost(block.price)))
+  return '$' + Math.round(estimateMonthlyCost(block.price)).toLocaleString('en-SG')
 }
 
 // Load the shortlist as soon as the page is created
@@ -137,7 +140,7 @@ loadShortlist()
             </tr>
             <tr>
               <th>Median price</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ formatPrice(item.block.price) }}</td>
+              <td v-for="item in selectedItems()" :key="item.id">{{ '$' + item.block.price.toLocaleString('en-SG') }}</td>
             </tr>
             <tr>
               <th>Remaining lease</th>
