@@ -4,9 +4,8 @@
 import { readFileSync } from 'node:fs';
 import { mongoUri } from './config.js';
 import { connectDb, disconnectDb } from './db.js';
-import { Block } from './models/Block.js';
-import { Amenity, CATEGORIES } from './models/Amenity.js';
-import { straightLineDistance } from './lib/straightLineDistance.js';
+import { Block } from './models/block-model.js';
+import { Amenity, CATEGORIES, straightLineDistance } from './models/amenity-model.js';
 
 const WALKING_METRES_PER_MINUTE = 80;
 const ROUTE_IS_LONGER_THAN_STRAIGHT_LINE = 1.3; // streets are not straight

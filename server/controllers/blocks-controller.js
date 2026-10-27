@@ -1,26 +1,228 @@
-// The /api/blocks routes: search, town names, nearby blocks, and one block's details
-import { Router } from 'express';
-import { Block } from '../models/Block.js';
-import { buildFilter } from '../lib/buildFilter.js';
-import { toCard } from '../lib/blockCard.js';
-import { findNearestAmenities } from '../lib/findNearestAmenities.js';
-import { salesSummary } from '../lib/salesSummary.js';
-import { isBlank, isNumber } from '../lib/numberCheck.js';
-import { sendError } from '../lib/sendError.js';
-import { getOneMapToken } from '../lib/oneMapToken.js';
-import { Amenity } from '../models/Amenity.js';
+// The /api/blocks controller: search, town names, nearby blocks, and one block's details.
+// routes/blocks-routes.js decides which address runs which function below.
+import { Block, toCard, earliestCommenceYear } from '../models/block-model.js';
+import { Amenity, findNearestAmenities } from '../models/amenity-model.js';
+import { oneMapEmail, oneMapPassword } from '../config.js';
 
+// =====================================================================
+// Helpers (only used in this file)
+// =====================================================================
 
-const router = Router();
+// ---------- Error answer ----------
+
+// Used in the catch block of every route: sends the right error answer to the frontend.
+function sendError(res, error) {
+  // MongoDB could not understand an id, e.g. /api/blocks/abc
+  if (error.name === 'CastError') {
+    res.status(404).json({ message: 'Not found' });
+    return;
+  }
+
+  // Mongoose rejected the data, e.g. a note longer than 500 letters
+  if (error.name === 'ValidationError') {
+    res.status(400).json({ message: error.message });
+    return;
+  }
+
+  // Anything else is a bug or a database problem: log it for us, keep the message simple for the user
+  console.error(error);
+  res.status(500).json({ message: 'Something went wrong' });
+}
+
+// ---------- Number checks ----------
+// Helpers for numbers that arrive in the URL, e.g. ?maxPrice=600000
+// (everything in a URL arrives as text at first)
+
+// True when the value was not sent at all, or sent empty (?maxPrice=)
+function isBlank(value) {
+  if (value === undefined || value === '') {
+    return true;
+  }
+  return false;
+}
+
+// True when the text is a real number: "600000" yes, "abc" no
+function isNumber(value) {
+  return Number.isFinite(Number(value));
+}
+
+// ---------- Search filter ----------
+
+// Characters that have a special meaning in a MongoDB text pattern ($regex)
+const SPECIAL_CHARACTERS = '.*+?^${}()|[]\\';
+
+// Puts a \ in front of special characters, so "a.b" is searched as plain text, not as a pattern
+function escapeSearchText(text) {
+  let safeText = '';
+  for (const character of text) {
+    if (SPECIAL_CHARACTERS.includes(character)) {
+      safeText = safeText + '\\' + character;
+    } else {
+      safeText = safeText + character;
+    }
+  }
+  return safeText;
+}
+
+// Turns the query string (?q=punggol&maxPrice=600000...) into a MongoDB filter object.
+// The route has already checked that the number filters really are numbers.
+//
+//   q          search text, matches block number, street or town
+//   flatType   e.g. "4 ROOM"
+//   maxPrice   budget in dollars
+//   minLease   minimum remaining lease in years
+function buildFilter(query) {
+  const filter = {};
+
+  if (query.q) {
+    const text = escapeSearchText(String(query.q).trim());
+    // $options: 'i' = ignore upper/lower case
+    filter.$or = [
+      { block: { $regex: text, $options: 'i' } },
+      { street: { $regex: text, $options: 'i' } },
+      { town: { $regex: text, $options: 'i' } },
+    ];
+  }
+
+  if (query.flatType) {
+    filter.flatType = String(query.flatType);
+  }
+
+  if (!isBlank(query.maxPrice)) {
+    filter.price = { $lte: Number(query.maxPrice) }; // $lte = less than or equal
+  }
+
+  if (!isBlank(query.minLease)) {
+    // $gte = greater than or equal
+    filter.leaseCommenceYear = { $gte: earliestCommenceYear(Number(query.minLease)) };
+  }
+
+  return filter;
+}
+
+// ---------- Sales summary ----------
+
+// Used by .sort() to put numbers from small to big
+function compareNumbers(a, b) {
+  return a - b;
+}
+
+// The middle value of a list of numbers (average of the two middle ones when the count is even).
+// Same idea as the median in prep/summariseResale.js.
+function median(numbers) {
+  // copy the list first, so sorting does not change the original
+  const sorted = [];
+  for (const number of numbers) {
+    sorted.push(number);
+  }
+  sorted.sort(compareNumbers);
+
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) {
+    // odd count, e.g. 5 numbers: the 3rd one is the middle
+    return sorted[middle];
+  }
+  // even count, e.g. 4 numbers: average of the 2nd and 3rd
+  return Math.round((sorted[middle - 1] + sorted[middle]) / 2);
+}
+
+// Turns a block's sales into the "price details" the frontend shows:
+// a summary (range, median, median price per m2) and each sale with its own price per m2.
+function salesSummary(sales) {
+  if (sales.length === 0) {
+    return {
+      count: 0,
+      lowest: null,
+      highest: null,
+      medianPrice: null,
+      medianPricePerSqm: null,
+      sales: [],
+    };
+  }
+
+  const rows = [];
+  const prices = [];
+  const pricesPerSqm = [];
+  let lowest = sales[0].price;
+  let highest = sales[0].price;
+
+  for (const sale of sales) {
+    // price per square metre, rounded to the dollar: $600,000 / 90 m2 = $6,667
+    const pricePerSqm = Math.round(sale.price / sale.areaSqm);
+
+    rows.push({
+      month: sale.month,
+      storey: sale.storey,
+      areaSqm: sale.areaSqm,
+      price: sale.price,
+      pricePerSqm: pricePerSqm,
+    });
+    prices.push(sale.price);
+    pricesPerSqm.push(pricePerSqm);
+
+    if (sale.price < lowest) {
+      lowest = sale.price;
+    }
+    if (sale.price > highest) {
+      highest = sale.price;
+    }
+  }
+
+  return {
+    count: rows.length,
+    lowest: lowest,
+    highest: highest,
+    medianPrice: median(prices),
+    medianPricePerSqm: median(pricesPerSqm),
+    sales: rows,
+  };
+}
+
+// ---------- OneMap token ----------
+// Gets (and remembers) a OneMap token. It lasts about 3 days, so we ask again a bit early.
+// STARTER CODE (AI-generated boilerplate): finish the TODO yourself.
+
+let token = null;
+let expiresAt = 0; // a time in milliseconds, like Date.now()
+
+async function getOneMapToken() {
+  if (token !== null && Date.now() < expiresAt) {
+    return token;
+  }
+
+  const response = await fetch('https://www.onemap.gov.sg/api/auth/post/getToken', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: oneMapEmail, password: oneMapPassword }),
+  });
+  if (!response.ok) {
+    throw new Error('OneMap login failed (' + response.status + ')');
+  }
+
+  const data = await response.json();
+  token = data.access_token;
+
+  // Convert expiry_timestamp from seconds to milliseconds, then subtract 1 hour (3,600,000 ms)
+  const safetyMarginMs = 60 * 60 * 1000; // 1 hour
+  expiresAt = (data.expiry_timestamp * 1000) - safetyMarginMs;
+
+  return token;
+}
+
+// ---------- Sorting ----------
 
 // Used by .sort() to put the cheapest block first
 function compareByPrice(a, b) {
   return a.price - b.price;
 }
 
+// =====================================================================
+// Controller functions (one per address, see routes/blocks-routes.js)
+// =====================================================================
+
 // GET /api/blocks?q=punggol&flatType=4 ROOM&maxPrice=700000&minLease=60
 // Search + filter. Sends every matching block (we only have a few hundred), cheapest first.
-async function searchBlocks(req, res) {
+export async function searchBlocks(req, res) {
   // The number filters must be numbers (or left out)
   const numberFields = ['maxPrice', 'minLease'];
   for (const field of numberFields) {
@@ -47,7 +249,7 @@ async function searchBlocks(req, res) {
 
 // GET /api/blocks/area
 // Every town name in the database, for the search suggestions
-async function listTowns(req, res) {
+export async function listTowns(req, res) {
   try {
     const towns = await Block.distinct('town');
     res.json(towns);
@@ -58,7 +260,7 @@ async function listTowns(req, res) {
 
 // GET /api/blocks/nearby?lat=1.40&lng=103.90&radius=1000&limit=20
 // GEOSPATIAL: blocks within `radius` metres of a point, closest first.
-async function nearbyBlocks(req, res) {
+export async function nearbyBlocks(req, res) {
   // lat and lng must be numbers, and both must be sent
   const pointFields = ['lat', 'lng'];
   for (const field of pointFields) {
@@ -129,7 +331,7 @@ async function nearbyBlocks(req, res) {
 
 // GET /api/blocks/:id/amenities
 // Nearest MRT, hawker centre, park and school, with distance in metres.
-async function blockAmenities(req, res) {
+export async function blockAmenities(req, res) {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -145,7 +347,7 @@ async function blockAmenities(req, res) {
 
 // GET /api/blocks/:id/sales
 // The recent sales behind the price range: month, storey, floor area, price and price per m2.
-async function blockSales(req, res) {
+export async function blockSales(req, res) {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -162,7 +364,7 @@ async function blockSales(req, res) {
 
 // GET /api/blocks/:id
 // One block, in the same shape as a search result card
-async function oneBlock(req, res) {
+export async function oneBlock(req, res) {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -178,7 +380,7 @@ async function oneBlock(req, res) {
 // 1. GET /api/blocks/place?q=560406
 // OneMap search: turns an address / postal code / place name into { name, lat, lng }.
 // The frontend then calls /api/blocks/nearby?lat=..&lng=.. with it.
-async function findPlace(req, res) {
+export async function findPlace(req, res) {
   if (isBlank(req.query.q)){
     return res.status(400).json({ message: 'q is required'});
   }
@@ -209,7 +411,7 @@ async function findPlace(req, res) {
 
 // 2. GET /api/blocks/:id/live-sales
 // Latest sales for this block straight from data.gov.sg, in the same shape as /sales.
-async function liveSales(req, res) {
+export async function liveSales(req, res) {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -272,7 +474,7 @@ async function liveSales(req, res) {
       summary.source = 'stored';
       return res.json(summary);
     };
-    
+
     const summary = salesSummary(filteredSales);
     summary.blockId = block._id;
     summary.source = 'live';
@@ -286,7 +488,7 @@ async function liveSales(req, res) {
 
 // 3. GET /api/blocks/:id/walk-to-mrt
 // Real walking time to the nearest MRT from OneMap's routing service.
-async function walkToMrt(req, res) {
+export async function walkToMrt(req, res) {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -334,15 +536,3 @@ async function walkToMrt(req, res) {
     sendError(res, error);
   }
 }
-
-router.get('/', searchBlocks);
-router.get('/area', listTowns);
-router.get('/nearby', nearbyBlocks);
-router.get('/place', findPlace);
-router.get('/:id/amenities', blockAmenities);
-router.get('/:id/sales', blockSales);
-router.get('/:id/live-sales', liveSales);
-router.get('/:id/walk-to-mrt', walkToMrt);
-router.get('/:id', oneBlock);
-
-export default router;

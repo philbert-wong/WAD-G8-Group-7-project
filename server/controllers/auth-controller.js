@@ -1,15 +1,34 @@
-// The /api/auth routes: register and login (both answer with a token the frontend sends back later),
+// The /api/auth controller: register and login (both answer with a token the frontend sends back later),
 // and the logged-in user's saved preferences.
-import { Router } from 'express';
+// routes/auth-routes.js decides which address runs which function below.
 // TODO 1: first run   pnpm add bcrypt jsonwebtoken   then uncomment these imports
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User} from '../models/User.js';
+import { User} from '../models/user-model.js';
 import { jwtSecret } from '../config.js';
-import { sendError } from '../lib/sendError.js';
-import { requireAuth } from '../middleware/requireAuth.js';
 
-const router = Router();
+// =====================================================================
+// Helpers (only used in this file)
+// =====================================================================
+
+// Used in the catch block of every route: sends the right error answer to the frontend.
+function sendError(res, error) {
+  // MongoDB could not understand an id
+  if (error.name === 'CastError') {
+    res.status(404).json({ message: 'Not found' });
+    return;
+  }
+
+  // Mongoose rejected the data
+  if (error.name === 'ValidationError') {
+    res.status(400).json({ message: error.message });
+    return;
+  }
+
+  // Anything else is a bug or a database problem: log it for us, keep the message simple for the user
+  console.error(error);
+  res.status(500).json({ message: 'Something went wrong' });
+}
 
 // Makes a token that says "this request is from user <id>". It stops working after 7 days.
 function makeToken(user) {
@@ -18,11 +37,15 @@ function makeToken(user) {
 
 }
 
+// =====================================================================
+// Controller functions (one per address, see routes/auth-routes.js)
+// =====================================================================
+
 // REGISTER POST /api/auth/register   body: { "email": "a@b.com", "password": "password123" }
-async function register(req, res) {
+export async function register(req, res) {
   // TODO 3: check the input. If req.body is missing, or email / password are not text,
   //   answer 400 with { message: 'email and password are required' }.
-  //   Hint: look at how addToShortlist() in shortlist.js does its 400.
+  //   Hint: look at how addToShortlist() in shortlist-controller.js does its 400.
   if (req.body === undefined || typeof(req.body.email) !== 'string' || typeof(req.body.password) !== 'string'){
     return res.status(400).json({ message: 'Email and Password are required'})
   }
@@ -54,14 +77,14 @@ async function register(req, res) {
         token: makeToken(user),
         user: { id: user._id, email: user.email}
     })
-    
+
   } catch (error) {
     sendError(res, error);
   }
 }
 
 // LOGIN POST /api/auth/login   body: { "email": "a@b.com", "password": "password123" }
-async function login(req, res) {
+export async function login(req, res) {
   // TODO 10: same input check as register (400 if email or password is missing).
     if (req.body === undefined || typeof(req.body.email) !== 'string' || typeof(req.body.password) !== 'string'){
     return res.status(400).json({ message: 'Email and Password are required'})
@@ -95,7 +118,7 @@ async function login(req, res) {
 
 // READ   GET /api/auth/preferences   (needs a token)
 // The logged-in user's saved "What matters to you?" choices. {} if nothing is saved yet.
-async function getPreferences(req, res) {
+export async function getPreferences(req, res) {
   try {
     const user = await User.findById(req.user.id);
     if (user === null) {
@@ -110,7 +133,7 @@ async function getPreferences(req, res) {
 // UPDATE PUT /api/auth/preferences   (needs a token)
 // body: { "preferences": { "panel": { "school": { "ticked": true, "level": 3 }, ... }, "sortBy": "match" } }
 // Replaces the saved choices with the ones sent.
-async function savePreferences(req, res) {
+export async function savePreferences(req, res) {
   // preferences must be an object like { ... } (not missing, not text, not a list)
   if (
     req.body === undefined ||
@@ -137,10 +160,3 @@ async function savePreferences(req, res) {
     sendError(res, error);
   }
 }
-
-router.post('/register', register);
-router.post('/login', login);
-router.get('/preferences', requireAuth, getPreferences);
-router.put('/preferences', requireAuth, savePreferences);
-
-export default router;

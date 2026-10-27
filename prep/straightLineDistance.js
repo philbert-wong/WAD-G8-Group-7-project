@@ -1,5 +1,6 @@
 // Straight-line distance in metres between two points on the earth (the "haversine" formula).
-// Only the seed script and prep/ use this; the API uses MongoDB's $geoNear instead.
+// prep/ keeps its own copy because it cannot load the server's model files (no mongoose here).
+// The server's copy lives in server/models/amenity-model.js (used by seed.js). Keep the two the same.
 
 const EARTH_RADIUS = 6371000; // metres
 

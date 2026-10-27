@@ -1,12 +1,30 @@
-// The /api/shortlist routes: list, save, change the note of, and remove saved flats
-import { Router } from 'express';
-import { Shortlist } from '../models/Shortlist.js';
-import { Block } from '../models/Block.js';
-import { toCard } from '../lib/blockCard.js';
-import { sendError } from '../lib/sendError.js';
-import { requireAuth } from '../middleware/requireAuth.js';
-const router = Router();
-router.use(requireAuth);
+// The /api/shortlist controller: list, save, change the note of, and remove saved flats.
+// routes/shortlist-routes.js decides which address runs which function below (all need a login).
+import { Shortlist } from '../models/shortlist-model.js';
+import { Block, toCard } from '../models/block-model.js';
+
+// =====================================================================
+// Helpers (only used in this file)
+// =====================================================================
+
+// Used in the catch block of every route: sends the right error answer to the frontend.
+function sendError(res, error) {
+  // MongoDB could not understand an id, e.g. /api/shortlist/abc
+  if (error.name === 'CastError') {
+    res.status(404).json({ message: 'Not found' });
+    return;
+  }
+
+  // Mongoose rejected the data, e.g. a note longer than 500 letters
+  if (error.name === 'ValidationError') {
+    res.status(400).json({ message: error.message });
+    return;
+  }
+
+  // Anything else is a bug or a database problem: log it for us, keep the message simple for the user
+  console.error(error);
+  res.status(500).json({ message: 'Something went wrong' });
+}
 
 // Shape of one shortlist item sent to the frontend
 function toItem(item, block) {
@@ -23,9 +41,13 @@ function compareNewestFirst(a, b) {
   return b.createdAt - a.createdAt;
 }
 
+// =====================================================================
+// Controller functions (one per address, see routes/shortlist-routes.js)
+// =====================================================================
+
 // READ   GET /api/shortlist
 // Every saved flat, newest first
-async function listShortlist(req, res) {
+export async function listShortlist(req, res) {
   try {
     const items = await Shortlist.find({ user: req.user.id});
     items.sort(compareNewestFirst);
@@ -47,7 +69,7 @@ async function listShortlist(req, res) {
 
 // CREATE POST /api/shortlist   body: { "blockId": "...", "note": "near my parents" }
 // Saves a flat. The note is optional.
-async function addToShortlist(req, res) {
+export async function addToShortlist(req, res) {
   if (req.body === undefined || !req.body.blockId) {
     return res.status(400).json({ message: 'blockId is required' });
   }
@@ -76,7 +98,7 @@ async function addToShortlist(req, res) {
 
 // UPDATE PATCH /api/shortlist/:id   body: { "note": "visited on Sunday" }
 // Changes the note of one saved flat
-async function updateNote(req, res) {
+export async function updateNote(req, res) {
   if (req.body === undefined || typeof req.body.note !== 'string') {
     return res.status(400).json({ message: 'note must be text' });
   }
@@ -102,7 +124,7 @@ async function updateNote(req, res) {
 
 // DELETE DELETE /api/shortlist/:id
 // Removes one saved flat. 204 means "done, nothing to send back".
-async function removeFromShortlist(req, res) {
+export async function removeFromShortlist(req, res) {
   try {
     const item = await Shortlist.findOneAndDelete({_id: req.params.id, user: req.user.id});
     if (item === null) {
@@ -113,10 +135,3 @@ async function removeFromShortlist(req, res) {
     sendError(res, error);
   }
 }
-
-router.get('/', listShortlist);
-router.post('/', addToShortlist);
-router.patch('/:id', updateNote);
-router.delete('/:id', removeFromShortlist);
-
-export default router;
