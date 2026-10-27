@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../server/app.js';
+import { createApp } from '../app.js';
 import { loadTestData, startTestDb, stopTestDb } from './helpers.js';
 
 const app = createApp();

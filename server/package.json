@@ -4,10 +4,9 @@
   "description": "Simple HDB resale finder: search, filters and a shortlist (Vue + Express + MongoDB)",
   "type": "module",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "concurrently -k -n api,web \"node --watch server/index.js\" \"pnpm --dir client dev\"",
-    "format": "pnpm --dir client format",
-    "seed": "node server/seed.js",
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "seed": "node seed.js",
     "test": "vitest run"
   },
   "dependencies": {
@@ -18,8 +17,6 @@
     "mongoose": "^9.11.1"
   },
   "devDependencies": {
-    "concurrently": "^10.0.6",
-    "csv-parse": "^7.0.3",
     "mongodb-memory-server": "^11.3.0",
     "supertest": "^7.3.1",
     "vitest": "^5.0.3"

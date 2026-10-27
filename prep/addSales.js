@@ -14,8 +14,8 @@ if (!csvPath) {
 }
 
 // 1. Read the blocks we already have
-// (this path starts from the main project folder, so run the script from there)
-const BLOCKS_FILE = 'server/data/blocks.json';
+// (this path starts from this file's folder, so the script works from any folder)
+const BLOCKS_FILE = new URL('../server/data/blocks.json', import.meta.url);
 const data = JSON.parse(readFileSync(BLOCKS_FILE, 'utf8'));
 const blocks = data.blocks;
 
