@@ -1,59 +1,30 @@
 <script setup>
-// The Shortlist page: every saved flat with its note
-import { onMounted, ref } from 'vue'
-import axios from 'axios'
+// The Shortlist page: every saved flat with its note.
+// The list itself lives in the shortlist store (stores/shortlist.js), shared with Search, Compare and the NavBar.
+// The route guard (router/index.js) only lets logged-in users open this page.
+import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import ShortlistItem from '../components/ShortlistItem.vue'
-import { getErrorMessage } from '../utils/errorMessage.js'
-import { currentUser, isLoggedIn } from '../utils/auth.js'
+import { useAuthStore } from '../stores/auth'
+import { useShortlistStore } from '../stores/shortlist'
 
-// Each item looks like { id, note, createdAt, block: { id, block, street, ... } }
-const items = ref([])
-const errorMessage = ref('')
-
-// Gets every saved flat from the server
-async function load() {
-  try {
-    const response = await axios.get('/api/shortlist')
-    items.value = response.data
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error)
-  }
-}
+const auth = useAuthStore()
+const shortlist = useShortlistStore()
 
 // ShortlistItem sends the item and the new note when "Save note" is pressed
-async function changeNote(item, note) {
-  errorMessage.value = ''
-  try {
-    const response = await axios.patch('/api/shortlist/' + item.id, { note: note })
-    item.note = response.data.note
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error)
-  }
+function changeNote(item, note) {
+  shortlist.updateNote(item.id, note)
 }
 
-// ShortlistItem sends the item when "Remove" is pressed.
-// After the server deletes it, we rebuild the list without that item.
-async function removeItem(item) {
-  errorMessage.value = ''
-  try {
-    await axios.delete('/api/shortlist/' + item.id)
-    const remaining = []
-    for (const savedItem of items.value) {
-      if (savedItem.id !== item.id) {
-        remaining.push(savedItem)
-      }
-    }
-    items.value = remaining
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error)
-  }
+// ShortlistItem sends the item when "Remove" is pressed
+function removeItem(item) {
+  shortlist.removeFromShortlist(item.id)
 }
 
 // When the page opens, get the latest shortlist from the server (only when logged in)
 onMounted(function () {
-  if (isLoggedIn()) {
-    load()
+  if (auth.isLoggedIn) {
+    shortlist.fetchShortlist()
   }
 })
 </script>
@@ -62,24 +33,24 @@ onMounted(function () {
   <section>
     <!-- DESIGN PREVIEW (Cosy Professional): serif title, one wide card per row -->
     <span class="eyebrow">Your favourites</span>
-    <h1 class="page-title serif">My <em>shortlist</em> ({{ items.length }})</h1>
+    <h1 class="page-title serif">My <em>shortlist</em> ({{ shortlist.count }})</h1>
     <p class="page-sub mb-4">Keep notes on the flats you like and compare them later.</p>
 
-    <!-- The shortlist belongs to an account -->
-    <p v-if="!currentUser" class="text-muted">
+    <!-- The shortlist belongs to an account (the route guard normally sends logged-out users to /login first) -->
+    <p v-if="!auth.isLoggedIn" class="text-muted">
       Please <RouterLink to="/login">log in</RouterLink> to see your shortlist.
     </p>
 
-    <div v-if="errorMessage" class="alert alert-danger">
-      {{ errorMessage }}
+    <div v-if="shortlist.error" class="alert alert-danger">
+      {{ shortlist.error }}
     </div>
 
-    <p v-if="currentUser && items.length === 0" class="text-muted">
+    <p v-if="auth.isLoggedIn && shortlist.count === 0" class="text-muted">
       Nothing saved yet. Go to Search and press "Save" on a flat.
     </p>
 
     <div class="row row-cols-1 g-3">
-      <div v-for="item in items" :key="item.id" class="col">
+      <div v-for="item in shortlist.items" :key="item.id" class="col">
         <ShortlistItem :item="item" @remove="removeItem" @change-note="changeNote" />
       </div>
     </div>

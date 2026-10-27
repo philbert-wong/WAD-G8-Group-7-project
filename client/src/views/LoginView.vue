@@ -1,14 +1,16 @@
 <script setup>
 // The Login page: one form that can log in OR create an account (switch with the tabs).
-// On success we save the token (utils/auth.js) and go to the Search page.
+// The auth store (stores/auth.js) talks to the server and remembers the login.
+// On success we go back to the page that sent us here (?redirect=...), or to the Search page.
 import { ref } from 'vue'
-import axios from 'axios'
-import { RouterLink, useRouter } from 'vue-router'
-import { getErrorMessage } from '../utils/errorMessage.js'
-import { saveLogin, currentUser } from '../utils/auth.js'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
-// The router lets us change page from code (like clicking a link)
+const auth = useAuthStore()
+
+// The router lets us change page from code (like clicking a link); route tells us the current URL
 const router = useRouter()
+const route = useRoute()
 
 // 'login' or 'register': which tab is open
 const mode = ref('login')
@@ -18,13 +20,14 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
+// Problems found by checkForm() below. Problems from the server are in auth.error.
 const errorMessage = ref('')
-const loading = ref(false)
 
 // Clicking a tab: switch form and clear any old error
 function switchMode(newMode) {
   mode.value = newMode
   errorMessage.value = ''
+  auth.error = ''
 }
 
 // Checks the form before we send it. Returns an error message, or '' when it is fine.
@@ -47,25 +50,25 @@ function checkForm() {
 // "Log in" / "Create account" button
 async function submit() {
   errorMessage.value = checkForm()
+  auth.error = ''
   if (errorMessage.value !== '') {
     return
   }
 
-  // Both routes take the same body and answer { token, user: { id, email } }
-  let url = '/api/auth/login'
   if (mode.value === 'register') {
-    url = '/api/auth/register'
+    await auth.register(email.value, password.value)
+  } else {
+    await auth.login(email.value, password.value)
   }
 
-  loading.value = true
-  try {
-    const response = await axios.post(url, { email: email.value, password: password.value })
-    saveLogin(response.data.token, response.data.user)
-    router.push('/')
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+  // Logged in: go back to the page the route guard sent us from (e.g. /shortlist), or to Search
+  if (auth.isLoggedIn) {
+    if (route.query.redirect) {
+      router.push(route.query.redirect)
+    } else {
+      router.push('/')
+    }
   }
-  loading.value = false
 }
 </script>
 
@@ -81,8 +84,8 @@ async function submit() {
       <div class="card shadow-sm">
         <div class="card-body">
           <!-- Already logged in: nothing to do here -->
-          <div v-if="currentUser" class="text-center">
-            <p class="mb-2">You are logged in as <strong>{{ currentUser.email }}</strong>.</p>
+          <div v-if="auth.isLoggedIn" class="text-center">
+            <p class="mb-2">You are logged in as <strong>{{ auth.user.email }}</strong>.</p>
             <RouterLink to="/" class="btn btn-primary">Go to Search</RouterLink>
           </div>
 
@@ -132,9 +135,10 @@ async function submit() {
               </div>
 
               <div v-if="errorMessage" class="alert alert-danger py-2">{{ errorMessage }}</div>
+              <div v-else-if="auth.error" class="alert alert-danger py-2">{{ auth.error }}</div>
 
-              <button type="submit" class="btn btn-primary w-100" :disabled="loading">
-                <span v-if="loading">Please wait...</span>
+              <button type="submit" class="btn btn-primary w-100" :disabled="auth.loading">
+                <span v-if="auth.loading">Please wait...</span>
                 <span v-else-if="mode === 'login'">Log in</span>
                 <span v-else>Create account</span>
               </button>

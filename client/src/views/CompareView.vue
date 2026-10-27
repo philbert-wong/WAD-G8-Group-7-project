@@ -4,19 +4,17 @@
 // The Compare page: tick 2 or 3 flats from your shortlist and see them side by side
 // (price range, lease, MRT, match score and an estimated monthly repayment).
 import { ref } from 'vue'
-import axios from 'axios'
-import { getErrorMessage } from '../utils/errorMessage.js'
-import { formatPrice } from '../utils/format.js'
 import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
 import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
+import { useShortlistStore } from '../stores/shortlist'
 
 // You can compare at most this many flats at once
 const MAX_COMPARE = 3
 
-// Each item looks like { id, note, createdAt, block: { id, block, street, ... } }
-const items = ref([])
-const errorMessage = ref('')
+// The shortlist lives in the shortlist store (stores/shortlist.js), shared with Search, Shortlist and the NavBar.
+// The route guard (router/index.js) only lets logged-in users open this page.
+const shortlist = useShortlistStore()
 const loading = ref(true)
 
 // The ids of the ticked items. v-model on the tick boxes adds / removes ids for us.
@@ -25,21 +23,16 @@ const selectedIds = ref([])
 // Match score uses the default "What matters to you?" choices (everything Important)
 const weights = getWeights(makeDefaultPreferences())
 
-// Gets the shortlist from the server (you must be logged in)
+// Gets the latest shortlist from the server (you must be logged in)
 async function loadShortlist() {
-  try {
-    const response = await axios.get('/api/shortlist')
-    items.value = response.data
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error)
-  }
+  await shortlist.fetchShortlist()
   loading.value = false
 }
 
 // The ticked items, in shortlist order
 function selectedItems() {
   const list = []
-  for (const item of items.value) {
+  for (const item of shortlist.items) {
     if (selectedIds.value.includes(item.id)) {
       list.push(item)
     }
@@ -55,9 +48,9 @@ function isDisabled(itemId) {
 // "$600,000 – $720,000", or one price when every sale was the same
 function formatRange(low, high) {
   if (low === high) {
-    return formatPrice(low)
+    return '$' + low.toLocaleString('en-SG')
   }
-  return formatPrice(low) + ' – ' + formatPrice(high)
+  return '$' + low.toLocaleString('en-SG') + ' – ' + '$' + high.toLocaleString('en-SG')
 }
 
 // Match score for one block, or "–" when it cannot be scored
@@ -71,7 +64,7 @@ function scoreText(block) {
 
 // Estimated monthly repayment for the median price, rounded to the dollar
 function monthlyText(block) {
-  return formatPrice(Math.round(estimateMonthlyCost(block.price)))
+  return '$' + Math.round(estimateMonthlyCost(block.price)).toLocaleString('en-SG')
 }
 
 // Load the shortlist as soon as the page is created
@@ -85,10 +78,10 @@ loadShortlist()
     <h1 class="page-title serif">Compare <em>flats</em></h1>
     <p class="page-sub mb-4">Tick 2 or 3 flats from your shortlist.</p>
 
-    <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+    <div v-if="shortlist.error" class="alert alert-danger">{{ shortlist.error }}</div>
     <p v-else-if="loading" class="text-muted">Loading...</p>
 
-    <p v-else-if="items.length < 2" class="text-muted">
+    <p v-else-if="shortlist.count < 2" class="text-muted">
       Save at least 2 flats to your shortlist first, then come back to compare them.
     </p>
 
@@ -97,7 +90,7 @@ loadShortlist()
       <div class="card shadow-sm mb-3">
         <div class="card-body">
           <h6 class="card-title">Choose 2 or 3 flats ({{ selectedIds.length }} / {{ MAX_COMPARE }})</h6>
-          <div v-for="item in items" :key="item.id" class="form-check">
+          <div v-for="item in shortlist.items" :key="item.id" class="form-check">
             <input
               :id="'compare-' + item.id"
               v-model="selectedIds"
@@ -134,7 +127,7 @@ loadShortlist()
             </tr>
             <tr>
               <th>Median price</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ formatPrice(item.block.price) }}</td>
+              <td v-for="item in selectedItems()" :key="item.id">{{ '$' + item.block.price.toLocaleString('en-SG') }}</td>
             </tr>
             <tr>
               <th>Remaining lease</th>

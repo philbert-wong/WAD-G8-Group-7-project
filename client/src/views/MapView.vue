@@ -3,17 +3,20 @@
 // Every block as a dot on a map, coloured by its median price. Click a dot for details.
 // PHG layer: pick your parents' block to draw the 4 km Proximity Housing Grant circle.
 //
-// ⚠️ NOT IN OUR COURSE: the Leaflet library (new npm package), onMounted / onUnmounted,
+// ⚠️ NOT IN OUR COURSE: the Leaflet library (new npm package), onMounted,
 //    and keeping the map in a normal variable (not a ref) because Vue's ref breaks Leaflet.
 // ⚠️ WATCH OUT: the map pictures (tiles) come from OpenStreetMap over the internet,
 //    the only outside call the site makes. OpenStreetMap's credit line must stay on the map.
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { getErrorMessage } from '../utils/errorMessage.js'
-import { formatPrice } from '../utils/format.js'
-import { PHG_NEAR_DISTANCE_METRES } from '../utils/affordabilityRules.js'
+
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
+// PHG "live near" rule: within 4 km of your parents / child (same value as Jihao's affordabilityRules.js)
+const PHG_NEAR_DISTANCE_METRES = 4000
 
 const errorMessage = ref('')
 const blockCount = ref(0)
@@ -26,14 +29,13 @@ const nearbyCount = ref(null) // how many flats are within 4 km (null = not chec
 // The map and the PHG circle live in normal variables (Leaflet does not like Vue's ref)
 let map = null
 let phgCircle = null
-const mapBox = ref(null)
 
 // The price colours, cheapest first. Used by the dots and by the legend.
 const priceBands = [
-  { max: 400000, colour: '#6b8c6b', label: 'Under $400k' },
-  { max: 550000, colour: '#d9a95c', label: '$400k – $550k' },
-  { max: 700000, colour: '#d98a63', label: '$550k – $700k' },
-  { max: Infinity, colour: '#a44e39', label: 'Over $700k' },
+  { max: 400000, colour: '#2e9e4f', label: 'Under $400k' },
+  { max: 550000, colour: '#f2c230', label: '$400k - $550k' },
+  { max: 700000, colour: '#ef7b22', label: '$550k - $700k' },
+  { max: Infinity, colour: '#d6312b', label: 'Over $700k' },
 ]
 
 // Picks the colour for a price (the first band it fits in)
@@ -43,7 +45,7 @@ function priceColour(price) {
       return band.colour
     }
   }
-  return '#2d2d2d'
+  return 'grey'
 }
 
 // The text inside a dot's popup
@@ -51,7 +53,7 @@ function popupText(block) {
   return (
     '<b>Blk ' + block.block + ' ' + block.street + '</b><br>' +
     block.town + ' · ' + block.flatType + '<br>' +
-    'Median ' + formatPrice(block.price) + ' (' + block.salesCount + ' sales)<br>' +
+    'Median $' + block.price.toLocaleString('en-SG') + ' (' + block.salesCount + ' sales)<br>' +
     block.remainingLease + ' years lease · ' + block.mrtWalkMinutes + ' min to ' + block.mrtName
   )
 }
@@ -59,7 +61,7 @@ function popupText(block) {
 // Gets every block and puts a dot for each on the map
 async function loadBlocks() {
   try {
-    const response = await axios.get('/api/blocks')
+    const response = await axios.get(`${BASE_URL}/api/blocks`)
     const blocks = response.data.results
     blockCount.value = blocks.length
 
@@ -89,7 +91,12 @@ async function loadBlocks() {
     })
     addresses.value = list
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 
@@ -122,30 +129,28 @@ async function showPhg() {
 
   // Count the flats inside (the server caps the answer at 50)
   try {
-    const response = await axios.get('/api/blocks/nearby', {
+    const response = await axios.get(`${BASE_URL}/api/blocks/nearby`, {
       params: { lat: parent.lat, lng: parent.lng, radius: PHG_NEAR_DISTANCE_METRES, limit: 50 },
     })
     nearbyCount.value = response.data.total
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 
-// When the page opens: make the map (centred on Singapore), then add the blocks
+// When the page opens: make the map inside <div id="mapBox"> (centred on Singapore), then add the blocks
 onMounted(function () {
-  map = L.map(mapBox.value).setView([1.36, 103.84], 12)
+  map = L.map('mapBox').setView([1.36, 103.84], 12)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map)
   loadBlocks()
-})
-
-// When the page closes: remove the map so it does not stay in memory
-onUnmounted(function () {
-  if (map !== null) {
-    map.remove()
-  }
 })
 </script>
 
@@ -159,7 +164,7 @@ onUnmounted(function () {
 
     <div class="row g-4">
       <div class="col-lg-8">
-        <div ref="mapBox" class="map-box"></div>
+        <div id="mapBox" class="map-box"></div>
       </div>
 
       <div class="col-lg-4">

@@ -5,8 +5,9 @@
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import axios from 'axios'
-import { formatPrice } from '../utils/format.js'
-import { getErrorMessage } from '../utils/errorMessage.js'
+
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
 
 const props = defineProps({
   blockId: String,
@@ -24,10 +25,15 @@ const details = ref(null)
 // Gets the recent sales of this block from the server
 async function load() {
   try {
-    const response = await axios.get('/api/blocks/' + props.blockId + '/live-sales')
+    const response = await axios.get(`${BASE_URL}/api/blocks/${props.blockId}/live-sales`)
     details.value = response.data
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false
 
@@ -117,10 +123,15 @@ function formatStorey(storey) {
     <template v-else>
       <ul class="list-unstyled small mb-2">
         <li>
-          Median price: <strong>{{ formatPrice(details.medianPrice) }}</strong>
+          Median price:
+          <!-- a block with no recent sales has no median (null), so show N/A instead -->
+          <strong v-if="details.medianPrice !== null">{{ '$' + details.medianPrice.toLocaleString('en-SG') }}</strong>
+          <strong v-else>N/A</strong>
         </li>
         <li>
-          Median price per m²: <strong>{{ formatPrice(details.medianPricePerSqm) }}</strong>
+          Median price per m²:
+          <strong v-if="details.medianPricePerSqm !== null">{{ '$' + details.medianPricePerSqm.toLocaleString('en-SG') }}</strong>
+          <strong v-else>N/A</strong>
         </li>
         <li class="text-muted">Based on {{ details.count }} recent sales</li>
         <li class="text-muted">Source: {{ details.source === 'live' ? 'data.gov.sg (live)' : 'Stored data' }}</li>
@@ -145,8 +156,8 @@ function formatStorey(storey) {
               <td class="text-nowrap">{{ formatMonth(sale.month) }}</td>
               <td class="text-nowrap">{{ formatStorey(sale.storey) }}</td>
               <td class="text-end text-nowrap">{{ sale.areaSqm }} m²</td>
-              <td class="text-end">{{ formatPrice(sale.price) }}</td>
-              <td class="text-end">{{ formatPrice(sale.pricePerSqm) }}</td>
+              <td class="text-end">{{ '$' + sale.price.toLocaleString('en-SG') }}</td>
+              <td class="text-end">{{ '$' + sale.pricePerSqm.toLocaleString('en-SG') }}</td>
             </tr>
           </tbody>
         </table>

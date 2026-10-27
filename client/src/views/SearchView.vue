@@ -7,8 +7,8 @@ import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
 import axios from 'axios'
-import { getErrorMessage } from '../utils/errorMessage.js'
-import { isLoggedIn } from '../utils/auth.js'
+import { useAuthStore } from '../stores/auth'
+import { useShortlistStore } from '../stores/shortlist'
 import {
   CATEGORIES,
   getWeights,
@@ -18,11 +18,18 @@ import {
 } from '../utils/matchScore.js'
 import { useRoute } from 'vue-router'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 // get the current route
 const route = useRoute() 
 
-// This page's own copy of the shortlist, so each card knows if it shows ☆ Save or ★ Saved
-const savedItems = ref([])
+// Pinia stores (Week 11): who is logged in, and the shortlist (so each card knows if it shows ☆ Save or ★ Saved)
+const auth = useAuthStore()
+const shortlist = useShortlistStore()
+
+// Messages for the top alert: "please log in" and problems saving your choices
+// (problems with the shortlist itself are in shortlist.error)
 const shortlistErrorMessage = ref('')
 
 // The search box text (q) and the four filters. Empty = not used.
@@ -63,10 +70,15 @@ function setFilter(name, value) {
 // Gets the town names from the server (for the search suggestions)
 async function loadAreas() {
   try {
-    const response = await axios.get('/api/blocks/area')
+    const response = await axios.get(`${BASE_URL}/api/blocks/area`)
     area.value = response.data
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 
@@ -76,11 +88,16 @@ async function search() {
   loading.value = true
   errorMessage.value = ''
   try {
-    const response = await axios.get('/api/blocks', { params: filters.value })
+    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
     results.value = response.data.results
     total.value = response.data.total
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false
 }
@@ -103,11 +120,11 @@ async function searchNearPlace() {
 
   try {
     // Bug 3 fix: Use axios for consistency, getting response.data
-    const placeResponse = await axios.get('/api/blocks/place', { 
+    const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { 
       params: { q: placeText.value } 
     });
     const place = placeResponse.data;
-    const nearbyResponse = await axios.get('/api/blocks/nearby', { 
+    const nearbyResponse = await axios.get(`${BASE_URL}/api/blocks/nearby`, { 
       params: { lat: place.lat, lng: place.lng } 
     });
     const nearbyData = nearbyResponse.data;
@@ -117,7 +134,12 @@ async function searchNearPlace() {
     placeName.value = place.name;
 
   } catch (error) {
-    errorMessage.value = getErrorMessage(error);
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false;
 }
@@ -141,14 +163,19 @@ async function saveChoices() {
   localStorage.setItem('matchPreferences', JSON.stringify(preferences.value))
   localStorage.setItem('sortBy', sortBy.value)
 
-  if (isLoggedIn()) {
+  if (auth.isLoggedIn) {
     try {
-      await axios.put('/api/auth/preferences', {
+      await axios.put(`${BASE_URL}/api/auth/preferences`, {
         preferences: { panel: preferences.value, sortBy: sortBy.value },
       })
     } catch (error) {
       // Shown in the top alert (with shortlist errors), so the search results stay visible
-      shortlistErrorMessage.value = getErrorMessage(error)
+      // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+      if (error.response && error.response.data && error.response.data.message) {
+        shortlistErrorMessage.value = error.response.data.message
+      } else {
+        shortlistErrorMessage.value = error.message
+      }
     }
   }
 }
@@ -176,16 +203,21 @@ function applyChoices(savedPanel, savedSort) {
 // Puts back the remembered choices, if there are any.
 // Logged in and something saved on the account: use that. Otherwise use this browser's copy.
 async function loadChoices() {
-  if (isLoggedIn()) {
+  if (auth.isLoggedIn) {
     try {
-      const response = await axios.get('/api/auth/preferences')
+      const response = await axios.get(`${BASE_URL}/api/auth/preferences`)
       const saved = response.data.preferences
       if (saved && saved.panel) {
         applyChoices(saved.panel, saved.sortBy)
         return
       }
     } catch (error) {
-      shortlistErrorMessage.value = getErrorMessage(error)
+      // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+      if (error.response && error.response.data && error.response.data.message) {
+        shortlistErrorMessage.value = error.response.data.message
+      } else {
+        shortlistErrorMessage.value = error.message
+      }
     }
   }
 
@@ -240,76 +272,25 @@ const scoredResults = computed(function () {
   return list
 })
 
-// Gets the saved flats from the server
-async function loadShortlist() {
-  try {
-    const response = await axios.get('/api/shortlist')
-    savedItems.value = response.data
-  } catch (error) {
-    shortlistErrorMessage.value = getErrorMessage(error)
-  }
-}
-
-// Finds the saved item that holds this block, or null if the block is not saved
-function findSavedItem(blockId) {
-  for (const item of savedItems.value) {
-    if (item.block.id === blockId) {
-      return item
-    }
-  }
-  return null
-}
-
-// Is this block saved? (decides ☆ Save or ★ Saved on its card)
-function isSaved(blockId) {
-  return findSavedItem(blockId) !== null
-}
-
-// Saves a flat. The server sends back the new item, so we add it to our list.
-async function saveBlock(block) {
-  shortlistErrorMessage.value = ''
-  try {
-    const response = await axios.post('/api/shortlist', { blockId: block.id })
-    savedItems.value.push(response.data)
-  } catch (error) {
-    shortlistErrorMessage.value = getErrorMessage(error)
-  }
-}
-
-// Un-saves a flat, then rebuilds our list without it
-async function unsaveBlock(block) {
-  const item = findSavedItem(block.id)
-  if (item === null) {
-    return
-  }
-
-  shortlistErrorMessage.value = ''
-  try {
-    await axios.delete('/api/shortlist/' + item.id)
-    const remaining = []
-    for (const savedItem of savedItems.value) {
-      if (savedItem.id !== item.id) {
-        remaining.push(savedItem)
-      }
-    }
-    savedItems.value = remaining
-  } catch (error) {
-    shortlistErrorMessage.value = getErrorMessage(error)
-  }
-}
-
 // ☆ Save / ★ Saved button on a card: saves the flat, or un-saves it if it is already saved
+// (the shortlist store talks to the server and keeps the list for every page)
 function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
-  if (!isLoggedIn()) {
+  if (!auth.isLoggedIn) {
     shortlistErrorMessage.value = 'Please log in to save flats'
     return
   }
 
-  if (isSaved(block.id)) {
-    unsaveBlock(block)
+  shortlistErrorMessage.value = ''
+  if (shortlist.isSaved(block.id)) {
+    // find the saved item that holds this block, to know which item to remove
+    for (const item of shortlist.items) {
+      if (item.block.id === block.id) {
+        shortlist.removeFromShortlist(item.id)
+      }
+    }
   } else {
-    saveBlock(block)
+    shortlist.addToShortlist(block.id)
   }
 }
 
@@ -324,8 +305,8 @@ function loadPage() {
   }
   search()
   loadAreas()
-  if (isLoggedIn()) {
-    loadShortlist()
+  if (auth.isLoggedIn) {
+    shortlist.fetchShortlist()
   }
 }
 
@@ -342,6 +323,9 @@ onMounted(loadPage)
 
     <div v-if="shortlistErrorMessage" class="alert alert-warning">
       {{ shortlistErrorMessage }}
+    </div>
+    <div v-if="shortlist.error" class="alert alert-warning">
+      {{ shortlist.error }}
     </div>
 
     <SearchBar :text="filters.q" @change-text="setSearchText" @search="search" />
@@ -361,10 +345,10 @@ onMounted(loadPage)
       <input
         v-model="placeText"
         type="search"
-        class="form-control"
+        class="form-control cosy-input flex-grow-1"
         placeholder="Or find flats near an address or postal code e.g. 560406"
       />
-      <button class="btn btn-outline-primary" type="submit">Find near me</button>
+      <button class="act-btn primary" type="submit">Find near me</button>
     </form>
 
     <p v-if="placeName" class="text-muted mb-3">
@@ -394,7 +378,7 @@ onMounted(loadPage)
           v-for="item in scoredResults"
           :key="item.block.id"
           :block="item.block"
-          :saved="isSaved(item.block.id)"
+          :saved="shortlist.isSaved(item.block.id)"
           :score="item.score"
           show-match
           @toggle-save="toggleSave"
@@ -430,11 +414,22 @@ onMounted(loadPage)
 .resbar b {
   color: var(--char);
 }
-/* [AI-ASSISTED] The sidebar stays on screen while you scroll the results (position: sticky) */
+
+.search-box input {
+  font-size: 16px;
+  padding: 11px 14px;
+}
+
 @media (min-width: 992px) {
   .sidebar {
     position: sticky;
     top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
   }
 }
+
+
+
+
 </style>

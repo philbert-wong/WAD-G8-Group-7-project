@@ -22,7 +22,7 @@ function chooseGuide(mode) {
   <!-- Preview bar: only for showing the design to the team -->
   <div class="demo-bar">
     <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
-      <span class="lbl">Final draft preview · Cosy Professional</span>
+      <span class="lbl"></span>
       <div class="seg">
         <button :class="{ on: guideMode === 'none' }" @click="chooseGuide('none')">Without Guide</button>
         <button :class="{ on: guideMode === 'cat' }" @click="chooseGuide('cat')">🐱 Cat (Mochi)</button>
@@ -39,8 +39,8 @@ function chooseGuide(mode) {
 
   <footer class="cosy-footer">
     <div class="container d-flex justify-content-between flex-wrap gap-2">
-      <span>Final draft preview. Prices are real HDB resale sales from data.gov.sg (last 12 months).</span>
-      <span>HDB Resale Finder · Cosy Professional</span>
+      <span>Prices are real HDB resale sales from data.gov.sg (last 12 months).</span>
+      <span>HDB Resale Finder</span>
     </div>
   </footer>
 
