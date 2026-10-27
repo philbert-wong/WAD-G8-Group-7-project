@@ -1,5 +1,6 @@
 // Builds the Express app: JSON body reading, the API routes and the error handler. index.js starts it.
 import express from 'express';
+import cors from 'cors';
 import blocksRouter from './routes/blocks.js';
 import shortlistRouter from './routes/shortlist.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -18,6 +19,8 @@ function notFound(req, res) {
 export function createApp() {
   const app = express();
 
+  // Lets our Vue site (a different port, e.g. localhost:5173) read this API's answers. Same one line as the class servers.
+  app.use(cors());
   app.use(express.json()); // lets us read JSON sent in a POST / PATCH body
 
   // API routes

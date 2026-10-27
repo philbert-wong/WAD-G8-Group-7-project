@@ -11,6 +11,9 @@ import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
 import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 // You can compare at most this many flats at once
 const MAX_COMPARE = 3
 
@@ -28,7 +31,7 @@ const weights = getWeights(makeDefaultPreferences())
 // Gets the shortlist from the server (you must be logged in)
 async function loadShortlist() {
   try {
-    const response = await axios.get('/api/shortlist')
+    const response = await axios.get(`${BASE_URL}/api/shortlist`)
     items.value = response.data
   } catch (error) {
     errorMessage.value = getErrorMessage(error)

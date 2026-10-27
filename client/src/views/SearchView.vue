@@ -18,6 +18,9 @@ import {
 } from '../utils/matchScore.js'
 import { useRoute } from 'vue-router'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 // get the current route
 const route = useRoute() 
 
@@ -63,7 +66,7 @@ function setFilter(name, value) {
 // Gets the town names from the server (for the search suggestions)
 async function loadAreas() {
   try {
-    const response = await axios.get('/api/blocks/area')
+    const response = await axios.get(`${BASE_URL}/api/blocks/area`)
     area.value = response.data
   } catch (error) {
     errorMessage.value = getErrorMessage(error)
@@ -76,7 +79,7 @@ async function search() {
   loading.value = true
   errorMessage.value = ''
   try {
-    const response = await axios.get('/api/blocks', { params: filters.value })
+    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
     results.value = response.data.results
     total.value = response.data.total
   } catch (error) {
@@ -103,11 +106,11 @@ async function searchNearPlace() {
 
   try {
     // Bug 3 fix: Use axios for consistency, getting response.data
-    const placeResponse = await axios.get('/api/blocks/place', { 
+    const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { 
       params: { q: placeText.value } 
     });
     const place = placeResponse.data;
-    const nearbyResponse = await axios.get('/api/blocks/nearby', { 
+    const nearbyResponse = await axios.get(`${BASE_URL}/api/blocks/nearby`, { 
       params: { lat: place.lat, lng: place.lng } 
     });
     const nearbyData = nearbyResponse.data;
@@ -143,7 +146,7 @@ async function saveChoices() {
 
   if (isLoggedIn()) {
     try {
-      await axios.put('/api/auth/preferences', {
+      await axios.put(`${BASE_URL}/api/auth/preferences`, {
         preferences: { panel: preferences.value, sortBy: sortBy.value },
       })
     } catch (error) {
@@ -178,7 +181,7 @@ function applyChoices(savedPanel, savedSort) {
 async function loadChoices() {
   if (isLoggedIn()) {
     try {
-      const response = await axios.get('/api/auth/preferences')
+      const response = await axios.get(`${BASE_URL}/api/auth/preferences`)
       const saved = response.data.preferences
       if (saved && saved.panel) {
         applyChoices(saved.panel, saved.sortBy)
@@ -243,7 +246,7 @@ const scoredResults = computed(function () {
 // Gets the saved flats from the server
 async function loadShortlist() {
   try {
-    const response = await axios.get('/api/shortlist')
+    const response = await axios.get(`${BASE_URL}/api/shortlist`)
     savedItems.value = response.data
   } catch (error) {
     shortlistErrorMessage.value = getErrorMessage(error)
@@ -269,7 +272,7 @@ function isSaved(blockId) {
 async function saveBlock(block) {
   shortlistErrorMessage.value = ''
   try {
-    const response = await axios.post('/api/shortlist', { blockId: block.id })
+    const response = await axios.post(`${BASE_URL}/api/shortlist`, { blockId: block.id })
     savedItems.value.push(response.data)
   } catch (error) {
     shortlistErrorMessage.value = getErrorMessage(error)
@@ -285,7 +288,7 @@ async function unsaveBlock(block) {
 
   shortlistErrorMessage.value = ''
   try {
-    await axios.delete('/api/shortlist/' + item.id)
+    await axios.delete(`${BASE_URL}/api/shortlist/${item.id}`)
     const remaining = []
     for (const savedItem of savedItems.value) {
       if (savedItem.id !== item.id) {

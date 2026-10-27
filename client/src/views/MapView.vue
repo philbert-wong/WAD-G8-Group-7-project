@@ -12,6 +12,9 @@ import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 // PHG "live near" rule: within 4 km of your parents / child (same value as Jihao's affordabilityRules.js)
 const PHG_NEAR_DISTANCE_METRES = 4000
 
@@ -58,7 +61,7 @@ function popupText(block) {
 // Gets every block and puts a dot for each on the map
 async function loadBlocks() {
   try {
-    const response = await axios.get('/api/blocks')
+    const response = await axios.get(`${BASE_URL}/api/blocks`)
     const blocks = response.data.results
     blockCount.value = blocks.length
 
@@ -126,7 +129,7 @@ async function showPhg() {
 
   // Count the flats inside (the server caps the answer at 50)
   try {
-    const response = await axios.get('/api/blocks/nearby', {
+    const response = await axios.get(`${BASE_URL}/api/blocks/nearby`, {
       params: { lat: parent.lat, lng: parent.lng, radius: PHG_NEAR_DISTANCE_METRES, limit: 50 },
     })
     nearbyCount.value = response.data.total

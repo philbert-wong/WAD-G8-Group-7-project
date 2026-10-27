@@ -7,6 +7,9 @@ import ShortlistItem from '../components/ShortlistItem.vue'
 import { getErrorMessage } from '../utils/errorMessage.js'
 import { currentUser, isLoggedIn } from '../utils/auth.js'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 // Each item looks like { id, note, createdAt, block: { id, block, street, ... } }
 const items = ref([])
 const errorMessage = ref('')
@@ -14,7 +17,7 @@ const errorMessage = ref('')
 // Gets every saved flat from the server
 async function load() {
   try {
-    const response = await axios.get('/api/shortlist')
+    const response = await axios.get(`${BASE_URL}/api/shortlist`)
     items.value = response.data
   } catch (error) {
     errorMessage.value = getErrorMessage(error)
@@ -25,7 +28,7 @@ async function load() {
 async function changeNote(item, note) {
   errorMessage.value = ''
   try {
-    const response = await axios.patch('/api/shortlist/' + item.id, { note: note })
+    const response = await axios.patch(`${BASE_URL}/api/shortlist/${item.id}`, { note: note })
     item.note = response.data.note
   } catch (error) {
     errorMessage.value = getErrorMessage(error)
@@ -37,7 +40,7 @@ async function changeNote(item, note) {
 async function removeItem(item) {
   errorMessage.value = ''
   try {
-    await axios.delete('/api/shortlist/' + item.id)
+    await axios.delete(`${BASE_URL}/api/shortlist/${item.id}`)
     const remaining = []
     for (const savedItem of items.value) {
       if (savedItem.id !== item.id) {

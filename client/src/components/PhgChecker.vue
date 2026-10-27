@@ -9,6 +9,9 @@ import { getErrorMessage } from '../utils/errorMessage.js'
 import { formatPrice } from '../utils/format.js'
 import { PHG_NEAR_DISTANCE_METRES } from '../utils/affordabilityRules.js'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 // The server never sends more than 50 nearby blocks
 const NEARBY_LIMIT = 50
 
@@ -37,7 +40,7 @@ function compareByLabel(a, b) {
 // (The same block appears once per flat type, e.g. "Blk 314" 3 ROOM and 4 ROOM.)
 async function loadAddresses() {
   try {
-    const response = await axios.get('/api/blocks')
+    const response = await axios.get(`${BASE_URL}/api/blocks`)
     const list = []
     const seen = []
     for (const block of response.data.results) {
@@ -75,7 +78,7 @@ async function checkPhg() {
 
   loading.value = true
   try {
-    const response = await axios.get('/api/blocks/nearby', {
+    const response = await axios.get(`${BASE_URL}/api/blocks/nearby`, {
       params: { lat: parent.lat, lng: parent.lng, radius: PHG_NEAR_DISTANCE_METRES, limit: NEARBY_LIMIT },
     })
     nearbyBlocks.value = response.data.results
