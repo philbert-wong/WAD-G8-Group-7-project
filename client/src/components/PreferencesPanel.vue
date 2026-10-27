@@ -97,7 +97,8 @@ function onLevelChange(key, event) {
   height: 17px;
 }
 .level {
-  width: 110px;
+  width: 135px;
+  flex-shrink: 0;
 }
 /* [AI-ASSISTED] Green tick boxes (accent-color) */
 .chk input {
