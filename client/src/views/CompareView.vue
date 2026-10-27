@@ -4,20 +4,17 @@
 // The Compare page: tick 2 or 3 flats from your shortlist and see them side by side
 // (price range, lease, MRT, match score and an estimated monthly repayment).
 import { ref } from 'vue'
-import axios from 'axios'
 import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
 import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
-
-// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
-const BASE_URL = 'http://localhost:8000'
+import { useShortlistStore } from '../stores/shortlist'
 
 // You can compare at most this many flats at once
 const MAX_COMPARE = 3
 
-// Each item looks like { id, note, createdAt, block: { id, block, street, ... } }
-const items = ref([])
-const errorMessage = ref('')
+// The shortlist lives in the shortlist store (stores/shortlist.js), shared with Search, Shortlist and the NavBar.
+// The route guard (router/index.js) only lets logged-in users open this page.
+const shortlist = useShortlistStore()
 const loading = ref(true)
 
 // The ids of the ticked items. v-model on the tick boxes adds / removes ids for us.
@@ -26,26 +23,16 @@ const selectedIds = ref([])
 // Match score uses the default "What matters to you?" choices (everything Important)
 const weights = getWeights(makeDefaultPreferences())
 
-// Gets the shortlist from the server (you must be logged in)
+// Gets the latest shortlist from the server (you must be logged in)
 async function loadShortlist() {
-  try {
-    const response = await axios.get(`${BASE_URL}/api/shortlist`)
-    items.value = response.data
-  } catch (error) {
-    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage.value = error.response.data.message
-    } else {
-      errorMessage.value = error.message
-    }
-  }
+  await shortlist.fetchShortlist()
   loading.value = false
 }
 
 // The ticked items, in shortlist order
 function selectedItems() {
   const list = []
-  for (const item of items.value) {
+  for (const item of shortlist.items) {
     if (selectedIds.value.includes(item.id)) {
       list.push(item)
     }
@@ -91,10 +78,10 @@ loadShortlist()
     <h1 class="page-title serif">Compare <em>flats</em></h1>
     <p class="page-sub mb-4">Tick 2 or 3 flats from your shortlist.</p>
 
-    <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+    <div v-if="shortlist.error" class="alert alert-danger">{{ shortlist.error }}</div>
     <p v-else-if="loading" class="text-muted">Loading...</p>
 
-    <p v-else-if="items.length < 2" class="text-muted">
+    <p v-else-if="shortlist.count < 2" class="text-muted">
       Save at least 2 flats to your shortlist first, then come back to compare them.
     </p>
 
@@ -103,7 +90,7 @@ loadShortlist()
       <div class="card shadow-sm mb-3">
         <div class="card-body">
           <h6 class="card-title">Choose 2 or 3 flats ({{ selectedIds.length }} / {{ MAX_COMPARE }})</h6>
-          <div v-for="item in items" :key="item.id" class="form-check">
+          <div v-for="item in shortlist.items" :key="item.id" class="form-check">
             <input
               :id="'compare-' + item.id"
               v-model="selectedIds"

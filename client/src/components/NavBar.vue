@@ -1,12 +1,18 @@
 <script setup>
 // FINAL DRAFT: the white bar at the top with the logo, page tabs, and Login / Logout on the right
 // (Cosy Professional design + the login from feature/accounts-jihao)
+import { onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { currentUser, logout } from '../utils/auth.js'
+import { useAuthStore } from '../stores/auth'
+import { useShortlistStore } from '../stores/shortlist'
 
 // The current URL, so we can underline the page we are on
 const route = useRoute()
 const router = useRouter()
+
+// Pinia stores (Week 11): who is logged in, and the shortlist (for "Shortlist (3)", like MiniShop's "Cart (3)")
+const auth = useAuthStore()
+const shortlist = useShortlistStore()
 
 // The page tabs, in order
 const tabs = [
@@ -17,11 +23,19 @@ const tabs = [
   { to: '/shortlist', label: 'Shortlist' },
 ]
 
-// "Logout" button: forget the login, then go to the Login page
+// "Logout" button: forget the login and the shortlist, then go to the Login page
 function onLogout() {
-  logout()
+  auth.logout()
+  shortlist.clearShortlist()
   router.push('/login')
 }
+
+// When the website opens and someone is already logged in, load the shortlist so the count is right on every page
+onMounted(function () {
+  if (auth.isLoggedIn) {
+    shortlist.fetchShortlist()
+  }
+})
 </script>
 
 <template>
@@ -36,12 +50,13 @@ function onLogout() {
       <div class="tabs d-none d-lg-block">
         <RouterLink v-for="tab in tabs" :key="tab.to" :to="tab.to" :class="{ act: route.path === tab.to }">
           {{ tab.label }}
+          <span v-if="tab.to === '/shortlist' && auth.isLoggedIn">({{ shortlist.count }})</span>
         </RouterLink>
       </div>
 
       <!-- Logged in: email + Logout. Logged out: a Login button. -->
-      <div v-if="currentUser" class="d-flex align-items-center gap-2">
-        <span class="small text-muted d-none d-sm-inline">{{ currentUser.email }}</span>
+      <div v-if="auth.isLoggedIn" class="d-flex align-items-center gap-2">
+        <span class="small text-muted d-none d-sm-inline">{{ auth.user.email }}</span>
         <button class="btn-short" @click="onLogout">Logout</button>
       </div>
       <RouterLink v-else to="/login" class="btn-short">Login</RouterLink>
@@ -50,6 +65,7 @@ function onLogout() {
       <div class="tabs-small d-lg-none w-100">
         <RouterLink v-for="tab in tabs" :key="tab.to" :to="tab.to" :class="{ act: route.path === tab.to }">
           {{ tab.label }}
+          <span v-if="tab.to === '/shortlist' && auth.isLoggedIn">({{ shortlist.count }})</span>
         </RouterLink>
       </div>
     </div>

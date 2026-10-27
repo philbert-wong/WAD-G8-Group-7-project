@@ -7,6 +7,8 @@ import CPFCalView from '../views/CPFCalView.vue'
 import CompareView from '../views/CompareView.vue' // FEATURE 7 (Jihao): compare shortlisted flats
 import MapView from '../views/MapView.vue' // FINAL DRAFT: map of every block + PHG circle
 
+import { useAuthStore } from '../stores/auth'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -19,6 +21,7 @@ const router = createRouter({
       path: '/shortlist',
       name: 'shortlist',
       component: ShortlistView,
+      meta: { requiresAuth: true }, // only for logged-in users (see the guard below)
     },
     {
       path: '/login',
@@ -35,6 +38,7 @@ const router = createRouter({
       path: '/compare',
       name: 'compare',
       component: CompareView,
+      meta: { requiresAuth: true }, // only for logged-in users (see the guard below)
     },
     {
       // FINAL DRAFT: map of every block, coloured by price, with the PHG 4 km circle
@@ -43,6 +47,23 @@ const router = createRouter({
       component: MapView,
     },
   ],
+})
+
+// Navigation guard (Week 11 slides 35-36): runs before every page change.
+// A page with meta.requiresAuth needs a logged-in user; otherwise go to /login,
+// and remember the page in ?redirect=... so LoginView can send the user back after logging in.
+// (This is only for the user experience: the server still checks the token on every shortlist call.)
+router.beforeEach(function (to) {
+  if (!to.meta.requiresAuth) {
+    return true
+  }
+
+  const auth = useAuthStore()
+  if (auth.isLoggedIn) {
+    return true
+  }
+
+  return { path: '/login', query: { redirect: to.fullPath } }
 })
 
 export default router
