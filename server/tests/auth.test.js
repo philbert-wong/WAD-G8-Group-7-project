@@ -1,22 +1,17 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../app.js';
-import { Shortlist } from '../models/shortlist-model.js';
-import { getToken, loadTestData, startTestDb, stopTestDb } from './helpers.js';
-
-const app = createApp();
-let mongo;
+import { BASE_URL, startTestDb, stopTestDb } from './helpers.js';
 
 beforeAll(async () => {
-  mongo = await startTestDb();
+  await startTestDb();
 });
 
-afterAll(() => stopTestDb(mongo));
+afterAll(() => stopTestDb());
 
 
 describe('/api/auth', () => {
   it('registers a user and returns a token', async () => {
-    const res = await request(app)
+    const res = await request(BASE_URL)
       .post('/api/auth/register')
       .send({ email: 'new@example.com', password: 'password123' });
 
@@ -29,14 +24,14 @@ describe('/api/auth', () => {
 
  it('rejects a duplicate email', async () => {
     const body = { email: 'dup@example.com', password: 'password123' };
-    await request(app).post('/api/auth/register').send(body);
-    const res = await request(app).post('/api/auth/register').send(body);
+    await request(BASE_URL).post('/api/auth/register').send(body);
+    const res = await request(BASE_URL).post('/api/auth/register').send(body);
 
     expect(res.status).toBe(409);
   });
 
   it('rejects a short password', async () => {
-    const res = await request(app)
+    const res = await request(BASE_URL)
       .post('/api/auth/register')
       .send({ email: 'short@example.com', password: '123' });
 
@@ -45,18 +40,18 @@ describe('/api/auth', () => {
 
   it('logs in with the right password', async () => {
     const body = { email: 'login@example.com', password: 'password123' };
-    await request(app).post('/api/auth/register').send(body);
-    const res = await request(app).post('/api/auth/login').send(body);
+    await request(BASE_URL).post('/api/auth/register').send(body);
+    const res = await request(BASE_URL).post('/api/auth/login').send(body);
 
     expect(res.status).toBe(200);
     expect(typeof res.body.token).toBe('string');
   });
 
   it('rejects a wrong password', async () => {
-    await request(app)
+    await request(BASE_URL)
       .post('/api/auth/register')
       .send({ email: 'wrong@example.com', password: 'password123' });
-    const res = await request(app)
+    const res = await request(BASE_URL)
       .post('/api/auth/login')
       .send({ email: 'wrong@example.com', password: 'not-the-password' });
 

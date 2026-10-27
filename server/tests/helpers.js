@@ -1,19 +1,28 @@
-// Shared test setup: a throwaway MongoDB that lives in memory, so tests never touch your real database.
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDb, disconnectDb } from '../db.js';
-import { Block } from '../models/block-model.js';
-import { Amenity } from '../models/amenity-model.js';
+// Shared test setup. The real server.js is already running on port 8001 (started by start-test-server.js)
+// and uses a throwaway MongoDB that lives in memory. These helpers connect to that SAME database
+// to put test data in, so tests never touch your real database.
+import { inject } from 'vitest';
+import { createRequire } from 'node:module';
+import request from 'supertest';
+
+// Our server files use require (CommonJS, like class), so the tests load them with require too
+const require = createRequire(import.meta.url);
+const mongoose = require('mongoose');
+export const Block = require('../models/block-model').Block;
+export const Amenity = require('../models/amenity-model').Amenity;
+export const Shortlist = require('../models/shortlist-model').Shortlist;
+export const User = require('../models/user-model').User;
+
+// Where the test server is listening (see start-test-server.js)
+export const BASE_URL = 'http://localhost:8001';
 
 // Three blocks:
 //   A  Ang Mo Kio  4 ROOM  $560,000  old lease (1979)  6 min walk
 //   B  Punggol     4 ROOM  $680,000  new lease (2018)  3 min walk   <- has an MRT and hawker centre next to it
 //   C  Bedok       3 ROOM  $360,000  old lease (1979)  15 min walk
 
-import request from 'supertest';
-import { createApp } from '../app.js';
-
 export async function getToken(email = 'test@example.com') {
-  const res = await request(createApp())
+  const res = await request(BASE_URL)
     .post('/api/auth/register')
     .send({ email: email, password: 'password123' });
   return res.body.token;
@@ -38,15 +47,17 @@ const testAmenities = [
   { category: 'hawker', name: 'Test Hawker', location: { type: 'Point', coordinates: [103.905, 1.4] } },
 ];
 
+// Connects to the throwaway database and empties it, so every test file starts from nothing
 export async function startTestDb() {
-  const mongo = await MongoMemoryServer.create();
-  await connectDb(mongo.getUri());
-  return mongo;
+  await mongoose.connect(inject('dbUri'));
+  await Block.deleteMany({});
+  await Amenity.deleteMany({});
+  await Shortlist.deleteMany({});
+  await User.deleteMany({});
 }
 
-export async function stopTestDb(mongo) {
-  await disconnectDb();
-  await mongo.stop();
+export async function stopTestDb() {
+  await mongoose.disconnect();
 }
 
 // Fills the blocks and amenities, and returns the saved blocks so tests can use their ids.

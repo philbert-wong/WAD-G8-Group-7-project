@@ -1,8 +1,24 @@
 // The /api/blocks controller: search, town names, nearby blocks, and one block's details.
 // routes/blocks-routes.js decides which address runs which function below.
-import { Block, toCard, earliestCommenceYear } from '../models/block-model.js';
-import { Amenity, findNearestAmenities } from '../models/amenity-model.js';
-import { oneMapEmail, oneMapPassword } from '../config.js';
+const blockModel = require('../models/block-model');
+const amenityModel = require('../models/amenity-model');
+
+// The parts of the models this file uses
+const Block = blockModel.Block;
+const toCard = blockModel.toCard;
+const earliestCommenceYear = blockModel.earliestCommenceYear;
+const Amenity = amenityModel.Amenity;
+const findNearestAmenities = amenityModel.findNearestAmenities;
+
+// OneMap login from config.env (free account at onemap.gov.sg). Needed for place search and walking routes.
+let oneMapEmail = '';
+if (process.env.ONEMAP_EMAIL) {
+  oneMapEmail = process.env.ONEMAP_EMAIL;
+}
+let oneMapPassword = '';
+if (process.env.ONEMAP_PASSWORD) {
+  oneMapPassword = process.env.ONEMAP_PASSWORD;
+}
 
 // =====================================================================
 // Helpers (only used in this file)
@@ -222,7 +238,7 @@ function compareByPrice(a, b) {
 
 // GET /api/blocks?q=punggol&flatType=4 ROOM&maxPrice=700000&minLease=60
 // Search + filter. Sends every matching block (we only have a few hundred), cheapest first.
-export async function searchBlocks(req, res) {
+exports.searchBlocks = async (req, res) => {
   // The number filters must be numbers (or left out)
   const numberFields = ['maxPrice', 'minLease'];
   for (const field of numberFields) {
@@ -245,22 +261,22 @@ export async function searchBlocks(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // GET /api/blocks/area
 // Every town name in the database, for the search suggestions
-export async function listTowns(req, res) {
+exports.listTowns = async (req, res) => {
   try {
     const towns = await Block.distinct('town');
     res.json(towns);
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // GET /api/blocks/nearby?lat=1.40&lng=103.90&radius=1000&limit=20
 // GEOSPATIAL: blocks within `radius` metres of a point, closest first.
-export async function nearbyBlocks(req, res) {
+exports.nearbyBlocks = async (req, res) => {
   // lat and lng must be numbers, and both must be sent
   const pointFields = ['lat', 'lng'];
   for (const field of pointFields) {
@@ -327,11 +343,11 @@ export async function nearbyBlocks(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // GET /api/blocks/:id/amenities
 // Nearest MRT, hawker centre, park and school, with distance in metres.
-export async function blockAmenities(req, res) {
+exports.blockAmenities = async (req, res) => {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -343,11 +359,11 @@ export async function blockAmenities(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // GET /api/blocks/:id/sales
 // The recent sales behind the price range: month, storey, floor area, price and price per m2.
-export async function blockSales(req, res) {
+exports.blockSales = async (req, res) => {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -360,11 +376,11 @@ export async function blockSales(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // GET /api/blocks/:id
 // One block, in the same shape as a search result card
-export async function oneBlock(req, res) {
+exports.oneBlock = async (req, res) => {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -375,12 +391,12 @@ export async function oneBlock(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // 1. GET /api/blocks/place?q=560406
 // OneMap search: turns an address / postal code / place name into { name, lat, lng }.
 // The frontend then calls /api/blocks/nearby?lat=..&lng=.. with it.
-export async function findPlace(req, res) {
+exports.findPlace = async (req, res) => {
   if (isBlank(req.query.q)){
     return res.status(400).json({ message: 'q is required'});
   }
@@ -407,11 +423,11 @@ export async function findPlace(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // 2. GET /api/blocks/:id/live-sales
 // Latest sales for this block straight from data.gov.sg, in the same shape as /sales.
-export async function liveSales(req, res) {
+exports.liveSales = async (req, res) => {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -483,12 +499,12 @@ export async function liveSales(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 
 // 3. GET /api/blocks/:id/walk-to-mrt
 // Real walking time to the nearest MRT from OneMap's routing service.
-export async function walkToMrt(req, res) {
+exports.walkToMrt = async (req, res) => {
   try {
     const block = await Block.findById(req.params.id);
     if (block === null) {
@@ -535,4 +551,4 @@ export async function walkToMrt(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};

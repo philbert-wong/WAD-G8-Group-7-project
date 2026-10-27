@@ -1,8 +1,9 @@
 // The /api/blocks routes: which address runs which function in controllers/blocks-controller.js
-import { Router } from 'express';
-import * as blocksController from '../controllers/blocks-controller.js';
+const express = require('express');
 
-const router = Router();
+const blocksController = require('../controllers/blocks-controller');
+
+const router = express.Router(); // sub application
 
 router.get('/', blocksController.searchBlocks);
 router.get('/area', blocksController.listTowns);
@@ -14,4 +15,5 @@ router.get('/:id/live-sales', blocksController.liveSales);
 router.get('/:id/walk-to-mrt', blocksController.walkToMrt);
 router.get('/:id', blocksController.oneBlock);
 
-export default router;
+// EXPORT
+module.exports = router;

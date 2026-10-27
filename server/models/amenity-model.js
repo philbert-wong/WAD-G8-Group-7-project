@@ -1,6 +1,7 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-export const CATEGORIES = ['mrt', 'hawker', 'park', 'school'];
+const CATEGORIES = ['mrt', 'hawker', 'park', 'school'];
+exports.CATEGORIES = CATEGORIES;
 
 // One document = one place near blocks, e.g. an MRT station or a hawker centre
 const amenitySchema = new mongoose.Schema({
@@ -14,7 +15,8 @@ const amenitySchema = new mongoose.Schema({
 
 amenitySchema.index({ location: '2dsphere' });
 
-export const Amenity = mongoose.model('Amenity', amenitySchema);
+const Amenity = mongoose.model('Amenity', amenitySchema);
+exports.Amenity = Amenity;
 
 // ---------- Nearest amenities (used by the blocks controller) ----------
 
@@ -22,7 +24,7 @@ export const Amenity = mongoose.model('Amenity', amenitySchema);
 //
 // $geoNear sorts amenities by distance from `near` and puts the distance (in metres)
 // in a new field called "distance". It must be the first stage of the aggregate.
-export async function findNearestAmenities(location) {
+exports.findNearestAmenities = async function (location) {
   const results = [];
 
   for (const category of CATEGORIES) {
@@ -50,7 +52,7 @@ export async function findNearestAmenities(location) {
   }
 
   return results;
-}
+};
 
 // ---------- Straight-line distance (used by seed.js) ----------
 
@@ -65,7 +67,7 @@ function toRadians(degrees) {
 }
 
 // pointA and pointB are [latitude, longitude], e.g. [1.37, 103.85]
-export function straightLineDistance(pointA, pointB) {
+exports.straightLineDistance = function (pointA, pointB) {
   const lat1 = pointA[0];
   const lng1 = pointA[1];
   const lat2 = pointB[0];
@@ -80,4 +82,4 @@ export function straightLineDistance(pointA, pointB) {
     Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * sinHalfLng * sinHalfLng;
 
   return 2 * EARTH_RADIUS * Math.asin(Math.sqrt(a));
-}
+};

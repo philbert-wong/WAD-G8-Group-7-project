@@ -1,7 +1,12 @@
 // The /api/shortlist controller: list, save, change the note of, and remove saved flats.
 // routes/shortlist-routes.js decides which address runs which function below (all need a login).
-import { Shortlist } from '../models/shortlist-model.js';
-import { Block, toCard } from '../models/block-model.js';
+const shortlistModel = require('../models/shortlist-model');
+const blockModel = require('../models/block-model');
+
+// The parts of the models this file uses
+const Shortlist = shortlistModel.Shortlist;
+const Block = blockModel.Block;
+const toCard = blockModel.toCard;
 
 // =====================================================================
 // Helpers (only used in this file)
@@ -47,7 +52,7 @@ function compareNewestFirst(a, b) {
 
 // READ   GET /api/shortlist
 // Every saved flat, newest first
-export async function listShortlist(req, res) {
+exports.listShortlist = async (req, res) => {
   try {
     const items = await Shortlist.find({ user: req.user.id});
     items.sort(compareNewestFirst);
@@ -65,11 +70,11 @@ export async function listShortlist(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // CREATE POST /api/shortlist   body: { "blockId": "...", "note": "near my parents" }
 // Saves a flat. The note is optional.
-export async function addToShortlist(req, res) {
+exports.addToShortlist = async (req, res) => {
   if (req.body === undefined || !req.body.blockId) {
     return res.status(400).json({ message: 'blockId is required' });
   }
@@ -94,11 +99,11 @@ export async function addToShortlist(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // UPDATE PATCH /api/shortlist/:id   body: { "note": "visited on Sunday" }
 // Changes the note of one saved flat
-export async function updateNote(req, res) {
+exports.updateNote = async (req, res) => {
   if (req.body === undefined || typeof req.body.note !== 'string') {
     return res.status(400).json({ message: 'note must be text' });
   }
@@ -120,11 +125,11 @@ export async function updateNote(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
 
 // DELETE DELETE /api/shortlist/:id
 // Removes one saved flat. 204 means "done, nothing to send back".
-export async function removeFromShortlist(req, res) {
+exports.removeFromShortlist = async (req, res) => {
   try {
     const item = await Shortlist.findOneAndDelete({_id: req.params.id, user: req.user.id});
     if (item === null) {
@@ -134,4 +139,4 @@ export async function removeFromShortlist(req, res) {
   } catch (error) {
     sendError(res, error);
   }
-}
+};
