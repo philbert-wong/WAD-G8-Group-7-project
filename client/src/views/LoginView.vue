@@ -4,7 +4,6 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { RouterLink, useRouter } from 'vue-router'
-import { getErrorMessage } from '../utils/errorMessage.js'
 import { saveLogin, currentUser } from '../utils/auth.js'
 
 // Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
@@ -66,7 +65,12 @@ async function submit() {
     saveLogin(response.data.token, response.data.user)
     router.push('/')
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false
 }

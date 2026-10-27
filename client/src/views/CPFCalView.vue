@@ -19,7 +19,6 @@ import { ref, computed } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { calculateBudget } from '../utils/affordability.js'
 import { MAX_LOAN_YEARS, HDB_LOAN_INTEREST_RATE, HDB_LOAN_LTV_PERCENT, MSR_PERCENT } from '../utils/affordabilityRules.js'
-import { formatPrice } from '../utils/format.js'
 import PhgChecker from '../components/PhgChecker.vue'
 
 // =====================================================================================
@@ -323,9 +322,9 @@ function applyBudget() {
               <div class="col-6 col-md-3">Buyers: {{ getResult().totals.buyers }}</div>
               <div class="col-6 col-md-3">First-timers: {{ getResult().totals.firstTimers }}</div>
               <div class="col-6 col-md-3">Second-timers: {{ getResult().totals.secondTimers }}</div>
-              <div class="col-6 col-md-3">Income: {{ formatPrice(getResult().totals.income) }}</div>
-              <div class="col-6 col-md-3">CPF OA: {{ formatPrice(getResult().totals.cpf) }}</div>
-              <div class="col-6 col-md-3">Cash: {{ formatPrice(getResult().totals.cash) }}</div>
+              <div class="col-6 col-md-3">Income: {{ '$' + getResult().totals.income.toLocaleString('en-SG') }}</div>
+              <div class="col-6 col-md-3">CPF OA: {{ '$' + getResult().totals.cpf.toLocaleString('en-SG') }}</div>
+              <div class="col-6 col-md-3">Cash: {{ '$' + getResult().totals.cash.toLocaleString('en-SG') }}</div>
             </div>
           </div>
 
@@ -345,7 +344,7 @@ function applyBudget() {
           <p class="mb-1">
             Household: <strong>{{ householdLabel(getResult().type) }}</strong>
           </p>
-          <p class="text-muted small">Household monthly income: {{ formatPrice(getResult().totals.income) }}</p>
+          <p class="text-muted small">Household monthly income: {{ '$' + getResult().totals.income.toLocaleString('en-SG') }}</p>
 
           <!-- FEATURE 3 (both): every grant, with the reason -->
           <table class="table align-middle">
@@ -356,14 +355,14 @@ function applyBudget() {
                   <div class="small text-muted">{{ grant.reason }}</div>
                 </td>
                 <td class="text-end">
-                  <span v-if="grant.status === 'yes'" class="text-success fw-semibold">{{ formatPrice(grant.amount) }}</span>
+                  <span v-if="grant.status === 'yes'" class="text-success fw-semibold">{{ '$' + grant.amount.toLocaleString('en-SG') }}</span>
                   <span v-else-if="grant.status === 'unknown'" class="text-warning">Not counted yet</span>
                   <span v-else class="text-muted">$0</span>
                 </td>
               </tr>
               <tr class="fw-bold">
                 <td>Total grants</td>
-                <td class="text-end">{{ formatPrice(getResult().grantsTotal) }}</td>
+                <td class="text-end">{{ '$' + getResult().grantsTotal.toLocaleString('en-SG') }}</td>
               </tr>
             </tbody>
           </table>
@@ -396,7 +395,7 @@ function applyBudget() {
         <div class="card-body p-4">
           <!-- FEATURE 4 (Jihao): max price including the HDB loan -->
           <p class="text-muted small mb-1">Estimated max flat price</p>
-          <h3 class="mb-1">{{ formatPrice(getResult().maxBudget) }}</h3>
+          <h3 class="mb-1">{{ '$' + getResult().maxBudget.toLocaleString('en-SG') }}</h3>
           <p class="small text-muted">
             <span v-if="getResult().limitedBy === 'savings'">
               Limited by your savings and grants: they must cover at least {{ 100 - HDB_LOAN_LTV_PERCENT }}% of the price.
@@ -412,11 +411,11 @@ function applyBudget() {
           <h6 class="mt-3">How it is paid for</h6>
           <table class="table table-sm">
             <tbody>
-              <tr><td>HDB loan ({{ HDB_LOAN_INTEREST_RATE }}% a year)</td><td class="text-end">{{ formatPrice(getResult().loan) }}</td></tr>
-              <tr><td>Grants</td><td class="text-end">{{ formatPrice(getResult().fromGrants) }}</td></tr>
-              <tr><td>CPF OA savings</td><td class="text-end">{{ formatPrice(getResult().fromCpf) }}</td></tr>
-              <tr><td>Cash savings</td><td class="text-end">{{ formatPrice(getResult().fromCash) }}</td></tr>
-              <tr class="fw-bold"><td>Monthly loan repayment</td><td class="text-end">{{ formatPrice(getResult().monthlyRepayment) }}</td></tr>
+              <tr><td>HDB loan ({{ HDB_LOAN_INTEREST_RATE }}% a year)</td><td class="text-end">{{ '$' + getResult().loan.toLocaleString('en-SG') }}</td></tr>
+              <tr><td>Grants</td><td class="text-end">{{ '$' + getResult().fromGrants.toLocaleString('en-SG') }}</td></tr>
+              <tr><td>CPF OA savings</td><td class="text-end">{{ '$' + getResult().fromCpf.toLocaleString('en-SG') }}</td></tr>
+              <tr><td>Cash savings</td><td class="text-end">{{ '$' + getResult().fromCash.toLocaleString('en-SG') }}</td></tr>
+              <tr class="fw-bold"><td>Monthly loan repayment</td><td class="text-end">{{ '$' + getResult().monthlyRepayment.toLocaleString('en-SG') }}</td></tr>
             </tbody>
           </table>
 

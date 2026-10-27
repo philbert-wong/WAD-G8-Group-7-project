@@ -5,7 +5,6 @@
 // When the user changes a box, we send the change up with emit.
 // DESIGN PREVIEW (Cosy Professional): now a sidebar card. Flat type became "chips" (buttons);
 // props and emits are the same as before.
-import { formatPrice } from '../utils/format.js'
 // FINAL DRAFT: Yujia's "Calculate My Affordability" button is now a link under the budget slider
 import { RouterLink } from 'vue-router'
 
@@ -68,7 +67,7 @@ function onClear() {
 
     <!-- Budget slider -->
     <label for="filter-budget" class="flab d-flex justify-content-between align-items-end">
-      Max budget <span class="big-val serif">{{ formatPrice(Number(props.filters.maxPrice)) }}</span>
+      Max budget <span class="big-val serif">{{ '$' + Number(props.filters.maxPrice).toLocaleString('en-SG') }}</span>
     </label>
     <input
       id="filter-budget"

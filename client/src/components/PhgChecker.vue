@@ -5,8 +5,6 @@
 // Uses the existing GET /api/blocks/nearby endpoint (MongoDB $geoNear), no new route.
 import { ref } from 'vue'
 import axios from 'axios'
-import { getErrorMessage } from '../utils/errorMessage.js'
-import { formatPrice } from '../utils/format.js'
 import { PHG_NEAR_DISTANCE_METRES } from '../utils/affordabilityRules.js'
 
 // Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
@@ -53,7 +51,12 @@ async function loadAddresses() {
     list.sort(compareByLabel)
     addresses.value = list
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
 }
 
@@ -84,7 +87,12 @@ async function checkPhg() {
     nearbyBlocks.value = response.data.results
     checked.value = true
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false
 }
@@ -154,7 +162,7 @@ loadAddresses()
                   <div class="small text-muted">{{ block.town }}</div>
                 </td>
                 <td>{{ block.flatType }}</td>
-                <td class="text-end">{{ formatPrice(block.price) }}</td>
+                <td class="text-end">{{ '$' + block.price.toLocaleString('en-SG') }}</td>
                 <td class="text-end">{{ formatDistance(block.distance) }}</td>
               </tr>
             </tbody>

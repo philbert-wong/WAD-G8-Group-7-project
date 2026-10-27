@@ -4,9 +4,7 @@
 // so SearchView and ShortlistItem did not need to change how they use this card.
 import { ref } from 'vue'
 import axios from 'axios'
-import { getErrorMessage } from '../utils/errorMessage.js'
 import PriceDetails from './PriceDetails.vue'
-import { formatPrice } from '../utils/format.js'
 
 // Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
 const BASE_URL = 'http://localhost:8000'
@@ -45,7 +43,12 @@ async function toggleDetails() {
     amenities.value = response.data.amenities
     walk.value = walkResponse.data
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
   }
   loading.value = false
 }
@@ -53,9 +56,9 @@ async function toggleDetails() {
 // "$600,000 – $720,000", or one price when every sale was the same
 function formatRange(low, high) {
   if (low === high) {
-    return formatPrice(low)
+    return '$' + low.toLocaleString('en-SG')
   }
-  return formatPrice(low) + ' – ' + formatPrice(high)
+  return '$' + low.toLocaleString('en-SG') + ' – ' + '$' + high.toLocaleString('en-SG')
 }
 
 const categoryNames = {
@@ -128,7 +131,7 @@ function barWidth(score) {
         <div class="lab">Resale price range · last 12 months</div>
         <div class="price serif">{{ formatRange(block.priceLow, block.priceHigh) }}</div>
         <span class="pill green">{{ block.salesCount }} sale(s)</span>
-        <span class="pill dark ms-1">Median {{ formatPrice(block.price) }}</span>
+        <span class="pill dark ms-1">Median {{ '$' + block.price.toLocaleString('en-SG') }}</span>
       </div>
 
       <!-- Lease + MRT -->
