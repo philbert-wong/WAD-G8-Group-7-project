@@ -1,8 +1,8 @@
 // Shared test setup: a throwaway MongoDB that lives in memory, so tests never touch your real database.
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDb, disconnectDb } from '../server/db.js';
-import { Block } from '../server/models/Block.js';
-import { Amenity } from '../server/models/Amenity.js';
+import { connectDb, disconnectDb } from '../db.js';
+import { Block } from '../models/Block.js';
+import { Amenity } from '../models/Amenity.js';
 
 // Three blocks:
 //   A  Ang Mo Kio  4 ROOM  $560,000  old lease (1979)  6 min walk
@@ -10,7 +10,7 @@ import { Amenity } from '../server/models/Amenity.js';
 //   C  Bedok       3 ROOM  $360,000  old lease (1979)  15 min walk
 
 import request from 'supertest';
-import { createApp } from '../server/app.js';
+import { createApp } from '../app.js';
 
 export async function getToken(email = 'test@example.com') {
   const res = await request(createApp())

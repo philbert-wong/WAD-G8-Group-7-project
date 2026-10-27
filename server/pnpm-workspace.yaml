@@ -1,0 +1,4 @@
+# Used by pnpm only: which packages may run install scripts (same idea as wk6 code-along's pnpm-workspace.yaml).
+allowBuilds:
+  bcrypt: false
+  mongodb-memory-server: true

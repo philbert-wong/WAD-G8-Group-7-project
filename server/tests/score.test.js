@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { getWeights, makeDefaultPreferences, matchScore, subScore } from '../client/src/utils/matchScore.js';
-import { earliestCommenceYear, remainingLease } from '../server/lib/lease.js';
-import { straightLineDistance } from '../server/lib/straightLineDistance.js';
+import { getWeights, makeDefaultPreferences, matchScore, subScore } from '../../client/src/utils/matchScore.js';
+import { earliestCommenceYear, remainingLease } from '../lib/lease.js';
+import { straightLineDistance } from '../lib/straightLineDistance.js';
 
 // Same max distance (1000 m) for all 4 categories, so the numbers are easy to check by hand
 const maxDistances = { school: 1000, mrt: 1000, hawker: 1000, park: 1000 };
