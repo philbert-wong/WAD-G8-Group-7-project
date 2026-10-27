@@ -8,6 +8,9 @@ import axios from 'axios'
 import { formatPrice } from '../utils/format.js'
 import { getErrorMessage } from '../utils/errorMessage.js'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 const props = defineProps({
   blockId: String,
 })
@@ -24,7 +27,7 @@ const details = ref(null)
 // Gets the recent sales of this block from the server
 async function load() {
   try {
-    const response = await axios.get('/api/blocks/' + props.blockId + '/live-sales')
+    const response = await axios.get(`${BASE_URL}/api/blocks/${props.blockId}/live-sales`)
     details.value = response.data
   } catch (error) {
     errorMessage.value = getErrorMessage(error)

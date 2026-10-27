@@ -7,6 +7,9 @@ import { RouterLink, useRouter } from 'vue-router'
 import { getErrorMessage } from '../utils/errorMessage.js'
 import { saveLogin, currentUser } from '../utils/auth.js'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 // The router lets us change page from code (like clicking a link)
 const router = useRouter()
 
@@ -52,9 +55,9 @@ async function submit() {
   }
 
   // Both routes take the same body and answer { token, user: { id, email } }
-  let url = '/api/auth/login'
+  let url = `${BASE_URL}/api/auth/login`
   if (mode.value === 'register') {
-    url = '/api/auth/register'
+    url = `${BASE_URL}/api/auth/register`
   }
 
   loading.value = true

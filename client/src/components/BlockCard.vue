@@ -8,6 +8,9 @@ import { getErrorMessage } from '../utils/errorMessage.js'
 import PriceDetails from './PriceDetails.vue'
 import { formatPrice } from '../utils/format.js'
 
+// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
+const BASE_URL = 'http://localhost:8000'
+
 const props = defineProps({
   block: Object, // one card from /api/blocks
   saved: Boolean, // is it in the shortlist?
@@ -37,8 +40,8 @@ async function toggleDetails() {
   loading.value = true
   errorMessage.value = ''
   try {
-    const response = await axios.get('/api/blocks/' + props.block.id + '/amenities')
-    const walkResponse = await axios.get('/api/blocks/'+ props.block.id + '/walk-to-mrt')
+    const response = await axios.get(`${BASE_URL}/api/blocks/${props.block.id}/amenities`)
+    const walkResponse = await axios.get(`${BASE_URL}/api/blocks/${props.block.id}/walk-to-mrt`)
     amenities.value = response.data.amenities
     walk.value = walkResponse.data
   } catch (error) {
