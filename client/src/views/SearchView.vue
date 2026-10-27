@@ -345,10 +345,10 @@ onMounted(loadPage)
       <input
         v-model="placeText"
         type="search"
-        class="form-control"
+        class="form-control cosy-input flex-grow-1"
         placeholder="Or find flats near an address or postal code e.g. 560406"
       />
-      <button class="btn btn-outline-primary" type="submit">Find near me</button>
+      <button class="act-btn primary" type="submit">Find near me</button>
     </form>
 
     <p v-if="placeName" class="text-muted mb-3">
@@ -414,11 +414,22 @@ onMounted(loadPage)
 .resbar b {
   color: var(--char);
 }
-/* [AI-ASSISTED] The sidebar stays on screen while you scroll the results (position: sticky) */
+
+.search-box input {
+  font-size: 16px;
+  padding: 11px 14px;
+}
+
 @media (min-width: 992px) {
   .sidebar {
     position: sticky;
     top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
   }
 }
+
+
+
+
 </style>
