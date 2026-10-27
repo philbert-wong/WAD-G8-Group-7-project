@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
-import { Shortlist } from '../models/Shortlist.js';
+import { Shortlist } from '../models/shortlist-model.js';
 import { getToken, loadTestData, startTestDb, stopTestDb } from './helpers.js';
 
 const app = createApp();

@@ -1,8 +1,8 @@
 // Shared test setup: a throwaway MongoDB that lives in memory, so tests never touch your real database.
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { connectDb, disconnectDb } from '../db.js';
-import { Block } from '../models/Block.js';
-import { Amenity } from '../models/Amenity.js';
+import { Block } from '../models/block-model.js';
+import { Amenity } from '../models/amenity-model.js';
 
 // Three blocks:
 //   A  Ang Mo Kio  4 ROOM  $560,000  old lease (1979)  6 min walk

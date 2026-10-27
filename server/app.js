@@ -1,10 +1,10 @@
 // Builds the Express app: JSON body reading, the API routes and the error handler. index.js starts it.
 import express from 'express';
 import cors from 'cors';
-import blocksRouter from './routes/blocks.js';
-import shortlistRouter from './routes/shortlist.js';
+import blocksRouter from './routes/blocks-routes.js';
+import shortlistRouter from './routes/shortlist-routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import authRouter from './routes/auth.js';
+import authRouter from './routes/auth-routes.js';
 
 // GET /api/health: a quick "is the server running?" check
 function healthCheck(req, res) {

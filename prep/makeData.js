@@ -12,7 +12,7 @@ import { parse } from 'csv-parse/sync';
 import { summariseResale } from './summariseResale.js';
 import { findPoint, saveCache } from './oneMap.js';
 import { DATASETS, downloadDataset, parsePoints, parseSchools } from './amenityFiles.js';
-import { straightLineDistance } from '../server/lib/straightLineDistance.js';
+import { straightLineDistance } from './straightLineDistance.js';
 
 const TOWNS = ['ANG MO KIO', 'BISHAN', 'PUNGGOL', 'TAMPINES'];
 const BLOCKS_PER_TOWN = 40;
