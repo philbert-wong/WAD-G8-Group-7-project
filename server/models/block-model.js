@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 // One document = one HDB block + one flat type (e.g. "Blk 406 Ang Mo Kio Ave 10, 4 ROOM")
 const blockSchema = new mongoose.Schema({
@@ -41,7 +41,8 @@ const blockSchema = new mongoose.Schema({
 // This index is what makes distance queries ($geoNear) possible
 blockSchema.index({ location: '2dsphere' });
 
-export const Block = mongoose.model('Block', blockSchema);
+const Block = mongoose.model('Block', blockSchema);
+exports.Block = Block;
 
 // ---------- Lease helpers (used by toCard below and by the search filter) ----------
 
@@ -49,21 +50,21 @@ export const Block = mongoose.model('Block', blockSchema);
 const LEASE_YEARS = 99;
 
 // A block that started its lease in 1990 has 99 - (2026 - 1990) = 63 years left in 2026.
-export function remainingLease(leaseCommenceYear) {
+exports.remainingLease = function (leaseCommenceYear) {
   const thisYear = new Date().getFullYear();
   return LEASE_YEARS - (thisYear - leaseCommenceYear);
-}
+};
 
 // Used by the filter: "at least 60 years left" means "lease must have started in this year or later".
-export function earliestCommenceYear(minLease) {
+exports.earliestCommenceYear = function (minLease) {
   const thisYear = new Date().getFullYear();
   return thisYear - LEASE_YEARS + minLease;
-}
+};
 
 // ---------- Card (used by the blocks and shortlist controllers) ----------
 
 // Turns a block from MongoDB into the simple object the frontend shows on a card.
-export function toCard(block) {
+exports.toCard = function (block) {
   // MongoDB stores the position as [longitude, latitude]
   const lng = block.location.coordinates[0];
   const lat = block.location.coordinates[1];
@@ -84,11 +85,11 @@ export function toCard(block) {
     priceLow: block.priceLow,
     priceHigh: block.priceHigh,
     salesCount: salesCount,
-    remainingLease: remainingLease(block.leaseCommenceYear),
+    remainingLease: exports.remainingLease(block.leaseCommenceYear),
     mrtName: block.mrtName,
     mrtWalkMinutes: block.mrtWalkMinutes,
     distances: block.distances, // nearest school, mrt, hawker, park in metres (for the match score)
     lat: lat,
     lng: lng,
   };
-}
+};

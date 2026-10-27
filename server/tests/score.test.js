@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { createRequire } from 'node:module';
 import { getWeights, makeDefaultPreferences, matchScore, subScore } from '../../client/src/utils/matchScore.js';
-import { earliestCommenceYear, remainingLease } from '../models/block-model.js';
-import { straightLineDistance } from '../models/amenity-model.js';
+
+// Our server files use require (CommonJS, like class), so the test loads them with require too
+const require = createRequire(import.meta.url);
+const earliestCommenceYear = require('../models/block-model').earliestCommenceYear;
+const remainingLease = require('../models/block-model').remainingLease;
+const straightLineDistance = require('../models/amenity-model').straightLineDistance;
 
 // Same max distance (1000 m) for all 4 categories, so the numbers are easy to check by hand
 const maxDistances = { school: 1000, mrt: 1000, hawker: 1000, park: 1000 };

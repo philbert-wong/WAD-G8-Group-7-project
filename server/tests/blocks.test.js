@@ -1,21 +1,18 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../app.js';
-import { loadTestData, startTestDb, stopTestDb } from './helpers.js';
+import { BASE_URL, loadTestData, startTestDb, stopTestDb } from './helpers.js';
 
-const app = createApp();
-let mongo;
 let data;
 
 beforeAll(async () => {
-  mongo = await startTestDb();
+  await startTestDb();
   data = await loadTestData();
 });
 
-afterAll(() => stopTestDb(mongo));
+afterAll(() => stopTestDb());
 
 describe('GET /api/blocks (search and filter)', () => {
-  const search = (query) => request(app).get('/api/blocks').query(query);
+  const search = (query) => request(BASE_URL).get('/api/blocks').query(query);
 
   it('returns everything, cheapest first', async () => {
     const res = await search({});
@@ -68,7 +65,7 @@ describe('GET /api/blocks (search and filter)', () => {
 });
 
 describe('GET /api/blocks/nearby (geospatial)', () => {
-  const nearby = (query) => request(app).get('/api/blocks/nearby').query(query);
+  const nearby = (query) => request(BASE_URL).get('/api/blocks/nearby').query(query);
 
   it('needs lat and lng', async () => {
     expect((await nearby({})).status).toBe(400);
@@ -89,32 +86,32 @@ describe('GET /api/blocks/nearby (geospatial)', () => {
 
 describe('GET /api/blocks/:id', () => {
   it('returns one block', async () => {
-    const res = await request(app).get(`/api/blocks/${data.punggol._id}`);
+    const res = await request(BASE_URL).get(`/api/blocks/${data.punggol._id}`);
     expect(res.status).toBe(200);
     expect(res.body.town).toBe('PUNGGOL');
   });
 
   it('404s for an id that does not exist', async () => {
-    const res = await request(app).get('/api/blocks/64b64b64b64b64b64b64b64b');
+    const res = await request(BASE_URL).get('/api/blocks/64b64b64b64b64b64b64b64b');
     expect(res.status).toBe(404);
   });
 
   it('404s for an id that is not a real id', async () => {
-    const res = await request(app).get('/api/blocks/abc');
+    const res = await request(BASE_URL).get('/api/blocks/abc');
     expect(res.status).toBe(404);
   });
 });
 
 describe('GET /api/blocks/:id/sales', () => {
   it('returns the price range on the card', async () => {
-    const res = await request(app).get(`/api/blocks/${data.punggol._id}`);
+    const res = await request(BASE_URL).get(`/api/blocks/${data.punggol._id}`);
     expect(res.body.priceLow).toBe(650000);
     expect(res.body.priceHigh).toBe(720000);
     expect(res.body.salesCount).toBe(3);
   });
 
   it('returns each sale with its price per square metre, plus a summary', async () => {
-    const res = await request(app).get(`/api/blocks/${data.punggol._id}/sales`);
+    const res = await request(BASE_URL).get(`/api/blocks/${data.punggol._id}/sales`);
     expect(res.status).toBe(200);
     expect(res.body.count).toBe(3);
     expect(res.body.lowest).toBe(650000);
@@ -129,7 +126,7 @@ describe('GET /api/blocks/:id/sales', () => {
   });
 
   it('works for a block with no sales stored', async () => {
-    const res = await request(app).get(`/api/blocks/${data.bedok._id}/sales`);
+    const res = await request(BASE_URL).get(`/api/blocks/${data.bedok._id}/sales`);
     expect(res.status).toBe(200);
     expect(res.body.count).toBe(0);
   });
@@ -137,7 +134,7 @@ describe('GET /api/blocks/:id/sales', () => {
 
 describe('GET /api/blocks/:id/amenities', () => {
   it('returns the nearest amenity of each type with distance', async () => {
-    const res = await request(app).get(`/api/blocks/${data.punggol._id}/amenities`);
+    const res = await request(BASE_URL).get(`/api/blocks/${data.punggol._id}/amenities`);
     expect(res.status).toBe(200);
     const mrt = res.body.amenities.find((a) => a.category === 'mrt');
     expect(mrt.name).toBe('Test MRT');

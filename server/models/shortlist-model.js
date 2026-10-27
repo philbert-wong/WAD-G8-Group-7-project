@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 // One document = one bookmarked block, with an optional note
 const shortlistSchema = new mongoose.Schema(
@@ -10,4 +10,5 @@ const shortlistSchema = new mongoose.Schema(
   { timestamps: true }, // adds createdAt and updatedAt for free
 );
 
-export const Shortlist = mongoose.model('Shortlist', shortlistSchema);
+const Shortlist = mongoose.model('Shortlist', shortlistSchema);
+exports.Shortlist = Shortlist;

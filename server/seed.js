@@ -1,19 +1,29 @@
 // Fills MongoDB from the two JSON files in server/data/.   Run with:  pnpm seed
 // It clears the blocks and amenities first, so it is safe to run again.
 // It does NOT touch the shortlist (but saved items point to old block ids, so they stop showing).
-import { readFileSync } from 'node:fs';
-import { mongoUri } from './config.js';
-import { connectDb, disconnectDb } from './db.js';
-import { Block } from './models/block-model.js';
-import { Amenity, CATEGORIES, straightLineDistance } from './models/amenity-model.js';
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+const blockModel = require('./models/block-model');
+const amenityModel = require('./models/amenity-model');
+
+// The parts of the models this file uses
+const Block = blockModel.Block;
+const Amenity = amenityModel.Amenity;
+const CATEGORIES = amenityModel.CATEGORIES;
+const straightLineDistance = amenityModel.straightLineDistance;
+
+// Same settings file as server.js
+dotenv.config({ path: './config.env' });
 
 const WALKING_METRES_PER_MINUTE = 80;
 const ROUTE_IS_LONGER_THAN_STRAIGHT_LINE = 1.3; // streets are not straight
 
-// Reads one of the JSON files in server/data/
+// Reads one of the JSON files in server/data/ (__dirname = the folder this file is in)
 function readJson(fileName) {
-  const path = new URL('./data/' + fileName, import.meta.url);
-  const text = readFileSync(path, 'utf8');
+  const filePath = path.join(__dirname, 'data', fileName);
+  const text = fs.readFileSync(filePath, 'utf8');
   return JSON.parse(text);
 }
 
@@ -100,13 +110,29 @@ for (const a of amenities) {
   });
 }
 
-await connectDb(mongoUri);
-await Block.deleteMany({});
-await Amenity.deleteMany({});
-await Block.insertMany(blockDocs);
-await Amenity.insertMany(amenityDocs);
+// Connect, replace the blocks and amenities, then disconnect
+async function seed() {
+  // DB in config.env if it is there, otherwise the MongoDB running on this computer (same as server.js)
+  let dbAddress = 'mongodb://127.0.0.1:27017/check-in';
+  if (process.env.DB) {
+    dbAddress = process.env.DB;
+  }
 
-const blockCount = await Block.countDocuments();
-const amenityCount = await Amenity.countDocuments();
-console.log('Seeded ' + blockCount + ' blocks and ' + amenityCount + ' amenities');
-await disconnectDb();
+  try {
+    await mongoose.connect(dbAddress, { serverSelectionTimeoutMS: 8000 });
+    await Block.deleteMany({});
+    await Amenity.deleteMany({});
+    await Block.insertMany(blockDocs);
+    await Amenity.insertMany(amenityDocs);
+
+    const blockCount = await Block.countDocuments();
+    const amenityCount = await Amenity.countDocuments();
+    console.log('Seeded ' + blockCount + ' blocks and ' + amenityCount + ' amenities');
+  } catch (error) {
+    console.error('Seeding failed:', error.message);
+    process.exitCode = 1;
+  }
+  await mongoose.disconnect();
+}
+
+seed();
