@@ -1,0 +1,28 @@
+{
+  "trainedOn": "HDB resale prices (data.gov.sg), 4 towns, 2021-01 to Oct 2026, 31443 sales",
+  "startMonth": "2021-01",
+  "intercept": 9.188035,
+  "weights": {
+    "storey": 0.008567,
+    "lease_years": 0.010276,
+    "months_since_start": 0.006036,
+    "log_area": 0.665546
+  },
+  "town": {
+    "ANG MO KIO": 0,
+    "BISHAN": 0.16069,
+    "PUNGGOL": -0.228876,
+    "TAMPINES": -0.070208
+  },
+  "flatType": {
+    "2 ROOM": 0,
+    "3 ROOM": 0.054388,
+    "4 ROOM": 0.117158,
+    "5 ROOM": 0.169637,
+    "EXECUTIVE": 0.302107
+  },
+  "accuracy": {
+    "r2Test": 0.914,
+    "maeDollars": 42841
+  }
+}
