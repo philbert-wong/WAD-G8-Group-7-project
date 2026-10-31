@@ -26,16 +26,17 @@ const blockCount = ref(0)
 // budget and lease (the sliders' limits), so you first see every block and then narrow it down.
 const filters = ref({ q: '', flatType: '', maxPrice: '1000000', minLease: '20' })
 
-// For the PHG dropdown: one entry per address
-const addresses = ref([])
-const parentAddress = ref('')
+// For the PHG search box: what is typed, and the place OneMap found ({ name, lat, lng }, or null = no circle)
+const parentQuery = ref('')
+const parentPlace = ref(null)
 const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circle (null = no circle)
 
-// The map, the group holding the block dots, and the PHG circle live in normal variables
-// (Leaflet does not like Vue's ref)
+// The map, the group holding the block dots, the PHG circle and the parents' marker live in
+// normal variables (Leaflet does not like Vue's ref)
 let map = null
 let blockLayer = null
 let phgCircle = null
+let parentMarker = null
 
 // The price colours, cheapest first. Used by the dots and by the legend.
 const priceBands = [
@@ -107,10 +108,10 @@ async function loadBlocks() {
       place.cards.push(card)
     }
 
-    // PHG filter: when your parents' block is chosen, keep only the blocks within 4 km of it
+    // PHG filter: when your parents' place has been searched, keep only the blocks within 4 km of it
     // (on top of the other filters). map.distance is Leaflet's: the straight-line distance in
     // metres between two [lat, lng] points.
-    const parent = findParent()
+    const parent = parentPlace.value
     let shown = places
     if (parent !== null) {
       shown = []
@@ -162,73 +163,80 @@ function clearFilters() {
   loadBlocks()
 }
 
-// Fills the PHG dropdown with every block address (all flat types: it is where your parents live,
-// so it does not depend on the filters). Runs once when the page opens.
-async function loadAddresses() {
-  try {
-    const response = await axios.get(`${BASE_URL}/api/blocks`)
-    const blocks = response.data.results
-
-    const seen = []
-    const list = []
-    for (const block of blocks) {
-      // One dropdown entry per address (the same block appears once per flat type)
-      const label = 'Blk ' + block.block + ' ' + block.street + ' (' + block.town + ')'
-      if (!seen.includes(label)) {
-        seen.push(label)
-        list.push({ label: label, lat: block.lat, lng: block.lng })
-      }
-    }
-    list.sort(function (a, b) {
-      return a.label.localeCompare(b.label)
-    })
-    addresses.value = list
-  } catch (error) {
-    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage.value = error.response.data.message
-    } else {
-      errorMessage.value = error.message
-    }
-  }
-}
-
-// The parents' block chosen in the PHG dropdown ({ label, lat, lng }), or null for "No circle"
-function findParent() {
-  let parent = null
-  for (const address of addresses.value) {
-    if (address.label === parentAddress.value) {
-      parent = address
-    }
-  }
-  return parent
-}
-
-// PHG dropdown changed: draw (or remove) the 4 km circle, then reload the dots,
-// so only the blocks inside the circle are shown (together with the filters)
-function showPhg() {
-  // Remove the old circle first
+// Takes the old PHG circle and parents' marker off the map (if there are any)
+function removeParentDrawings() {
   if (phgCircle !== null) {
     map.removeLayer(phgCircle)
     phgCircle = null
   }
-
-  const parent = findParent()
-  if (parent !== null) {
-    phgCircle = L.circle([parent.lat, parent.lng], {
-      radius: PHG_NEAR_DISTANCE_METRES,
-      color: '#c0614a',
-      weight: 2,
-      fillOpacity: 0.08,
-    }).addTo(map)
-    map.fitBounds(phgCircle.getBounds())
+  if (parentMarker !== null) {
+    map.removeLayer(parentMarker)
+    parentMarker = null
   }
+}
+
+// PHG search (Search button or Enter): ask OneMap where the parents live (any address or postal code),
+// draw a marker and the 4 km circle there, then reload the dots so only the blocks inside are shown
+async function searchParent() {
+  errorMessage.value = ''
+  if (parentQuery.value.trim() === '') {
+    errorMessage.value = 'Type your parents\' address or postal code'
+    return
+  }
+
+  try {
+    // Our server asks OneMap and answers { name, lat, lng } for the best match
+    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: parentQuery.value } })
+    parentPlace.value = response.data
+  } catch (error) {
+    if (error.response && error.response.status === 500) {
+      // The server could not log in to OneMap (or something else broke there)
+      errorMessage.value = 'Place search failed. Check the OneMap login in server/config.env'
+    } else if (error.response && error.response.data && error.response.data.message) {
+      // e.g. "Place not found" (404)
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
+    return
+  }
+
+  const parent = parentPlace.value
+  removeParentDrawings()
+
+  // A small dark dot where the parents live, with its name in a popup.
+  // (A circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite.)
+  parentMarker = L.circleMarker([parent.lat, parent.lng], {
+    radius: 8,
+    color: '#fff',
+    weight: 2,
+    fillColor: '#2d2d2d',
+    fillOpacity: 1,
+  })
+    .bindPopup('<b>Parents</b><br>' + parent.name)
+    .addTo(map)
+
+  // The 4 km PHG circle (a real size in metres), and zoom so the whole circle fits on screen
+  phgCircle = L.circle([parent.lat, parent.lng], {
+    radius: PHG_NEAR_DISTANCE_METRES,
+    color: '#c0614a',
+    weight: 2,
+    fillOpacity: 0.08,
+  }).addTo(map)
+  map.fitBounds(phgCircle.getBounds())
 
   loadBlocks()
 }
 
-// When the page opens: make the map inside <div id="mapBox"> (centred on Singapore),
-// then add the blocks and fill the PHG dropdown
+// "Clear" link: remove the circle and marker, and show every block that fits the filters again
+function clearParent() {
+  removeParentDrawings()
+  parentPlace.value = null
+  parentQuery.value = ''
+  loadBlocks()
+}
+
+// When the page opens: make the map inside <div id="mapBox"> (centred on Singapore), then add the blocks
 onMounted(function () {
   map = L.map('mapBox').setView([1.36, 103.84], 12)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -240,7 +248,6 @@ onMounted(function () {
   blockLayer = L.layerGroup().addTo(map)
 
   loadBlocks()
-  loadAddresses()
 })
 </script>
 
@@ -284,15 +291,28 @@ onMounted(function () {
         <div class="cosy-card cosy-shadow">
           <h5 class="serif">Proximity Grant (PHG) layer</h5>
           <p class="small text-muted">
-            Choose your parents' block to draw the {{ PHG_NEAR_DISTANCE_METRES / 1000 }} km circle.
+            Type your parents' postal code (or home address) to draw the {{ PHG_NEAR_DISTANCE_METRES / 1000 }} km circle.
             Only the blocks inside it are shown (together with your filters): they can get the "live near" grant.
           </p>
-          <select v-model="parentAddress" class="form-select cosy-input" @change="showPhg">
-            <option value="">No circle</option>
-            <option v-for="address in addresses" :key="address.label" :value="address.label">
-              {{ address.label }}
-            </option>
-          </select>
+
+          <!-- Search box: any address or postal code (looked up by OneMap) -->
+          <div class="d-flex gap-2">
+            <input
+              v-model="parentQuery"
+              type="text"
+              class="form-control cosy-input"
+              placeholder="e.g. 560406"
+              @keyup.enter="searchParent"
+            />
+            <button type="button" class="btn btn-dark" @click="searchParent">Search</button>
+          </div>
+
+          <!-- The place OneMap found, so you can check it is the right one -->
+          <p v-if="parentPlace !== null" class="small mt-2 mb-0">
+            Using: <strong>{{ parentPlace.name }}</strong>
+            <a href="#" class="ms-2" @click.prevent="clearParent">Clear</a>
+          </p>
+
           <p v-if="nearbyCount !== null" class="mt-2 mb-0">
             <strong>{{ nearbyCount }}</strong> block(s) within {{ PHG_NEAR_DISTANCE_METRES / 1000 }} km match your filters
           </p>
