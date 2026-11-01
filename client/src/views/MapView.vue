@@ -20,6 +20,10 @@ const blockCount = ref(0)
 // budget and lease (the sliders' limits), so you first see every block and then narrow it down.
 const filters = ref({ q: '', flatType: '', maxPrice: '1000000', minLease: '20' })
 
+// For the address search above the map: what is typed, and the place OneMap found ({ name, lat, lng }, or null)
+const searchQuery = ref('')
+const searchedPlace = ref(null)
+
 // For the PHG search box: what is typed, and the place OneMap found ({ name, lat, lng }, or null = no circle)
 const parentQuery = ref('')
 const parentPlace = ref(null)
@@ -53,6 +57,7 @@ let blockLayer = null
 let amenityLayer = null
 let phgCircle = null
 let parentMarker = null
+let searchMarker = null
 
 // The price colours, cheapest first. Used by the dots and by the legend.
 const priceBands = [
@@ -119,6 +124,12 @@ async function showNearest() {
       errorMessage.value = error.message
     }
   }
+}
+
+// "Hide nearest amenities" button: back to the "Show" button, and the highlighted squares go back to normal
+function hideNearest() {
+  nearestAmenities.value = null
+  showAmenities()
 }
 
 // The single name of an amenity category, e.g. 'hawker' -> 'Hawker centre' (for the nearest list)
@@ -292,11 +303,11 @@ async function showAmenities() {
           group.type.colour + ';"></span>',
         iconSize: [10, 10],
       })
-      // A bigger square with a thick white border, for the selected block's nearest one of this type
+      // A bigger square with a thick black border, for the selected block's nearest one of this type
       const bigSquareIcon = L.divIcon({
         className: '',
         html:
-          '<span style="display: block; width: 18px; height: 18px; border: 3px solid #fff; background: ' +
+          '<span style="display: block; width: 18px; height: 18px; border: 3px solid #000; background: ' +
           group.type.colour + ';"></span>',
         iconSize: [18, 18],
       })
@@ -322,6 +333,70 @@ async function showAmenities() {
       errorMessage.value = error.message
     }
   }
+}
+
+// Address search above the map (Go button or Enter): ask OneMap where the place is, put a marker there
+// and move the map to it. Unlike the PHG search, it does not filter the blocks.
+async function searchPlace() {
+  errorMessage.value = ''
+  if (searchQuery.value.trim() === '') {
+    errorMessage.value = 'Type an address or postal code'
+    return
+  }
+
+  let place = null
+  try {
+    // Our server asks OneMap and answers { name, lat, lng } for the best match
+    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: searchQuery.value } })
+    place = response.data
+  } catch (error) {
+    if (error.response && error.response.status === 500) {
+      // The server could not log in to OneMap (or something else broke there)
+      errorMessage.value = 'Place search failed. Check the OneMap login in server/config.env'
+    } else if (error.response && error.response.data && error.response.data.message) {
+      // e.g. "Place not found" (404)
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
+    return
+  }
+  searchedPlace.value = place
+
+  // A new search closes the selected-block card (comparing blocks is the Compare page's job)
+  closePlace()
+
+  // Remove the previous search marker, if there is one
+  if (searchMarker !== null) {
+    map.removeLayer(searchMarker)
+    searchMarker = null
+  }
+
+  // A white dot with a thick dark ring, so it does not look like a block, an amenity or the parents' dot.
+  // (A circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite.)
+  searchMarker = L.circleMarker([place.lat, place.lng], {
+    radius: 9,
+    color: '#111',
+    weight: 4,
+    fillColor: '#fff',
+    fillOpacity: 1,
+  })
+    .bindPopup('<b>' + place.name + '</b>')
+    .addTo(map)
+
+  // Jump there at zoom 16 (street level), then open the marker's popup so the name shows straight away
+  map.setView([place.lat, place.lng], 16)
+  searchMarker.openPopup()
+}
+
+// "Clear" next to the searched place: remove the marker and empty the search box
+function clearSearch() {
+  if (searchMarker !== null) {
+    map.removeLayer(searchMarker)
+    searchMarker = null
+  }
+  searchedPlace.value = null
+  searchQuery.value = ''
 }
 
 // Takes the old PHG circle and parents' marker off the map (if there are any)
@@ -428,6 +503,22 @@ onMounted(function () {
 
     <div class="row g-4">
       <div class="col-lg-8">
+        <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
+        <div class="input-group mb-2">
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="form-control"
+            placeholder="Search an address or postal code"
+            @keyup.enter="searchPlace"
+          />
+          <button type="button" class="btn btn-dark" @click="searchPlace">Go</button>
+        </div>
+        <p v-if="searchedPlace !== null" class="small mb-2">
+          Showing: <strong>{{ searchedPlace.name }}</strong>
+          <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearSearch">Clear</button>
+        </p>
+
         <div id="mapBox" class="map-box"></div>
       </div>
 
@@ -479,23 +570,16 @@ onMounted(function () {
                 <strong>{{ amenityName(amenity.category) }}:</strong> {{ amenity.name }} · {{ amenity.distance }} m
               </li>
             </ul>
-            <p class="small text-muted mb-0">
+            <p class="small text-muted mb-2">
               Tick a type under "Show amenities" to see its nearest one highlighted (bigger square) on the map.
             </p>
+            <button type="button" class="btn btn-sm btn-outline-dark" @click="hideNearest">
+              Hide nearest amenities
+            </button>
           </div>
         </div>
 
-        <!-- Filters: the same panel as Search -->
-        <div class="mb-3">
-          <FilterPanel
-            :filters="filters"
-            @change-filter="setFilter"
-            @search="loadBlocks"
-            @clear="clearFilters"
-          />
-        </div>
-
-        <!-- Legend -->
+        <!-- Legend (2nd card, so on a phone it is right under the map, before the filters) -->
         <div class="cosy-card cosy-shadow mb-3">
           <h5 class="serif">Median price (cheapest flat type)</h5>
           <div v-for="band in priceBands" :key="band.label" class="d-flex align-items-center gap-2 mb-1">
@@ -519,6 +603,16 @@ onMounted(function () {
               {{ type.label }}
             </label>
           </div>
+        </div>
+
+        <!-- Filters: the same panel as Search -->
+        <div class="mb-3">
+          <FilterPanel
+            :filters="filters"
+            @change-filter="setFilter"
+            @search="loadBlocks"
+            @clear="clearFilters"
+          />
         </div>
 
         <!-- PHG layer -->
