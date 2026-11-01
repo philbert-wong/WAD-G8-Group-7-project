@@ -440,16 +440,35 @@ exports.oneBlock = async (req, res) => {
   }
 };
 
-// 1. GET /api/blocks/place?q=560406
+// A real value from OneMap? (OneMap writes "NIL" or leaves it empty when a place has no block number / postal code)
+function isRealValue(value) {
+  if (value === undefined || value === null || value === '' || value === 'NIL') {
+    return false;
+  }
+  return true;
+}
+
+// 1. GET /api/blocks/place?q=560314
 // OneMap search: turns an address / postal code / place name into { name, lat, lng }.
 // The frontend then calls /api/blocks/nearby?lat=..&lng=.. with it.
 exports.findPlace = async (req, res) => {
   if (isBlank(req.query.q)){
     return res.status(400).json({ message: 'q is required'});
   }
+
+  // Our cards show addresses as "Blk 314 ANG MO KIO AVE 3", but OneMap does not understand "Blk",
+  // so a leading "Blk" / "Block" is removed before searching
+  let searchText = String(req.query.q).trim();
+  const upperText = searchText.toUpperCase();
+  if (upperText.startsWith('BLK ')) {
+    searchText = searchText.slice(4).trim();
+  } else if (upperText.startsWith('BLOCK ')) {
+    searchText = searchText.slice(6).trim();
+  }
+
   const url =
     'https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&searchVal=' +
-    encodeURIComponent(req.query.q);
+    encodeURIComponent(searchText);
 
   try {
     const response = await fetch(url, { headers: { Authorization: await getOneMapToken() } });
@@ -462,8 +481,25 @@ exports.findPlace = async (req, res) => {
     }
 
     const firstResult = data.results[0];
+
+    // The name to show. When the user typed a block number or postal code (the search starts with a digit),
+    // show the address ("BLK 314 ANG MO KIO AVENUE 3 (560314)"), because OneMap's own name is often the
+    // estate's building name (e.g. "TECK GHEE EVERGREEN"), which looks like the wrong place.
+    // Otherwise (an MRT station, a mall...), keep OneMap's own name ("BISHAN MRT STATION"),
+    // since OneMap gives those a block number too.
+    const firstLetter = searchText.charAt(0);
+    const typedNumber = firstLetter >= '0' && firstLetter <= '9';
+
+    let name = firstResult.SEARCHVAL;
+    if (typedNumber && isRealValue(firstResult.BLK_NO) && isRealValue(firstResult.ROAD_NAME)) {
+      name = 'BLK ' + firstResult.BLK_NO + ' ' + firstResult.ROAD_NAME;
+      if (isRealValue(firstResult.POSTAL)) {
+        name = name + ' (' + firstResult.POSTAL + ')';
+      }
+    }
+
     return res.json({
-      name: firstResult.SEARCHVAL,
+      name: name,
       lat: Number(firstResult.LATITUDE),
       lng: Number(firstResult.LONGITUDE)
     });
