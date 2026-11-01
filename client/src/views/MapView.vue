@@ -269,6 +269,8 @@ function closePlace() {
 // "Show nearest amenities" button: ask our server for the selected block's nearest MRT, hawker centre,
 // park and school (GET /api/blocks/<id>/amenities), list them in the card, and highlight them on the map
 async function showNearest() {
+  // A new action: remove any old error message first
+  errorMessage.value = ''
   // Every flat type of a block is at the same spot, so the first card's id is enough
   const blockId = selectedPlace.value.cards[0].id
   try {
@@ -339,6 +341,8 @@ function scoreText(place) {
 
 // Gets the blocks that match the filters and puts a dot for each on the map
 async function loadBlocks() {
+  // New filters / a new load: remove any old error message first (a new problem below sets it again)
+  errorMessage.value = ''
   try {
     // Same request as Search: the server only sends blocks that match the filters
     const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
@@ -494,6 +498,8 @@ function clearFilters() {
 
 // A tick box changed: draw the amenity dots for every ticked type (and none for the unticked ones)
 async function showAmenities() {
+  // Runs after every click on a dot, a tick box or the card's buttons: remove any old error message first
+  errorMessage.value = ''
   try {
     // 1. Get the amenities of each ticked type from our server: [{ type, places: [...] }, ...]
     const toDraw = []
