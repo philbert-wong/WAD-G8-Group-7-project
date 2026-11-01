@@ -1,12 +1,6 @@
 <script setup>
-// FINAL DRAFT, FEATURE: MAP (Jiun Wei's area, first draft by Jihao + AI)
 // Every block as a dot on a map, coloured by its median price. Click a dot for details.
 // PHG layer: pick your parents' block to draw the 4 km Proximity Housing Grant circle.
-//
-// ⚠️ NOT IN OUR COURSE: the Leaflet library (new npm package), onMounted,
-//    and keeping the map in a normal variable (not a ref) because Vue's ref breaks Leaflet.
-// ⚠️ WATCH OUT: the map pictures (tiles) come from OpenStreetMap over the internet,
-//    the only outside call the site makes. OpenStreetMap's credit line must stay on the map.
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import L from 'leaflet'
@@ -16,7 +10,7 @@ import FilterPanel from '../components/FilterPanel.vue'
 // Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
 const BASE_URL = 'http://localhost:8000'
 
-// PHG "live near" rule: within 4 km of your parents / child (same value as Jihao's affordabilityRules.js)
+// PHG "live near" rule: within 4 km of your parents / child 
 const PHG_NEAR_DISTANCE_METRES = 4000
 
 const errorMessage = ref('')
@@ -105,6 +99,8 @@ async function loadBlocks() {
         place = { label: label, lat: card.lat, lng: card.lng, cards: [] }
         places.push(place)
       }
+      // Add this flat type to its address. place points to the SAME object that is inside places
+      // (not a copy), so the entry in places gets the card too, without pushing it again.
       place.cards.push(card)
     }
 
@@ -310,7 +306,7 @@ onMounted(function () {
           <!-- The place OneMap found, so you can check it is the right one -->
           <p v-if="parentPlace !== null" class="small mt-2 mb-0">
             Using: <strong>{{ parentPlace.name }}</strong>
-            <a href="#" class="ms-2" @click.prevent="clearParent">Clear</a>
+            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearParent">Clear</button>
           </p>
 
           <p v-if="nearbyCount !== null" class="mt-2 mb-0">
