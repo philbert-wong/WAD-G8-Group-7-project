@@ -5,6 +5,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useMapFocusStore } from '../stores/mapFocus'
 import PriceDetails from './PriceDetails.vue'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
@@ -19,11 +20,13 @@ const props = defineProps({
 })
 defineEmits(['toggle-save'])
 
-// "Show on map" button: open the Map page with this block's id in the URL (/map?block=...),
-// so the map can zoom to it and open its card (the same idea as the calculator's ?maxPrice=)
+// "Show on map" button: remember this block in the small mapFocus Pinia store, then open the Map page.
+// The map reads it, zooms to the block and opens its card. (The URL stays a plain /map.)
 const router = useRouter()
+const mapFocus = useMapFocusStore()
 function showOnMap() {
-  router.push({ path: '/map', query: { block: props.block.id } })
+  mapFocus.showOnMap(props.block.id)
+  router.push('/map')
 }
 
 // Price details (each sale) are shown when you press the "Price details" button

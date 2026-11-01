@@ -16,10 +16,10 @@ import MapLegend from '../components/map/MapLegend.vue'
 import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
 import PhgCard from '../components/map/PhgCard.vue'
 import { useAuthStore } from '../stores/auth'
-import { useRoute } from 'vue-router'
+import { useMapFocusStore } from '../stores/mapFocus'
 
-// The current URL, to read ?block=<id> when we come from Search's "Show on map" button
-const route = useRoute()
+// Which block to zoom to when we come from Search's "Show on map" button (small Pinia store)
+const mapFocus = useMapFocusStore()
 // The same match score maths as Search (shared file, not changed here)
 import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 
@@ -74,6 +74,10 @@ let amenityLayer = null
 let phgCircle = null
 let parentMarker = null
 let searchMarker = null
+
+// The blocks (places) currently drawn on the map, kept so the address search can check
+// whether the place it found is one of them
+let shownPlaces = []
 
 // "Colour dots by": 'price' (the price bands) or 'match' (the match score gradient)
 const colourBy = ref('price')
@@ -381,6 +385,7 @@ async function loadBlocks() {
       nearbyCount.value = null
     }
     blockCount.value = shown.length
+    shownPlaces = shown
 
     // Keep the "Selected block" card up to date: if the selected block is still on the map, use its new
     // entry (its flat types may have changed with the filters); if it is gone, close the card and its highlights.
@@ -419,7 +424,7 @@ async function loadBlocks() {
     }
 
     // If we came from Search's "Show on map", zoom to that block (first load only)
-    focusOnBlockFromUrl(shown)
+    focusOnRequestedBlock(shown)
   } catch (error) {
     // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
     if (error.response && error.response.data && error.response.data.message) {
@@ -430,19 +435,22 @@ async function loadBlocks() {
   }
 }
 
-// Coming from Search's "Show on map" button (/map?block=<id>): zoom to that block, open its popup and its
-// "Selected block" card. Only done once, on the first load (not again every time the filters change).
-let focusDone = false
-function focusOnBlockFromUrl(places) {
-  if (focusDone) {
-    return
-  }
-  focusDone = true
+// Zoom to one block on the map, open its popup and its "Selected block" card (as if its dot was clicked).
+// L.popup (Leaflet) opens a popup at a spot without needing the dot itself, with the same text as the dot's.
+function focusPlace(place) {
+  map.setView([place.lat, place.lng], 17) // 17 = street level
+  L.popup().setLatLng([place.lat, place.lng]).setContent(popupText(place)).openOn(map)
+  selectPlace(place)
+}
 
-  const blockId = route.query.block
-  if (blockId === undefined) {
+// Coming from Search's "Show on map" button: the block's id is in the mapFocus store. Zoom to it, then clear
+// the store, so it only happens once (not again every time the filters change).
+function focusOnRequestedBlock(places) {
+  const blockId = mapFocus.blockId
+  if (blockId === null) {
     return
   }
+  mapFocus.clear()
 
   // Find the dot (address) that holds this block's card
   let found = null
@@ -457,12 +465,20 @@ function focusOnBlockFromUrl(places) {
     errorMessage.value = "That block is outside the map's current filters"
     return
   }
+  focusPlace(found)
+}
 
-  // Zoom in on it (17 = street level). L.popup (Leaflet) opens a popup at a spot without needing the dot
-  // itself, with the same text as the dot's own popup.
-  map.setView([found.lat, found.lng], 17)
-  L.popup().setLatLng([found.lat, found.lng]).setContent(popupText(found)).openOn(map)
-  selectPlace(found)
+// Is this spot one of the blocks on the map? Returns that place, or null.
+// Our blocks were located with OneMap too, so the same building comes back within a few metres;
+// 40 m allows for small differences without matching the block next door.
+function findShownPlaceAt(lat, lng) {
+  let found = null
+  for (const place of shownPlaces) {
+    if (map.distance([lat, lng], [place.lat, place.lng]) <= 40) {
+      found = place
+    }
+  }
+  return found
 }
 
 // The filter panel says one filter changed, e.g. ('maxPrice', '600000'). Same as on Search.
@@ -572,7 +588,15 @@ async function searchPlace(text) {
     searchMarker = null
   }
 
-  // A white dot with a thick dark ring, so it does not look like a block, an amenity or the parents' dot.
+  // Is the place one of our blocks on the map? Then show it like a clicked block dot
+  // (its own colour, popup and "Selected block" card) instead of a white search dot.
+  const block = findShownPlaceAt(place.lat, place.lng)
+  if (block !== null) {
+    focusPlace(block)
+    return
+  }
+
+  // Not one of our blocks: a white dot with a thick dark ring, so it does not look like a block, an amenity or the parents' dot.
   // (A circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite.)
   searchMarker = L.circleMarker([place.lat, place.lng], {
     radius: 9,
