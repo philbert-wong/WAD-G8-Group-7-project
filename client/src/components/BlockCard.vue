@@ -52,6 +52,15 @@ async function loadWalk() {
 
 onMounted(loadWalk)
 
+// Minutes to walk to the nearest MRT: OneMap's real walk once it has arrived, otherwise the stored estimate.
+// Used by the "min walk" line AND the "Near MRT" tag, so the two always agree.
+function walkMinutes() {
+  if (walk.value !== null) {
+    return walk.value.minutes
+  }
+  return props.block.mrtWalkMinutes
+}
+
 
 // "Amenities" button: opens the list and gets it from the server, or closes it
 async function toggleDetails() {
@@ -95,7 +104,7 @@ const categoryNames = {
 // The limits (10 min, 70 years, 1 km, 500 m) are our own choice, not an HDB rule.
 function makeTags(block) {
   const tags = []
-  if (block.mrtWalkMinutes <= 10) {
+  if (walkMinutes() <= 10) {
     tags.push('Near MRT')
   }
   if (block.remainingLease >= 70) {
@@ -217,7 +226,7 @@ function barWidth(score) {
         </div>
         <div class="stat">
           <span class="ic">🚆</span>
-          <div><b>{{ walk ? walk.minutes : block.mrtWalkMinutes }} min walk</b>to {{ block.mrtName }}</div>
+          <div><b>{{ walkMinutes() }} min walk</b>to {{ block.mrtName }}</div>
         </div>
       </div>
 

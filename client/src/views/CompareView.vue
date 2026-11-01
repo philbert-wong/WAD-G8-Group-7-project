@@ -4,10 +4,14 @@
 // The Compare page: tick 2 or 3 flats from your shortlist and see them side by side
 // (price range, lease, MRT, match score and an estimated monthly repayment).
 import { ref } from 'vue'
+import axios from 'axios'
 import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
 import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 import { useShortlistStore } from '../stores/shortlist'
+
+// Our Express server's address, from one shared place (see config.js; it changes for deployment)
+import { BASE_URL } from '../config.js'
 
 // You can compare at most this many flats at once
 const MAX_COMPARE = 3
@@ -40,10 +44,35 @@ function loadSavedPreferences() {
 // Match score uses Your Priorities, so it shows the same number as on Search and the Map
 const weights = getWeights(loadSavedPreferences())
 
-// Gets the latest shortlist from the server (you must be logged in)
+// Each saved flat's real walk to its nearest MRT from OneMap, by block id: { '<blockId>': { minutes, ... } }.
+// A block that is not in here (yet) shows the stored estimate. Same request as the Search card.
+const walks = ref({})
+
+// Asks our server for one block's walking time (GET /api/blocks/<id>/walk-to-mrt, which asks OneMap)
+async function loadWalk(blockId) {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/blocks/${blockId}/walk-to-mrt`)
+    walks.value[blockId] = response.data
+  } catch (error) {
+    // do nothing: this flat keeps the stored estimate (same as the Search card)
+  }
+}
+
+// Minutes to walk to the nearest MRT: OneMap's real walk once it has arrived, otherwise the stored estimate
+function walkMinutes(block) {
+  if (walks.value[block.id] !== undefined) {
+    return walks.value[block.id].minutes
+  }
+  return block.mrtWalkMinutes
+}
+
+// Gets the latest shortlist from the server (you must be logged in), then each flat's walking time
 async function loadShortlist() {
   await shortlist.fetchShortlist()
   loading.value = false
+  for (const item of shortlist.items) {
+    loadWalk(item.block.id) // not awaited: the walks load at the same time, each fills in when it arrives
+  }
 }
 
 // The ticked items, in shortlist order
@@ -152,7 +181,7 @@ loadShortlist()
             </tr>
             <tr>
               <th>Nearest MRT</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ item.block.mrtName }} ({{ item.block.mrtWalkMinutes }} min walk)</td>
+              <td v-for="item in selectedItems()" :key="item.id">{{ item.block.mrtName }} ({{ walkMinutes(item.block) }} min walk)</td>
             </tr>
             <tr>
               <th>Match score</th>

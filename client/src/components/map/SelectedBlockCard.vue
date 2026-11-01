@@ -6,8 +6,27 @@ const props = defineProps({
   matchText: { type: String, default: '' }, // e.g. "62 / 100" in Best match mode, '' otherwise
   nearestAmenities: { type: Array, default: null }, // [{ category, name, distance }] or null (not loaded yet)
   amenityTypes: Array, // [{ key, label, one, colour }], for the names in the nearest list
+  walk: { type: Object, default: null }, // OneMap's walk to the nearest MRT: { minutes, metres, source }, or null
 })
 const emit = defineEmits(['close', 'show-nearest', 'hide-nearest'])
+
+// Minutes to walk to the nearest MRT: OneMap's real walk once it has arrived, otherwise the stored estimate
+// (the same rule as the Search card, so both show the same number)
+function walkMinutes() {
+  if (props.walk !== null) {
+    return props.walk.minutes
+  }
+  return props.place.cards[0].mrtWalkMinutes
+}
+
+// The distance shown in the nearest list: for the MRT, OneMap's walking distance when we have it
+// (like the Search card), otherwise the straight-line distance
+function amenityDistance(amenity) {
+  if (amenity.category === 'mrt' && props.walk !== null && props.walk.metres) {
+    return props.walk.metres + ' m walk'
+  }
+  return amenity.distance + ' m'
+}
 
 // The single name of an amenity category, e.g. 'hawker' -> 'Hawker centre'
 function amenityName(category) {
@@ -27,7 +46,7 @@ function amenityName(category) {
       <button type="button" class="btn-close" aria-label="Close" @click="emit('close')"></button>
     </div>
     <p class="small text-muted mb-3">
-      {{ place.cards[0].town }} · {{ place.cards[0].mrtWalkMinutes }} min walk to {{ place.cards[0].mrtName }}
+      {{ place.cards[0].town }} · {{ walkMinutes() }} min walk to {{ place.cards[0].mrtName }}
       <span v-if="matchText !== ''"><br />Match score: <strong>{{ matchText }}</strong></span>
     </p>
 
@@ -64,7 +83,7 @@ function amenityName(category) {
       <h6 class="mb-2">Nearest amenities</h6>
       <ul class="list-unstyled small mb-2">
         <li v-for="amenity in nearestAmenities" :key="amenity.category" class="mb-1">
-          <strong>{{ amenityName(amenity.category) }}:</strong> {{ amenity.name }} · {{ amenity.distance }} m
+          <strong>{{ amenityName(amenity.category) }}:</strong> {{ amenity.name }} · {{ amenityDistance(amenity) }}
         </li>
       </ul>
       <p class="small text-muted mb-2">
