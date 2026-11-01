@@ -56,7 +56,7 @@ Step 3. Load the data into MongoDB
     (still in the server folder)
     pnpm seed
     This loads server/data/blocks.json and amenities.json: 223 block + flat type cards in 4 towns,
-    and 309 amenities. Running it again replaces the blocks and amenities (saved shortlist items
+    and 336 amenities (MRT and LRT stations, hawker centres, parks, primary schools). Running it again replaces the blocks and amenities (saved shortlist items
     then point to old blocks and stop showing).
 
 Step 4. Install the website
@@ -144,7 +144,7 @@ Manual check of the main user journeys (with both terminals running):
     7. Affordability: fill in the steps, then "use this budget": Search opens with that budget.
     8. Map: dots coloured by price. Click 4-Rm in the filters: the dots change. Click a dot: its popup
        and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
-    9. Map: tick "MRT stations": blue squares appear; untick: they go. Switch "Colour dots by" to
+    9. Map: tick "MRT / LRT stations": blue squares appear; untick: they go. Switch "Colour dots by" to
        Best match: dots change colour (red = poor ... blue/purple = great), using Your Priorities.
    10. Map: type "560406" in the PHG box: a 4 km circle, and only the blocks inside it remain.
        Type "Bishan MRT" in the search bar above the map: the map jumps there with a marker.
@@ -210,7 +210,7 @@ GET    /api/blocks/:id/live-sales    the same, fetched live from data.gov.sg; so
 GET    /api/blocks/:id/amenities     nearest MRT, hawker centre, park and school with distance (metres)
 GET    /api/blocks/:id/walk-to-mrt   OneMap walking route to the nearest MRT:
                                      { minutes, metres, source: "onemap" }, or { minutes, source: "estimate" }
-GET    /api/amenities                every MRT station, hawker centre, park and primary school (for the map).
+GET    /api/amenities                every MRT / LRT station, hawker centre, park and primary school (for the map).
                                      Query: category (optional: mrt, hawker, park or school; anything else 400).
                                      Returns { total, results: [{ name, category, lat, lng }] }
 POST   /api/auth/register            body { email, password (8+ characters) }. Returns { token, user: { id, email } } (201)
@@ -274,6 +274,8 @@ Login and shared state
 Real HDB resale sales from the last 12 months (data.gov.sg), grouped per block and flat type,
 for the 40 busiest blocks in each of 4 towns: Ang Mo Kio, Bishan, Punggol and Tampines.
 Coordinates come from OneMap; MRT stations, hawker centres, parks and primary schools from data.gov.sg.
+LRT stations (Punggol LRT and Sengkang LRT) are stored with the MRT stations (category "mrt"), so the
+nearest-station walk and the match score's Transport part count them too.
 
 The prep/ scripts built the two JSON files once. To rebuild them:
     cd prep
@@ -283,6 +285,8 @@ The prep/ scripts built the two JSON files once. To rebuild them:
                                                      on OneMap (cached in prep/geocode-cache.json).
     node addSales.js "/path/to/resale-prices.csv"   only refreshes the sales and price ranges of the
                                                      blocks already in blocks.json (no OneMap calls)
+    node addLrt.js                                  adds the Punggol and Sengkang LRT stations to
+                                                     amenities.json (run it again after makeData.js)
 Then run  pnpm seed  in the server folder.
 
 

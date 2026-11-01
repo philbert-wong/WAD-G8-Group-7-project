@@ -49,7 +49,7 @@ const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circl
 // The colours are chosen to look nothing like the 4 price colours (green, yellow, orange, red).
 // one = the name for a single one (used in the "nearest amenities" list)
 const amenityTypes = [
-  { key: 'mrt', label: 'MRT stations', one: 'MRT', colour: '#0057ff' },
+  { key: 'mrt', label: 'MRT / LRT stations', one: 'MRT / LRT', colour: '#0057ff' },
   { key: 'hawker', label: 'Hawker centres', one: 'Hawker centre', colour: '#a21caf' },
   { key: 'park', label: 'Parks', one: 'Park', colour: '#e83e8c' },
   { key: 'school', label: 'Primary schools', one: 'Primary school', colour: '#111111' },
