@@ -81,10 +81,80 @@ function escapeSearchText(text) {
   return safeText;
 }
 
+// ---------- Address text ----------
+// Helpers so a typed address like "Blk 314 Ang Mo Kio Avenue 3" finds our block "314", "ANG MO KIO AVE 3"
+
+// HDB writes street names short ("ANG MO KIO AVE 3", "BT BATOK ST 21"), but people often type the full words.
+// Each pair is [the full word, HDB's short form] (only short forms that appear in our data).
+const STREET_SHORT_FORMS = [
+  ['AVENUE', 'AVE'], ['STREET', 'ST'], ['ROAD', 'RD'], ['DRIVE', 'DR'], ['CRESCENT', 'CRES'],
+  ['BUKIT', 'BT'], ['NORTH', 'NTH'], ['SOUTH', 'STH'], ['UPPER', 'UPP'], ['JALAN', 'JLN'],
+  ['LORONG', 'LOR'], ['CENTRAL', 'CTRL'], ['PARK', 'PK'], ['GARDENS', 'GDNS'], ['CLOSE', 'CL'],
+  ['PLACE', 'PL'], ['TERRACE', 'TER'], ['TANJONG', 'TG'], ['HEIGHTS', 'HTS'], ['COMMONWEALTH', "C'WEALTH"],
+];
+
+// Our cards show addresses as "Blk 314 ANG MO KIO AVE 3", but the data and OneMap have no "Blk",
+// so a leading "Blk" / "Block" is removed: "Blk 314 Ang Mo Kio Ave 3" -> "314 Ang Mo Kio Ave 3"
+function removeBlkWord(text) {
+  const upperText = text.toUpperCase();
+  if (upperText.startsWith('BLK ')) {
+    return text.slice(4).trim();
+  }
+  if (upperText.startsWith('BLOCK ')) {
+    return text.slice(6).trim();
+  }
+  return text;
+}
+
+// True when the text starts with a digit, like a block number ("314", "260A") or a postal code
+function startsWithDigit(text) {
+  const firstLetter = text.charAt(0);
+  return firstLetter >= '0' && firstLetter <= '9';
+}
+
+// The words of a text in capitals, ignoring extra spaces: "ang  mo kio" -> ['ANG', 'MO', 'KIO']
+function toWords(text) {
+  const words = [];
+  for (const word of text.toUpperCase().split(' ')) {
+    if (word !== '') {
+      words.push(word);
+    }
+  }
+  return words;
+}
+
+// Puts words back together with one space between them: ['ANG', 'MO', 'KIO'] -> "ANG MO KIO"
+function joinWords(words) {
+  let text = '';
+  for (const word of words) {
+    if (text === '') {
+      text = word;
+    } else {
+      text = text + ' ' + word;
+    }
+  }
+  return text;
+}
+
+// Swaps full street words for HDB's short forms: ['ANG', 'MO', 'KIO', 'AVENUE', '3'] -> [..., 'AVE', '3']
+function shortenStreetWords(words) {
+  const shortWords = [];
+  for (const word of words) {
+    let shortWord = word;
+    for (const pair of STREET_SHORT_FORMS) {
+      if (word === pair[0]) {
+        shortWord = pair[1];
+      }
+    }
+    shortWords.push(shortWord);
+  }
+  return shortWords;
+}
+
 // Turns the query string (?q=punggol&maxPrice=600000...) into a MongoDB filter object.
 // The route has already checked that the number filters really are numbers.
 //
-//   q          search text, matches block number, street or town
+//   q          search text, matches block number, street or town, or a full address ("Blk 314 Ang Mo Kio Ave 3")
 //   flatType   e.g. "4 ROOM"
 //   maxPrice   budget in dollars
 //   minLease   minimum remaining lease in years
@@ -92,13 +162,30 @@ function buildFilter(query) {
   const filter = {};
 
   if (query.q) {
-    const text = escapeSearchText(String(query.q).trim());
-    // $options: 'i' = ignore upper/lower case
+    const typed = removeBlkWord(String(query.q).trim());
+    const text = escapeSearchText(typed);
+    const words = toWords(typed);
+    // The same text with HDB's short street words: "Ang Mo Kio Avenue 3" -> "ANG MO KIO AVE 3"
+    const shortText = escapeSearchText(joinWords(shortenStreetWords(words)));
+
+    // $or = any one of these is enough. $options: 'i' = ignore upper/lower case
     filter.$or = [
       { block: { $regex: text, $options: 'i' } },
       { street: { $regex: text, $options: 'i' } },
       { town: { $regex: text, $options: 'i' } },
+      { street: { $regex: shortText, $options: 'i' } },
     ];
+
+    // A full address: the first word is a block number and the rest is its street.
+    // Both must fit: the block number exactly (^...$ = the whole block number, so "314" is not "3140")
+    // and the street. Then "314 Ang Mo Kio Ave 3" finds just that block's flats.
+    if (words.length >= 2 && startsWithDigit(words[0])) {
+      const streetText = escapeSearchText(joinWords(shortenStreetWords(words.slice(1))));
+      filter.$or.push({
+        block: { $regex: '^' + escapeSearchText(words[0]) + '$', $options: 'i' },
+        street: { $regex: streetText, $options: 'i' },
+      });
+    }
   }
 
   if (query.flatType) {
@@ -321,8 +408,9 @@ exports.listTowns = async (req, res) => {
   }
 };
 
-// GET /api/blocks/nearby?lat=1.40&lng=103.90&radius=1000&limit=20
+// GET /api/blocks/nearby?lat=1.40&lng=103.90&radius=1000&limit=20&flatType=4 ROOM&maxPrice=700000&minLease=60
 // GEOSPATIAL: blocks within `radius` metres of a point, closest first.
+// flatType, maxPrice and minLease are optional: the same filters as the search, so near-a-place results fit them too.
 exports.nearbyBlocks = async (req, res) => {
   // lat and lng must be numbers, and both must be sent
   const pointFields = ['lat', 'lng'];
@@ -336,8 +424,8 @@ exports.nearbyBlocks = async (req, res) => {
     return res.status(400).json({ message: 'lat and lng are required' });
   }
 
-  // radius and limit are optional, but must be numbers if sent
-  const optionalFields = ['radius', 'limit'];
+  // radius, limit, maxPrice and minLease are optional, but must be numbers if sent
+  const optionalFields = ['radius', 'limit', 'maxPrice', 'minLease'];
   for (const field of optionalFields) {
     const value = req.query[field];
     if (!isBlank(value) && !isNumber(value)) {
@@ -368,6 +456,7 @@ exports.nearbyBlocks = async (req, res) => {
 
   try {
     // $geoNear sorts by distance and adds a "distance" field in metres. Remember: [lng, lat].
+    // query: only blocks that fit the filters (the same buildFilter as the search; empty filters are ignored)
     const blocks = await Block.aggregate([
       {
         $geoNear: {
@@ -375,6 +464,7 @@ exports.nearbyBlocks = async (req, res) => {
           distanceField: 'distance',
           maxDistance: radius,
           spherical: true,
+          query: buildFilter(req.query),
         },
       },
       { $limit: limit },
@@ -456,15 +546,8 @@ exports.findPlace = async (req, res) => {
     return res.status(400).json({ message: 'q is required'});
   }
 
-  // Our cards show addresses as "Blk 314 ANG MO KIO AVE 3", but OneMap does not understand "Blk",
-  // so a leading "Blk" / "Block" is removed before searching
-  let searchText = String(req.query.q).trim();
-  const upperText = searchText.toUpperCase();
-  if (upperText.startsWith('BLK ')) {
-    searchText = searchText.slice(4).trim();
-  } else if (upperText.startsWith('BLOCK ')) {
-    searchText = searchText.slice(6).trim();
-  }
+  // OneMap does not understand "Blk", so a leading "Blk" / "Block" is removed before searching
+  const searchText = removeBlkWord(String(req.query.q).trim());
 
   const url =
     'https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&searchVal=' +
@@ -487,11 +570,8 @@ exports.findPlace = async (req, res) => {
     // estate's building name (e.g. "TECK GHEE EVERGREEN"), which looks like the wrong place.
     // Otherwise (an MRT station, a mall...), keep OneMap's own name ("BISHAN MRT STATION"),
     // since OneMap gives those a block number too.
-    const firstLetter = searchText.charAt(0);
-    const typedNumber = firstLetter >= '0' && firstLetter <= '9';
-
     let name = firstResult.SEARCHVAL;
-    if (typedNumber && isRealValue(firstResult.BLK_NO) && isRealValue(firstResult.ROAD_NAME)) {
+    if (startsWithDigit(searchText) && isRealValue(firstResult.BLK_NO) && isRealValue(firstResult.ROAD_NAME)) {
       name = 'BLK ' + firstResult.BLK_NO + ' ' + firstResult.ROAD_NAME;
       if (isRealValue(firstResult.POSTAL)) {
         name = name + ' (' + firstResult.POSTAL + ')';

@@ -48,8 +48,9 @@ Step 2. Settings for the server
                           (mongodb://127.0.0.1:27017/check-in).
       JWT_SECRET=...      any long random text (used to sign login tokens)
       PORT=8000           port for the API (default 8000)
-      ONEMAP_EMAIL=...    a OneMap account (free at onemap.gov.sg). Needed for "search near a place"
-      ONEMAP_PASSWORD=... and the walking time to the nearest MRT. Without it those two features show an error.
+      ONEMAP_EMAIL=...    a OneMap account (free at onemap.gov.sg). Needed for places and postal codes
+      ONEMAP_PASSWORD=... in the search box, the map's address and PHG search, and the walking time to the
+                          nearest MRT. Without it, place searches show an error and walking times use our estimate.
     config.env is never committed to git (it is in .gitignore).
 
 Step 3. Load the data into MongoDB
@@ -82,8 +83,10 @@ Terminal 2 (website):
     Open http://localhost:5173
 
 Pages:
-    /            Search: search box, filters (budget, flat type, remaining lease), "search near a place",
-                 "What matters to you?" match score, block cards with price details and nearest amenities
+    /            Search: one search box (town, street, block address, postal code or any place: our own
+                 data first, then OneMap for flats within 1 km of a place), filters (budget, flat type,
+                 remaining lease), "What matters to you?" match score, block cards with price details,
+                 nearest amenities and "Show on map"
     /map         Map: one dot per block, coloured by price or by match score ("Colour dots by"),
                  with the same filters and Your Priorities as Search; amenity layers (MRT, hawker,
                  park, school); an address search; the PHG (Proximity Housing Grant) layer (type your
@@ -135,7 +138,8 @@ End-to-end tests:
 
 Manual check of the main user journeys (with both terminals running):
     1. Search: type "Bishan", change the budget slider and flat type, press Search: cards update.
-    2. Search near a place: type "Bishan MRT": blocks near the station appear (needs OneMap login).
+    2. Same search box: type "Blk 314 Ang Mo Kio Ave 3" (its card), then "560314" or "Bishan MRT":
+       flats within 1 km of that place appear, still following the filters (needs OneMap login).
     3. Open a card's price details: recent sales, median price, chart; nearest amenities and walk time.
     4. Click Shortlist while logged out: you are sent to Login; log in: you come back to Shortlist.
     5. On Search press Save on 2 flats: the navbar shows "Shortlist (2)". Add a note on Shortlist.
@@ -193,10 +197,14 @@ Errors always look like  { "message": "..." }
 
 GET    /api/health                   { status: "ok" }
 GET    /api/blocks                   search + filter. Query: q, flatType, maxPrice, minLease.
+                                     q matches a town, street or block, or a full address such as
+                                     "Blk 314 Ang Mo Kio Avenue 3" (full street words like Avenue / Bukit
+                                     also match HDB's short forms AVE / BT).
                                      Returns { total, results: [card] }, cheapest first
 GET    /api/blocks/area              the town names (for the search suggestions)
 GET    /api/blocks/nearby            blocks near a point. Query: lat, lng (required), radius in metres
-                                     (default 1000, max 5000), limit (default 20, max 50).
+                                     (default 1000, max 5000), limit (default 20, max 50), and the
+                                     optional filters flatType, maxPrice, minLease (same as the search).
                                      Each result also has distance (metres)
 GET    /api/blocks/place             OneMap place search. Query: q (address, postal code or place).
                                      Returns { name, lat, lng }. 404 if nothing is found
@@ -243,8 +251,8 @@ Geospatial search
     /api/blocks/nearby uses $geoNear on blocks (with a maximum distance),
     /api/blocks/:id/amenities uses $geoNear on amenities (the closest one of each category).
   The walking minutes shown on each card are worked out once when seeding
-  (straight-line distance x 1.3 / 80 metres per minute). The block's price details also ask OneMap
-  for a real walking route (/walk-to-mrt).
+  (straight-line distance x 1.3 / 80 metres per minute). The cards, the map's selected-block card and
+  Compare then ask OneMap for a real walking route (/walk-to-mrt) and show that instead when it arrives.
 
 Match score ("What matters to you?")
   The seed script stores the straight-line distance from each block to its nearest school, MRT,

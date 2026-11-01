@@ -1,5 +1,5 @@
 <script setup>
-// The big search box.
+// The big search box: towns, streets, block addresses, postal codes or any place (SearchView decides how to search).
 // The page (SearchView) owns the text and passes it in as a prop.
 // While the user types, we send the new text up with emit.
 // DESIGN PREVIEW: restyled to the Cosy Professional look (logic unchanged).
@@ -25,7 +25,7 @@ function onSubmit() {
       :value="text"
       type="search"
       class="form-control cosy-input flex-grow-1"
-      placeholder="Search by town, street or block e.g. Punggol"
+      placeholder="Town, street, block, postal code or any place e.g. Punggol, 560314"
       @input="onInput"
     />
     <button class="act-btn primary" type="submit">Search</button>

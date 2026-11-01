@@ -35,7 +35,7 @@ const shortlistErrorMessage = ref('')
 // The search box text (q) and the four filters. Empty = not used.
 const filters = ref({ q: '', flatType: '', maxPrice: '650000', minLease: '60' })
 // The filters the cards on screen were found with (a copy, so moving a slider without searching does not
-// change it), handed to the map by "Show on map". null after a "near a place" search, which ignores filters.
+// change it), handed to the map by "Show on map". null until the first search has finished.
 const searchedFilters = ref(null)
 const results = ref([])
 const total = ref(0)
@@ -85,75 +85,97 @@ async function loadAreas() {
   }
 }
 
-// Gets the flats that match the search box and filters.
-// Empty filters are ignored by the server, so we can send them all.
-async function search() {
-  loading.value = true
-  errorMessage.value = ''
-  // A normal search replaces any "near a place" results, so stop saying "Showing flats near ..."
-  placeName.value = ''
-  try {
-    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
-    results.value = response.data.results
-    total.value = response.data.total
-    searchedFilters.value = {
-      q: filters.value.q,
+// The place OneMap found when the search box held a place instead of one of our blocks, e.g. "NORTHPOINT CITY"
+// ('' = a normal search). Shown above the results.
+const placeName = ref('')
+
+// True when the text is a 6-digit Singapore postal code, e.g. "560314".
+// Our data has no postal codes, so a postal code always goes to OneMap.
+function isPostalCode(text) {
+  if (text.length !== 6) {
+    return false
+  }
+  for (const character of text) {
+    if (character < '0' || character > '9') {
+      return false
+    }
+  }
+  return true
+}
+
+// Keeps a copy of the filters these results were found with, for "Show on map" (see searchedFilters).
+// q = the search text to bring along ('' for near-a-place results, because the map has no OneMap search).
+function rememberSearchedFilters(q) {
+  searchedFilters.value = {
+    q: q,
+    flatType: filters.value.flatType,
+    maxPrice: filters.value.maxPrice,
+    minLease: filters.value.minLease,
+  }
+}
+
+// Flats near any place in Singapore: our server asks OneMap where the place is (/api/blocks/place),
+// then finds our flats within 1 km of it that fit the filters (/api/blocks/nearby).
+// Errors are caught by search() below.
+async function searchNearPlace(text) {
+  const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
+  const place = placeResponse.data
+
+  const nearbyResponse = await axios.get(`${BASE_URL}/api/blocks/nearby`, {
+    params: {
+      lat: place.lat,
+      lng: place.lng,
       flatType: filters.value.flatType,
       maxPrice: filters.value.maxPrice,
       minLease: filters.value.minLease,
+    },
+  })
+
+  results.value = nearbyResponse.data.results
+  total.value = nearbyResponse.data.total
+  placeName.value = place.name
+  rememberSearchedFilters('')
+}
+
+// The one search box (and the filters). Empty filters are ignored by the server, so we can send them all.
+//   1. A postal code ("560314"): straight to OneMap, flats near it
+//   2. Anything else: search our own data (town, street, block or full address, e.g. "Blk 314 Ang Mo Kio Ave 3")
+//   3. Our data has nothing, but something was typed (e.g. "Northpoint City"): ask OneMap, flats near it
+async function search() {
+  loading.value = true
+  errorMessage.value = ''
+  placeName.value = ''
+  const typed = filters.value.q.trim()
+
+  try {
+    if (isPostalCode(typed)) {
+      await searchNearPlace(typed)
+    } else {
+      const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
+      if (response.data.total === 0 && typed !== '') {
+        await searchNearPlace(typed)
+      } else {
+        results.value = response.data.results
+        total.value = response.data.total
+        rememberSearchedFilters(filters.value.q)
+      }
     }
   } catch (error) {
-    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
-    if (error.response && error.response.data && error.response.data.message) {
+    // Nothing to show: empty the list, so old cards do not stay under the message
+    results.value = []
+    total.value = 0
+    if (error.response && error.response.status === 404) {
+      // OneMap could not find the place either
+      errorMessage.value = 'Nothing found for "' + typed + '". Try a town, a street, a block address or a postal code.'
+    } else if (error.response && error.response.data && error.response.data.message) {
+      // Show our server's message if it sent one
       errorMessage.value = error.response.data.message
     } else {
+      // otherwise axios's own (e.g. "Network Error")
       errorMessage.value = error.message
     }
   }
   loading.value = false
-}
-
-// ---------------------------------------------------------------------------------------------
-// "Near a place" search: STARTER CODE (AI-generated boilerplate). Finish every TODO yourself.
-// OneMap turns the text into a point (/api/blocks/place), then /api/blocks/nearby finds the flats.
-// ---------------------------------------------------------------------------------------------
-const placeText = ref('') // what the user typed in the "near a place" box
-const placeName = ref('') // the place OneMap found, shown above the results
-
-async function searchNearPlace() {
-  if (placeText.value.trim() === "") {
-    errorMessage.value = 'Type an address or postal code';
-    return;
-  }
-  loading.value = true
-  errorMessage.value = '';
-  placeName.value = '';
-
-  try {
-    // Bug 3 fix: Use axios for consistency, getting response.data
-    const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { 
-      params: { q: placeText.value } 
-    });
-    const place = placeResponse.data;
-    const nearbyResponse = await axios.get(`${BASE_URL}/api/blocks/nearby`, { 
-      params: { lat: place.lat, lng: place.lng } 
-    });
-    const nearbyData = nearbyResponse.data;
-
-    results.value = nearbyData.results;
-    total.value = nearbyData.total;
-    placeName.value = place.name;
-    searchedFilters.value = null // these results ignore the filters, so "Show on map" should not bring them
-
-  } catch (error) {
-    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage.value = error.response.data.message
-    } else {
-      errorMessage.value = error.message
-    }
-  }
-  loading.value = false;
 }
 
 // "Clear all": empty the search box and every filter, then search again
@@ -390,19 +412,9 @@ onMounted(loadPage)
       </button>
     </div>
 
-    <!-- Near a place (OneMap): STARTER CODE, AI-generated boilerplate -->
-    <form class="input-group mb-3" @submit.prevent="searchNearPlace">
-      <input
-        v-model="placeText"
-        type="search"
-        class="form-control cosy-input flex-grow-1"
-        placeholder="Or find flats near an address or postal code e.g. 560314"
-      />
-      <button class="act-btn primary" type="submit">Find near me</button>
-    </form>
-
+    <!-- The search box held a place, not one of our blocks: say which place OneMap found -->
     <p v-if="placeName" class="text-muted mb-3">
-      Showing flats near {{ placeName }} (place search by OneMap)
+      Showing flats within 1 km of <strong>{{ placeName }}</strong> (place found by OneMap)
     </p>
 
     <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->
@@ -411,9 +423,7 @@ onMounted(loadPage)
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
         <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
-          <!-- "Near a place" results come from /nearby (within 1 km), which does not use the filters -->
-          <span v-if="placeName"><b>{{ total }} flat(s)</b> within 1 km (filters not used)</span>
-          <span v-else><b>{{ total }} flat(s)</b> match your filters</span>
+          <span><b>{{ total }} flat(s)</b> match your filters</span>
           <select
             id="sort-by"
             v-model="sortBy"
