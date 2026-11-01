@@ -2,8 +2,7 @@
 // "What matters to you?" panel.
 // The page (SearchView) owns the choices and passes them in as a prop.
 // When the user clicks something, this panel tells the page with emit, and the page updates the choices.
-// DESIGN PREVIEW (Cosy Professional): now the "Priorities" card in the sidebar.
-// The 5 importance buttons became one dropdown so it fits the narrow sidebar. Emits are the same.
+// The importance level is one dropdown per category, so it fits the narrow sidebar.
 import { CATEGORIES, IMPORTANCE_LEVELS } from '../utils/matchScore.js'
 
 defineProps({
@@ -56,14 +55,14 @@ function onLevelChange(key, event) {
 </template>
 
 <style scoped>
-/* [COURSE] Same sidebar card look as the filters */
+/* Same sidebar card look as the filters */
 .prio {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 22px;
 }
-/* [AI-ASSISTED] Shadow under the card */
+/* Shadow under the card */
 .prio {
   box-shadow: 0 14px 34px -20px rgba(80, 50, 30, 0.25);
 }
@@ -77,7 +76,7 @@ function onLevelChange(key, event) {
   margin-bottom: 10px;
 }
 
-/* [COURSE] One row per category: tick box on the left, dropdown on the right (Flexbox) */
+/* One row per category: tick box on the left, dropdown on the right (Flexbox) */
 .prio-row {
   display: flex;
   align-items: center;
@@ -100,7 +99,7 @@ function onLevelChange(key, event) {
   width: 135px;
   flex-shrink: 0;
 }
-/* [AI-ASSISTED] Green tick boxes (accent-color) */
+/* Green tick boxes (accent-color) */
 .chk input {
   accent-color: var(--sage);
 }

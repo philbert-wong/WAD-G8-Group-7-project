@@ -1,7 +1,5 @@
 <script setup>
 // One flat card: price, lease, MRT, match score, and buttons for Save, price details and amenities
-// DESIGN PREVIEW (Cosy Professional): new look. The props, emits and logic are the SAME as before,
-// so SearchView and ShortlistItem did not need to change how they use this card.
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -100,7 +98,7 @@ const categoryNames = {
   school: 'Primary school',
 }
 
-// NEW (design): the little "✓ Near MRT" tags. Worked out from the block's own data.
+// The little "✓ Near MRT" tags. Worked out from the block's own data.
 // The limits (10 min, 70 years, 1 km, 500 m) are our own choice, not an HDB rule.
 function makeTags(block) {
   const tags = []
@@ -176,7 +174,7 @@ function photoStyle(score) {
 }
 
 
-// NEW (design): width of the match bar, e.g. score 87 -> "87%"
+// Width of the match bar, e.g. score 87 -> "87%"
 function barWidth(score) {
   if (score === null) {
     return '0%'
@@ -274,7 +272,7 @@ function barWidth(score) {
 </template>
 
 <style scoped>
-/* [COURSE] The card: white, rounded, photo on the left and text on the right (Flexbox) */
+/* The card: white, rounded, photo on the left and text on the right (Flexbox) */
 .bcard {
   background: #fff;
   border: 1px solid var(--line);
@@ -283,7 +281,7 @@ function barWidth(score) {
   display: flex;
   margin-bottom: 22px;
 }
-/* [AI-ASSISTED] Soft shadow, and the card lifts up a little on hover (transform + transition) */
+/* Soft shadow, and the card lifts up a little on hover (transform + transition) */
 .bcard {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 14px 34px -18px rgba(80, 50, 30, 0.25);
   transition: transform 0.25s, box-shadow 0.25s;
@@ -293,7 +291,7 @@ function barWidth(score) {
   box-shadow: 0 22px 44px -20px rgba(80, 50, 30, 0.35);
 }
 
-/* [COURSE] Photo area: fixed width, icon centred with Grid */
+/* Photo area: fixed width, icon centred with Grid */
 .photo {
   width: 32%;
   min-height: 300px;
@@ -305,11 +303,11 @@ function barWidth(score) {
 .photo-icon {
   font-size: 64px;
 }
-/* [AI-ASSISTED] Warm gradient as a stand-in for a real photo */
+/* Warm gradient as a stand-in for a real photo */
 .photo {
   background: linear-gradient(160deg, #f3d9c4, #e7b89a 55%, #c98c6a);
 }
-/* [COURSE] Town label in the bottom-left corner of the photo (position: absolute) */
+/* Town label in the bottom-left corner of the photo (position: absolute) */
 .ph-tag {
   position: absolute;
   left: 12px;
@@ -321,7 +319,7 @@ function barWidth(score) {
   font-weight: 600;
 }
 
-/* [COURSE] Text side of the card */
+/* Text side of the card */
 .cbody {
   padding: 22px 24px;
   flex: 1;
@@ -338,7 +336,7 @@ function barWidth(score) {
   margin-top: 4px;
 }
 
-/* [COURSE] Match score label and the bar behind it */
+/* Match score label and the bar behind it */
 .match {
   min-width: 150px;
 }
@@ -364,13 +362,13 @@ function barWidth(score) {
   height: 100%;
   border-radius: 9px;
 }
-/* [AI-ASSISTED] Gradient fill that slides to its width (transition) */
+/* Gradient fill that slides to its width (transition) */
 .bar i {
   background: linear-gradient(90deg, #d98a63, var(--terra));
   transition: width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* [COURSE] Beige price box */
+/* Beige price box */
 .pricebox {
   background: var(--beige);
   border-radius: 14px;
@@ -390,7 +388,7 @@ function barWidth(score) {
   margin: 4px 0 10px;
 }
 
-/* [COURSE] Lease / MRT facts with an icon square */
+/* Lease / MRT facts with an icon square */
 .stat {
   display: flex;
   gap: 10px;
@@ -413,7 +411,7 @@ function barWidth(score) {
   font-size: 15px;
 }
 
-/* [COURSE] Phones and tablets: photo on top instead of on the left (media query) */
+/* Phones and tablets: photo on top instead of on the left (media query) */
 @media (max-width: 991px) {
   .bcard {
     flex-direction: column;

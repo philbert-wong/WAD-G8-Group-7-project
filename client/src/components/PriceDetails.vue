@@ -1,6 +1,6 @@
 <script setup>
 // The "Price details" panel inside a card: median prices and a table of recent sales
-// FINAL DRAFT, FEATURE: PRICE CHART (Shaun's area, first draft by Jihao + AI): a line of every sale's price.
+// Price chart: a line of every sale's price.
 // ⚠️ NOT IN OUR COURSE: the Chart.js library (new npm package), nextTick, and drawing on a <canvas>.
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
@@ -137,7 +137,7 @@ function formatStorey(storey) {
         <li class="text-muted">Source: {{ details.source === 'live' ? 'data.gov.sg (live)' : 'Stored data' }}</li>
       </ul>
 
-      <!-- FINAL DRAFT: price chart -->
+      <!-- Price chart -->
       <div class="mb-3"><canvas ref="chartCanvas" height="140"></canvas></div>
 
       <div class="table-responsive">

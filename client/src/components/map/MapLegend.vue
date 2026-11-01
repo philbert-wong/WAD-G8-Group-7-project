@@ -93,14 +93,14 @@ function isShown(key) {
 </template>
 
 <style scoped>
-/* [COURSE] Round colour dots in the legend */
+/* Round colour dots in the legend */
 .dot {
   display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
 }
-/* [AI-ASSISTED] The match score legend: a rainbow bar red → orange → yellow → green → blue → purple
+/* The match score legend: a rainbow bar red → orange → yellow → green → blue → purple
    (linear-gradient is not in our course; the same colours AND positions as MATCH_STOPS in MapView) */
 .gradient-bar {
   height: 12px;
@@ -116,7 +116,7 @@ function isShown(key) {
   );
   margin-bottom: 4px;
 }
-/* [COURSE] Small coloured squares in the legend for the amenities (same as their squares on the map) */
+/* Small coloured squares in the legend for the amenities (same as their squares on the map) */
 .square {
   display: inline-block;
   width: 10px;

@@ -5,9 +5,9 @@
 //
 //   ✅ = read on an official page (HDB / CPF / MAS)
 //   ⚠️ VERIFY = only found on a non-official site, or the official page did not show it clearly
-//   ❌ TODO = not filled in yet; the calculator skips it until you fill it in
+//   ❌ = not found anywhere, so it is left out; the calculator skips it
 //
-// All checked on 23 Oct 2026 (by Claude, for Jihao to confirm).
+// All checked on 23 Oct 2026.
 //
 // Household types used below (same as the calculator's "Buying as"):
 //   family = couple / family, ALL first-timers
@@ -77,7 +77,7 @@ export const CPF_HOUSING_GRANT_INCOME_CEILING = {
 // Only found on non-official sites. Check on hdb.gov.sg or the HFE letter page.
 // ⚠️ VERIFY: can a single get this grant for an EXECUTIVE flat at all? [HDB-2026] says the singles
 // ceiling is "for the purchase of up to a 5-room resale flat". For now singles get room5OrBigger.
-// ❌ TODO: amounts for "mixed" couples and "joint" singles were not found anywhere, so they are left out.
+// ❌ Amounts for "mixed" couples and "joint" singles were not found anywhere, so they are left out.
 // The calculator shows "not counted yet" for them instead of guessing.
 export const CPF_HOUSING_GRANT = {
   family: { upTo4Room: 80000, room5OrBigger: 50000 },

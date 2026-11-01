@@ -1,6 +1,5 @@
 <script setup>
-// FINAL DRAFT: the white bar at the top with the logo, page tabs, and Login / Logout on the right
-// (Cosy Professional design + the login from feature/accounts-jihao)
+// The white bar at the top with the logo, page tabs, and Login / Logout on the right
 import { onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
@@ -73,13 +72,13 @@ onMounted(function () {
 </template>
 
 <style scoped>
-/* [COURSE] White bar with a bottom border */
+/* White bar with a bottom border */
 .navx {
   background: #fff;
   border-bottom: 1px solid var(--line);
 }
 
-/* [COURSE] Logo: bold text, "HDB" in the serif font and terracotta */
+/* Logo: bold text, "HDB" in the serif font and terracotta */
 .logo {
   font-weight: 700;
   font-size: 19px;
@@ -96,7 +95,7 @@ onMounted(function () {
   font-weight: 400;
   font-size: 22px;
 }
-/* [COURSE] Square logo mark, centred with Grid */
+/* Square logo mark, centred with Grid */
 .logo .mark {
   width: 30px;
   height: 30px;
@@ -105,13 +104,13 @@ onMounted(function () {
   place-items: center;
   font-size: 15px;
 }
-/* [AI-ASSISTED] Gradient fill and glow on the logo mark */
+/* Gradient fill and glow on the logo mark */
 .logo .mark {
   background: linear-gradient(140deg, var(--terra), #d98a63);
   box-shadow: 0 4px 10px rgba(192, 97, 74, 0.35);
 }
 
-/* [COURSE] Tabs: grey links, the current one is dark with a terracotta underline (border-bottom) */
+/* Tabs: grey links, the current one is dark with a terracotta underline (border-bottom) */
 .tabs a,
 .tabs-small a {
   color: var(--muted);
@@ -141,7 +140,7 @@ onMounted(function () {
   color: var(--terra);
 }
 
-/* [COURSE] Login / Logout pill button */
+/* Login / Logout pill button */
 .btn-short {
   border: 1.5px solid var(--char);
   border-radius: 999px;

@@ -31,7 +31,7 @@ onMounted(function () {
 
 <template>
   <section>
-    <!-- DESIGN PREVIEW (Cosy Professional): serif title, one wide card per row -->
+    <!-- Serif title, one wide card per row -->
     <span class="eyebrow">Your favourites</span>
     <h1 class="page-title serif">My <em>shortlist</em> ({{ shortlist.count }})</h1>
     <p class="page-sub mb-4">Keep notes on the flats you like and compare them later.</p>

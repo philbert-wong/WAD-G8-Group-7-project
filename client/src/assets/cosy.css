@@ -1,17 +1,10 @@
 /* =====================================================================================
-   "COSY PROFESSIONAL" DESIGN: shared styles for the whole site (DESIGN PREVIEW BRANCH)
+   "COSY PROFESSIONAL" DESIGN: shared styles for the whole site
 
-   Every block below is tagged:
-     [COURSE]       = we could write this ourselves with what IS216 taught
-                      (selectors, colours, fonts, box model, borders, Flexbox, Grid, Bootstrap)
-     [AI-ASSISTED]  = written with AI help; uses CSS we were NOT taught
-                      (CSS variables, gradients, shadows, transitions, transforms,
-                       animations, pseudo-elements, sticky positioning, custom range sliders)
-
-   Based on Jihao's mockup hdb_cosy_professional.html (its own comments say "AI-assisted (UI styling)").
+   Based on Jihao's mockup hdb_cosy_professional.html.
    ===================================================================================== */
 
-/* [AI-ASSISTED] Design tokens: CSS custom properties ("variables") so every colour is defined once.
+/* Design tokens: CSS custom properties ("variables") so every colour is defined once.
    Not taught: var(--name). The course way would be to repeat the hex colour everywhere. */
 :root {
   --cream: #faf5ee;
@@ -24,7 +17,7 @@
   --muted: #7a7166; /* grey-brown secondary text */
 }
 
-/* [COURSE] Page background, font and text colour.
+/* Page background, font and text colour.
    The fonts (DM Sans, DM Serif Display) come from Google Fonts, linked in index.html. */
 body {
   background: var(--cream);
@@ -32,13 +25,13 @@ body {
   color: var(--char);
 }
 
-/* [COURSE] The serif headline font, used with class="serif" */
+/* The serif headline font, used with class="serif" */
 .serif {
   font-family: 'DM Serif Display', serif;
   font-weight: 400;
 }
 
-/* [COURSE] Small rounded label above a page title, e.g. "4 towns · real sales" */
+/* Small rounded label above a page title, e.g. "4 towns · real sales" */
 .eyebrow {
   display: inline-block;
   border: 1px solid #e3c3b5;
@@ -50,7 +43,7 @@ body {
   background: #fff;
 }
 
-/* [COURSE] Big page title, with the <em> part in terracotta */
+/* Big page title, with the <em> part in terracotta */
 .page-title {
   font-size: 46px;
   line-height: 1.1;
@@ -64,7 +57,7 @@ body {
   font-size: 16px;
 }
 
-/* [COURSE] White rounded card used for panels (filters, shortlist notes, calculator...) */
+/* White rounded card used for panels (filters, shortlist notes, calculator...) */
 .cosy-card {
   background: #fff;
   border: 1px solid var(--line);
@@ -72,12 +65,12 @@ body {
   padding: 22px;
 }
 
-/* [AI-ASSISTED] Soft brown shadow under cards (box-shadow with a negative spread) */
+/* Soft brown shadow under cards (box-shadow with a negative spread) */
 .cosy-shadow {
   box-shadow: 0 14px 34px -18px rgba(80, 50, 30, 0.25);
 }
 
-/* [COURSE] Action buttons: rounded, dark outline */
+/* Action buttons: rounded, dark outline */
 .act-btn {
   border-radius: 11px;
   font-weight: 600;
@@ -91,7 +84,7 @@ body {
   background: var(--char);
   color: #fff;
 }
-/* [COURSE] Main (terracotta) button, "saved" (sage) button and plain "ghost" button */
+/* Main (terracotta) button, "saved" (sage) button and plain "ghost" button */
 .act-btn.primary {
   background: var(--terra);
   border-color: var(--terra);
@@ -113,7 +106,7 @@ body {
   background: var(--beige);
   color: var(--char);
 }
-/* [AI-ASSISTED] Smooth colour change on hover + glow under the main button */
+/* Smooth colour change on hover + glow under the main button */
 .act-btn {
   transition: 0.2s;
 }
@@ -121,7 +114,7 @@ body {
   box-shadow: 0 8px 18px -8px rgba(192, 97, 74, 0.8);
 }
 
-/* [COURSE] Pills (small rounded labels) and tags */
+/* Pills (small rounded labels) and tags */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -151,7 +144,7 @@ body {
   color: var(--sage);
 }
 
-/* [COURSE] Form boxes in the cosy style (used on top of Bootstrap's form-select / form-control) */
+/* Form boxes in the cosy style (used on top of Bootstrap's form-select / form-control) */
 .cosy-input {
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -163,13 +156,13 @@ body {
 .form-select.cosy-input {
   padding-right: 2.25rem;
 }
-/* [AI-ASSISTED] Terracotta glow ring when a box is clicked into (box-shadow on :focus) */
+/* Terracotta glow ring when a box is clicked into (box-shadow on :focus) */
 .cosy-input:focus {
   border-color: var(--terra);
   box-shadow: 0 0 0 3px rgba(192, 97, 74, 0.15);
 }
 
-/* [AI-ASSISTED] Spotlight for the guide pet's tour: pulsing outline (keyframe animation) */
+/* Spotlight for the guide pet's tour: pulsing outline (keyframe animation) */
 .tour-hl {
   position: relative;
   z-index: 40;
@@ -185,7 +178,7 @@ body {
   }
 }
 
-/* [COURSE] Footer */
+/* Footer */
 .cosy-footer {
   border-top: 1px solid var(--line);
   color: var(--muted);
@@ -194,16 +187,16 @@ body {
   margin-top: 30px;
 }
 
-/* [COURSE] Smaller title on phones (media query) */
+/* Smaller title on phones (media query) */
 @media (max-width: 560px) {
   .page-title {
     font-size: 34px;
   }
 }
 
-/* FINAL DRAFT: Bootstrap's blue buttons, tabs and tick boxes in terracotta, so the calculator,
+/* Bootstrap's blue buttons, tabs and tick boxes in terracotta, so the calculator,
    Compare and Login pages match the cosy design.
-   [COURSE] overriding Bootstrap classes with our own CSS (loaded after Bootstrap) */
+   Overriding Bootstrap classes with our own CSS (loaded after Bootstrap) */
 .btn-primary,
 .btn-primary:disabled {
   background: var(--terra);

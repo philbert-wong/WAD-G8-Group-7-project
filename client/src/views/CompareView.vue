@@ -119,7 +119,7 @@ loadShortlist()
 
 <template>
   <section>
-    <!-- FINAL DRAFT: cosy page heading -->
+    <!-- Page heading -->
     <span class="eyebrow">Side by side</span>
     <h1 class="page-title serif">Compare <em>flats</em></h1>
     <p class="page-sub mb-4">Tick 2 or 3 flats from your shortlist.</p>

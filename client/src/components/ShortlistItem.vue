@@ -28,7 +28,7 @@ function removeItem() {
     <BlockCard :block="item.block" :show-save="false" />
 
     <!-- The note box, in its own card underneath -->
-    <!-- DESIGN PREVIEW: note box in the cosy card style, sitting under the flat card -->
+    <!-- Note box in the cosy card style, sitting under the flat card -->
     <div class="cosy-card note-card">
       <div>
         <label class="form-label d-block small mb-1">My note</label>
@@ -52,7 +52,7 @@ function removeItem() {
 </template>
 
 <style scoped>
-/* [COURSE] Pull the note box up so it tucks under the flat card */
+/* Pull the note box up so it tucks under the flat card */
 .note-card {
   margin-top: -10px;
 }

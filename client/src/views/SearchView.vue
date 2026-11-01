@@ -1,6 +1,5 @@
 <script setup>
 // The Search page: search box, filters, "What matters to you?" panel and the flat cards
-// DESIGN PREVIEW (Cosy Professional): only the <template> layout and <style> changed; the logic is the same.
 import { onMounted, ref, computed, watch } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
@@ -388,7 +387,7 @@ onMounted(loadPage)
 
 <template>
   <section>
-    <!-- DESIGN PREVIEW (Cosy Professional): hero title, then results (left) + sidebar (right) -->
+    <!-- Hero title, then results (left) + sidebar (right) -->
     <span class="eyebrow">26 towns · real resale prices · last 12 months</span>
     <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
     <p class="page-sub">Search blocks, compare real sale prices, and keep a shortlist.</p>
@@ -479,7 +478,7 @@ onMounted(loadPage)
 </template>
 
 <style>
-/* [COURSE] Results count line */
+/* Results count line */
 .resbar {
   font-size: 14px;
   color: var(--muted);

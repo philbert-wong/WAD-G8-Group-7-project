@@ -3,9 +3,7 @@
 // (Closeness to MRT is handled by the "What matters to you?" panel instead.)
 // The page (SearchView) owns the filter values and passes them in as a prop.
 // When the user changes a box, we send the change up with emit.
-// DESIGN PREVIEW (Cosy Professional): now a sidebar card. Flat type became "chips" (buttons);
-// props and emits are the same as before.
-// FINAL DRAFT: Yujia's "Calculate My Affordability" button is now a link under the budget slider
+// The "Not sure? Calculate my budget" link under the budget slider opens the Affordability page.
 import { RouterLink } from 'vue-router'
 
 const props = defineProps({
@@ -126,7 +124,7 @@ function onClear() {
 </template>
 
 <style scoped>
-/* [COURSE] Sidebar card with a thick terracotta top border */
+/* Sidebar card with a thick terracotta top border */
 .filters {
   background: #fff;
   border: 1px solid var(--line);
@@ -135,7 +133,7 @@ function onClear() {
   border-top: 4px solid var(--terra);
   margin-bottom: 18px;
 }
-/* [AI-ASSISTED] Shadow under the sidebar */
+/* Shadow under the sidebar */
 .filters {
   box-shadow: 0 14px 34px -20px rgba(80, 50, 30, 0.25);
 }
@@ -158,7 +156,7 @@ function onClear() {
   font-size: 19px;
 }
 
-/* [COURSE] Chips: a row of equal buttons (Flexbox + flex-wrap); the chosen one is dark */
+/* Chips: a row of equal buttons (Flexbox + flex-wrap); the chosen one is dark */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -180,7 +178,7 @@ function onClear() {
   border-color: var(--char);
 }
 
-/* [AI-ASSISTED] Terracotta slider handle (browser-specific ::-webkit / ::-moz selectors, not taught) */
+/* Terracotta slider handle (browser-specific ::-webkit / ::-moz selectors, not taught) */
 .form-range::-webkit-slider-thumb {
   background: var(--terra);
 }
@@ -195,7 +193,7 @@ function onClear() {
   background: var(--beige);
 }
 
-/* [COURSE] Small terracotta link to the affordability calculator */
+/* Small terracotta link to the affordability calculator */
 .calc-link {
   display: inline-block;
   font-size: 13px;
@@ -204,7 +202,7 @@ function onClear() {
   margin-top: 2px;
 }
 
-/* [COURSE] Full-width "Apply Filters" button and the "Clear all" link-button */
+/* Full-width "Apply Filters" button and the "Clear all" link-button */
 .apply {
   width: 100%;
   background: var(--terra);

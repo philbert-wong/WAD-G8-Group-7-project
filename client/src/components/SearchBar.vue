@@ -2,7 +2,6 @@
 // The big search box: towns, streets, block addresses, postal codes or any place (SearchView decides how to search).
 // The page (SearchView) owns the text and passes it in as a prop.
 // While the user types, we send the new text up with emit.
-// DESIGN PREVIEW: restyled to the Cosy Professional look (logic unchanged).
 defineProps({
   text: String,
 })
@@ -33,7 +32,7 @@ function onSubmit() {
 </template>
 
 <style scoped>
-/* [COURSE] Slightly bigger text in the search box */
+/* Slightly bigger text in the search box */
 .search-box input {
   font-size: 16px;
   padding: 11px 14px;

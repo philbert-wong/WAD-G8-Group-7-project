@@ -26,7 +26,11 @@ import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANC
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
 
-// PHG "live near" rule: within 4 km of your parents / child 
+// Is the browser window at least as wide as Bootstrap's "lg" size (992px, a laptop)? On a phone the Filters
+// panel starts closed, because the sidebar is under the map there and the open filters push everything down.
+const isWideScreen = window.innerWidth >= 992
+
+// PHG "live near" rule: within 4 km of your parents / child
 const PHG_NEAR_DISTANCE_METRES = 4000
 
 const errorMessage = ref('')
@@ -784,78 +788,105 @@ onUnmounted(function () {
       Press "Clear all" under Filters to see every block.
     </p>
 
+    <!-- Bootstrap grid: the map takes 8 of 12 columns on laptops and 9 of 12 on big screens, the sidebar the rest.
+         On phones and tablets (below lg) the sidebar goes under the map. -->
     <div class="row g-4">
-      <div class="col-lg-8">
+      <div class="col-lg-8 col-xl-9">
         <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
         <MapSearchBar :searched-place="searchedPlace" @search="searchPlace" @clear="clearSearch" />
 
         <div id="mapBox" class="map-box"></div>
       </div>
 
-      <div class="col-lg-4">
-        <!-- Selected block: appears when a dot is clicked -->
-        <SelectedBlockCard
-          v-if="selectedPlace !== null"
-          :place="selectedPlace"
-          :match-text="selectedMatchText()"
-          :nearest-amenities="nearestAmenities"
-          :amenity-types="amenityTypes"
-          :walk="walk"
-          @close="closePlace"
-          @show-nearest="showNearest"
-          @hide-nearest="hideNearest"
-        />
-
-        <!-- Legend: colour dots by price / match, and the amenity tick boxes
-             (2nd card, so on a phone it is right under the map, before the filters) -->
-        <MapLegend
-          :colour-by="colourBy"
-          :price-bands="priceBands"
-          :amenity-types="amenityTypes"
-          :shown-types="shownTypes"
-          :no-score-colour="NO_SCORE_COLOUR"
-          @change-colour-by="changeColourBy"
-          @toggle-amenity="toggleAmenity"
-        />
-
-        <!-- Filters: the same panel as Search, inside a panel that opens / closes (open at the start) -->
-        <CollapsiblePanel title="Filters" :start-open="true">
-          <FilterPanel
-            :filters="filters"
-            @change-filter="setFilter"
-            @search="loadBlocks"
-            @clear="clearFilters"
+      <div class="col-lg-4 col-xl-3">
+        <div class="map-sidebar">
+          <!-- Selected block: appears when a dot is clicked -->
+          <SelectedBlockCard
+            v-if="selectedPlace !== null"
+            :place="selectedPlace"
+            :match-text="selectedMatchText()"
+            :nearest-amenities="nearestAmenities"
+            :amenity-types="amenityTypes"
+            :walk="walk"
+            @close="closePlace"
+            @show-nearest="showNearest"
+            @hide-nearest="hideNearest"
           />
-        </CollapsiblePanel>
 
-        <!-- Your Priorities: the same panel as Search (they share the saved choices), closed at the start -->
-        <CollapsiblePanel title="Your Priorities" :start-open="false">
-          <PreferencesPanel
-            :preferences="preferences"
-            @change-ticked="changeTicked"
-            @change-level="changeLevel"
+          <!-- Legend: colour dots by price / match, and the amenity tick boxes
+               (2nd card, so on a phone it is right under the map, before the filters) -->
+          <MapLegend
+            :colour-by="colourBy"
+            :price-bands="priceBands"
+            :amenity-types="amenityTypes"
+            :shown-types="shownTypes"
+            :no-score-colour="NO_SCORE_COLOUR"
+            @change-colour-by="changeColourBy"
+            @toggle-amenity="toggleAmenity"
           />
-        </CollapsiblePanel>
 
-        <!-- PHG layer: the parents' postal code, the 4 km circle and the count -->
-        <PhgCard
-          :parent-place="parentPlace"
-          :nearby-count="nearbyCount"
-          :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
-          @search="searchParent"
-          @clear="clearParent"
-        />
+          <!-- Filters: the same panel as Search, inside a panel that opens / closes
+               (open at the start on a wide screen, closed on a phone so the PHG card is not far down) -->
+          <CollapsiblePanel title="Filters" :start-open="isWideScreen">
+            <FilterPanel
+              :filters="filters"
+              @change-filter="setFilter"
+              @search="loadBlocks"
+              @clear="clearFilters"
+            />
+          </CollapsiblePanel>
+
+          <!-- Your Priorities: the same panel as Search (they share the saved choices), closed at the start -->
+          <CollapsiblePanel title="Your Priorities" :start-open="false">
+            <PreferencesPanel
+              :preferences="preferences"
+              @change-ticked="changeTicked"
+              @change-level="changeLevel"
+            />
+          </CollapsiblePanel>
+
+          <!-- PHG layer: the parents' postal code, the 4 km circle and the count -->
+          <PhgCard
+            :parent-place="parentPlace"
+            :nearby-count="nearbyCount"
+            :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
+            @search="searchParent"
+            @clear="clearParent"
+          />
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* [COURSE] The map needs a fixed height, otherwise it is 0 px tall */
+/* The map needs a set height, otherwise it is 0 px tall.
+   100vh = the whole height of the browser window, minus room for the address search bar above the map,
+   so when you scroll down to the map it fills the screen. Never shorter than 450px. */
 .map-box {
-  height: 560px;
+  height: calc(100vh - 120px);
+  min-height: 450px;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--line);
+}
+
+/* Phones and tablets (narrower than Bootstrap's lg, 992px): a shorter map, so the cards under it are easy to reach */
+@media (max-width: 991px) {
+  .map-box {
+    height: 60vh;
+    min-height: 320px;
+  }
+}
+
+/* Laptops and bigger: the sidebar stays beside the map while you scroll, and scrolls by itself
+   when its cards are taller than the window (the same idea as Search's sidebar) */
+@media (min-width: 992px) {
+  .map-sidebar {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+  }
 }
 </style>

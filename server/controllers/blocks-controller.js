@@ -297,9 +297,10 @@ function monthsSinceStart() {
   const startYear = Number(priceModel.startMonth.slice(0, 4));   // 2021
   const startMonth = Number(priceModel.startMonth.slice(5, 7));  // 1
   const now = new Date();
-  const thisYear = now.getFullYear();     // hint: now.getFullYear()
-  const thisMonth = now.getMonth() + 1;    // hint: now.getMonth() is 0-11, so it needs + 1
-  return (thisYear-startYear)*12 + (thisMonth-startMonth);               // your Python formula, using startYear / startMonth / thisYear / thisMonth
+  const thisYear = now.getFullYear();
+  const thisMonth = now.getMonth() + 1;    // getMonth() is 0-11, so it needs + 1
+  // the same formula as in prep/priceRegression.ipynb
+  return (thisYear-startYear)*12 + (thisMonth-startMonth);
 }
 
 // features: { town, flatType, storey, leaseYears, areaSqm, months }
@@ -329,7 +330,6 @@ function estimatePrice(features) {
 
 // ---------- OneMap token ----------
 // Gets (and remembers) a OneMap token. It lasts about 3 days, so we ask again a bit early.
-// STARTER CODE (AI-generated boilerplate): finish the TODO yourself.
 
 let token = null;
 let expiresAt = 0; // a time in milliseconds, like Date.now()

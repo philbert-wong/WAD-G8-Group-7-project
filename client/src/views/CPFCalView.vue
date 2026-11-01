@@ -221,7 +221,7 @@ function applyBudget() {
 
 <template>
   <div class="mb-5">
-    <!-- FINAL DRAFT: cosy page heading -->
+    <!-- Page heading -->
     <span class="eyebrow">Affordability</span>
     <h1 class="page-title serif">How much can I <em>afford?</em></h1>
     <p class="text-muted small mb-4">Step {{ currentStep }} of 3 · an estimate for a resale flat with an HDB loan</p>

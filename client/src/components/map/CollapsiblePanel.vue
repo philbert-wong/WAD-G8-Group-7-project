@@ -30,7 +30,7 @@ const open = ref(props.startOpen)
 </template>
 
 <style scoped>
-/* [COURSE] The header bar: full width, title on the left, Show/Hide on the right (Flexbox) */
+/* The header bar: full width, title on the left, Show/Hide on the right (Flexbox) */
 .panel-toggle {
   width: 100%;
   display: flex;
