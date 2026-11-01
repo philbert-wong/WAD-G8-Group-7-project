@@ -110,6 +110,58 @@ function makeTags(block) {
   return tags
 }
 
+const SCORE_STOPS = [
+  { at: 0,   color: '#e07b39' },   // orange
+  { at: 25,  color: '#f0c13f' },   // yellow
+  { at: 50,  color: '#4fa66a' },   // green
+  { at: 75,  color: '#2f6fa8' },   // blue
+  { at: 100, color: '#1c3a6b' },   // navy
+]
+
+function scoreColor(score) {
+  let i = 0
+  while (i < SCORE_STOPS.length - 2 && score > SCORE_STOPS[i + 1].at) {
+    i++
+  }
+  const a = SCORE_STOPS[i]
+  const b = SCORE_STOPS[i + 1]
+  const t = ((score - a.at) / (b.at - a.at)) * 100   // how far from a to b, in %
+  return `color-mix(in oklab, ${b.color} ${t}%, ${a.color})`
+}
+
+// The match bar: filled to the score, showing the ramp from orange up to the score's colour
+function barStyle(score) {
+  if (score === null || score <= 0) {
+    return { width: '0%' }
+  }
+  const parts = SCORE_STOPS
+    .filter(function (stop) {
+      return stop.at < score
+    })
+    .map(function (stop) {
+      return `${stop.color} ${(stop.at / score) * 100}%`
+    })
+  parts.push(`${scoreColor(score)} 100%`)
+  return {
+    width: score + '%',
+    background: `linear-gradient(90deg, ${parts.join(', ')})`,
+  }
+}
+
+
+
+function photoStyle(score) {
+  if (score === null) {
+    return {}   // no score: keep the default warm gradient
+  }
+  const c = scoreColor(score)
+  // lighter at the top, full colour at the bottom, so the 🏢 and the town label stay readable
+  return {
+    background: `linear-gradient(160deg, color-mix(in oklab, ${c} 55%, white), color-mix(in oklab, ${c} 80%, white) 55%, ${c})`,
+  }
+}
+
+
 // NEW (design): width of the match bar, e.g. score 87 -> "87%"
 function barWidth(score) {
   if (score === null) {
@@ -122,7 +174,7 @@ function barWidth(score) {
 <template>
   <article class="bcard">
     <!-- Photo area. We have no real photos, so it is a coloured placeholder. -->
-    <div class="photo">
+    <div class="photo" :style="photoStyle(score)">
       <span class="photo-icon">🏢</span>
       <span class="ph-tag">{{ block.town }}</span>
     </div>
@@ -140,7 +192,7 @@ function barWidth(score) {
             <b v-if="score === null">–</b>
             <b v-else>{{ score }}/100</b>
           </div>
-          <div class="bar"><i :style="{ width: barWidth(score) }"></i></div>
+          <div class="bar"><i :style="barStyle(score)"></i></div>
         </div>
       </div>
 
