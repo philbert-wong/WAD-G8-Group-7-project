@@ -5,8 +5,8 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 
-// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
-const BASE_URL = 'http://localhost:8000'
+// Our Express server's address, from one shared place (see config.js; it changes for deployment)
+import { BASE_URL } from '../config.js'
 
 export const useShortlistStore = defineStore('shortlist', function () {
   // ---------- state ----------

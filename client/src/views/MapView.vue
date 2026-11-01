@@ -8,6 +8,13 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import FilterPanel from '../components/FilterPanel.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
+// The map page's own sidebar pieces (client/src/components/map/). MapView keeps the data and the
+// Leaflet map; these components only show things and send clicks / typed text back up (props down, emit up).
+import MapSearchBar from '../components/map/MapSearchBar.vue'
+import SelectedBlockCard from '../components/map/SelectedBlockCard.vue'
+import MapLegend from '../components/map/MapLegend.vue'
+import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
+import PhgCard from '../components/map/PhgCard.vue'
 import { useAuthStore } from '../stores/auth'
 import { useRoute } from 'vue-router'
 
@@ -16,8 +23,8 @@ const route = useRoute()
 // The same match score maths as Search (shared file, not changed here)
 import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 
-// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
-const BASE_URL = 'http://localhost:8000'
+// Our Express server's address, from one shared place (see config.js; it changes for deployment)
+import { BASE_URL } from '../config.js'
 
 // PHG "live near" rule: within 4 km of your parents / child 
 const PHG_NEAR_DISTANCE_METRES = 4000
@@ -29,12 +36,12 @@ const blockCount = ref(0)
 // budget and lease (the sliders' limits), so you first see every block and then narrow it down.
 const filters = ref({ q: '', flatType: '', maxPrice: '1000000', minLease: '20' })
 
-// For the address search above the map: what is typed, and the place OneMap found ({ name, lat, lng }, or null)
-const searchQuery = ref('')
+// The place found by the address search above the map: { name, lat, lng }, or null
+// (the typed text itself lives in MapSearchBar)
 const searchedPlace = ref(null)
 
-// For the PHG search box: what is typed, and the place OneMap found ({ name, lat, lng }, or null = no circle)
-const parentQuery = ref('')
+// The parents' place found by the PHG search: { name, lat, lng }, or null = no circle
+// (the typed text itself lives in PhgCard)
 const parentPlace = ref(null)
 const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circle (null = no circle)
 
@@ -42,7 +49,7 @@ const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circl
 // The colours are chosen to look nothing like the 4 price colours (green, yellow, orange, red).
 // one = the name for a single one (used in the "nearest amenities" list)
 const amenityTypes = [
-  { key: 'mrt', label: 'MRT stations', one: 'MRT', colour: '#0057ff' },
+  { key: 'mrt', label: 'MRT / LRT stations', one: 'MRT / LRT', colour: '#0057ff' },
   { key: 'hawker', label: 'Hawker centres', one: 'Hawker centre', colour: '#a21caf' },
   { key: 'park', label: 'Parks', one: 'Park', colour: '#e83e8c' },
   { key: 'school', label: 'Primary schools', one: 'Primary school', colour: '#111111' },
@@ -71,9 +78,25 @@ let searchMarker = null
 // "Colour dots by": 'price' (the price bands) or 'match' (the match score gradient)
 const colourBy = ref('price')
 
-// Which sidebar panels are open: Filters open and Your Priorities closed at the start, so the sidebar is shorter
-const showFilters = ref(true)
-const showPriorities = ref(false)
+// The legend's "Colour dots by" changed: remember it and redraw the dots in the new colours
+function changeColourBy(value) {
+  colourBy.value = value
+  loadBlocks()
+}
+
+// The legend's amenity tick box changed, e.g. ('mrt', true): add or remove that type, then redraw the squares
+function toggleAmenity(key, ticked) {
+  if (ticked) {
+    if (!shownTypes.value.includes(key)) {
+      shownTypes.value.push(key)
+    }
+  } else {
+    shownTypes.value = shownTypes.value.filter(function (shownKey) {
+      return shownKey !== key
+    })
+  }
+  showAmenities()
+}
 
 // Your Priorities (school, MRT, hawker, park: ticked + importance), the same ones Search uses.
 // Search saves them in localStorage as 'matchPreferences'; we start from those (or the defaults).
@@ -262,16 +285,6 @@ async function showNearest() {
 function hideNearest() {
   nearestAmenities.value = null
   showAmenities()
-}
-
-// The single name of an amenity category, e.g. 'hawker' -> 'Hawker centre' (for the nearest list)
-function amenityName(category) {
-  for (const type of amenityTypes) {
-    if (type.key === category) {
-      return type.one
-    }
-  }
-  return category
 }
 
 // Is this amenity one of the selected block's 4 nearest? (same category AND same name)
@@ -522,11 +535,11 @@ async function showAmenities() {
   }
 }
 
-// Address search above the map (Go button or Enter): ask OneMap where the place is, put a marker there
-// and move the map to it. Unlike the PHG search, it does not filter the blocks.
-async function searchPlace() {
+// Address search above the map (MapSearchBar sends the typed text): ask OneMap where the place is,
+// put a marker there and move the map to it. Unlike the PHG search, it does not filter the blocks.
+async function searchPlace(text) {
   errorMessage.value = ''
-  if (searchQuery.value.trim() === '') {
+  if (text.trim() === '') {
     errorMessage.value = 'Type an address or postal code'
     return
   }
@@ -534,7 +547,7 @@ async function searchPlace() {
   let place = null
   try {
     // Our server asks OneMap and answers { name, lat, lng } for the best match
-    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: searchQuery.value } })
+    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
     place = response.data
   } catch (error) {
     if (error.response && error.response.status === 500) {
@@ -576,14 +589,13 @@ async function searchPlace() {
   searchMarker.openPopup()
 }
 
-// "Clear" next to the searched place: remove the marker and empty the search box
+// "Clear" next to the searched place: remove the marker (MapSearchBar empties its own box)
 function clearSearch() {
   if (searchMarker !== null) {
     map.removeLayer(searchMarker)
     searchMarker = null
   }
   searchedPlace.value = null
-  searchQuery.value = ''
 }
 
 // Takes the old PHG circle and parents' marker off the map (if there are any)
@@ -598,18 +610,18 @@ function removeParentDrawings() {
   }
 }
 
-// PHG search (Search button or Enter): ask OneMap where the parents live (any address or postal code),
+// PHG search (PhgCard sends the typed text): ask OneMap where the parents live (any address or postal code),
 // draw a marker and the 4 km circle there, then reload the dots so only the blocks inside are shown
-async function searchParent() {
+async function searchParent(text) {
   errorMessage.value = ''
-  if (parentQuery.value.trim() === '') {
+  if (text.trim() === '') {
     errorMessage.value = 'Type your parents\' address or postal code'
     return
   }
 
   try {
     // Our server asks OneMap and answers { name, lat, lng } for the best match
-    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: parentQuery.value } })
+    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
     parentPlace.value = response.data
   } catch (error) {
     if (error.response && error.response.status === 500) {
@@ -651,12 +663,20 @@ async function searchParent() {
   loadBlocks()
 }
 
-// "Clear" link: remove the circle and marker, and show every block that fits the filters again
+// PhgCard's "Clear": remove the circle and marker, and show every block that fits the filters again
+// (PhgCard empties its own box)
 function clearParent() {
   removeParentDrawings()
   parentPlace.value = null
-  parentQuery.value = ''
   loadBlocks()
+}
+
+// The match score text for the Selected block card: "62 / 100" in Best match mode, '' otherwise (not shown)
+function selectedMatchText() {
+  if (colourBy.value === 'match') {
+    return scoreText(selectedPlace.value)
+  }
+  return ''
 }
 
 // When the page opens: make the map inside <div id="mapBox"> (centred on Singapore), then add the blocks
@@ -699,203 +719,63 @@ onUnmounted(function () {
     <div class="row g-4">
       <div class="col-lg-8">
         <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
-        <div class="input-group mb-2">
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="form-control"
-            placeholder="Search an address or postal code"
-            @keyup.enter="searchPlace"
-          />
-          <button type="button" class="btn btn-dark" @click="searchPlace">Go</button>
-        </div>
-        <p v-if="searchedPlace !== null" class="small mb-2">
-          Showing: <strong>{{ searchedPlace.name }}</strong>
-          <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearSearch">Clear</button>
-        </p>
+        <MapSearchBar :searched-place="searchedPlace" @search="searchPlace" @clear="clearSearch" />
 
         <div id="mapBox" class="map-box"></div>
       </div>
 
       <div class="col-lg-4">
         <!-- Selected block: appears when a dot is clicked -->
-        <div v-if="selectedPlace !== null" class="cosy-card cosy-shadow mb-3">
-          <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="serif mb-1">{{ selectedPlace.label }}</h5>
-            <button type="button" class="btn-close" aria-label="Close" @click="closePlace"></button>
-          </div>
-          <p class="small text-muted mb-3">
-            {{ selectedPlace.cards[0].town }} · {{ selectedPlace.cards[0].mrtWalkMinutes }} min walk to
-            {{ selectedPlace.cards[0].mrtName }}
-            <span v-if="colourBy === 'match'"><br />Match score: <strong>{{ scoreText(selectedPlace) }}</strong></span>
-          </p>
+        <SelectedBlockCard
+          v-if="selectedPlace !== null"
+          :place="selectedPlace"
+          :match-text="selectedMatchText()"
+          :nearest-amenities="nearestAmenities"
+          :amenity-types="amenityTypes"
+          @close="closePlace"
+          @show-nearest="showNearest"
+          @hide-nearest="hideNearest"
+        />
 
-          <!-- One row per flat type at this block that fits the filters -->
-          <table class="table table-sm small mb-0">
-            <thead>
-              <tr>
-                <th>Flat type</th>
-                <th class="text-end">Median</th>
-                <th class="text-end">Sales</th>
-                <th class="text-end">Lease left</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="card in selectedPlace.cards" :key="card.id">
-                <td>{{ card.flatType }}</td>
-                <td class="text-end">{{ '$' + card.price.toLocaleString('en-SG') }}</td>
-                <td class="text-end">{{ card.salesCount }}</td>
-                <td class="text-end">{{ card.remainingLease }} yrs</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Legend: colour dots by price / match, and the amenity tick boxes
+             (2nd card, so on a phone it is right under the map, before the filters) -->
+        <MapLegend
+          :colour-by="colourBy"
+          :price-bands="priceBands"
+          :amenity-types="amenityTypes"
+          :shown-types="shownTypes"
+          :no-score-colour="NO_SCORE_COLOUR"
+          @change-colour-by="changeColourBy"
+          @toggle-amenity="toggleAmenity"
+        />
 
-          <!-- Nearest amenities: a button first, then the list once loaded -->
-          <button
-            v-if="nearestAmenities === null"
-            type="button"
-            class="btn btn-sm btn-outline-dark mt-3"
-            @click="showNearest"
-          >
-            Show nearest amenities
-          </button>
-          <div v-else class="mt-3">
-            <h6 class="mb-2">Nearest amenities</h6>
-            <ul class="list-unstyled small mb-2">
-              <li v-for="amenity in nearestAmenities" :key="amenity.category" class="mb-1">
-                <strong>{{ amenityName(amenity.category) }}:</strong> {{ amenity.name }} · {{ amenity.distance }} m
-              </li>
-            </ul>
-            <p class="small text-muted mb-2">
-              Tick a type under "Show amenities" to see its nearest one highlighted (bigger square) on the map.
-            </p>
-            <button type="button" class="btn btn-sm btn-outline-dark" @click="hideNearest">
-              Hide nearest amenities
-            </button>
-          </div>
-        </div>
-
-        <!-- Legend (2nd card, so on a phone it is right under the map, before the filters) -->
-        <div class="cosy-card cosy-shadow mb-3">
-          <!-- Colour dots by: price or match (like Search's "Cheapest first / Best match") -->
-          <div class="small fw-semibold mb-1">Colour dots by</div>
-          <div class="form-check form-check-inline">
-            <input id="colour-price" v-model="colourBy" value="price" type="radio" class="form-check-input" @change="loadBlocks" />
-            <label for="colour-price" class="form-check-label">Cheapest price</label>
-          </div>
-          <div class="form-check form-check-inline mb-3">
-            <input id="colour-match" v-model="colourBy" value="match" type="radio" class="form-check-input" @change="loadBlocks" />
-            <label for="colour-match" class="form-check-label">Best match</label>
-          </div>
-
-          <!-- Price legend -->
-          <div v-if="colourBy === 'price'">
-            <h5 class="serif">Median price (cheapest flat type)</h5>
-            <div v-for="band in priceBands" :key="band.label" class="d-flex align-items-center gap-2 mb-1">
-              <span class="dot" :style="{ background: band.colour }"></span>
-              {{ band.label }}
-            </div>
-          </div>
-
-          <!-- Match legend: a smooth gradient from 0 to 100 -->
-          <div v-else>
-            <h5 class="serif">Match score (Your Priorities)</h5>
-            <div class="gradient-bar"></div>
-            <div class="d-flex justify-content-between small text-muted">
-              <span>0 (poor)</span>
-              <span>50</span>
-              <span>100 (great)</span>
-            </div>
-            <div class="d-flex align-items-center gap-2 small mt-2">
-              <span class="dot" :style="{ background: NO_SCORE_COLOUR }"></span>
-              No score (no priorities ticked)
-            </div>
-            <p class="small text-muted mt-2 mb-0">Uses Your Priorities (below, shared with the Search page).</p>
-          </div>
-
-          <!-- Amenity layers: tick a type to show its dots (the coloured dot is its legend) -->
-          <h5 class="serif mt-3">Show amenities</h5>
-          <div v-for="type in amenityTypes" :key="type.key" class="form-check">
-            <input
-              :id="'amenity-' + type.key"
-              v-model="shownTypes"
-              :value="type.key"
-              type="checkbox"
-              class="form-check-input"
-              @change="showAmenities"
-            />
-            <label :for="'amenity-' + type.key" class="form-check-label d-flex align-items-center gap-2">
-              <span class="square" :style="{ background: type.colour }"></span>
-              {{ type.label }}
-            </label>
-          </div>
-        </div>
-
-        <!-- Filters: the same panel as Search. The header button opens / closes it
-             (showFilters = !showFilters flips true/false, like "showModules = !showModules" in the Week 4 vue-example) -->
-        <div class="mb-3">
-          <button type="button" class="panel-toggle" @click="showFilters = !showFilters">
-            <span>Filters</span>
-            <span v-if="showFilters">Hide ▴</span>
-            <span v-else>Show ▾</span>
-          </button>
-          <!-- v-show only hides it, so the chosen filters stay as they are while it is closed -->
-          <div v-show="showFilters">
-            <FilterPanel
-              :filters="filters"
-              @change-filter="setFilter"
-              @search="loadBlocks"
-              @clear="clearFilters"
-            />
-          </div>
-        </div>
+        <!-- Filters: the same panel as Search, inside a panel that opens / closes (open at the start) -->
+        <CollapsiblePanel title="Filters" :start-open="true">
+          <FilterPanel
+            :filters="filters"
+            @change-filter="setFilter"
+            @search="loadBlocks"
+            @clear="clearFilters"
+          />
+        </CollapsiblePanel>
 
         <!-- Your Priorities: the same panel as Search (they share the saved choices), closed at the start -->
-        <div class="mb-3">
-          <button type="button" class="panel-toggle" @click="showPriorities = !showPriorities">
-            <span>Your Priorities</span>
-            <span v-if="showPriorities">Hide ▴</span>
-            <span v-else>Show ▾</span>
-          </button>
-          <div v-show="showPriorities">
-            <PreferencesPanel
-              :preferences="preferences"
-              @change-ticked="changeTicked"
-              @change-level="changeLevel"
-            />
-          </div>
-        </div>
+        <CollapsiblePanel title="Your Priorities" :start-open="false">
+          <PreferencesPanel
+            :preferences="preferences"
+            @change-ticked="changeTicked"
+            @change-level="changeLevel"
+          />
+        </CollapsiblePanel>
 
-        <!-- PHG layer -->
-        <div class="cosy-card cosy-shadow">
-          <h5 class="serif">Proximity Grant (PHG) layer</h5>
-          <p class="small text-muted">
-            Type your parents' postal code (or home address) to draw the {{ PHG_NEAR_DISTANCE_METRES / 1000 }} km circle.
-            Only the blocks inside it are shown (together with your filters): they can get the "live near" grant.
-          </p>
-
-          <!-- Search box: any address or postal code (looked up by OneMap) -->
-          <div class="d-flex gap-2">
-            <input
-              v-model="parentQuery"
-              type="text"
-              class="form-control cosy-input"
-              placeholder="e.g. 560406"
-              @keyup.enter="searchParent"
-            />
-            <button type="button" class="btn btn-dark" @click="searchParent">Search</button>
-          </div>
-
-          <!-- The place OneMap found, so you can check it is the right one -->
-          <p v-if="parentPlace !== null" class="small mt-2 mb-0">
-            Using: <strong>{{ parentPlace.name }}</strong>
-            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" @click="clearParent">Clear</button>
-          </p>
-
-          <p v-if="nearbyCount !== null" class="mt-2 mb-0">
-            <strong>{{ nearbyCount }}</strong> block(s) within {{ PHG_NEAR_DISTANCE_METRES / 1000 }} km match your filters
-          </p>
-        </div>
+        <!-- PHG layer: the parents' postal code, the 4 km circle and the count -->
+        <PhgCard
+          :parent-place="parentPlace"
+          :nearby-count="nearbyCount"
+          :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
+          @search="searchParent"
+          @clear="clearParent"
+        />
       </div>
     </div>
   </section>
@@ -908,51 +788,5 @@ onUnmounted(function () {
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--line);
-}
-/* [COURSE] Round colour dots in the legend */
-.dot {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-}
-/* [AI-ASSISTED] The match score legend: a rainbow bar red → orange → yellow → green → blue → purple
-   (linear-gradient is not in our course; the same colours AND positions as MATCH_STOPS in the script) */
-.gradient-bar {
-  height: 12px;
-  border-radius: 6px;
-  background: linear-gradient(
-    to right,
-    rgb(230, 57, 70) 0%,
-    rgb(247, 140, 40) 12%,
-    rgb(250, 215, 60) 25%,
-    rgb(76, 175, 80) 45%,
-    rgb(33, 102, 172) 70%,
-    rgb(123, 50, 148) 100%
-  );
-  margin-bottom: 4px;
-}
-/* [COURSE] The "Filters / Your Priorities  Show ▾" header buttons: full width, name on the left, Show/Hide on the right */
-.panel-toggle {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 16px;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--char);
-}
-.panel-toggle:hover {
-  border-color: var(--terra);
-}
-/* [COURSE] Small coloured squares in the legend for the amenities (same as their squares on the map) */
-.square {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
 }
 </style>

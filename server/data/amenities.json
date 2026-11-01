@@ -5350,5 +5350,167 @@
   "name": "ZHONGHUA PRIMARY SCHOOL",
   "lat": 1.360203,
   "lng": 103.869762
+ },
+ {
+  "category": "mrt",
+  "name": "Cove LRT",
+  "lat": 1.399281988373422,
+  "lng": 103.9059619412137
+ },
+ {
+  "category": "mrt",
+  "name": "Meridian LRT",
+  "lat": 1.396912049877407,
+  "lng": 103.9089502244891
+ },
+ {
+  "category": "mrt",
+  "name": "Coral Edge LRT",
+  "lat": 1.393909228633142,
+  "lng": 103.9125808455146
+ },
+ {
+  "category": "mrt",
+  "name": "Riviera LRT",
+  "lat": 1.394519785402498,
+  "lng": 103.9161693811566
+ },
+ {
+  "category": "mrt",
+  "name": "Kadaloor LRT",
+  "lat": 1.399509106362594,
+  "lng": 103.9165749742334
+ },
+ {
+  "category": "mrt",
+  "name": "Oasis LRT",
+  "lat": 1.402286679711236,
+  "lng": 103.9127273524113
+ },
+ {
+  "category": "mrt",
+  "name": "Damai LRT",
+  "lat": 1.405234836369568,
+  "lng": 103.9086035425655
+ },
+ {
+  "category": "mrt",
+  "name": "Sam Kee LRT",
+  "lat": 1.409612685288038,
+  "lng": 103.9048315506079
+ },
+ {
+  "category": "mrt",
+  "name": "Teck Lee LRT",
+  "lat": 1.412770893746303,
+  "lng": 103.9065776227674
+ },
+ {
+  "category": "mrt",
+  "name": "Punggol Point LRT",
+  "lat": 1.416848520312058,
+  "lng": 103.9066507893127
+ },
+ {
+  "category": "mrt",
+  "name": "Samudera LRT",
+  "lat": 1.415901721603825,
+  "lng": 103.9021563171623
+ },
+ {
+  "category": "mrt",
+  "name": "Nibong LRT",
+  "lat": 1.411854477442394,
+  "lng": 103.9003394520542
+ },
+ {
+  "category": "mrt",
+  "name": "Sumang LRT",
+  "lat": 1.408452419430784,
+  "lng": 103.898558450395
+ },
+ {
+  "category": "mrt",
+  "name": "Soo Teck LRT",
+  "lat": 1.405323318604549,
+  "lng": 103.8972905220323
+ },
+ {
+  "category": "mrt",
+  "name": "Compassvale LRT",
+  "lat": 1.394493044503743,
+  "lng": 103.9004924509439
+ },
+ {
+  "category": "mrt",
+  "name": "Rumbia LRT",
+  "lat": 1.391468495341322,
+  "lng": 103.9059735934099
+ },
+ {
+  "category": "mrt",
+  "name": "Bakau LRT",
+  "lat": 1.387994310547688,
+  "lng": 103.9054153001703
+ },
+ {
+  "category": "mrt",
+  "name": "Kangkar LRT",
+  "lat": 1.383959116889146,
+  "lng": 103.9022253704398
+ },
+ {
+  "category": "mrt",
+  "name": "Ranggung LRT",
+  "lat": 1.384233559182769,
+  "lng": 103.8971946678037
+ },
+ {
+  "category": "mrt",
+  "name": "Cheng Lim LRT",
+  "lat": 1.39627763344324,
+  "lng": 103.8937971817304
+ },
+ {
+  "category": "mrt",
+  "name": "Farmway LRT",
+  "lat": 1.397170195918215,
+  "lng": 103.8893048241955
+ },
+ {
+  "category": "mrt",
+  "name": "Kupang LRT",
+  "lat": 1.398212830313787,
+  "lng": 103.8812562222543
+ },
+ {
+  "category": "mrt",
+  "name": "Thanggam LRT",
+  "lat": 1.397318155819383,
+  "lng": 103.875635154729
+ },
+ {
+  "category": "mrt",
+  "name": "Fernvale LRT",
+  "lat": 1.391885892347656,
+  "lng": 103.87630862552
+ },
+ {
+  "category": "mrt",
+  "name": "Layar LRT",
+  "lat": 1.392079836599983,
+  "lng": 103.8800296005455
+ },
+ {
+  "category": "mrt",
+  "name": "Tongkang LRT",
+  "lat": 1.389347946589417,
+  "lng": 103.8858441501157
+ },
+ {
+  "category": "mrt",
+  "name": "Renjong LRT",
+  "lat": 1.386700589919044,
+  "lng": 103.8906213160796
  }
 ]

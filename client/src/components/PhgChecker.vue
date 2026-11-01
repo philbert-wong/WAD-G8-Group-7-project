@@ -7,8 +7,8 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { PHG_NEAR_DISTANCE_METRES } from '../utils/affordabilityRules.js'
 
-// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
-const BASE_URL = 'http://localhost:8000'
+// Our Express server's address, from one shared place (see config.js; it changes for deployment)
+import { BASE_URL } from '../config.js'
 
 // The server never sends more than 50 nearby blocks
 const NEARBY_LIMIT = 50
