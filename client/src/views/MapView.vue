@@ -27,11 +27,12 @@ const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circl
 
 // The 4 kinds of amenity that can be shown on the map. key = the category the server uses.
 // The colours are chosen to look nothing like the 4 price colours (green, yellow, orange, red).
+// one = the name for a single one (used in the "nearest amenities" list)
 const amenityTypes = [
-  { key: 'mrt', label: 'MRT stations', colour: '#0057ff' },
-  { key: 'hawker', label: 'Hawker centres', colour: '#a21caf' },
-  { key: 'park', label: 'Parks', colour: '#e83e8c' },
-  { key: 'school', label: 'Primary schools', colour: '#111111' },
+  { key: 'mrt', label: 'MRT stations', one: 'MRT', colour: '#0057ff' },
+  { key: 'hawker', label: 'Hawker centres', one: 'Hawker centre', colour: '#a21caf' },
+  { key: 'park', label: 'Parks', one: 'Park', colour: '#e83e8c' },
+  { key: 'school', label: 'Primary schools', one: 'Primary school', colour: '#111111' },
 ]
 
 // The ticked amenity types, e.g. ['mrt', 'park']. v-model on the tick boxes adds / removes keys for us.
@@ -40,6 +41,10 @@ const shownTypes = ref([])
 // The block whose dot was clicked: { label, lat, lng, cards: [...] }, shown in the "Selected block" card
 // (null = no block selected, so no card)
 const selectedPlace = ref(null)
+
+// The selected block's nearest MRT, hawker centre, park and school: [{ category, name, distance }, ...]
+// (null = not asked for yet, so the card shows the "Show nearest amenities" button)
+const nearestAmenities = ref(null)
 
 // The map, the groups holding the block and amenity dots, the PHG circle and the parents' marker live in
 // normal variables (Leaflet does not like Vue's ref)
@@ -82,14 +87,61 @@ function popupText(place) {
 }
 
 // A block dot was clicked: show that block in the "Selected block" card
+// (and forget the previous block's nearest amenities, so their highlights go away)
 function selectPlace(place) {
   selectedPlace.value = place
+  nearestAmenities.value = null
+  showAmenities()
 }
 
 // The card's close (X) button: close the card AND the dot's popup on the map (map.closePopup is Leaflet's)
 function closePlace() {
   selectedPlace.value = null
+  nearestAmenities.value = null
+  showAmenities()
   map.closePopup()
+}
+
+// "Show nearest amenities" button: ask our server for the selected block's nearest MRT, hawker centre,
+// park and school (GET /api/blocks/<id>/amenities), list them in the card, and highlight them on the map
+async function showNearest() {
+  // Every flat type of a block is at the same spot, so the first card's id is enough
+  const blockId = selectedPlace.value.cards[0].id
+  try {
+    const response = await axios.get(`${BASE_URL}/api/blocks/${blockId}/amenities`)
+    nearestAmenities.value = response.data.amenities
+    showAmenities()
+  } catch (error) {
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
+  }
+}
+
+// The single name of an amenity category, e.g. 'hawker' -> 'Hawker centre' (for the nearest list)
+function amenityName(category) {
+  for (const type of amenityTypes) {
+    if (type.key === category) {
+      return type.one
+    }
+  }
+  return category
+}
+
+// Is this amenity one of the selected block's 4 nearest? (same category AND same name)
+function isNearest(category, name) {
+  if (nearestAmenities.value === null) {
+    return false
+  }
+  for (const nearest of nearestAmenities.value) {
+    if (nearest.category === category && nearest.name === name) {
+      return true
+    }
+  }
+  return false
 }
 
 // The flat type (card) with the lowest median price at an address
@@ -157,8 +209,23 @@ async function loadBlocks() {
     }
     blockCount.value = shown.length
 
-    // Remove the old dots first, or the new ones pile up on top of them.
-    // (If a dot's popup is open, removing the dot closes its popup, which also closes the card: see 'popupclose' below.)
+    // Keep the "Selected block" card up to date: if the selected block is still on the map, use its new
+    // entry (its flat types may have changed with the filters); if it is gone, close the card and its highlights.
+    if (selectedPlace.value !== null) {
+      let stillShown = null
+      for (const place of shown) {
+        if (place.label === selectedPlace.value.label) {
+          stillShown = place
+        }
+      }
+      selectedPlace.value = stillShown
+      if (stillShown === null) {
+        nearestAmenities.value = null
+        showAmenities()
+      }
+    }
+
+    // Remove the old dots first, or the new ones pile up on top of them
     blockLayer.clearLayers()
 
     for (const place of shown) {
@@ -174,13 +241,6 @@ async function loadBlocks() {
         // Leaflet's own click event (Vue's @click cannot be used on map dots): show this block in the sidebar
         .on('click', function () {
           selectPlace(place)
-        })
-        // This dot's popup closed (its x, a click on the map, or another dot): close the card too,
-        // but only if the card is still showing THIS block
-        .on('popupclose', function () {
-          if (selectedPlace.value !== null && selectedPlace.value.label === place.label) {
-            selectedPlace.value = null
-          }
         })
         .addTo(blockLayer)
     }
@@ -232,11 +292,26 @@ async function showAmenities() {
           group.type.colour + ';"></span>',
         iconSize: [10, 10],
       })
+      // A bigger square with a thick white border, for the selected block's nearest one of this type
+      const bigSquareIcon = L.divIcon({
+        className: '',
+        html:
+          '<span style="display: block; width: 18px; height: 18px; border: 3px solid #fff; background: ' +
+          group.type.colour + ';"></span>',
+        iconSize: [18, 18],
+      })
 
       for (const place of group.places) {
-        L.marker([place.lat, place.lng], { icon: squareIcon })
-          .bindPopup('<b>' + place.name + '</b><br>' + group.type.label)
-          .addTo(amenityLayer)
+        if (isNearest(group.type.key, place.name)) {
+          // zIndexOffset (Leaflet) puts this marker on top of the small ones around it
+          L.marker([place.lat, place.lng], { icon: bigSquareIcon, zIndexOffset: 1000 })
+            .bindPopup('<b>' + place.name + '</b><br>Nearest ' + group.type.one + ' to the selected block')
+            .addTo(amenityLayer)
+        } else {
+          L.marker([place.lat, place.lng], { icon: squareIcon })
+            .bindPopup('<b>' + place.name + '</b><br>' + group.type.label)
+            .addTo(amenityLayer)
+        }
       }
     }
   } catch (error) {
@@ -387,6 +462,27 @@ onMounted(function () {
               </tr>
             </tbody>
           </table>
+
+          <!-- Nearest amenities: a button first, then the list once loaded -->
+          <button
+            v-if="nearestAmenities === null"
+            type="button"
+            class="btn btn-sm btn-outline-dark mt-3"
+            @click="showNearest"
+          >
+            Show nearest amenities
+          </button>
+          <div v-else class="mt-3">
+            <h6 class="mb-2">Nearest amenities</h6>
+            <ul class="list-unstyled small mb-2">
+              <li v-for="amenity in nearestAmenities" :key="amenity.category" class="mb-1">
+                <strong>{{ amenityName(amenity.category) }}:</strong> {{ amenity.name }} · {{ amenity.distance }} m
+              </li>
+            </ul>
+            <p class="small text-muted mb-0">
+              Tick a type under "Show amenities" to see its nearest one highlighted (bigger square) on the map.
+            </p>
+          </div>
         </div>
 
         <!-- Filters: the same panel as Search -->
