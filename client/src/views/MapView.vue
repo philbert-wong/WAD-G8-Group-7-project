@@ -627,21 +627,72 @@ async function searchPlace(text) {
     return
   }
 
-  // Not one of our blocks: a white dot with a thick dark ring, so it does not look like a block, an amenity or the parents' dot.
-  // (A circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite.)
-  searchMarker = L.circleMarker([place.lat, place.lng], {
-    radius: 9,
-    color: '#111',
-    weight: 4,
-    fillColor: '#fff',
-    fillOpacity: 1,
-  })
-    .bindPopup('<b>' + place.name + '</b>')
-    .addTo(map)
+  // Is it one of our blocks that the filters hide? (If asking fails, just show the normal search dot.)
+  let hiddenBlock = null
+  try {
+    hiddenBlock = await findAnyBlockAt(place.lat, place.lng)
+  } catch (error) {
+    hiddenBlock = null
+  }
 
-  // Jump there at zoom 16 (street level), then open the marker's popup so the name shows straight away
-  map.setView([place.lat, place.lng], 16)
+  if (hiddenBlock !== null) {
+    // One of our blocks, but not on the map because of the filters: a grey dot the size of a block dot,
+    // with a dashed dark ring (so it does not look like the light grey "no score" dots of Best match),
+    // and its usual popup plus why it is not shown.
+    searchMarker = L.circleMarker([hiddenBlock.lat, hiddenBlock.lng], {
+      radius: 7,
+      color: '#444',
+      weight: 2,
+      dashArray: '3 3',
+      fillColor: '#9e9e9e',
+      fillOpacity: 1,
+    })
+      .bindPopup(
+        popupText(hiddenBlock) +
+          '<br><span class="text-danger">Does not fit your current filters, so it is not on the map.</span>' +
+          '<br><span class="small text-muted">Press "Clear all" under Filters to see it.</span>',
+      )
+      .addTo(map)
+    map.setView([hiddenBlock.lat, hiddenBlock.lng], 17) // 17 = street level, like a found block
+  } else {
+    // Not one of our blocks: a white dot with a thick dark ring, so it does not look like a block, an amenity or the parents' dot.
+    // (A circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite.)
+    searchMarker = L.circleMarker([place.lat, place.lng], {
+      radius: 9,
+      color: '#111',
+      weight: 4,
+      fillColor: '#fff',
+      fillOpacity: 1,
+    })
+      .bindPopup('<b>' + place.name + '</b>')
+      .addTo(map)
+    map.setView([place.lat, place.lng], 16) // 16 = street level
+  }
+
+  // Open the marker's popup so the text shows straight away
   searchMarker.openPopup()
+}
+
+// Is one of our blocks at this spot, even if the filters hide it? Asks our server's /nearby route with NO filters,
+// within 40 m (the same distance as findShownPlaceAt). Returns that block as a place { label, lat, lng, cards }
+// (one card per flat type, like the dots), or null when there is none.
+async function findAnyBlockAt(lat, lng) {
+  const response = await axios.get(`${BASE_URL}/api/blocks/nearby`, { params: { lat: lat, lng: lng, radius: 40 } })
+  const cards = response.data.results
+  if (cards.length === 0) {
+    return null
+  }
+
+  // The closest card is the block; keep every flat type at that same address
+  const first = cards[0]
+  const label = 'Blk ' + first.block + ' ' + first.street
+  const place = { label: label, lat: first.lat, lng: first.lng, cards: [] }
+  for (const card of cards) {
+    if ('Blk ' + card.block + ' ' + card.street === label) {
+      place.cards.push(card)
+    }
+  }
+  return place
 }
 
 // "Clear" next to the searched place: remove the marker (MapSearchBar empties its own box)
