@@ -4,6 +4,7 @@
 // so SearchView and ShortlistItem did not need to change how they use this card.
 import { ref } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import PriceDetails from './PriceDetails.vue'
 
 // Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
@@ -17,6 +18,13 @@ const props = defineProps({
   score: { type: Number, default: null }, // match score 0 to 100, or null for "–"
 })
 defineEmits(['toggle-save'])
+
+// "Show on map" button: open the Map page with this block's id in the URL (/map?block=...),
+// so the map can zoom to it and open its card (the same idea as the calculator's ?maxPrice=)
+const router = useRouter()
+function showOnMap() {
+  router.push({ path: '/map', query: { block: props.block.id } })
+}
 
 // Price details (each sale) are shown when you press the "Price details" button
 const showPrices = ref(false)
@@ -170,6 +178,7 @@ function barWidth(score) {
           <span v-if="open">Hide amenities ▴</span>
           <span v-else>Amenities ▾</span>
         </button>
+        <button class="act-btn" @click="showOnMap">📍 Show on map</button>
       </div>
 
       <PriceDetails v-if="showPrices" :block-id="block.id" />

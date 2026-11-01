@@ -9,6 +9,10 @@ import 'leaflet/dist/leaflet.css'
 import FilterPanel from '../components/FilterPanel.vue'
 import PreferencesPanel from '../components/PreferencesPanel.vue'
 import { useAuthStore } from '../stores/auth'
+import { useRoute } from 'vue-router'
+
+// The current URL, to read ?block=<id> when we come from Search's "Show on map" button
+const route = useRoute()
 // The same match score maths as Search (shared file, not changed here)
 import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 
@@ -400,6 +404,9 @@ async function loadBlocks() {
         })
         .addTo(blockLayer)
     }
+
+    // If we came from Search's "Show on map", zoom to that block (first load only)
+    focusOnBlockFromUrl(shown)
   } catch (error) {
     // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
     if (error.response && error.response.data && error.response.data.message) {
@@ -408,6 +415,41 @@ async function loadBlocks() {
       errorMessage.value = error.message
     }
   }
+}
+
+// Coming from Search's "Show on map" button (/map?block=<id>): zoom to that block, open its popup and its
+// "Selected block" card. Only done once, on the first load (not again every time the filters change).
+let focusDone = false
+function focusOnBlockFromUrl(places) {
+  if (focusDone) {
+    return
+  }
+  focusDone = true
+
+  const blockId = route.query.block
+  if (blockId === undefined) {
+    return
+  }
+
+  // Find the dot (address) that holds this block's card
+  let found = null
+  for (const place of places) {
+    for (const card of place.cards) {
+      if (card.id === blockId) {
+        found = place
+      }
+    }
+  }
+  if (found === null) {
+    errorMessage.value = "That block is outside the map's current filters"
+    return
+  }
+
+  // Zoom in on it (17 = street level). L.popup (Leaflet) opens a popup at a spot without needing the dot
+  // itself, with the same text as the dot's own popup.
+  map.setView([found.lat, found.lng], 17)
+  L.popup().setLatLng([found.lat, found.lng]).setContent(popupText(found)).openOn(map)
+  selectPlace(found)
 }
 
 // The filter panel says one filter changed, e.g. ('maxPrice', '600000'). Same as on Search.
