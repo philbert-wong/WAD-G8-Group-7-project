@@ -6,7 +6,7 @@
 import { ref } from 'vue'
 import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
-import { getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
+import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 import { useShortlistStore } from '../stores/shortlist'
 
 // You can compare at most this many flats at once
@@ -20,8 +20,25 @@ const loading = ref(true)
 // The ids of the ticked items. v-model on the tick boxes adds / removes ids for us.
 const selectedIds = ref([])
 
-// Match score uses the default "What matters to you?" choices (everything Important)
-const weights = getWeights(makeDefaultPreferences())
+// Your Priorities (school, MRT, hawker, park: ticked + importance), the same ones Search and the Map use.
+// Search saves them in localStorage as 'matchPreferences'; we start from those (or the defaults).
+function loadSavedPreferences() {
+  const choices = makeDefaultPreferences()
+  const saved = localStorage.getItem('matchPreferences')
+  if (saved !== null) {
+    const savedPanel = JSON.parse(saved)
+    // Copy only the categories we know, so a category added later still gets its default (same as Search)
+    for (const category of CATEGORIES) {
+      if (savedPanel[category.key]) {
+        choices[category.key] = savedPanel[category.key]
+      }
+    }
+  }
+  return choices
+}
+
+// Match score uses Your Priorities, so it shows the same number as on Search and the Map
+const weights = getWeights(loadSavedPreferences())
 
 // Gets the latest shortlist from the server (you must be logged in)
 async function loadShortlist() {
@@ -153,8 +170,8 @@ loadShortlist()
         </table>
         <p class="small text-muted">
           Monthly repayment assumes an HDB loan of {{ HDB_LOAN_LTV_PERCENT }}% of the median price at
-          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Match score uses the default
-          "What matters to you?" choices.
+          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Match score uses Your Priorities
+          (set on the Search page).
         </p>
       </div>
     </div>
