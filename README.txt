@@ -55,9 +55,8 @@ Step 2. Settings for the server
 Step 3. Load the data into MongoDB
     (still in the server folder)
     pnpm seed
-    This loads server/data/blocks.json and amenities.json: 223 block + flat type cards in 4 towns,
-    and 309 amenities. Running it again replaces the blocks and amenities (saved shortlist items
-    then point to old blocks and stop showing).
+    This loads server/data/blocks.json and amenities.json: 1,306 block + flat type cards (974 blocks)
+    in all 26 HDB towns, and 892 amenities.
 
 Step 4. Install the website
     cd ../client
@@ -210,6 +209,11 @@ GET    /api/blocks/:id/live-sales    the same, fetched live from data.gov.sg; so
 GET    /api/blocks/:id/amenities     nearest MRT, hawker centre, park and school with distance (metres)
 GET    /api/blocks/:id/walk-to-mrt   OneMap walking route to the nearest MRT:
                                      { minutes, metres, source: "onemap" }, or { minutes, source: "estimate" }
+GET    /api/blocks/:id/estimate      price estimate from the regression model (prep/priceRegression.ipynb,
+                                     saved in server/data/priceModel.json). Query: storey (1 to 75) and
+                                     area in sqm (30 to 250), both optional (default: the block's latest sale).
+                                     Returns { blockId, estimate } rounded to $1,000. 400 for an invalid
+                                     value or an unsupported flat type, 404 if there are no sales.
 GET    /api/amenities                every MRT station, hawker centre, park and primary school (for the map).
                                      Query: category (optional: mrt, hawker, park or school; anything else 400).
                                      Returns { total, results: [{ name, category, lat, lng }] }
@@ -272,7 +276,7 @@ Login and shared state
 ------------------------------------------------------------------------------------------
 
 Real HDB resale sales from the last 12 months (data.gov.sg), grouped per block and flat type,
-for the 40 busiest blocks in each of 4 towns: Ang Mo Kio, Bishan, Punggol and Tampines.
+for up to the 40 busiest blocks in each of the 26 HDB towns of Singapore.
 Coordinates come from OneMap; MRT stations, hawker centres, parks and primary schools from data.gov.sg.
 
 The prep/ scripts built the two JSON files once. To rebuild them:
@@ -290,7 +294,7 @@ Then run  pnpm seed  in the server folder.
 10. KNOWN LIMITS
 ------------------------------------------------------------------------------------------
 
-- Only 4 towns, and the 40 busiest blocks in each.
+- Only the 40 busiest blocks in each of the 26 towns (974 blocks), not every block in Singapore.
 - The match score and the walking minutes on the cards use straight-line distances.
 - Distances to an amenity are measured to ONE point per amenity (from the NParks / data.gov.sg
   datasets). Big parks are split into a few sections with their own points (e.g. Bishan-Ang Mo Kio

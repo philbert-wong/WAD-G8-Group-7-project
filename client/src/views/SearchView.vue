@@ -1,7 +1,7 @@
 <script setup>
 // The Search page: search box, filters, "What matters to you?" panel and the flat cards
 // DESIGN PREVIEW (Cosy Professional): only the <template> layout and <style> changed; the logic is the same.
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
@@ -255,6 +255,7 @@ function compareByMatch(a, b) {
   }
 }
 
+
 // Every result paired with its match score: [{ block, score }, ...]
 // computed() re-runs by itself whenever the panel, the sort or the results change,
 // so the scores update straight away without calling the server.
@@ -271,6 +272,40 @@ const scoredResults = computed(function () {
   }
   return list
 })
+
+// Pages: show PAGE_SIZE cards at a time
+const PAGE_SIZE = 12
+const page = ref(1)
+
+// how many pages the whole list needs (at least 1)
+const totalPages = computed(function () {
+  return Math.max(1, Math.ceil(scoredResults.value.length / PAGE_SIZE))
+})
+
+// the cards for the current page
+const visibleResults = computed(function () {
+  const start = (page.value - 1) * PAGE_SIZE
+  const end = start + PAGE_SIZE
+  return scoredResults.value.slice(start, end)
+})
+
+// a new search gives new results: go back to page 1
+watch(results, function () {
+  page.value = 1
+})
+
+// move to a page and scroll back to the top of the list
+function goToPage(number) {
+  if (number < 1 || number > totalPages.value) {
+    return
+  }
+  page.value = number
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+
+
+
 
 // ☆ Save / ★ Saved button on a card: saves the flat, or un-saves it if it is already saved
 // (the shortlist store talks to the server and keeps the list for every page)
@@ -317,7 +352,7 @@ onMounted(loadPage)
 <template>
   <section>
     <!-- DESIGN PREVIEW (Cosy Professional): hero title, then results (left) + sidebar (right) -->
-    <span class="eyebrow">4 towns · real resale prices · last 12 months</span>
+    <span class="eyebrow">26 towns · real resale prices · last 12 months</span>
     <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
     <p class="page-sub">Search blocks, compare real sale prices, and keep a shortlist.</p>
 
@@ -375,7 +410,7 @@ onMounted(loadPage)
         </div>
 
         <BlockCard
-          v-for="item in scoredResults"
+          v-for="item in visibleResults"
           :key="item.block.id"
           :block="item.block"
           :saved="shortlist.isSaved(item.block.id)"
@@ -383,6 +418,16 @@ onMounted(loadPage)
           show-match
           @toggle-save="toggleSave"
         />
+
+        <nav v-if="totalPages > 1" class="d-flex justify-content-center align-items-center gap-2 mb-4">
+          <button class="act-btn" type="button" :disabled="page === 1" @click="goToPage(page - 1)">
+            ← Previous
+          </button>
+          <span class="text-muted">Page {{ page }} of {{ totalPages }}</span>
+          <button class="act-btn" type="button" :disabled="page === totalPages" @click="goToPage(page + 1)">
+            Next →
+          </button>
+        </nav>
       </div>
 
       <div class="col-lg-4 order-1 order-lg-2">

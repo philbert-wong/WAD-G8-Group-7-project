@@ -133,7 +133,7 @@ loadAddresses()
         </div>
       </form>
       <p class="small text-muted mt-1 mb-0">
-        Only blocks in our data are listed (4 towns). If your parents live elsewhere, this check cannot help yet.
+        Only blocks in our data are listed. If your parents live elsewhere, this check cannot help yet.
       </p>
 
       <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0">{{ errorMessage }}</div>
