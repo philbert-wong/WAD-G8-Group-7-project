@@ -28,6 +28,28 @@ function onChange(name, event) {
   emit('change-filter', name, event.target.value)
 }
 
+// Budget slider: $300k to $1.2M in $10k steps, then ONE more step at the very end = "Any" (no budget limit).
+// Above $1.2M money is rarely what rules a flat out, and this way no expensive block is ever hidden.
+// "Any" is sent as '' (empty), which the server already treats as "no maxPrice filter".
+const ANY_BUDGET_STEP = 1210000 // the slider position just after $1.2M
+
+// Where the slider knob sits: at the very end when the budget is "Any" ('')
+function budgetSliderValue() {
+  if (props.filters.maxPrice === '') {
+    return ANY_BUDGET_STEP
+  }
+  return props.filters.maxPrice
+}
+
+// The budget slider moved: the last position means "Any" (''), every other position is that amount
+function onBudgetChange(event) {
+  if (Number(event.target.value) === ANY_BUDGET_STEP) {
+    emit('change-filter', 'maxPrice', '')
+  } else {
+    emit('change-filter', 'maxPrice', event.target.value)
+  }
+}
+
 // A flat type chip was clicked: set it and search straight away
 function chooseFlatType(value) {
   emit('change-filter', 'flatType', value)
@@ -65,19 +87,21 @@ function onClear() {
       </button>
     </div>
 
-    <!-- Budget slider (up to $1.6M = the most expensive block's median in our data, so no block is ever hidden) -->
+    <!-- Budget slider: $300k to $1.2M, and "Any" at the very end (see ANY_BUDGET_STEP above) -->
     <label for="filter-budget" class="flab d-flex justify-content-between align-items-end">
-      Max budget <span class="big-val serif">{{ '$' + Number(props.filters.maxPrice).toLocaleString('en-SG') }}</span>
+      Max budget
+      <span v-if="props.filters.maxPrice === ''" class="big-val serif">Any</span>
+      <span v-else class="big-val serif">{{ '$' + Number(props.filters.maxPrice).toLocaleString('en-SG') }}</span>
     </label>
     <input
       id="filter-budget"
-      :value="props.filters.maxPrice"
+      :value="budgetSliderValue()"
       type="range"
       min="300000"
-      max="1600000"
+      :max="ANY_BUDGET_STEP"
       step="10000"
       class="form-range"
-      @input="onChange('maxPrice', $event)"
+      @input="onBudgetChange"
     />
     <RouterLink to="/CPFCal" class="calc-link">Not sure? Calculate my budget →</RouterLink>
 
