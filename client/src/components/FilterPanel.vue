@@ -65,7 +65,7 @@ function onClear() {
       </button>
     </div>
 
-    <!-- Budget slider -->
+    <!-- Budget slider (up to $1.6M = the most expensive block's median in our data, so no block is ever hidden) -->
     <label for="filter-budget" class="flab d-flex justify-content-between align-items-end">
       Max budget <span class="big-val serif">{{ '$' + Number(props.filters.maxPrice).toLocaleString('en-SG') }}</span>
     </label>
@@ -74,7 +74,7 @@ function onClear() {
       :value="props.filters.maxPrice"
       type="range"
       min="300000"
-      max="1000000"
+      max="1600000"
       step="10000"
       class="form-range"
       @input="onChange('maxPrice', $event)"

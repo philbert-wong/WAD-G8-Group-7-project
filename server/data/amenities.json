@@ -236,8 +236,8 @@
  {
   "category": "mrt",
   "name": "Esplanade MRT",
-  "lat": 1.29134,
-  "lng": 103.854609
+  "lat": 1.293658,
+  "lng": 103.855081
  },
  {
   "category": "mrt",
@@ -536,8 +536,8 @@
  {
   "category": "mrt",
   "name": "Orchard MRT",
-  "lat": 1.302422,
-  "lng": 103.823869
+  "lat": 1.30398,
+  "lng": 103.832245
  },
  {
   "category": "mrt",
@@ -560,8 +560,8 @@
  {
   "category": "mrt",
   "name": "Pasir Ris MRT",
-  "lat": 1.367129,
-  "lng": 103.960557
+  "lat": 1.373043,
+  "lng": 103.949285
  },
  {
   "category": "mrt",
@@ -590,8 +590,8 @@
  {
   "category": "mrt",
   "name": "Punggol MRT",
-  "lat": 1.414927,
-  "lng": 103.910166
+  "lat": 1.404547,
+  "lng": 103.902073
  },
  {
   "category": "mrt",
@@ -692,8 +692,8 @@
  {
   "category": "mrt",
   "name": "Tampines MRT",
-  "lat": 1.356191,
-  "lng": 103.954634
+  "lat": 1.35515,
+  "lng": 103.94301
  },
  {
   "category": "mrt",

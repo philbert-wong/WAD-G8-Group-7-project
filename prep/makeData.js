@@ -125,13 +125,17 @@ for (const listing of listings) {
 console.log('2/3 Amenities...');
 const amenities = [];
 
-// Only accept OneMap results that really are MRT stations
-function isMrtStation(hit) {
-  return String(hit.SEARCHVAL).toUpperCase().includes('MRT STATION');
-}
-
 for (const name of MRT_STATIONS) {
-  const point = await findPoint(name + ' MRT STATION', isMrtStation);
+  // Only accept OneMap's result for THIS station: "ORCHARD MRT STATION" or "ORCHARD MRT STATION (NS22)".
+  // (Just checking for "MRT STATION" let in other stations with a similar name: searching
+  // "ORCHARD MRT STATION" gives "ORCHARD BOULEVARD MRT STATION" first, and Tampines gave Tampines East.)
+  const wanted = name.toUpperCase() + ' MRT STATION';
+  function isThisStation(hit) {
+    const found = String(hit.SEARCHVAL).toUpperCase();
+    return found === wanted || found.startsWith(wanted + ' (');
+  }
+
+  const point = await findPoint(wanted, isThisStation);
   if (point) {
     amenities.push({ category: 'mrt', name: name + ' MRT', lat: point.lat, lng: point.lng });
   } else {
