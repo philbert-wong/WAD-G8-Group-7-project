@@ -723,6 +723,17 @@ onMounted(function () {
   // A second bag for the amenity dots, so ticking / unticking only clears and redraws those
   amenityLayer = L.layerGroup().addTo(map)
 
+  // Coming from Search's "Show on map": start with the same filters Search used (a copy), so the map
+  // shows the same results. (focusOnRequestedBlock clears the store after the first load.)
+  if (mapFocus.filters !== null) {
+    filters.value = {
+      q: mapFocus.filters.q,
+      flatType: mapFocus.filters.flatType,
+      maxPrice: mapFocus.filters.maxPrice,
+      minLease: mapFocus.filters.minLease,
+    }
+  }
+
   loadBlocks()
 })
 
@@ -745,6 +756,12 @@ onUnmounted(function () {
     </p>
 
     <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+    <!-- Search's search text came along with "Show on map" (the map has no search-text box of its own) -->
+    <p v-if="filters.q !== ''" class="small">
+      Only blocks matching "<strong>{{ filters.q }}</strong>" (from your search).
+      Press "Clear all" under Filters to see every block.
+    </p>
 
     <div class="row g-4">
       <div class="col-lg-8">

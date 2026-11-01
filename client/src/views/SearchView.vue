@@ -34,6 +34,9 @@ const shortlistErrorMessage = ref('')
 
 // The search box text (q) and the four filters. Empty = not used.
 const filters = ref({ q: '', flatType: '', maxPrice: '650000', minLease: '60' })
+// The filters the cards on screen were found with (a copy, so moving a slider without searching does not
+// change it), handed to the map by "Show on map". null after a "near a place" search, which ignores filters.
+const searchedFilters = ref(null)
 const results = ref([])
 const total = ref(0)
 const loading = ref(false)
@@ -93,6 +96,12 @@ async function search() {
     const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
     results.value = response.data.results
     total.value = response.data.total
+    searchedFilters.value = {
+      q: filters.value.q,
+      flatType: filters.value.flatType,
+      maxPrice: filters.value.maxPrice,
+      minLease: filters.value.minLease,
+    }
   } catch (error) {
     // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
     if (error.response && error.response.data && error.response.data.message) {
@@ -134,6 +143,7 @@ async function searchNearPlace() {
     results.value = nearbyData.results;
     total.value = nearbyData.total;
     placeName.value = place.name;
+    searchedFilters.value = null // these results ignore the filters, so "Show on map" should not bring them
 
   } catch (error) {
     // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
@@ -211,6 +221,9 @@ async function loadChoices() {
       const saved = response.data.preferences
       if (saved && saved.panel) {
         applyChoices(saved.panel, saved.sortBy)
+        // Also keep them in this browser, so the Map and Compare pages (which read localStorage) use the same ones
+        localStorage.setItem('matchPreferences', JSON.stringify(preferences.value))
+        localStorage.setItem('sortBy', sortBy.value)
         return
       }
     } catch (error) {
@@ -419,6 +432,7 @@ onMounted(loadPage)
           :block="item.block"
           :saved="shortlist.isSaved(item.block.id)"
           :score="item.score"
+          :map-filters="searchedFilters"
           show-match
           @toggle-save="toggleSave"
         />
