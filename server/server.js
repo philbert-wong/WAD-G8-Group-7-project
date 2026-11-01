@@ -12,6 +12,7 @@ dotenv.config({ path: './config.env' });
 const blocksRoutes = require('./routes/blocks-routes');
 const shortlistRoutes = require('./routes/shortlist-routes');
 const authRoutes = require('./routes/auth-routes');
+const amenitiesRoutes = require('./routes/amenities-routes');
 const errorHandler = require('./middleware/errorHandler');
 
 const server = express();
@@ -37,6 +38,7 @@ server.get('/api/health', healthCheck);
 server.use('/api/blocks', blocksRoutes);
 server.use('/api/shortlist', shortlistRoutes);
 server.use('/api/auth', authRoutes);
+server.use('/api/amenities', amenitiesRoutes); // map: MRT / hawker / park / school dots
 server.use('/api', notFound);
 
 server.use(errorHandler); // must be last

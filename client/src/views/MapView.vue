@@ -25,10 +25,27 @@ const parentQuery = ref('')
 const parentPlace = ref(null)
 const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circle (null = no circle)
 
-// The map, the group holding the block dots, the PHG circle and the parents' marker live in
+// The 4 kinds of amenity that can be shown on the map. key = the category the server uses.
+// The colours are chosen to look nothing like the 4 price colours (green, yellow, orange, red).
+const amenityTypes = [
+  { key: 'mrt', label: 'MRT stations', colour: '#0057ff' },
+  { key: 'hawker', label: 'Hawker centres', colour: '#a21caf' },
+  { key: 'park', label: 'Parks', colour: '#e83e8c' },
+  { key: 'school', label: 'Primary schools', colour: '#111111' },
+]
+
+// The ticked amenity types, e.g. ['mrt', 'park']. v-model on the tick boxes adds / removes keys for us.
+const shownTypes = ref([])
+
+// The block whose dot was clicked: { label, lat, lng, cards: [...] }, shown in the "Selected block" card
+// (null = no block selected, so no card)
+const selectedPlace = ref(null)
+
+// The map, the groups holding the block and amenity dots, the PHG circle and the parents' marker live in
 // normal variables (Leaflet does not like Vue's ref)
 let map = null
 let blockLayer = null
+let amenityLayer = null
 let phgCircle = null
 let parentMarker = null
 
@@ -50,28 +67,45 @@ function priceColour(price) {
   return 'grey'
 }
 
-// The text inside a dot's popup: the address, then one line per flat type, then the nearest MRT.
-// place = { cards: [...] }: every card (flat type) at this address that matches the filters
+// The short text inside a dot's popup: the address, the town, then one line per flat type with its median
+// (a block has at most a few flat types). More details are in the "Selected block" card in the sidebar.
+// Bootstrap classes work here because Bootstrap's CSS applies to the whole page.
 function popupText(place) {
   const first = place.cards[0]
-  let text = '<b>Blk ' + first.block + ' ' + first.street + '</b><br>' + first.town + '<br>'
+  let text =
+    '<b>Blk ' + first.block + ' ' + first.street + '</b><br>' +
+    '<span class="small text-muted">' + first.town + '</span>'
   for (const card of place.cards) {
-    text = text + card.flatType + ': median $' + card.price.toLocaleString('en-SG') +
-      ' (' + card.salesCount + ' sales), ' + card.remainingLease + ' yrs lease<br>'
+    text = text + '<br>' + card.flatType + ': median $' + card.price.toLocaleString('en-SG')
   }
-  text = text + first.mrtWalkMinutes + ' min walk to ' + first.mrtName
   return text
 }
 
-// The lowest median price at an address (the dot's colour: "the least you would pay to live here")
-function cheapestPrice(place) {
-  let cheapest = place.cards[0].price
+// A block dot was clicked: show that block in the "Selected block" card
+function selectPlace(place) {
+  selectedPlace.value = place
+}
+
+// The card's close (X) button: close the card AND the dot's popup on the map (map.closePopup is Leaflet's)
+function closePlace() {
+  selectedPlace.value = null
+  map.closePopup()
+}
+
+// The flat type (card) with the lowest median price at an address
+function cheapestCard(place) {
+  let cheapest = place.cards[0]
   for (const card of place.cards) {
-    if (card.price < cheapest) {
-      cheapest = card.price
+    if (card.price < cheapest.price) {
+      cheapest = card
     }
   }
   return cheapest
+}
+
+// The lowest median price at an address (the dot's colour: "the least you would typically pay to live here")
+function cheapestPrice(place) {
+  return cheapestCard(place).price
 }
 
 // Gets the blocks that match the filters and puts a dot for each on the map
@@ -123,7 +157,8 @@ async function loadBlocks() {
     }
     blockCount.value = shown.length
 
-    // Remove the old dots first, or the new ones pile up on top of them
+    // Remove the old dots first, or the new ones pile up on top of them.
+    // (If a dot's popup is open, removing the dot closes its popup, which also closes the card: see 'popupclose' below.)
     blockLayer.clearLayers()
 
     for (const place of shown) {
@@ -136,6 +171,17 @@ async function loadBlocks() {
         fillOpacity: 1,
       })
         .bindPopup(popupText(place))
+        // Leaflet's own click event (Vue's @click cannot be used on map dots): show this block in the sidebar
+        .on('click', function () {
+          selectPlace(place)
+        })
+        // This dot's popup closed (its x, a click on the map, or another dot): close the card too,
+        // but only if the card is still showing THIS block
+        .on('popupclose', function () {
+          if (selectedPlace.value !== null && selectedPlace.value.label === place.label) {
+            selectedPlace.value = null
+          }
+        })
         .addTo(blockLayer)
     }
   } catch (error) {
@@ -157,6 +203,50 @@ function setFilter(name, value) {
 function clearFilters() {
   filters.value = { q: '', flatType: '', maxPrice: '1000000', minLease: '20' }
   loadBlocks()
+}
+
+// A tick box changed: draw the amenity dots for every ticked type (and none for the unticked ones)
+async function showAmenities() {
+  try {
+    // 1. Get the amenities of each ticked type from our server: [{ type, places: [...] }, ...]
+    const toDraw = []
+    for (const type of amenityTypes) {
+      if (shownTypes.value.includes(type.key)) {
+        const response = await axios.get(`${BASE_URL}/api/amenities`, { params: { category: type.key } })
+        toDraw.push({ type: type, places: response.data.results })
+      }
+    }
+
+    // 2. Remove the old amenity dots (the block dots are in their own group, so they stay)
+    amenityLayer.clearLayers()
+
+    // 3. One small SQUARE per amenity (so they look different from the round block dots),
+    //    in its type's colour, with its name in the popup.
+    //    L.divIcon = a marker drawn with our own HTML instead of a picture: here a 10 x 10 coloured <span>.
+    //    (className: '' removes Leaflet's default white box around a divIcon.)
+    for (const group of toDraw) {
+      const squareIcon = L.divIcon({
+        className: '',
+        html:
+          '<span style="display: block; width: 10px; height: 10px; border: 1px solid #fff; background: ' +
+          group.type.colour + ';"></span>',
+        iconSize: [10, 10],
+      })
+
+      for (const place of group.places) {
+        L.marker([place.lat, place.lng], { icon: squareIcon })
+          .bindPopup('<b>' + place.name + '</b><br>' + group.type.label)
+          .addTo(amenityLayer)
+      }
+    }
+  } catch (error) {
+    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else {
+      errorMessage.value = error.message
+    }
+  }
 }
 
 // Takes the old PHG circle and parents' marker off the map (if there are any)
@@ -243,6 +333,9 @@ onMounted(function () {
   // A layer group is a "bag" of map things: the block dots go in it, so they can all be removed at once
   blockLayer = L.layerGroup().addTo(map)
 
+  // A second bag for the amenity dots, so ticking / unticking only clears and redraws those
+  amenityLayer = L.layerGroup().addTo(map)
+
   loadBlocks()
 })
 </script>
@@ -264,6 +357,38 @@ onMounted(function () {
       </div>
 
       <div class="col-lg-4">
+        <!-- Selected block: appears when a dot is clicked -->
+        <div v-if="selectedPlace !== null" class="cosy-card cosy-shadow mb-3">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <h5 class="serif mb-1">{{ selectedPlace.label }}</h5>
+            <button type="button" class="btn-close" aria-label="Close" @click="closePlace"></button>
+          </div>
+          <p class="small text-muted mb-3">
+            {{ selectedPlace.cards[0].town }} · {{ selectedPlace.cards[0].mrtWalkMinutes }} min walk to
+            {{ selectedPlace.cards[0].mrtName }}
+          </p>
+
+          <!-- One row per flat type at this block that fits the filters -->
+          <table class="table table-sm small mb-0">
+            <thead>
+              <tr>
+                <th>Flat type</th>
+                <th class="text-end">Median</th>
+                <th class="text-end">Sales</th>
+                <th class="text-end">Lease left</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="card in selectedPlace.cards" :key="card.id">
+                <td>{{ card.flatType }}</td>
+                <td class="text-end">{{ '$' + card.price.toLocaleString('en-SG') }}</td>
+                <td class="text-end">{{ card.salesCount }}</td>
+                <td class="text-end">{{ card.remainingLease }} yrs</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <!-- Filters: the same panel as Search -->
         <div class="mb-3">
           <FilterPanel
@@ -280,6 +405,23 @@ onMounted(function () {
           <div v-for="band in priceBands" :key="band.label" class="d-flex align-items-center gap-2 mb-1">
             <span class="dot" :style="{ background: band.colour }"></span>
             {{ band.label }}
+          </div>
+
+          <!-- Amenity layers: tick a type to show its dots (the coloured dot is its legend) -->
+          <h5 class="serif mt-3">Show amenities</h5>
+          <div v-for="type in amenityTypes" :key="type.key" class="form-check">
+            <input
+              :id="'amenity-' + type.key"
+              v-model="shownTypes"
+              :value="type.key"
+              type="checkbox"
+              class="form-check-input"
+              @change="showAmenities"
+            />
+            <label :for="'amenity-' + type.key" class="form-check-label d-flex align-items-center gap-2">
+              <span class="square" :style="{ background: type.colour }"></span>
+              {{ type.label }}
+            </label>
           </div>
         </div>
 
@@ -332,5 +474,11 @@ onMounted(function () {
   width: 14px;
   height: 14px;
   border-radius: 50%;
+}
+/* [COURSE] Small coloured squares in the legend for the amenities (same as their squares on the map) */
+.square {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
 }
 </style>
