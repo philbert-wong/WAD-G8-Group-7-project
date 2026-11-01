@@ -87,6 +87,8 @@ async function loadAreas() {
 async function search() {
   loading.value = true
   errorMessage.value = ''
+  // A normal search replaces any "near a place" results, so stop saying "Showing flats near ..."
+  placeName.value = ''
   try {
     const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
     results.value = response.data.results
@@ -396,7 +398,9 @@ onMounted(loadPage)
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
         <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
-          <span><b>{{ total }} flat(s)</b> match your filters</span>
+          <!-- "Near a place" results come from /nearby (within 1 km), which does not use the filters -->
+          <span v-if="placeName"><b>{{ total }} flat(s)</b> within 1 km (filters not used)</span>
+          <span v-else><b>{{ total }} flat(s)</b> match your filters</span>
           <select
             id="sort-by"
             v-model="sortBy"
