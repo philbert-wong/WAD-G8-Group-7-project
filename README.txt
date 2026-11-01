@@ -56,7 +56,7 @@ Step 3. Load the data into MongoDB
     (still in the server folder)
     pnpm seed
     This loads server/data/blocks.json and amenities.json: 1,306 block + flat type cards (974 blocks)
-    in all 26 HDB towns, and 892 amenities.
+    in all 26 HDB towns, and 919 amenities.
 
 Step 4. Install the website
     cd ../client
@@ -214,7 +214,7 @@ GET    /api/blocks/:id/estimate      price estimate from the regression model (p
                                      area in sqm (30 to 250), both optional (default: the block's latest sale).
                                      Returns { blockId, estimate } rounded to $1,000. 400 for an invalid
                                      value or an unsupported flat type, 404 if there are no sales.
-GET    /api/amenities                every MRT station, hawker centre, park and primary school (for the map).
+GET    /api/amenities                every MRT station/LRT Station, hawker centre, park and primary school (for the map).
                                      Query: category (optional: mrt, hawker, park or school; anything else 400).
                                      Returns { total, results: [{ name, category, lat, lng }] }
 POST   /api/auth/register            body { email, password (8+ characters) }. Returns { token, user: { id, email } } (201)
