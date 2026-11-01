@@ -10,8 +10,8 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 
-// Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
-const BASE_URL = 'http://localhost:8000'
+// Our Express server's address, from one shared place (see config.js; it changes for deployment)
+import { BASE_URL } from '../config.js'
 
 // Tells axios to add the token to every request from now on
 function sendTokenWithEveryRequest(token) {
