@@ -381,7 +381,7 @@ onMounted(loadPage)
         v-model="placeText"
         type="search"
         class="form-control cosy-input flex-grow-1"
-        placeholder="Or find flats near an address or postal code e.g. 560406"
+        placeholder="Or find flats near an address or postal code e.g. 560314"
       />
       <button class="act-btn primary" type="submit">Find near me</button>
     </form>

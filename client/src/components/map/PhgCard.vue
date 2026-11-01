@@ -39,7 +39,7 @@ function onClear() {
         v-model="text"
         type="text"
         class="form-control cosy-input"
-        placeholder="e.g. 560406"
+        placeholder="e.g. 560314"
         @keyup.enter="onSearch"
       />
       <button type="button" class="btn btn-dark" @click="onSearch">Search</button>

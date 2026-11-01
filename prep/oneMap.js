@@ -5,7 +5,7 @@ import { wait } from './wait.js';
 
 const CACHE_FILE = new URL('./geocode-cache.json', import.meta.url);
 
-// Answers we already got: { "406 ANG MO KIO AVE 10": { lat, lng, postal }, "NOWHERE": null, ... }
+// Answers we already got: { "314 ANG MO KIO AVE 3": { lat, lng, postal }, "NOWHERE": null, ... }
 let cache = {};
 if (existsSync(CACHE_FILE)) {
   cache = JSON.parse(readFileSync(CACHE_FILE, 'utf8'));
@@ -31,7 +31,7 @@ function firstAcceptedHit(hits, accept) {
   return null;
 }
 
-// searchText: what to type into OneMap, e.g. "406 ANG MO KIO AVE 10" or "560406"
+// searchText: what to type into OneMap, e.g. "314 ANG MO KIO AVE 3" or "560314"
 // accept (optional): a function that says whether a result is the one we want
 // returns { lat, lng, postal } or null when OneMap found nothing suitable
 export async function findPoint(searchText, accept) {

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// One document = one HDB block + one flat type (e.g. "Blk 406 Ang Mo Kio Ave 10, 4 ROOM")
+// One document = one HDB block + one flat type (e.g. "Blk 323 Ang Mo Kio Ave 3, 2 ROOM")
 const blockSchema = new mongoose.Schema({
   block: { type: String, required: true },
   street: { type: String, required: true },

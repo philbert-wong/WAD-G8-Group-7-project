@@ -145,7 +145,7 @@ Manual check of the main user journeys (with both terminals running):
        and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
     9. Map: tick "MRT / LRT stations": blue squares appear; untick: they go. Switch "Colour dots by" to
        Best match: dots change colour (red = poor ... blue/purple = great), using Your Priorities.
-   10. Map: type "560406" in the PHG box: a 4 km circle, and only the blocks inside it remain.
+   10. Map: type "560314" in the PHG box: a 4 km circle, and only the blocks inside it remain.
        Type "Bishan MRT" in the search bar above the map: the map jumps there with a marker.
    11. Refresh the page: you stay logged in. Logout: the shortlist count disappears.
 
