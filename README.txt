@@ -56,7 +56,7 @@ Step 3. Load the data into MongoDB
     (still in the server folder)
     pnpm seed
     This loads server/data/blocks.json and amenities.json: 1,306 block + flat type cards (974 blocks)
-    in all 26 HDB towns, and 919 amenities.
+    in all 26 HDB towns, and 930 amenities.
 
 Step 4. Install the website
     cd ../client
@@ -278,7 +278,7 @@ Login and shared state
 Real HDB resale sales from the last 12 months (data.gov.sg), grouped per block and flat type,
 for up to the 40 busiest blocks in each of the 26 HDB towns of Singapore.
 Coordinates come from OneMap; MRT stations, hawker centres, parks and primary schools from data.gov.sg.
-LRT stations (Punggol LRT and Sengkang LRT) are stored with the MRT stations (category "mrt"), so the
+LRT stations (Punggol, Sengkang and Bukit Panjang LRT) are stored with the MRT stations (category "mrt"), so the
 nearest-station walk and the match score's Transport part count them too.
 
 The prep/ scripts built the two JSON files once. To rebuild them:
@@ -289,7 +289,7 @@ The prep/ scripts built the two JSON files once. To rebuild them:
                                                      on OneMap (cached in prep/geocode-cache.json).
     node addSales.js "/path/to/resale-prices.csv"   only refreshes the sales and price ranges of the
                                                      blocks already in blocks.json (no OneMap calls)
-    node addLrt.js                                  adds the Punggol and Sengkang LRT stations to
+    node addLrt.js                                  adds the Punggol, Sengkang and Bukit Panjang LRT stations to
                                                      amenities.json (run it again after makeData.js)
 Then run  pnpm seed  in the server folder.
 

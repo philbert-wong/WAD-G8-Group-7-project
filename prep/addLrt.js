@@ -1,4 +1,4 @@
-// Adds the LRT stations near our blocks (Punggol LRT and Sengkang LRT) to server/data/amenities.json,
+// Adds the LRT stations (Punggol LRT, Sengkang LRT and Bukit Panjang LRT) to server/data/amenities.json,
 // without rebuilding everything (makeData.js would need the resale CSV again).
 // They are stored with the MRT stations (category 'mrt', e.g. "Cove LRT"), so the nearest-station walk,
 // the match score's Transport part and the map's station layer all include them.
@@ -9,12 +9,16 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { findPoint, saveCache } from './oneMap.js';
 
-// Punggol LRT (East and West loops) and Sengkang LRT (East and West loops)
+// Punggol LRT (East and West loops), Sengkang LRT (East and West loops) and Bukit Panjang LRT.
+// Interchange stations that are already MRT stations (Punggol, Sengkang, Choa Chu Kang, Bukit Panjang)
+// are left out, because they are in the data already as "... MRT" at the same spot.
 const LRT_STATIONS = [
   'Cove', 'Meridian', 'Coral Edge', 'Riviera', 'Kadaloor', 'Oasis', 'Damai',
   'Sam Kee', 'Teck Lee', 'Punggol Point', 'Samudera', 'Nibong', 'Sumang', 'Soo Teck',
   'Compassvale', 'Rumbia', 'Bakau', 'Kangkar', 'Ranggung',
   'Cheng Lim', 'Farmway', 'Kupang', 'Thanggam', 'Fernvale', 'Layar', 'Tongkang', 'Renjong',
+  'South View', 'Keat Hong', 'Teck Whye', 'Phoenix', 'Petir', 'Pending', 'Bangkit', 'Fajar',
+  'Segar', 'Jelapang', 'Senja',
 ];
 
 // Only accept OneMap results that really are an LRT station (same idea as isMrtStation in makeData.js)

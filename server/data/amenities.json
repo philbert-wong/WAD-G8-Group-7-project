@@ -5512,5 +5512,71 @@
   "name": "Renjong LRT",
   "lat": 1.386700589919044,
   "lng": 103.8906213160796
+ },
+ {
+  "category": "mrt",
+  "name": "South View LRT",
+  "lat": 1.380298287423997,
+  "lng": 103.7452917998233
+ },
+ {
+  "category": "mrt",
+  "name": "Keat Hong LRT",
+  "lat": 1.378603250637315,
+  "lng": 103.7490556689249
+ },
+ {
+  "category": "mrt",
+  "name": "Teck Whye LRT",
+  "lat": 1.376684679208098,
+  "lng": 103.7537122323367
+ },
+ {
+  "category": "mrt",
+  "name": "Phoenix LRT",
+  "lat": 1.378615451040848,
+  "lng": 103.7579955583452
+ },
+ {
+  "category": "mrt",
+  "name": "Petir LRT",
+  "lat": 1.377772042590833,
+  "lng": 103.7666457824963
+ },
+ {
+  "category": "mrt",
+  "name": "Pending LRT",
+  "lat": 1.376135743349891,
+  "lng": 103.7712611755711
+ },
+ {
+  "category": "mrt",
+  "name": "Bangkit LRT",
+  "lat": 1.380022230100881,
+  "lng": 103.7726473704518
+ },
+ {
+  "category": "mrt",
+  "name": "Fajar LRT",
+  "lat": 1.38457317668027,
+  "lng": 103.7708872230177
+ },
+ {
+  "category": "mrt",
+  "name": "Segar LRT",
+  "lat": 1.387785086633622,
+  "lng": 103.7695996852484
+ },
+ {
+  "category": "mrt",
+  "name": "Jelapang LRT",
+  "lat": 1.386739269979613,
+  "lng": 103.7645340864596
+ },
+ {
+  "category": "mrt",
+  "name": "Senja LRT",
+  "lat": 1.38272547134454,
+  "lng": 103.7623442547194
  }
 ]
