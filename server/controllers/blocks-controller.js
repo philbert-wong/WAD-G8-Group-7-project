@@ -623,6 +623,9 @@ exports.estimate = async (req, res) => {
     return res.status(400).json({ message: 'storey must be a number' });
   } else {
     storey = Number(req.query.storey);
+        if (storey < 1 || storey > 75) {
+        return res.status(400).json({ message: 'storey must be between 1 and 75' });
+      }
   }
 
     // area:   from ?area= if sent, otherwise from block.sales
@@ -633,6 +636,9 @@ exports.estimate = async (req, res) => {
     return res.status(400).json({ message: 'area must be a number' });
   } else {
     area = Number(req.query.area);
+      if (area < 30 || area > 250) {
+        return res.status(400).json({ message: 'area must be between 30 and 250 sqm' });
+      }
   }
 
     const price = estimatePrice({
