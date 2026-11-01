@@ -14,16 +14,31 @@ import { findPoint, saveCache } from './oneMap.js';
 import { DATASETS, downloadDataset, parsePoints, parseSchools } from './amenityFiles.js';
 import { straightLineDistance } from './straightLineDistance.js';
 
-const TOWNS = ['ANG MO KIO', 'BISHAN', 'PUNGGOL', 'TAMPINES'];
+const TOWNS = [
+  'ANG MO KIO', 'BEDOK', 'BISHAN', 'BUKIT BATOK', 'BUKIT MERAH', 'BUKIT PANJANG', 'BUKIT TIMAH',
+  'CENTRAL AREA', 'CHOA CHU KANG', 'CLEMENTI', 'GEYLANG', 'HOUGANG', 'JURONG EAST', 'JURONG WEST',
+  'KALLANG/WHAMPOA', 'MARINE PARADE', 'PASIR RIS', 'PUNGGOL', 'QUEENSTOWN', 'SEMBAWANG', 'SENGKANG',
+  'SERANGOON', 'TAMPINES', 'TOA PAYOH', 'WOODLANDS', 'YISHUN',
+];
+
 const BLOCKS_PER_TOWN = 40;
 const KEEP_AMENITIES_WITHIN_METRES = 3000;
 
 // MRT stations in and around those four towns
 const MRT_STATIONS = [
-  'Ang Mo Kio', 'Yio Chu Kang', 'Bishan', 'Braddell', 'Marymount', 'Caldecott', 'Toa Payoh', 'Lorong Chuan',
-  'Serangoon', 'Upper Thomson', 'Mayflower', 'Khatib', 'Tampines', 'Tampines East', 'Tampines West', 'Simei',
-  'Pasir Ris', 'Tanah Merah', 'Bedok Reservoir', 'Bedok North', 'Punggol', 'Punggol Coast', 'Sengkang',
-  'Buangkok', 'Hougang', 'Kovan',
+  'Admiralty','Aljunied','Ang Mo Kio','Bartley','Bayfront','Bayshore','Beauty World','Bedok','Bedok North','Bedok Reservoir',
+  'Bencoolen','Bendemeer','Bishan','Boon Keng','Boon Lay','Botanic Gardens','Braddell','Bras Basah','Bright Hill','Buangkok',
+  'Bugis','Bukit Batok','Bukit Gombak','Bukit Panjang','Buona Vista','Caldecott','Canberra','Cashew','Changi Airport','Chinatown',
+  'Chinese Garden','Choa Chu Kang','City Hall','Clarke Quay','Clementi','Commonwealth','Dakota','Dhoby Ghaut','Dover','Downtown',
+  'Esplanade','Eunos','Expo','Farrer Park','Farrer Road','Fort Canning','Gardens By The Bay','Geylang Bahru','Great World','Gul Circle',
+  'Harbourfront','Havelock','Haw Par Villa','Hillview','Holland Village','Hougang','Jalan Besar','Joo Koon','Jurong East','Kaki Bukit',
+  'Kallang','Katong Park','Kembangan','Kent Ridge','Khatib','King Albert Park','Kovan','Kranji','Labrador Park','Lakeside','Lavender',
+  'Lentor','Little India','Lorong Chuan','Macpherson','Marina Bay','Marina South','Marina South Pier','Marine Parade','Marine Terrace','Marsiling',
+  'Marymount','Mattar','Maxwell','Mayflower','Mountbatten','Napier','Newton','Nicoll Highway','Novena','One-North','Orchard','Orchard Boulevard',
+  'Outram Park','Pasir Panjang','Pasir Ris','Paya Lebar','Pioneer','Potong Pasir','Promenade','Punggol','Queenstown','Raffles Place','Redhill','Rochor',
+  'Sembawang','Sengkang','Serangoon','Shenton Way','Siglap','Simei','Sixth Avenue','Somerset','Springleaf','Stadium','Stevens','Tai Seng','Tampines','Tampines East',
+  'Tampines West','Tan Kah Kee','Tanah Merah','Tanjong Katong','Tanjong Pagar','Tanjong Rhu','Telok Ayer','Telok Blangah','Tiong Bahru','Toa Payoh','Tuas Crescent',
+  'Tuas Link','Tuas West Road','Ubi','Upper Changi','Upper Thomson','Woodlands','Woodlands North','Woodlands South','Woodleigh','Yew Tee','Yio Chu Kang','Yishun',
 ];
 
 const csvPath = process.argv[2];
