@@ -246,6 +246,7 @@ function estimatePrice(features) {
 
 let token = null;
 let expiresAt = 0; // a time in milliseconds, like Date.now()
+const walkCache = {};
 
 async function getOneMapToken() {
   if (token !== null && Date.now() < expiresAt) {
@@ -471,6 +472,7 @@ exports.findPlace = async (req, res) => {
   }
 };
 
+
 // 2. GET /api/blocks/:id/live-sales
 // Latest sales for this block straight from data.gov.sg, in the same shape as /sales.
 exports.liveSales = async (req, res) => {
@@ -557,6 +559,11 @@ exports.walkToMrt = async (req, res) => {
       return res.status(404).json({ message: 'Block not found' });
     }
 
+    if (walkCache[req.params.id] !== undefined) {
+      return res.json(walkCache[req.params.id]);
+    }
+
+
     // OneMap wants "lat,lng". MongoDB stores [lng, lat], so the order flips here.
     const start = block.location.coordinates[1] + ',' + block.location.coordinates[0];
 
@@ -593,7 +600,9 @@ exports.walkToMrt = async (req, res) => {
 
     const minutes = Math.round(data.route_summary.total_time / 60);
     const metres = data.route_summary.total_distance;
-    return res.json({ minutes, metres, source: 'onemap' });
+    const result = { minutes, metres, source: 'onemap' };
+    walkCache[req.params.id] = result;
+    return res.json(result);
   } catch (error) {
     sendError(res, error);
   }

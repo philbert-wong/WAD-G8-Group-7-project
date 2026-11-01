@@ -2,7 +2,7 @@
 // One flat card: price, lease, MRT, match score, and buttons for Save, price details and amenities
 // DESIGN PREVIEW (Cosy Professional): new look. The props, emits and logic are the SAME as before,
 // so SearchView and ShortlistItem did not need to change how they use this card.
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import PriceDetails from './PriceDetails.vue'
@@ -36,6 +36,18 @@ const errorMessage = ref('')
 const amenities = ref([])
 const walk = ref(null)
 
+async function loadWalk() {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/blocks/${props.block.id}/walk-to-mrt`)
+    walk.value = response.data
+  } catch (error) {
+    // do nothing: the card keeps the stored estimate
+  }
+}
+
+onMounted(loadWalk)
+
+
 // "Amenities" button: opens the list and gets it from the server, or closes it
 async function toggleDetails() {
   open.value = !open.value
@@ -47,9 +59,7 @@ async function toggleDetails() {
   errorMessage.value = ''
   try {
     const response = await axios.get(`${BASE_URL}/api/blocks/${props.block.id}/amenities`)
-    const walkResponse = await axios.get(`${BASE_URL}/api/blocks/${props.block.id}/walk-to-mrt`)
     amenities.value = response.data.amenities
-    walk.value = walkResponse.data
   } catch (error) {
     // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
     if (error.response && error.response.data && error.response.data.message) {
@@ -150,7 +160,7 @@ function barWidth(score) {
         </div>
         <div class="stat">
           <span class="ic">🚆</span>
-          <div><b>{{ block.mrtWalkMinutes }} min walk</b>to {{ block.mrtName }}</div>
+          <div><b>{{ walk ? walk.minutes : block.mrtWalkMinutes }} min walk</b>to {{ block.mrtName }}</div>
         </div>
       </div>
 
@@ -188,14 +198,10 @@ function barWidth(score) {
         <p v-else-if="errorMessage" class="text-danger mb-0">{{ errorMessage }}</p>
         <ul v-else class="list-unstyled small mb-0">
           <li v-for="a in amenities" :key="a.category">
-            {{ categoryNames[a.category] }}: {{ a.name }} ({{ a.distance }} m)
+            {{ categoryNames[a.category] }}: {{ a.name }}
+            ({{ a.category === 'mrt' && walk && walk.metres ? walk.metres + ' m walk' : a.distance + ' m' }})
           </li>
         </ul>
-        <p v-if="walk && !loading && !errorMessage" class="small text-muted mt-2 mb-0">
-          Walk to nearest MRT: {{ walk.minutes }} min
-          <span v-if="walk.metres">({{ walk.metres }} m)</span>
-          · {{ walk.source === 'onemap' ? 'live route by OneMap' : 'estimate' }}
-        </p>
       </div>
     </div>
   </article>
