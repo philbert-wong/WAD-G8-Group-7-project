@@ -6,6 +6,10 @@ import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import FilterPanel from '../components/FilterPanel.vue'
+import PreferencesPanel from '../components/PreferencesPanel.vue'
+import { useAuthStore } from '../stores/auth'
+// The same match score maths as Search (shared file, not changed here)
+import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 
 // Our Express server's address (class style: the full URL, like wk5/wk6 code-along App.vue)
 const BASE_URL = 'http://localhost:8000'
@@ -59,6 +63,125 @@ let phgCircle = null
 let parentMarker = null
 let searchMarker = null
 
+// "Colour dots by": 'price' (the price bands) or 'match' (the match score gradient)
+const colourBy = ref('price')
+
+// Which sidebar panels are open: Filters open and Your Priorities closed at the start, so the sidebar is shorter
+const showFilters = ref(true)
+const showPriorities = ref(false)
+
+// Your Priorities (school, MRT, hawker, park: ticked + importance), the same ones Search uses.
+// Search saves them in localStorage as 'matchPreferences'; we start from those (or the defaults).
+function loadSavedPreferences() {
+  const choices = makeDefaultPreferences()
+  const saved = localStorage.getItem('matchPreferences')
+  if (saved !== null) {
+    const savedPanel = JSON.parse(saved)
+    // Copy only the categories we know, so a category added later still gets its default (same as Search)
+    for (const category of CATEGORIES) {
+      if (savedPanel[category.key]) {
+        choices[category.key] = savedPanel[category.key]
+      }
+    }
+  }
+  return choices
+}
+const preferences = ref(loadSavedPreferences())
+
+// Who is logged in (Pinia store), so a change to Your Priorities can also be saved to the account, like Search does
+const auth = useAuthStore()
+
+// Saves Your Priorities the same way Search does: in this browser (localStorage), and on the account when
+// logged in. That way Search and the map always use the same priorities.
+async function saveChoices() {
+  localStorage.setItem('matchPreferences', JSON.stringify(preferences.value))
+
+  if (auth.isLoggedIn) {
+    // The account also stores Search's sort choice; keep whatever Search saved (or 'price')
+    let sortBy = 'price'
+    if (localStorage.getItem('sortBy') !== null) {
+      sortBy = localStorage.getItem('sortBy')
+    }
+    try {
+      await axios.put(`${BASE_URL}/api/auth/preferences`, {
+        preferences: { panel: preferences.value, sortBy: sortBy },
+      })
+    } catch (error) {
+      // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMessage.value = error.response.data.message
+      } else {
+        errorMessage.value = error.message
+      }
+    }
+  }
+}
+
+// Your Priorities panel: a tick box changed, e.g. ('park', false). Same as Search.
+function changeTicked(key, ticked) {
+  preferences.value[key].ticked = ticked
+  saveChoices()
+  // In "Best match" mode the colours depend on the priorities, so redraw the dots
+  if (colourBy.value === 'match') {
+    loadBlocks()
+  }
+}
+
+// Your Priorities panel: an importance level changed, e.g. ('mrt', 5). Same as Search.
+function changeLevel(key, level) {
+  preferences.value[key].level = level
+  saveChoices()
+  if (colourBy.value === 'match') {
+    loadBlocks()
+  }
+}
+
+// The match score gradient: a rainbow from 0 (poor) to 100 (great). Each stop = a score and its colour
+// as [red, green, blue] numbers. A score between two stops gets a colour partway between them.
+// Red, orange and yellow are squeezed to the left, so the usual scores (mostly below 75) spread over more colours.
+const MATCH_STOPS = [
+  { score: 0, rgb: [230, 57, 70] }, // red
+  { score: 12, rgb: [247, 140, 40] }, // orange
+  { score: 25, rgb: [250, 215, 60] }, // yellow
+  { score: 45, rgb: [76, 175, 80] }, // green
+  { score: 70, rgb: [33, 102, 172] }, // blue
+  { score: 100, rgb: [123, 50, 148] }, // purple
+]
+const NO_SCORE_COLOUR = '#bdbdbd' // grey: no score (every priority unticked)
+
+// A block's match score (0 to 100, or null), from its distances to the nearest school, MRT, hawker and park.
+// Every flat type of a block has the same distances, so the first card is enough.
+function placeScore(place) {
+  return matchScore(place.cards[0].distances, getWeights(preferences.value), MAX_DISTANCES)
+}
+
+// One number partway between a and b: t = 0 gives a, t = 1 gives b, t = 0.5 gives the middle
+function blend(a, b, t) {
+  return Math.round(a + (b - a) * t)
+}
+
+// The rainbow colour for a score, e.g. 62 → between yellow (50) and green (75), about half way
+function matchColour(score) {
+  if (score === null) {
+    return NO_SCORE_COLOUR
+  }
+  // Find the two stops the score sits between (the last pair that starts at or below the score)
+  let from = MATCH_STOPS[0]
+  let to = MATCH_STOPS[1]
+  for (let i = 0; i < MATCH_STOPS.length - 1; i++) {
+    if (score >= MATCH_STOPS[i].score) {
+      from = MATCH_STOPS[i]
+      to = MATCH_STOPS[i + 1]
+    }
+  }
+  // How far the score is from "from" to "to": 0 = at "from", 1 = at "to"
+  const t = (score - from.score) / (to.score - from.score)
+  return (
+    'rgb(' + blend(from.rgb[0], to.rgb[0], t) + ', ' + blend(from.rgb[1], to.rgb[1], t) + ', ' +
+    blend(from.rgb[2], to.rgb[2], t) + ')'
+  )
+}
+
 // The price colours, cheapest first. Used by the dots and by the legend.
 const priceBands = [
   { max: 400000, colour: '#2e9e4f', label: 'Under $400k' },
@@ -87,6 +210,10 @@ function popupText(place) {
     '<span class="small text-muted">' + first.town + '</span>'
   for (const card of place.cards) {
     text = text + '<br>' + card.flatType + ': median $' + card.price.toLocaleString('en-SG')
+  }
+  // When the dots are coloured by match, show the score too
+  if (colourBy.value === 'match') {
+    text = text + '<br><b>Match: ' + scoreText(place) + '</b>'
   }
   return text
 }
@@ -171,6 +298,23 @@ function cheapestPrice(place) {
   return cheapestCard(place).price
 }
 
+// A dot's colour: by price band, or by match score gradient (the "Colour dots by" switch)
+function dotColour(place) {
+  if (colourBy.value === 'match') {
+    return matchColour(placeScore(place))
+  }
+  return priceColour(cheapestPrice(place))
+}
+
+// The match score as text, for the popup and the card: "62 / 100", or "–" when there is no score
+function scoreText(place) {
+  const score = placeScore(place)
+  if (score === null) {
+    return '– (no priorities ticked)'
+  }
+  return score + ' / 100'
+}
+
 // Gets the blocks that match the filters and puts a dot for each on the map
 async function loadBlocks() {
   try {
@@ -245,7 +389,7 @@ async function loadBlocks() {
         radius: 7,
         color: '#fff',
         weight: 1.5,
-        fillColor: priceColour(cheapestPrice(place)),
+        fillColor: dotColour(place),
         fillOpacity: 1,
       })
         .bindPopup(popupText(place))
@@ -532,6 +676,7 @@ onMounted(function () {
           <p class="small text-muted mb-3">
             {{ selectedPlace.cards[0].town }} · {{ selectedPlace.cards[0].mrtWalkMinutes }} min walk to
             {{ selectedPlace.cards[0].mrtName }}
+            <span v-if="colourBy === 'match'"><br />Match score: <strong>{{ scoreText(selectedPlace) }}</strong></span>
           </p>
 
           <!-- One row per flat type at this block that fits the filters -->
@@ -581,10 +726,40 @@ onMounted(function () {
 
         <!-- Legend (2nd card, so on a phone it is right under the map, before the filters) -->
         <div class="cosy-card cosy-shadow mb-3">
-          <h5 class="serif">Median price (cheapest flat type)</h5>
-          <div v-for="band in priceBands" :key="band.label" class="d-flex align-items-center gap-2 mb-1">
-            <span class="dot" :style="{ background: band.colour }"></span>
-            {{ band.label }}
+          <!-- Colour dots by: price or match (like Search's "Cheapest first / Best match") -->
+          <div class="small fw-semibold mb-1">Colour dots by</div>
+          <div class="form-check form-check-inline">
+            <input id="colour-price" v-model="colourBy" value="price" type="radio" class="form-check-input" @change="loadBlocks" />
+            <label for="colour-price" class="form-check-label">Cheapest price</label>
+          </div>
+          <div class="form-check form-check-inline mb-3">
+            <input id="colour-match" v-model="colourBy" value="match" type="radio" class="form-check-input" @change="loadBlocks" />
+            <label for="colour-match" class="form-check-label">Best match</label>
+          </div>
+
+          <!-- Price legend -->
+          <div v-if="colourBy === 'price'">
+            <h5 class="serif">Median price (cheapest flat type)</h5>
+            <div v-for="band in priceBands" :key="band.label" class="d-flex align-items-center gap-2 mb-1">
+              <span class="dot" :style="{ background: band.colour }"></span>
+              {{ band.label }}
+            </div>
+          </div>
+
+          <!-- Match legend: a smooth gradient from 0 to 100 -->
+          <div v-else>
+            <h5 class="serif">Match score (Your Priorities)</h5>
+            <div class="gradient-bar"></div>
+            <div class="d-flex justify-content-between small text-muted">
+              <span>0 (poor)</span>
+              <span>50</span>
+              <span>100 (great)</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 small mt-2">
+              <span class="dot" :style="{ background: NO_SCORE_COLOUR }"></span>
+              No score (no priorities ticked)
+            </div>
+            <p class="small text-muted mt-2 mb-0">Uses Your Priorities (below, shared with the Search page).</p>
           </div>
 
           <!-- Amenity layers: tick a type to show its dots (the coloured dot is its legend) -->
@@ -605,14 +780,39 @@ onMounted(function () {
           </div>
         </div>
 
-        <!-- Filters: the same panel as Search -->
+        <!-- Filters: the same panel as Search. The header button opens / closes it
+             (showFilters = !showFilters flips true/false, like "showModules = !showModules" in the Week 4 vue-example) -->
         <div class="mb-3">
-          <FilterPanel
-            :filters="filters"
-            @change-filter="setFilter"
-            @search="loadBlocks"
-            @clear="clearFilters"
-          />
+          <button type="button" class="panel-toggle" @click="showFilters = !showFilters">
+            <span>Filters</span>
+            <span v-if="showFilters">Hide ▴</span>
+            <span v-else>Show ▾</span>
+          </button>
+          <!-- v-show only hides it, so the chosen filters stay as they are while it is closed -->
+          <div v-show="showFilters">
+            <FilterPanel
+              :filters="filters"
+              @change-filter="setFilter"
+              @search="loadBlocks"
+              @clear="clearFilters"
+            />
+          </div>
+        </div>
+
+        <!-- Your Priorities: the same panel as Search (they share the saved choices), closed at the start -->
+        <div class="mb-3">
+          <button type="button" class="panel-toggle" @click="showPriorities = !showPriorities">
+            <span>Your Priorities</span>
+            <span v-if="showPriorities">Hide ▴</span>
+            <span v-else>Show ▾</span>
+          </button>
+          <div v-show="showPriorities">
+            <PreferencesPanel
+              :preferences="preferences"
+              @change-ticked="changeTicked"
+              @change-level="changeLevel"
+            />
+          </div>
         </div>
 
         <!-- PHG layer -->
@@ -664,6 +864,39 @@ onMounted(function () {
   width: 14px;
   height: 14px;
   border-radius: 50%;
+}
+/* [AI-ASSISTED] The match score legend: a rainbow bar red → orange → yellow → green → blue → purple
+   (linear-gradient is not in our course; the same colours AND positions as MATCH_STOPS in the script) */
+.gradient-bar {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    rgb(230, 57, 70) 0%,
+    rgb(247, 140, 40) 12%,
+    rgb(250, 215, 60) 25%,
+    rgb(76, 175, 80) 45%,
+    rgb(33, 102, 172) 70%,
+    rgb(123, 50, 148) 100%
+  );
+  margin-bottom: 4px;
+}
+/* [COURSE] The "Filters / Your Priorities  Show ▾" header buttons: full width, name on the left, Show/Hide on the right */
+.panel-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--char);
+}
+.panel-toggle:hover {
+  border-color: var(--terra);
 }
 /* [COURSE] Small coloured squares in the legend for the amenities (same as their squares on the map) */
 .square {
