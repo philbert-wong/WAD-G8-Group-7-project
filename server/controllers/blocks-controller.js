@@ -2,6 +2,7 @@
 // routes/blocks-routes.js decides which address runs which function below.
 const blockModel = require('../models/block-model');
 const amenityModel = require('../models/amenity-model');
+const priceModel = require('../data/priceModel.json');
 
 // The parts of the models this file uses
 const Block = blockModel.Block;
@@ -193,6 +194,51 @@ function salesSummary(sales) {
     sales: rows,
   };
 }
+
+// ---------- Price estimate ----------
+// Uses the weights trained in prep/priceRegression.ipynb (saved in data/priceModel.json)
+// "04 TO 06" -> one number
+function storeyToNumber(storeyRange) {
+  const parts = storeyRange.split(" TO ") 
+  const low = Number(parts[0]);
+  const high = Number(parts[1]);
+  return (low + high)/2;
+}
+
+// Months from priceModel.startMonth ("2021-01") up to this month
+function monthsSinceStart() {
+  const startYear = Number(priceModel.startMonth.slice(0, 4));   // 2021
+  const startMonth = Number(priceModel.startMonth.slice(5, 7));  // 1
+  const now = new Date();
+  const thisYear = now.getFullYear();     // hint: now.getFullYear()
+  const thisMonth = now.getMonth() + 1;    // hint: now.getMonth() is 0-11, so it needs + 1
+  return (thisYear-startYear)*12 + (thisMonth-startMonth);               // your Python formula, using startYear / startMonth / thisYear / thisMonth
+}
+
+// features: { town, flatType, storey, leaseYears, areaSqm, months }
+// Returns the estimated price in dollars
+function estimatePrice(features) {
+  const intercept = priceModel.intercept;
+  const town = priceModel.town[features.town];
+  const flatType = priceModel.flatType[features.flatType];
+  const storeyWeight = priceModel.weights.storey;
+  const leaseWeight  = priceModel.weights.lease_years;
+  const monthsWeight = priceModel.weights.months_since_start;
+  const areaWeight   = priceModel.weights.log_area;
+  
+  const logPrice = intercept 
+    + storeyWeight * features.storey 
+    + leaseWeight  * features.leaseYears
+    + monthsWeight * features.months
+    + areaWeight   * Math.log(features.areaSqm)
+    + town
+    + flatType;
+
+  return Math.exp(logPrice);
+}
+
+
+
 
 // ---------- OneMap token ----------
 // Gets (and remembers) a OneMap token. It lasts about 3 days, so we ask again a bit early.
@@ -552,3 +598,64 @@ exports.walkToMrt = async (req, res) => {
     sendError(res, error);
   }
 };
+
+// GET /api/blocks/:id/estimate?storey=10&area=93
+exports.estimate = async (req, res) => {
+  try {
+    const block = await Block.findById(req.params.id);
+    if (block === null) {
+      return res.status(404).json({ message: 'Block not found' });
+    };
+
+    if (priceModel.town[block.town] === undefined || priceModel.flatType[block.flatType] === undefined) {
+      return res.status(400).json({ message: 'No estimate for this town or flat type' });
+    };
+
+    if (block.sales.length === 0) {
+    return res.status(404).json({ message: 'No recent sales to base an estimate on' });
+}
+
+    // storey: from ?storey= if sent, otherwise from block.sales
+    let storey;
+    if (isBlank(req.query.storey)) {
+    storey = storeyToNumber(block.sales[0].storey);
+  } else if (!isNumber(req.query.storey)) {
+    return res.status(400).json({ message: 'storey must be a number' });
+  } else {
+    storey = Number(req.query.storey);
+        if (storey < 1 || storey > 75) {
+        return res.status(400).json({ message: 'storey must be between 1 and 75' });
+      }
+  }
+
+    // area:   from ?area= if sent, otherwise from block.sales
+  let area;
+    if (isBlank(req.query.area)) {
+      area = block.sales[0].areaSqm;
+  } else if (!isNumber(req.query.area)) {
+    return res.status(400).json({ message: 'area must be a number' });
+  } else {
+    area = Number(req.query.area);
+      if (area < 30 || area > 250) {
+        return res.status(400).json({ message: 'area must be between 30 and 250 sqm' });
+      }
+  }
+
+    const price = estimatePrice({
+      town: block.town,
+      flatType: block.flatType,
+      storey: storey,
+      leaseYears: blockModel.remainingLease(block.leaseCommenceYear),
+      areaSqm: area,
+      months: monthsSinceStart(),
+    });
+
+    res.json({
+      blockId: block._id,
+      estimate: Math.round(price / 1000) * 1000,
+    });
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
