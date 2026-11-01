@@ -1,7 +1,8 @@
 <script setup>
-// Every block as a dot on a map, coloured by its median price. Click a dot for details.
-// PHG layer: pick your parents' block to draw the 4 km Proximity Housing Grant circle.
-import { ref, onMounted } from 'vue'
+// The Map page: every block as a dot (coloured by price or by match score), with the same filters and
+// Your Priorities as Search, amenity layers, an address search, and the PHG (Proximity Housing Grant) layer:
+// type your parents' postal code to see the blocks within 4 km. Click a dot for the "Selected block" card.
+import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -631,6 +632,14 @@ onMounted(function () {
   amenityLayer = L.layerGroup().addTo(map)
 
   loadBlocks()
+})
+
+// When you leave the Map page: remove the Leaflet map, so its listeners and layers do not stay in memory
+// (Week 5 slide 8: onUnmounted is for cleanup)
+onUnmounted(function () {
+  if (map !== null) {
+    map.remove()
+  }
 })
 </script>
 

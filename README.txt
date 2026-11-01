@@ -85,7 +85,11 @@ Terminal 2 (website):
 Pages:
     /            Search: search box, filters (budget, flat type, remaining lease), "search near a place",
                  "What matters to you?" match score, block cards with price details and nearest amenities
-    /map         Map: every block coloured by price, and the PHG (Proximity Housing Grant) 4 km circle
+    /map         Map: one dot per block, coloured by price or by match score ("Colour dots by"),
+                 with the same filters and Your Priorities as Search; amenity layers (MRT, hawker,
+                 park, school); an address search; the PHG (Proximity Housing Grant) layer (type your
+                 parents' postal code to see only blocks within 4 km); click a dot for its flat types
+                 and its nearest amenities
     /CPFCal      Affordability: calculator for a maximum budget, grants, PHG checker, "use this budget"
     /compare     Compare 2 or 3 shortlisted flats side by side (needs login)
     /shortlist   Your saved flats with notes (needs login)
@@ -138,8 +142,13 @@ Manual check of the main user journeys (with both terminals running):
     5. On Search press Save on 2 flats: the navbar shows "Shortlist (2)". Add a note on Shortlist.
     6. Compare: tick the 2 flats and see them side by side.
     7. Affordability: fill in the steps, then "use this budget": Search opens with that budget.
-    8. Map: dots coloured by price; pick a block in the PHG list to draw the 4 km circle.
-    9. Refresh the page: you stay logged in. Logout: the shortlist count disappears.
+    8. Map: dots coloured by price. Click 4-Rm in the filters: the dots change. Click a dot: its popup
+       and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
+    9. Map: tick "MRT stations": blue squares appear; untick: they go. Switch "Colour dots by" to
+       Best match: dots change colour (red = poor ... blue/purple = great), using Your Priorities.
+   10. Map: type "560406" in the PHG box: a 4 km circle, and only the blocks inside it remain.
+       Type "Bishan MRT" in the search bar above the map: the map jumps there with a marker.
+   11. Refresh the page: you stay logged in. Logout: the shortlist count disappears.
 
 
 ------------------------------------------------------------------------------------------
@@ -161,8 +170,8 @@ client/                     the website (made with pnpm create vue@latest, like 
 
 server/                     the API (same layout as the class's blog-with-mongodb server)
   server.js                 starts everything: config.env, Express, cors, routes, MongoDB, listen
-  routes/                   which address runs which function (blocks-, shortlist-, auth-routes.js)
-  controllers/              the functions behind each address (blocks-, shortlist-, auth-controller.js)
+  routes/                   which address runs which function (blocks-, shortlist-, auth-, amenities-routes.js)
+  controllers/              the functions behind each address (blocks-, shortlist-, auth-, amenities-controller.js)
   models/                   MongoDB data shapes: block-, amenity-, shortlist-, user-model.js
   middleware/               requireAuth.js (login check), errorHandler.js (last safety net)
   data/                     blocks.json and amenities.json (the real data)
@@ -201,6 +210,9 @@ GET    /api/blocks/:id/live-sales    the same, fetched live from data.gov.sg; so
 GET    /api/blocks/:id/amenities     nearest MRT, hawker centre, park and school with distance (metres)
 GET    /api/blocks/:id/walk-to-mrt   OneMap walking route to the nearest MRT:
                                      { minutes, metres, source: "onemap" }, or { minutes, source: "estimate" }
+GET    /api/amenities                every MRT station, hawker centre, park and primary school (for the map).
+                                     Query: category (optional: mrt, hawker, park or school; anything else 400).
+                                     Returns { total, results: [{ name, category, lat, lng }] }
 POST   /api/auth/register            body { email, password (8+ characters) }. Returns { token, user: { id, email } } (201)
 POST   /api/auth/login               body { email, password }. Returns { token, user: { id, email } }
 GET    /api/auth/preferences         [login] the saved "What matters to you?" choices: { preferences }
@@ -239,6 +251,14 @@ Match score ("What matters to you?")
     Weights: not ticked 0, Low 1, Moderate 2, Important 3, Very 4, Extremely 5
     Score = (sum of weight x sub-score) / (sum of weights), rounded. All weights 0 = no score
 
+The map (Leaflet + OpenStreetMap tiles)
+  The map loads the blocks with the same filters as Search, then groups the cards by address, so each
+  block is ONE dot (its flat types would otherwise sit on top of each other). A dot's colour is the
+  price band of its cheapest flat type, or its match score on a rainbow scale (red 0 ... purple 100).
+  The PHG layer looks up the parents' address with OneMap and keeps only the blocks within 4 km
+  (Leaflet's map.distance, straight-line), on top of the filters. Amenities come from /api/amenities
+  and are drawn as small squares in their own layer.
+
 Login and shared state
   Register / login return a token (JWT, valid 7 days). The Pinia auth store keeps it in the
   browser's localStorage (so a refresh keeps you logged in) and sends it with every request.
@@ -272,6 +292,9 @@ Then run  pnpm seed  in the server folder.
 
 - Only 4 towns, and the 40 busiest blocks in each.
 - The match score and the walking minutes on the cards use straight-line distances.
+- Distances to an amenity are measured to ONE point per amenity (from the NParks / data.gov.sg
+  datasets). Big parks are split into a few sections with their own points (e.g. Bishan-Ang Mo Kio
+  Park), but a block on a park's edge can still be closer to the park than the distance shown.
 - The login token lasts 7 days; after that, log in again.
 - The affordability numbers (grants, loan limits) must be checked against hdb.gov.sg / cpf.gov.sg;
   each one is listed with its source in client/src/utils/affordabilityRules.js.
