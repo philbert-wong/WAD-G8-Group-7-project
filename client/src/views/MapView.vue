@@ -690,7 +690,8 @@ async function searchPlace(text) {
       fillColor: '#fff',
       fillOpacity: 1,
     })
-      .bindPopup('<b>' + place.name + '</b>')
+      .bindPopup('<b>' + place.name + '</b>' +
+        '<br><span class="text-danger">There is currently no active listing for the block.</span>')
       .addTo(map)
     map.setView([place.lat, place.lng], 16) // 16 = street level
   }
