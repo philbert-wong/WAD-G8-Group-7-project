@@ -1,6 +1,6 @@
 <script setup>
 // One flat card: price, lease, MRT, match score, and buttons for Save, price details and amenities
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useMapFocusStore } from '../stores/mapFocus'
@@ -38,6 +38,17 @@ const loading = ref(false)
 const errorMessage = ref('')
 const amenities = ref([])
 const walk = ref(null)
+const imageFailed = ref(false)
+const mapUrl = computed(function () {
+  const b = props.block
+  return `https://www.onemap.gov.sg/api/staticmap/getStaticImage?layerchosen=default&lat=${b.lat}&lng=${b.lng}&zoom=17&height=500&width=400&points=%5B${b.lat},${b.lng},%22255,0,0%22,%22%22%5D`
+})
+
+const streetViewUrl = computed(function () {
+  const b = props.block
+  return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${b.lat},${b.lng}`
+})
+
 
 async function loadWalk() {
   try {
@@ -185,9 +196,16 @@ function barWidth(score) {
 
 <template>
   <article class="bcard">
-    <!-- Photo area. We have no real photos, so it is a coloured placeholder. -->
-    <div class="photo" :style="photoStyle(score)">
-      <span class="photo-icon">🏢</span>
+      <div class="photo" :style="photoStyle(score)">
+      <img
+        v-if="!imageFailed"
+        class="photo-img"
+        :src="mapUrl"
+        :alt="`Map of Blk ${block.block} ${block.street}`"
+        loading="lazy"
+        @error="imageFailed = true"
+      />
+      <span v-else class="photo-icon">🏢</span>
       <span class="ph-tag">{{ block.town }}</span>
     </div>
 
@@ -253,6 +271,7 @@ function barWidth(score) {
           <span v-else>Amenities ▾</span>
         </button>
         <button class="act-btn" @click="showOnMap">📍 Show on map</button>
+        <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
       </div>
 
       <PriceDetails v-if="showPrices" :block-id="block.id" />
@@ -303,6 +322,21 @@ function barWidth(score) {
 .photo-icon {
   font-size: 64px;
 }
+
+.photo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+a.act-btn {
+  text-decoration: none;
+  display: inline-block;
+}
+
+
 /* Warm gradient as a stand-in for a real photo */
 .photo {
   background: linear-gradient(160deg, #f3d9c4, #e7b89a 55%, #c98c6a);
