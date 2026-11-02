@@ -201,6 +201,7 @@ function barWidth(score) {
 
 <template>
   <article class="bcard">
+    <div class="leftcol">
       <div class="photo" :style="photoStyle(score)">
       <img
         v-if="!imageFailed"
@@ -212,6 +213,12 @@ function barWidth(score) {
       />
       <span v-else class="photo-icon">🏢</span>
       <span class="ph-tag">{{ block.town }}</span>
+    </div>
+
+      <div class="map-actions">
+        <button class="act-btn" @click="showOnMap">📍 Show on map</button>
+        <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
+      </div>
     </div>
 
     <div class="cbody">
@@ -278,10 +285,6 @@ function barWidth(score) {
           <span v-if="open">Hide amenities ▴</span>
           <span v-else>Amenities ▾</span>
         </button>
-        <div class="d-flex gap-2 btn-pair">
-          <button class="act-btn" @click="showOnMap">📍 Show on map</button>
-          <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
-        </div>
       </div>
 
       <PriceDetails v-if="showPrices" :block-id="block.id" />
@@ -320,10 +323,14 @@ function barWidth(score) {
   box-shadow: 0 22px 44px -20px rgba(80, 50, 30, 0.35);
 }
 
-/* Photo area: fixed width, icon centred with Grid */
+/* Photo area: fills the left column (see .leftcol), icon centred with Grid */
 .photo {
-  width: 32%;
+  width: 100%;
+  flex: 1 1 auto;
   min-height: 300px;
+  /* The map is 400x500 px. The column grows with the card (e.g. when Price details opens)
+     but stops at 500px, so the map is never blown up and no empty gradient is left below it. */
+  max-height: 500px;
   flex-shrink: 0;
   position: relative;
   display: grid;
@@ -354,6 +361,28 @@ a.act-btn {
   font-size: 13px;
   white-space: nowrap;
 }
+
+.leftcol {
+  width: 32%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+}
+.map-actions .act-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
+}
+
 
 .btn-pair {
   gap: 8px;
@@ -477,6 +506,9 @@ a.act-btn {
 @media (max-width: 991px) {
   .bcard {
     flex-direction: column;
+  }
+  .leftcol {
+    width: 100%;
   }
   .photo {
     width: 100%;
