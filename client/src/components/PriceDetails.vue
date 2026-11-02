@@ -186,16 +186,38 @@ function formatPct(pct) {
   return pct.toFixed(1) + '%'
 }
 
-// Badge colour from a buyer's view: red = makes the flat dearer, green = makes it cheaper
-function badgeClass(pct) {
-  if (pct > 0) {
-    return 'text-bg-danger'
-  } else if (pct < 0) {
-    return 'text-bg-success'
+// The factors as bars: without the market (it is the same for every flat, so it is shown under the chart),
+// biggest effect first, each with its bar width as a % of the biggest one
+function factorBars() {
+  const bars = []
+  for (const factor of model.value.factors) {
+    if (factor.key !== 'market') {
+      bars.push(factor)
+    }
   }
-  return 'text-bg-secondary'
-}
 
+  // Biggest effect first, whether it makes the flat dearer or cheaper
+  bars.sort(function (a, b) { return Math.abs(b.pct) - Math.abs(a.pct) })
+
+  // The biggest effect gets the full half-width; the others are drawn in proportion
+  let biggest = 0
+  for (const bar of bars) {
+    if (Math.abs(bar.pct) > biggest) {
+      biggest = Math.abs(bar.pct)
+    }
+  }
+
+  const rows = []
+  for (const bar of bars) {
+    let width = 0
+    if (biggest > 0) {
+      width = (Math.abs(bar.pct) / biggest) * 100
+    }
+    rows.push({ key: bar.key, name: bar.name, thisFlat: bar.thisFlat, compare: bar.compare, pct: bar.pct, width: width })
+
+  }
+  return rows
+}
 
 // Groups the sales since 2021 by year: how many, the median price, the change from the year before, and the latest sale
 // sales: newest first, so the first sale seen in each year is that year's latest
@@ -317,21 +339,41 @@ function buildYearRows(sales) {
         <p class="small text-muted mt-1 mb-0">Real sales of this block and flat type. The current year is only part of a year.</p>
       </div>
 
-      <!-- What drives this flat's price: each factor vs a typical flat, all else equal -->
+      <!-- How this flat compares with a typical flat: bars going left (costs less) or right (costs more) from the centre line -->
       <div v-if="model !== null" class="mb-3">
-        <h6 class="small fw-bold mb-2">What drives this flat's price</h6>
-        <ul class="list-group list-group-flush small">
-          <li
-            v-for="(factor, i) in model.factors"
-            :key="i"
-            class="list-group-item d-flex justify-content-between align-items-center px-0"
-          >
-            <span>{{ factor.label }}</span>
-            <span class="badge" :class="badgeClass(factor.pct)">{{ formatPct(factor.pct) }}</span>
-          </li>
-        </ul>
-        <p class="small text-muted mt-1 mb-0">
-          Each effect is from our price model, with everything else held the same. The effects multiply, so they do not simply add up.
+        <h6 class="small fw-bold mb-2">How this flat compares with a typical resale flat</h6>
+
+        <!-- Direction labels, above the bar area only -->
+        <div class="factor-row factor-head small text-muted">
+          <span class="factor-label"></span>
+          <div class="factor-track-labels">
+            <span>◀ less expensive</span>
+            <span>more expensive ▶</span>
+          </div>
+          <span class="factor-value"></span>
+        </div>
+
+        <div v-for="bar in factorBars()" :key="bar.key" class="factor-row small">
+          <span class="factor-label">
+            <strong>{{ bar.name }}:</strong> {{ bar.thisFlat }}
+            <span class="text-muted">({{ bar.compare }})</span>
+          </span>
+          <div class="factor-track">
+            <!-- Left half: only cheaper factors draw here, growing out from the centre -->
+            <div class="factor-half factor-left">
+              <div v-if="bar.pct < 0" class="factor-bar factor-cheaper" :style="{ width: bar.width + '%' }"></div>
+            </div>
+            <!-- Right half: only dearer factors draw here -->
+            <div class="factor-half">
+              <div v-if="bar.pct > 0" class="factor-bar factor-dearer" :style="{ width: bar.width + '%' }"></div>
+            </div>
+          </div>
+          <span class="factor-value" :class="bar.pct < 0 ? 'text-success' : 'text-danger'">{{ formatPct(bar.pct) }}</span>
+        </div>
+
+        <p class="small text-muted mt-2 mb-0">
+          Each bar compares this flat with a typical resale flat (town vs Ang Mo Kio, flat type vs 2-room),
+          with everything else held the same. The market rise since 2021 applies to every flat, so it is shown under the chart.
         </p>
       </div>
 
@@ -360,3 +402,60 @@ function buildYearRows(sales) {
     </template>
   </div>
 </template>
+
+
+<style scoped>
+/* "What drives this flat's price": one row = label | bar area | % */
+.factor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0ebe6;
+}
+.factor-head {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.factor-label {
+  flex: 0 0 42%;
+}
+.factor-value {
+  flex: 0 0 3.6rem;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums; /* digits line up in a column */
+}
+
+/* Bar area: two halves with the centre line between them */
+.factor-track,
+.factor-track-labels {
+  flex: 1;
+  display: flex;
+}
+.factor-track-labels {
+  justify-content: space-between;
+}
+.factor-track {
+  height: 10px;
+}
+.factor-half {
+  flex: 1;
+  display: flex;
+}
+.factor-left {
+  justify-content: flex-end; /* cheaper bars grow leftwards from the centre */
+  border-right: 2px solid #9a8f86;
+}
+
+.factor-bar {
+  height: 100%;
+  border-radius: 3px;
+}
+.factor-cheaper {
+  background: #3b8a5a;
+}
+.factor-dearer {
+  background: #c0614a;
+}
+</style>
