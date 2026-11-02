@@ -1,6 +1,6 @@
 <script setup>
 // One flat card: price, lease, MRT, match score, and buttons for Save, price details and amenities
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useMapFocusStore } from '../stores/mapFocus'
@@ -37,7 +37,6 @@ const open = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const amenities = ref([])
-const walk = ref(null)
 const imageFailed = ref(false)
 const mapUrl = computed(function () {
   const b = props.block
@@ -50,29 +49,15 @@ const streetViewUrl = computed(function () {
 })
 
 
-async function loadWalk() {
-  try {
-    const response = await axios.get(`${BASE_URL}/api/blocks/${props.block.id}/walk-to-mrt`)
-    walk.value = response.data
-  } catch (error) {
-    // do nothing: the card keeps the stored estimate
-  }
-}
-
 // Price estimate from our regression model (/api/blocks/:id/estimate). null = not loaded, or none for this block.
 
-onMounted(function () {
-  loadWalk()
-})
-
-
-// Minutes to walk to the nearest MRT: OneMap's real walk once it has arrived, otherwise the stored estimate.
-// Used by the "min walk" line AND the "Near MRT" tag, so the two always agree.
-function walkMinutes() {
-  if (walk.value !== null) {
-    return walk.value.minutes
+// The text after each amenity in the list. For the MRT: the block's nearest station by WALKING and its walking
+// distance (the same walk as the card's "min walk" and the match score). The others: straight-line metres.
+function amenityText(amenity) {
+  if (amenity.category === 'mrt') {
+    return props.block.mrtName + ' (' + props.block.distances.mrt + ' m walk)'
   }
-  return props.block.mrtWalkMinutes
+  return amenity.name + ' (' + amenity.distance + ' m)'
 }
 
 
@@ -118,7 +103,7 @@ const categoryNames = {
 // The limits (10 min, 70 years, 1 km, 500 m) are our own choice, not an HDB rule.
 function makeTags(block) {
   const tags = []
-  if (walkMinutes() <= 10) {
+  if (block.mrtWalkMinutes <= 10) {
     tags.push('Near MRT')
   }
   if (block.remainingLease >= 70) {
@@ -254,7 +239,7 @@ function barWidth(score) {
         </div>
         <div class="stat">
           <span class="ic">🚆</span>
-          <div><b>{{ walkMinutes() }} min walk</b>to {{ block.mrtName }}</div>
+          <div><b>{{ block.mrtWalkMinutes }} min walk</b>to {{ block.mrtName }}</div>
         </div>
       </div>
 
@@ -294,8 +279,7 @@ function barWidth(score) {
         <p v-else-if="errorMessage" class="text-danger mb-0">{{ errorMessage }}</p>
         <ul v-else class="list-unstyled small mb-0">
           <li v-for="a in amenities" :key="a.category">
-            {{ categoryNames[a.category] }}: {{ a.name }}
-            ({{ a.category === 'mrt' && walk && walk.metres ? walk.metres + ' m walk' : a.distance + ' m' }})
+            {{ categoryNames[a.category] }}: {{ amenityText(a) }}
           </li>
         </ul>
       </div>

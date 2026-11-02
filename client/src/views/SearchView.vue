@@ -278,6 +278,8 @@ function changeLevel(key, level) {
 }
 
 // Puts the best match first. Blocks with no score ("–") go to the end.
+// Same score (e.g. every block more than 1300 m' walk from a station scores 0 for Transport):
+// the shorter walk to the MRT goes first, so the "min walk" on the cards still goes up down the list.
 // Returning a negative number puts a before b, a positive number puts b before a.
 function compareByMatch(a, b) {
   if (a.score === null && b.score === null) {
@@ -286,6 +288,8 @@ function compareByMatch(a, b) {
     return 1
   } else if (b.score === null) {
     return -1
+  } else if (a.score === b.score) {
+    return a.block.distances.mrt - b.block.distances.mrt
   } else {
     return b.score - a.score
   }

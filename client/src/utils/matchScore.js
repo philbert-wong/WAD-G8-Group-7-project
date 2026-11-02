@@ -6,8 +6,10 @@
 // It runs in the browser, so the cards update straight away without asking the server.
 
 // How far away still counts. At this distance (or further) the sub-score is 0.
-const SCHOOL_MAX_DISTANCE = 1000 // metres
-const MRT_MAX_DISTANCE = 1000
+const SCHOOL_MAX_DISTANCE = 1000 // metres, in a straight line
+// The MRT distance is a real WALKING distance (prep/addWalks.js), which is longer than a straight line
+// (about 1.3 times), so its limit is 1300 m: about the same as 1000 m in a straight line, a 16-minute walk
+const MRT_MAX_DISTANCE = 1300
 const HAWKER_MAX_DISTANCE = 800
 const PARK_MAX_DISTANCE = 800
 

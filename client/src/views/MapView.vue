@@ -70,10 +70,6 @@ const selectedPlace = ref(null)
 // (null = not asked for yet, so the card shows the "Show nearest amenities" button)
 const nearestAmenities = ref(null)
 
-// The selected block's real walk to its nearest MRT from OneMap: { minutes, metres, source }
-// (null = not loaded yet, so the card shows the stored estimate). Same request as the Search card.
-const walk = ref(null)
-
 // The map, the groups holding the block and amenity dots, the PHG circle and the parents' marker live in
 // normal variables (Leaflet does not like Vue's ref)
 let map = null
@@ -263,30 +259,13 @@ function popupText(place) {
 function selectPlace(place) {
   selectedPlace.value = place
   nearestAmenities.value = null
-  walk.value = null
   showAmenities()
-  loadWalk(place)
-}
-
-// Asks our server for the block's real walking time to its nearest MRT (GET /api/blocks/<id>/walk-to-mrt,
-// which asks OneMap and remembers the answer). If it fails, the card just keeps the stored estimate.
-async function loadWalk(place) {
-  try {
-    const response = await axios.get(`${BASE_URL}/api/blocks/${place.cards[0].id}/walk-to-mrt`)
-    // Only use the answer if this block is still the selected one (another dot may have been clicked meanwhile)
-    if (selectedPlace.value !== null && selectedPlace.value.label === place.label) {
-      walk.value = response.data
-    }
-  } catch (error) {
-    // do nothing: the card keeps the stored estimate (same as the Search card)
-  }
 }
 
 // The card's close (X) button: close the card AND the dot's popup on the map (map.closePopup is Leaflet's)
 function closePlace() {
   selectedPlace.value = null
   nearestAmenities.value = null
-  walk.value = null
   showAmenities()
   map.closePopup()
 }
@@ -300,7 +279,15 @@ async function showNearest() {
   const blockId = selectedPlace.value.cards[0].id
   try {
     const response = await axios.get(`${BASE_URL}/api/blocks/${blockId}/amenities`)
-    nearestAmenities.value = response.data.amenities
+    const amenities = response.data.amenities
+    // The server finds the closest MRT in a straight line; use the block's nearest station by WALKING instead
+    // (the same one as the card's "min walk"), so the right station's square is the highlighted one
+    for (const amenity of amenities) {
+      if (amenity.category === 'mrt') {
+        amenity.name = selectedPlace.value.cards[0].mrtName
+      }
+    }
+    nearestAmenities.value = amenities
     showAmenities()
   } catch (error) {
     // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
@@ -882,7 +869,6 @@ onUnmounted(function () {
             :match-text="selectedMatchText()"
             :nearest-amenities="nearestAmenities"
             :amenity-types="amenityTypes"
-            :walk="walk"
             @close="closePlace"
             @show-nearest="showNearest"
             @hide-nearest="hideNearest"

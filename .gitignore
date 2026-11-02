@@ -4,3 +4,4 @@ config.env
 .DS_Store
 client/dist/
 prep/geocode-cache.json
+prep/walk-cache.json

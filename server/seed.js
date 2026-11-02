@@ -35,22 +35,34 @@ const stations = amenities.filter(function (amenity) {
   return amenity.category === 'mrt';
 });
 
-// Finds the closest MRT station and works out the walking minutes to it
+// The block's nearest MRT / LRT station and the walk to it: { mrtName, mrtWalkMinutes, walkingMetres }.
+// Uses the REAL walk measured by prep/addWalks.js (OneMap walking routes, saved as block.walk) when there is one.
+// Otherwise: the closest station in a straight line, with the walk estimated as 1.3 x that distance.
 function nearestStation(block) {
-  let bestStation = null;
-  let bestMetres = null;
-  for (const station of stations) {
-    const metres = straightLineDistance([block.lat, block.lng], [station.lat, station.lng]);
-    if (bestMetres === null || metres < bestMetres) {
-      bestStation = station;
-      bestMetres = metres;
+  let stationName = null;
+  let walkingMetres = null;
+
+  if (block.walk) {
+    stationName = block.walk.station;
+    walkingMetres = block.walk.metres;
+  } else {
+    let bestStation = null;
+    let bestMetres = null;
+    for (const station of stations) {
+      const metres = straightLineDistance([block.lat, block.lng], [station.lat, station.lng]);
+      if (bestMetres === null || metres < bestMetres) {
+        bestStation = station;
+        bestMetres = metres;
+      }
     }
+    stationName = bestStation.name;
+    walkingMetres = bestMetres * ROUTE_IS_LONGER_THAN_STRAIGHT_LINE;
   }
 
-  const walkingMetres = bestMetres * ROUTE_IS_LONGER_THAN_STRAIGHT_LINE;
-  // at least 1 minute, even if the station is right next door
+  // Minutes worked out from the metres (at least 1 minute, even if the station is right next door),
+  // so the minutes always go up in the same order as the metres
   const walkMinutes = Math.max(1, Math.round(walkingMetres / WALKING_METRES_PER_MINUTE));
-  return { mrtName: bestStation.name, mrtWalkMinutes: walkMinutes };
+  return { mrtName: stationName, mrtWalkMinutes: walkMinutes, walkingMetres: Math.round(walkingMetres) };
 }
 
 // Straight-line metres from a block to the closest amenity of one category (e.g. 'park')
@@ -83,6 +95,12 @@ function nearestDistances(block) {
 const blockDocs = [];
 for (const b of blocks) {
   const station = nearestStation(b);
+
+  // Straight-line distances to the nearest school, hawker centre and park; for the MRT, the WALKING distance,
+  // so the match score's Transport part, the walking minutes and the station name all come from the same walk
+  const distances = nearestDistances(b);
+  distances.mrt = station.walkingMetres;
+
   blockDocs.push({
     block: b.block,
     street: b.street,
@@ -95,7 +113,7 @@ for (const b of blocks) {
     leaseCommenceYear: b.leaseCommenceYear,
     mrtName: station.mrtName,
     mrtWalkMinutes: station.mrtWalkMinutes,
-    distances: nearestDistances(b),
+    distances: distances,
     location: { type: 'Point', coordinates: [b.lng, b.lat] }, // [lng, lat]
   });
 }

@@ -10,11 +10,11 @@ const blockSchema = new mongoose.Schema({
   priceLow: Number, // cheapest recent sale
   priceHigh: Number, // most expensive recent sale
   leaseCommenceYear: { type: Number, required: true },
-  mrtName: String, // nearest MRT station
-  mrtWalkMinutes: Number, // walking minutes to it
+  mrtName: String, // nearest MRT / LRT station by walking (OneMap walking route, see prep/addWalks.js)
+  mrtWalkMinutes: Number, // walking minutes to it (walking metres / 80 m per minute)
 
-  // Straight-line metres to the nearest amenity of each kind. Worked out once by the seed script
-  // and used by the "What matters to you?" match score on the search page.
+  // Metres to the nearest amenity of each kind: walking metres for the MRT, straight-line for the others.
+  // Worked out once by the seed script and used by the "What matters to you?" match score.
   distances: {
     school: Number,
     mrt: Number,

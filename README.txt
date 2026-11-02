@@ -49,8 +49,8 @@ Step 2. Settings for the server
       JWT_SECRET=...      any long random text (used to sign login tokens)
       PORT=8000           port for the API (default 8000)
       ONEMAP_EMAIL=...    a OneMap account (free at onemap.gov.sg). Needed for places and postal codes
-      ONEMAP_PASSWORD=... in the search box, the map's address and PHG search, and the walking time to the
-                          nearest MRT. Without it, place searches show an error and walking times use our estimate.
+      ONEMAP_PASSWORD=... in the search box and the map's address and PHG search. Without it, those place
+                          searches show an error. (The walking routes are already saved in the data.)
     config.env is never committed to git (it is in .gitignore).
 
 Step 3. Load the data into MongoDB
@@ -141,6 +141,7 @@ Manual check of the main user journeys (with both terminals running):
     2. Same search box: type "Blk 314 Ang Mo Kio Ave 3" (its card), then "560314" or "Bishan MRT":
        flats within 1 km of that place appear, still following the filters (needs OneMap login).
     3. Open a card's price details: recent sales, median price, chart; nearest amenities and walk time.
+       Search "Ang Mo Kio" with Sort: Best match and only Transport ticked: the "min walk" goes up down the list.
     4. Click Shortlist while logged out: you are sent to Login; log in: you come back to Shortlist.
     5. On Search press Save on 2 flats: the navbar shows "Shortlist (2)". Add a note on Shortlist.
     6. Compare: tick the 2 flats and see them side by side.
@@ -215,7 +216,8 @@ GET    /api/blocks/:id/sales         the stored recent sales: { count, lowest, h
 GET    /api/blocks/:id/live-sales    the same, fetched live from data.gov.sg; source is "live", or
                                      "stored" when data.gov.sg cannot be reached
 GET    /api/blocks/:id/amenities     nearest MRT, hawker centre, park and school with distance (metres)
-GET    /api/blocks/:id/walk-to-mrt   OneMap walking route to the nearest MRT:
+GET    /api/blocks/:id/walk-to-mrt   (no page uses it now: the walks are saved in the data by prep/addWalks.js)
+                                     OneMap walking route to the nearest MRT:
                                      { minutes, metres, source: "onemap" }, or { minutes, source: "estimate" }
 GET    /api/blocks/:id/estimate      price estimate from the regression model (prep/priceRegression.ipynb,
                                      saved in server/data/priceModel.json). Query: storey (1 to 75) and
@@ -250,16 +252,18 @@ Geospatial search
   2dsphere index, so MongoDB's $geoNear can sort by distance:
     /api/blocks/nearby uses $geoNear on blocks (with a maximum distance),
     /api/blocks/:id/amenities uses $geoNear on amenities (the closest one of each category).
-  The walking minutes shown on each card are worked out once when seeding
-  (straight-line distance x 1.3 / 80 metres per minute). The cards, the map's selected-block card and
-  Compare then ask OneMap for a real walking route (/walk-to-mrt) and show that instead when it arrives.
+  The walk to the nearest MRT / LRT is a REAL walking route: prep/addWalks.js asked OneMap's walking
+  routes once for every block (to its nearest station, and to the second-nearest when that is almost
+  as close) and saved the shortest walk in blocks.json. The seed turns it into the station name,
+  the walking minutes (walking metres / 80 metres per minute) and the MRT distance of the match score,
+  so all three come from the same walk. (A block without a route falls back to straight-line x 1.3.)
 
 Match score ("What matters to you?")
-  The seed script stores the straight-line distance from each block to its nearest school, MRT,
-  hawker centre and park. The browser scores every card itself (client/src/utils/matchScore.js),
-  so changing the panel updates the scores straight away without calling the server.
+  The seed script stores the distance from each block to its nearest school, hawker centre and park
+  (straight line) and MRT / LRT station (walking route, see above). The browser scores every card itself
+  (client/src/utils/matchScore.js), so changing the panel updates the scores straight away.
     Sub-score per category = 100 x (max - distance) / max, or 0 if further than max
-    Max distances: school 1000 m, MRT 1000 m, hawker 800 m, park 800 m
+    Max distances: school 1000 m, MRT 1300 m walking (about 1000 m in a straight line), hawker 800 m, park 800 m
     Weights: not ticked 0, Low 1, Moderate 2, Important 3, Very 4, Extremely 5
     Score = (sum of weight x sub-score) / (sum of weights), rounded. All weights 0 = no score
 
@@ -299,6 +303,10 @@ The prep/ scripts built the two JSON files once. To rebuild them:
                                                      blocks already in blocks.json (no OneMap calls)
     node addLrt.js                                  adds the Punggol, Sengkang and Bukit Panjang LRT stations to
                                                      amenities.json (run it again after makeData.js)
+    node addWalks.js                                measures each block's real walk to its nearest station
+                                                     with OneMap walking routes (needs the OneMap login in
+                                                     server/config.env; about 30 minutes the first time,
+                                                     cached in prep/walk-cache.json). Run it last.
 Then run  pnpm seed  in the server folder.
 
 
@@ -307,7 +315,8 @@ Then run  pnpm seed  in the server folder.
 ------------------------------------------------------------------------------------------
 
 - Only the 40 busiest blocks in each of the 26 towns (974 blocks), not every block in Singapore.
-- The match score and the walking minutes on the cards use straight-line distances.
+- The match score uses straight-line distances for schools, hawker centres and parks (only the MRT uses a
+  real walking route). Walking routes end at the station's centre point, not its nearest exit.
 - Distances to an amenity are measured to ONE point per amenity (from the NParks / data.gov.sg
   datasets). Big parks are split into a few sections with their own points (e.g. Bishan-Ang Mo Kio
   Park), but a block on a park's edge can still be closer to the park than the distance shown.
