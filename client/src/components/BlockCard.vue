@@ -353,14 +353,17 @@ a.act-btn {
   flex-direction: column;
 }
 
+/* The two buttons share a row when there is room (phones, very wide screens) and wrap into a
+   column when the left column is narrow (Bootstrap lg and xl, where the column is only ~200-250px wide) */
 .map-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 10px;
   border-top: 1px solid var(--line);
 }
 .map-actions .act-btn {
-  flex: 1;
+  flex: 1 1 120px;
   padding: 8px 12px;
   font-size: 13px;
   white-space: nowrap;
