@@ -38,7 +38,7 @@ const blockCount = ref(0)
 
 // The filters: the same panel as Search ('' = any flat type, and maxPrice '' = "Any" budget). The map starts
 // with any budget and the lowest lease (the sliders' limits), so you first see every block and then narrow it down.
-const filters = ref({ q: '', flatType: '', maxPrice: '', minLease: '20' })
+const filters = ref({ q: '', flatType: '', maxPrice: '760000', minLease: '60' })
 
 // The place found by the address search above the map: { name, lat, lng }, or null
 // (the typed text itself lives in MapSearchBar)
@@ -517,7 +517,7 @@ function setFilter(name, value) {
 
 // "Clear all": back to the starting filters, then reload the dots
 function clearFilters() {
-  filters.value = { q: '', flatType: '', maxPrice: '', minLease: '20' }
+  filters.value = { q: '', flatType: '', maxPrice: '760000', minLease: '60' }
   loadBlocks()
 }
 

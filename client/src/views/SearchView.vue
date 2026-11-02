@@ -32,7 +32,7 @@ const shortlist = useShortlistStore()
 const shortlistErrorMessage = ref('')
 
 // The search box text (q) and the four filters. Empty = not used.
-const filters = ref({ q: '', flatType: '', maxPrice: '650000', minLease: '60' })
+const filters = ref({ q: '', flatType: '', maxPrice: '760000', minLease: '60' })
 // The filters the cards on screen were found with (a copy, so moving a slider without searching does not
 // change it), handed to the map by "Show on map". null until the first search has finished.
 const searchedFilters = ref(null)
@@ -179,7 +179,7 @@ async function search() {
 
 // "Clear all": empty the search box and every filter, then search again
 function clearFilters() {
-  filters.value = { q: '', flatType: '', maxPrice: '650000', minLease: '60' }
+  filters.value = { q: '', flatType: '', maxPrice: '760000', minLease: '60' }
   search()
 }
 
