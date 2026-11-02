@@ -8,6 +8,7 @@ import PreferencesPanel from '../components/PreferencesPanel.vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import { useShortlistStore } from '../stores/shortlist'
+import { useFiltersStore } from '../stores/filters'
 import {
   CATEGORIES,
   getWeights,
@@ -26,16 +27,15 @@ const route = useRoute()
 // Pinia stores (Week 11): who is logged in, and the shortlist (so each card knows if it shows ☆ Save or ★ Saved)
 const auth = useAuthStore()
 const shortlist = useShortlistStore()
+// The filters (flat type, budget, lease) live in a Pinia store shared with the Map, so both pages show the same results
+const filterStore = useFiltersStore()
 
 // Messages for the top alert: "please log in" and problems saving your choices
 // (problems with the shortlist itself are in shortlist.error)
 const shortlistErrorMessage = ref('')
 
-// The search box text (q) and the four filters. Empty = not used.
-const filters = ref({ q: '', flatType: '', maxPrice: '760000', minLease: '60' })
-// The filters the cards on screen were found with (a copy, so moving a slider without searching does not
-// change it), handed to the map by "Show on map". null until the first search has finished.
-const searchedFilters = ref(null)
+// The search box text ('' = not used). Only the Search page has a search box, so it is not in the filters store.
+const searchText = ref('')
 const results = ref([])
 const total = ref(0)
 const loading = ref(false)
@@ -45,7 +45,7 @@ const showSuggestions = ref(true)
 
 // Town names that contain what is typed in the search box
 const suggestions = computed(function () {
-  const typed = filters.value.q.toUpperCase()
+  const typed = searchText.value.toUpperCase()
   return area.value.filter(function (town) {
     return town.includes(typed)
   })
@@ -53,20 +53,20 @@ const suggestions = computed(function () {
 
 // The search box says the user typed something
 function setSearchText(text) {
-  filters.value.q = text
+  searchText.value = text
   showSuggestions.value = true
 }
 
 // The user clicked a suggested town
 function selectArea(town) {
-  filters.value.q = town
+  searchText.value = town
   showSuggestions.value = false
   search()
 }
 
-// The filter panel says one filter changed, e.g. ('maxPrice', '600000')
+// The filter panel says one filter changed, e.g. ('maxPrice', '600000'): change it in the shared store
 function setFilter(name, value) {
-  filters.value[name] = value
+  filterStore.setFilter(name, value)
 }
 
 // Gets the town names from the server (for the search suggestions)
@@ -102,17 +102,6 @@ function isPostalCode(text) {
   return true
 }
 
-// Keeps a copy of the filters these results were found with, for "Show on map" (see searchedFilters).
-// q = the search text to bring along ('' for near-a-place results, because the map has no OneMap search).
-function rememberSearchedFilters(q) {
-  searchedFilters.value = {
-    q: q,
-    flatType: filters.value.flatType,
-    maxPrice: filters.value.maxPrice,
-    minLease: filters.value.minLease,
-  }
-}
-
 // Flats near any place in Singapore: our server asks OneMap where the place is (/api/blocks/place),
 // then finds our flats within 1 km of it that fit the filters (/api/blocks/nearby).
 // Errors are caught by search() below.
@@ -124,16 +113,15 @@ async function searchNearPlace(text) {
     params: {
       lat: place.lat,
       lng: place.lng,
-      flatType: filters.value.flatType,
-      maxPrice: filters.value.maxPrice,
-      minLease: filters.value.minLease,
+      flatType: filterStore.filters.flatType,
+      maxPrice: filterStore.filters.maxPrice,
+      minLease: filterStore.filters.minLease,
     },
   })
 
   results.value = nearbyResponse.data.results
   total.value = nearbyResponse.data.total
   placeName.value = place.name
-  rememberSearchedFilters('')
 }
 
 // The one search box (and the filters). Empty filters are ignored by the server, so we can send them all.
@@ -144,19 +132,25 @@ async function search() {
   loading.value = true
   errorMessage.value = ''
   placeName.value = ''
-  const typed = filters.value.q.trim()
+  const typed = searchText.value.trim()
 
   try {
     if (isPostalCode(typed)) {
       await searchNearPlace(typed)
     } else {
-      const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
+      // The search text plus the shared filters
+      const params = {
+        q: searchText.value,
+        flatType: filterStore.filters.flatType,
+        maxPrice: filterStore.filters.maxPrice,
+        minLease: filterStore.filters.minLease,
+      }
+      const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
       if (response.data.total === 0 && typed !== '') {
         await searchNearPlace(typed)
       } else {
         results.value = response.data.results
         total.value = response.data.total
-        rememberSearchedFilters(filters.value.q)
       }
     }
   } catch (error) {
@@ -177,9 +171,10 @@ async function search() {
   loading.value = false
 }
 
-// "Clear all": empty the search box and every filter, then search again
+// "Clear all": empty the search box and every filter (also on the Map, since they are shared), then search again
 function clearFilters() {
-  filters.value = { q: '', flatType: '', maxPrice: '760000', minLease: '60' }
+  searchText.value = ''
+  filterStore.clearFilters()
   search()
 }
 
@@ -376,7 +371,7 @@ function loadPage() {
   const budget = route.query.maxPrice
 
   if (budget !== undefined) {
-    filters.value.maxPrice = String(budget)
+    filterStore.setFilter('maxPrice', String(budget))
   }
   search()
   loadAreas()
@@ -403,8 +398,8 @@ onMounted(loadPage)
       {{ shortlist.error }}
     </div>
 
-    <SearchBar :text="filters.q" @change-text="setSearchText" @search="search" />
-    <div v-if="filters.q && showSuggestions && suggestions.length > 0" class="list-group mb-3">
+    <SearchBar :text="searchText" @change-text="setSearchText" @search="search" />
+    <div v-if="searchText && showSuggestions && suggestions.length > 0" class="list-group mb-3">
       <button
         v-for="town in suggestions"
         :key="town"
@@ -445,7 +440,6 @@ onMounted(loadPage)
           :block="item.block"
           :saved="shortlist.isSaved(item.block.id)"
           :score="item.score"
-          :map-filters="searchedFilters"
           show-match
           @toggle-save="toggleSave"
         />
@@ -464,7 +458,7 @@ onMounted(loadPage)
       <div class="col-lg-4 order-1 order-lg-2">
         <div class="sidebar">
           <FilterPanel
-            :filters="filters"
+            :filters="filterStore.filters"
             @change-filter="setFilter"
             @search="search"
             @clear="clearFilters"

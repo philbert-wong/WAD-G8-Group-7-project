@@ -15,17 +15,16 @@ const props = defineProps({
   showSave: { type: Boolean, default: true }, // the shortlist page hides the Save button
   showMatch: { type: Boolean, default: false }, // only the search page shows the match score
   score: { type: Number, default: null }, // match score 0 to 100, or null for "–"
-  mapFilters: { type: Object, default: null }, // Search's filters for "Show on map", or null (the map keeps its own)
 })
 defineEmits(['toggle-save'])
 
-// "Show on map" button: remember this block (and Search's filters, if the page gave them) in the small
-// mapFocus Pinia store, then open the Map page. The map reads them, uses the same filters, zooms to the
-// block and opens its card. (The URL stays a plain /map.)
+// "Show on map" button: remember this block in the small mapFocus Pinia store, then open the Map page.
+// The map reads it, zooms to the block and opens its card. (The filters are already the same on both pages:
+// they live in the shared filters store. The URL stays a plain /map.)
 const router = useRouter()
 const mapFocus = useMapFocusStore()
 function showOnMap() {
-  mapFocus.showOnMap(props.block.id, props.mapFilters)
+  mapFocus.showOnMap(props.block.id)
   router.push('/map')
 }
 

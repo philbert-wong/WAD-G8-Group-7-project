@@ -17,9 +17,12 @@ import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
 import PhgCard from '../components/map/PhgCard.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMapFocusStore } from '../stores/mapFocus'
+import { useFiltersStore } from '../stores/filters'
 
 // Which block to zoom to when we come from Search's "Show on map" button (small Pinia store)
 const mapFocus = useMapFocusStore()
+// The filters (flat type, budget, lease) live in a Pinia store shared with Search, so both pages show the same results
+const filterStore = useFiltersStore()
 // The same match score maths as Search (shared file, not changed here)
 import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 
@@ -36,9 +39,6 @@ const PHG_NEAR_DISTANCE_METRES = 4000
 const errorMessage = ref('')
 const blockCount = ref(0)
 
-// The filters: the same panel as Search ('' = any flat type, and maxPrice '' = "Any" budget). The map starts
-// with any budget and the lowest lease (the sliders' limits), so you first see every block and then narrow it down.
-const filters = ref({ q: '', flatType: '', maxPrice: '760000', minLease: '60' })
 
 // The place found by the address search above the map: { name, lat, lng }, or null
 // (the typed text itself lives in MapSearchBar)
@@ -356,8 +356,14 @@ async function loadBlocks() {
   // New filters / a new load: remove any old error message first (a new problem below sets it again)
   errorMessage.value = ''
   try {
-    // Same request as Search: the server only sends blocks that match the filters
-    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: filters.value })
+    // Same request as Search, with the shared filters: the server only sends blocks that match them.
+    // (No search text: the map always shows the whole island; you zoom in to a place instead.)
+    const params = {
+      flatType: filterStore.filters.flatType,
+      maxPrice: filterStore.filters.maxPrice,
+      minLease: filterStore.filters.minLease,
+    }
+    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
     const cards = response.data.results
 
     // The server sends one card per block + flat type. Group them by address, so each block
@@ -478,7 +484,8 @@ function focusOnRequestedBlock(places) {
     }
   }
   if (found === null) {
-    errorMessage.value = "That block is outside the map's current filters"
+    // It does not fit the filters (e.g. a shortlisted flat): show it as a grey dot instead
+    showRequestedHiddenBlock(blockId)
     return
   }
   focusPlace(found)
@@ -497,14 +504,14 @@ function findShownPlaceAt(lat, lng) {
   return found
 }
 
-// The filter panel says one filter changed, e.g. ('maxPrice', '600000'). Same as on Search.
+// The filter panel says one filter changed, e.g. ('maxPrice', '600000'): change it in the shared store. Same as on Search.
 function setFilter(name, value) {
-  filters.value[name] = value
+  filterStore.setFilter(name, value)
 }
 
-// "Clear all": back to the starting filters, then reload the dots
+// "Clear all": back to the starting filters (also on Search, since they are shared), then reload the dots
 function clearFilters() {
-  filters.value = { q: '', flatType: '', maxPrice: '760000', minLease: '60' }
+  filterStore.clearFilters()
   loadBlocks()
 }
 
@@ -649,27 +656,19 @@ async function searchPlace(text) {
   }
 
   if (hiddenBlock !== null) {
-    // One of our blocks, but not on the map because of the filters: a grey dot the size of a block dot,
-    // with a dashed dark ring (so it does not look like the light grey "no score" dots of Best match),
-    // and its usual popup plus why it is not shown.
-    searchMarker = L.circleMarker([hiddenBlock.lat, hiddenBlock.lng], {
-      radius: 7,
-      color: '#444',
-      weight: 2,
-      dashArray: '3 3',
-      fillColor: '#9e9e9e',
-      fillOpacity: 1,
-    })
-      .bindPopup(
-        popupText(hiddenBlock) +
-          '<br><span class="text-danger">Does not fit your current filters, so it is not on the map.</span>' +
-          '<br><span class="small text-muted">Press "Clear all" under Filters to see it.</span>',
-      )
-      .addTo(map)
-    map.setView([hiddenBlock.lat, hiddenBlock.lng], 17) // 17 = street level, like a found block
+    // One of our blocks, but not on the map because of the filters: the grey dot
+    showHiddenBlock(hiddenBlock)
   } else {
     // Not one of our blocks: a white dot with a thick dark ring, so it does not look like a block, an amenity or the parents' dot.
     // (A circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite.)
+    // If the user typed an address (a block number or postal code), say that this block is not in our data;
+    // for a place like "Bishan MRT" or a mall, the name alone is enough.
+    let popup = '<b>' + place.name + '</b>'
+    if (looksLikeAddress(text)) {
+      popup = popup +
+        '<br><span class="text-danger">This block is not in our data</span>' +
+        '<br><span class="small text-muted">(we have the 40 busiest blocks in each town)</span>'
+    }
     searchMarker = L.circleMarker([place.lat, place.lng], {
       radius: 9,
       color: '#111',
@@ -677,14 +676,66 @@ async function searchPlace(text) {
       fillColor: '#fff',
       fillOpacity: 1,
     })
-      .bindPopup('<b>' + place.name + '</b>' +
-        '<br><span class="text-danger">There is currently no active listing for the block.</span>')
+      .bindPopup(popup)
       .addTo(map)
     map.setView([place.lat, place.lng], 16) // 16 = street level
+    // Open the marker's popup so the name shows straight away
+    searchMarker.openPopup()
   }
+}
 
-  // Open the marker's popup so the text shows straight away
+// One of our blocks that the filters hide: a grey dot the size of a block dot, with a dashed dark ring
+// (so it does not look like the light grey "no score" dots of Best match), and its usual popup plus why it is
+// not shown. Used by the address search and by "Show on map" (e.g. a shortlisted flat that does not fit the filters).
+// It is kept in searchMarker, so the address bar's "Clear" removes it.
+function showHiddenBlock(hiddenBlock) {
+  if (searchMarker !== null) {
+    map.removeLayer(searchMarker)
+  }
+  searchMarker = L.circleMarker([hiddenBlock.lat, hiddenBlock.lng], {
+    radius: 7,
+    color: '#444',
+    weight: 2,
+    dashArray: '3 3',
+    fillColor: '#9e9e9e',
+    fillOpacity: 1,
+  })
+    .bindPopup(
+      popupText(hiddenBlock) +
+        '<br><span class="text-danger">Does not fit your current filters, so it is not on the map.</span>' +
+        '<br><span class="small text-muted">Press "Clear all" under Filters to see it.</span>',
+    )
+    .addTo(map)
+  map.setView([hiddenBlock.lat, hiddenBlock.lng], 17) // 17 = street level, like a found block
   searchMarker.openPopup()
+}
+
+// "Show on map" for a block that does not fit the filters: get that one card from our server (GET /api/blocks/<id>)
+// and show it as the grey dot, with its address in the address bar (so its "Clear" button can remove it)
+async function showRequestedHiddenBlock(blockId) {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/blocks/${blockId}`)
+    const card = response.data
+    const label = 'Blk ' + card.block + ' ' + card.street
+    searchedPlace.value = { name: label, lat: card.lat, lng: card.lng }
+    showHiddenBlock({ label: label, lat: card.lat, lng: card.lng, cards: [card] })
+  } catch (error) {
+    // e.g. the block was removed when the data was seeded again
+    errorMessage.value = 'That block could not be found'
+  }
+}
+
+// Does the typed text look like an address, i.e. start with a block number or postal code (after any "Blk")?
+// "Blk 405B Northshore Dr" and "560314" yes; "Bishan MRT" and "Northpoint City" no.
+function looksLikeAddress(text) {
+  let rest = text.trim().toUpperCase()
+  if (rest.startsWith('BLK ')) {
+    rest = rest.slice(4).trim()
+  } else if (rest.startsWith('BLOCK ')) {
+    rest = rest.slice(6).trim()
+  }
+  const firstLetter = rest.charAt(0)
+  return firstLetter >= '0' && firstLetter <= '9'
 }
 
 // Is one of our blocks at this spot, even if the filters hide it? Asks our server's /nearby route with NO filters,
@@ -811,17 +862,6 @@ onMounted(function () {
   // A second bag for the amenity dots, so ticking / unticking only clears and redraws those
   amenityLayer = L.layerGroup().addTo(map)
 
-  // Coming from Search's "Show on map": start with the same filters Search used (a copy), so the map
-  // shows the same results. (focusOnRequestedBlock clears the store after the first load.)
-  if (mapFocus.filters !== null) {
-    filters.value = {
-      q: mapFocus.filters.q,
-      flatType: mapFocus.filters.flatType,
-      maxPrice: mapFocus.filters.maxPrice,
-      minLease: mapFocus.filters.minLease,
-    }
-  }
-
   loadBlocks()
 })
 
@@ -844,12 +884,6 @@ onUnmounted(function () {
     </p>
 
     <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-
-    <!-- Search's search text came along with "Show on map" (the map has no search-text box of its own) -->
-    <p v-if="filters.q !== ''" class="small">
-      Only blocks matching "<strong>{{ filters.q }}</strong>" (from your search).
-      Press "Clear all" under Filters to see every block.
-    </p>
 
     <!-- Bootstrap grid: the map takes 8 of 12 columns on laptops and 9 of 12 on big screens, the sidebar the rest.
          On phones and tablets (below lg) the sidebar goes under the map. -->
@@ -891,7 +925,7 @@ onUnmounted(function () {
                (open at the start on a wide screen, closed on a phone so the PHG card is not far down) -->
           <CollapsiblePanel title="Filters" :start-open="isWideScreen">
             <FilterPanel
-              :filters="filters"
+              :filters="filterStore.filters"
               @change-filter="setFilter"
               @search="loadBlocks"
               @clear="clearFilters"

@@ -164,10 +164,14 @@ client/                     the website (made with pnpm create vue@latest, like 
   src/main.js               starts Vue: Bootstrap, our design (assets/cosy.css), Pinia, the router
   src/App.vue               page shell: navbar + <RouterView />
   src/router/index.js       the pages, and the navigation guard for pages that need a login
-  src/stores/               Pinia stores: auth.js (who is logged in), shortlist.js (saved flats)
+  src/stores/               Pinia stores: auth.js (who is logged in), shortlist.js (saved flats),
+                            filters.js (flat type, budget and lease, shared by Search and the Map),
+                            mapFocus.js (the block "Show on map" should zoom to)
   src/views/                SearchView, MapView, CPFCalView, CompareView, ShortlistView, LoginView
   src/components/           NavBar, SearchBar, FilterPanel, PreferencesPanel, BlockCard, PriceDetails,
-                            ShortlistItem, PhgChecker, GuidePet
+                            ShortlistItem, PhgChecker
+  src/components/map/       the map page's sidebar: MapSearchBar, SelectedBlockCard, MapLegend,
+                            CollapsiblePanel, PhgCard
   src/utils/                matchScore.js (match score), affordability.js (calculator maths),
                             affordabilityRules.js (every grant / loan number, with its source)
   src/assets/cosy.css       the site's design
@@ -268,7 +272,9 @@ Match score ("What matters to you?")
     Score = (sum of weight x sub-score) / (sum of weights), rounded. All weights 0 = no score
 
 The map (Leaflet + OpenStreetMap tiles)
-  The map loads the blocks with the same filters as Search, then groups the cards by address, so each
+  Search and the map share their filters (flat type, budget, lease) through the Pinia filters store, so a
+  change on one page also applies on the other. The map loads the blocks with them (no search text: it
+  always shows the whole island), then groups the cards by address, so each
   block is ONE dot (its flat types would otherwise sit on top of each other). A dot's colour is the
   price band of its cheapest flat type, or its match score on a rainbow scale (red 0 ... purple 100).
   The PHG layer looks up the parents' address with OneMap and keeps only the blocks within 4 km
@@ -278,7 +284,8 @@ The map (Leaflet + OpenStreetMap tiles)
 Login and shared state
   Register / login return a token (JWT, valid 7 days). The Pinia auth store keeps it in the
   browser's localStorage (so a refresh keeps you logged in) and sends it with every request.
-  The Pinia shortlist store is shared by Search, Shortlist, Compare and the navbar count.
+  The Pinia shortlist store is shared by Search, Shortlist, Compare and the navbar count, and the
+  filters store by Search and the Map.
   A navigation guard sends logged-out users from /shortlist and /compare to /login and back.
   The server checks the token again on every shortlist and preferences request.
 
