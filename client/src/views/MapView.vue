@@ -582,7 +582,35 @@ async function showAmenities() {
   }
 }
 
-// Address search above the map (MapSearchBar sends the typed text): ask OneMap where the place is,
+// Where is this typed text? Answers { name, lat, lng }. Used by the address search and the PHG search.
+// 1. Our own blocks first (the same search as the Search page, with no filters): if the text is the address of
+//    exactly ONE of our blocks, e.g. "Blk 405B Northshore Dr Punggol", use that block's spot, no OneMap needed.
+//    (Only when the text contains the block number, so a word like "Ubi" still goes to OneMap.)
+// 2. Otherwise our server asks OneMap (any address, postal code or place in Singapore).
+async function findPlaceFor(text) {
+  const response = await axios.get(`${BASE_URL}/api/blocks`, { params: { q: text } })
+  const cards = response.data.results
+  if (cards.length > 0) {
+    const first = cards[0]
+    const label = 'Blk ' + first.block + ' ' + first.street
+
+    // Are all the cards the same block (its flat types), and was its block number typed?
+    let oneBlock = true
+    for (const card of cards) {
+      if ('Blk ' + card.block + ' ' + card.street !== label) {
+        oneBlock = false
+      }
+    }
+    if (oneBlock && text.toUpperCase().includes(first.block.toUpperCase() + ' ')) {
+      return { name: label, lat: first.lat, lng: first.lng }
+    }
+  }
+
+  const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
+  return placeResponse.data
+}
+
+// Address search above the map (MapSearchBar sends the typed text): find where the place is,
 // put a marker there and move the map to it. Unlike the PHG search, it does not filter the blocks.
 async function searchPlace(text) {
   errorMessage.value = ''
@@ -593,9 +621,7 @@ async function searchPlace(text) {
 
   let place = null
   try {
-    // Our server asks OneMap and answers { name, lat, lng } for the best match
-    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
-    place = response.data
+    place = await findPlaceFor(text)
   } catch (error) {
     if (error.response && error.response.status === 500) {
       // The server could not log in to OneMap (or something else broke there)
@@ -716,7 +742,7 @@ function removeParentDrawings() {
   }
 }
 
-// PHG search (PhgCard sends the typed text): ask OneMap where the parents live (any address or postal code),
+// PHG search (PhgCard sends the typed text): find where the parents live (any address or postal code),
 // draw a marker and the 4 km circle there, then reload the dots so only the blocks inside are shown
 async function searchParent(text) {
   errorMessage.value = ''
@@ -726,9 +752,7 @@ async function searchParent(text) {
   }
 
   try {
-    // Our server asks OneMap and answers { name, lat, lng } for the best match
-    const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
-    parentPlace.value = response.data
+    parentPlace.value = await findPlaceFor(text)
   } catch (error) {
     if (error.response && error.response.status === 500) {
       // The server could not log in to OneMap (or something else broke there)

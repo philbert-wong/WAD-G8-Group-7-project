@@ -112,10 +112,11 @@ function startsWithDigit(text) {
   return firstLetter >= '0' && firstLetter <= '9';
 }
 
-// The words of a text in capitals, ignoring extra spaces: "ang  mo kio" -> ['ANG', 'MO', 'KIO']
+// The words of a text in capitals, ignoring extra spaces and commas: "northshore dr, punggol" -> ['NORTHSHORE', 'DR', 'PUNGGOL']
 function toWords(text) {
   const words = [];
-  for (const word of text.toUpperCase().split(' ')) {
+  const withoutCommas = text.toUpperCase().replaceAll(',', ' ');
+  for (const word of withoutCommas.split(' ')) {
     if (word !== '') {
       words.push(word);
     }
@@ -180,11 +181,28 @@ function buildFilter(query) {
     // Both must fit: the block number exactly (^...$ = the whole block number, so "314" is not "3140")
     // and the street. Then "314 Ang Mo Kio Ave 3" finds just that block's flats.
     if (words.length >= 2 && startsWithDigit(words[0])) {
+      const blockText = '^' + escapeSearchText(words[0]) + '$';
       const streetText = escapeSearchText(joinWords(shortenStreetWords(words.slice(1))));
       filter.$or.push({
-        block: { $regex: '^' + escapeSearchText(words[0]) + '$', $options: 'i' },
+        block: { $regex: blockText, $options: 'i' },
         street: { $regex: streetText, $options: 'i' },
       });
+
+      // The town may be typed at the end, like on our cards: "405B Northshore Dr Punggol".
+      // Town names are 1 to 3 words ("ANG MO KIO"), so also try the last 1, 2 or 3 words as the town
+      // and the words before them as the street (at least one street word must be left).
+      for (let townWordCount = 1; townWordCount <= 3; townWordCount++) {
+        const streetWordCount = words.length - 1 - townWordCount;
+        if (streetWordCount >= 1) {
+          const streetPart = words.slice(1, 1 + streetWordCount);
+          const townPart = words.slice(1 + streetWordCount);
+          filter.$or.push({
+            block: { $regex: blockText, $options: 'i' },
+            street: { $regex: escapeSearchText(joinWords(shortenStreetWords(streetPart))), $options: 'i' },
+            town: { $regex: escapeSearchText(joinWords(townPart)), $options: 'i' },
+          });
+        }
+      }
     }
   }
 
@@ -548,22 +566,32 @@ exports.findPlace = async (req, res) => {
 
   // OneMap does not understand "Blk", so a leading "Blk" / "Block" is removed before searching
   const searchText = removeBlkWord(String(req.query.q).trim());
-
-  const url =
-    'https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&searchVal=' +
-    encodeURIComponent(searchText);
+  const words = toWords(searchText);
 
   try {
-    const response = await fetch(url, { headers: { Authorization: await getOneMapToken() } });
-    if (!response.ok){
-      return res.status(502).json({message: 'Place search is unavailable' });
+    // OneMap finds nothing when extra words are added at the end, like the town on our cards:
+    // "405B NORTHSHORE DR PUNGGOL". So when it finds nothing, try again without the last word,
+    // then without the last two ("405B NORTHSHORE DR" works). At least one word is always kept.
+    let results = [];
+    for (let dropCount = 0; dropCount <= 2; dropCount++) {
+      if (results.length === 0 && words.length - dropCount >= 1) {
+        const tryText = joinWords(words.slice(0, words.length - dropCount));
+        const url =
+          'https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&searchVal=' +
+          encodeURIComponent(tryText);
+        const response = await fetch(url, { headers: { Authorization: await getOneMapToken() } });
+        if (!response.ok){
+          return res.status(502).json({message: 'Place search is unavailable' });
+        }
+        const data = await response.json();
+        results = data.results;
+      }
     }
-    const data = await response.json();
-    if (data.results.length === 0){
+    if (results.length === 0){
       return res.status(404).json({message: 'Place not found' });
     }
 
-    const firstResult = data.results[0];
+    const firstResult = results[0];
 
     // The name to show. When the user typed a block number or postal code (the search starts with a digit),
     // show the address ("BLK 314 ANG MO KIO AVENUE 3 (560314)"), because OneMap's own name is often the
