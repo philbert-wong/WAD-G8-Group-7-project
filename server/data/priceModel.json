@@ -1,50 +1,55 @@
 {
   "trainedOn": "HDB resale prices (data.gov.sg), 26 towns, 2021-01 to Oct 2026, 156183 sales",
   "startMonth": "2021-01",
-  "intercept": 8.59379,
+  "intercept": 8.593791,
   "weights": {
-    "storey": 0.007697,
+    "storey": 0.007696,
     "lease_years": 0.009983,
     "months_since_start": 0.005702,
-    "log_area": 0.826051
+    "log_area": 0.826054
   },
   "town": {
     "ANG MO KIO": 0,
     "BEDOK": -0.033267,
-    "BISHAN": 0.153441,
-    "BUKIT BATOK": -0.18268,
-    "BUKIT MERAH": 0.127237,
-    "BUKIT PANJANG": -0.233706,
+    "BISHAN": 0.153442,
+    "BUKIT BATOK": -0.182705,
+    "BUKIT MERAH": 0.127239,
+    "BUKIT PANJANG": -0.233704,
     "BUKIT TIMAH": 0.273897,
-    "CENTRAL AREA": 0.240755,
-    "CHOA CHU KANG": -0.298136,
-    "CLEMENTI": 0.042627,
+    "CENTRAL AREA": 0.240758,
+    "CHOA CHU KANG": -0.298134,
+    "CLEMENTI": 0.042628,
     "GEYLANG": 0.050871,
-    "HOUGANG": -0.127337,
+    "HOUGANG": -0.127336,
     "JURONG EAST": -0.165837,
-    "JURONG WEST": -0.253531,
-    "KALLANG/WHAMPOA": 0.086724,
-    "MARINE PARADE": 0.206147,
-    "PASIR RIS": -0.153445,
-    "PUNGGOL": -0.215958,
-    "QUEENSTOWN": 0.135424,
-    "SEMBAWANG": -0.27339,
-    "SENGKANG": -0.234163,
+    "JURONG WEST": -0.25353,
+    "KALLANG/WHAMPOA": 0.086726,
+    "MARINE PARADE": 0.206146,
+    "PASIR RIS": -0.153444,
+    "PUNGGOL": -0.215955,
+    "QUEENSTOWN": 0.135427,
+    "SEMBAWANG": -0.273387,
+    "SENGKANG": -0.23416,
     "SERANGOON": 0.02977,
-    "TAMPINES": -0.074923,
-    "TOA PAYOH": 0.063895,
-    "WOODLANDS": -0.262369,
-    "YISHUN": -0.195843
+    "TAMPINES": -0.074922,
+    "TOA PAYOH": 0.063897,
+    "WOODLANDS": -0.262368,
+    "YISHUN": -0.195842
   },
   "flatType": {
     "2 ROOM": 0,
-    "3 ROOM": 0.003874,
-    "4 ROOM": 0.018125,
-    "5 ROOM": 0.036958,
-    "EXECUTIVE": 0.144358
+    "3 ROOM": 0.00387,
+    "4 ROOM": 0.018118,
+    "5 ROOM": 0.036952,
+    "EXECUTIVE": 0.144351
+  },
+  "typical": {
+    "storey": 8.0,
+    "lease_years": 72.8,
+    "areaSqm": 93.0
   },
   "accuracy": {
     "r2Test": 0.904,
-    "maeDollars": 46315
+    "maeDollars": 46311
   }
 }
