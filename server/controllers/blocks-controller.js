@@ -775,8 +775,6 @@ exports.liveSales = async (req, res) => {
     const history = sales.filter(sale => sale.month >= priceModel.startMonth);
 
     const filteredSales = sales.filter(sale => sale.month >= cutoff);
-    const CHART_START_MONTH = '2021-01';
-    const history = sales.filter(sale => sale.month >= CHART_START_MONTH);
 
     if (filteredSales.length === 0) {
       const summary = salesSummary(block.sales);
