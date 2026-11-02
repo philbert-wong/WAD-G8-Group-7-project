@@ -7,27 +7,27 @@
 /* Design tokens: CSS custom properties ("variables") so every colour is defined once.
    Not taught: var(--name). The course way would be to repeat the hex colour everywhere. */
 :root {
-  --cream: #faf5ee;
-  --terra: #c0614a; /* terracotta, the main accent */
-  --terra-d: #a44e39; /* darker terracotta for hover */
+  --cream: #fbfcff;
+  --terra: #4a5ac0; /* terracotta, the main accent */
+  --terra-d: #354091; /* darker terracotta for hover */
   --sage: #6b8c6b; /* green for "good" things */
   --char: #2d2d2d; /* charcoal text */
-  --beige: #f0e8d8;
-  --line: #e7dccb; /* light border colour */
-  --muted: #7a7166; /* grey-brown secondary text */
+  --beige: #e9eaf8;
+  --line: #cbcce7; /* light border colour */
+  --muted: #3d404d; /* grey-brown secondary text */
 }
 
 /* Page background, font and text colour.
    The fonts (DM Sans, DM Serif Display) come from Google Fonts, linked in index.html. */
 body {
   background: var(--cream);
-  font-family: 'DM Sans', sans-serif;
+  font-family: "Cactus Classical Serif", serif;
   color: var(--char);
 }
 
 /* The serif headline font, used with class="serif" */
 .serif {
-  font-family: 'DM Serif Display', serif;
+  font-family: "Cactus Classical Serif", serif;
   font-weight: 400;
 }
 
