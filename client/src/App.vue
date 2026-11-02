@@ -17,6 +17,5 @@ import NavBar from './components/NavBar.vue'
       <span>HDB Resale Finder</span>
     </div>
   </footer>
-
 </template>
 

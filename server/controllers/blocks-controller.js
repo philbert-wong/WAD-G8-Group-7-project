@@ -560,7 +560,7 @@ exports.nearbyBlocks = async (req, res) => {
   }
 
   // How many blocks to send: 20 unless the URL says otherwise, and never more than 50
-  let limit = 20;
+  let limit = 100;
   if (!isBlank(req.query.limit)) {
     limit = Number(req.query.limit);
   }
@@ -775,11 +775,14 @@ exports.liveSales = async (req, res) => {
     const history = sales.filter(sale => sale.month >= priceModel.startMonth);
 
     const filteredSales = sales.filter(sale => sale.month >= cutoff);
+    const CHART_START_MONTH = '2021-01';
+    const history = sales.filter(sale => sale.month >= CHART_START_MONTH);
 
     if (filteredSales.length === 0) {
       const summary = salesSummary(block.sales);
       summary.blockId = block._id;
       summary.source = 'stored';
+      summary.history = history;
       return res.json(summary);
     };
 

@@ -3,9 +3,12 @@ const jwt = require('jsonwebtoken');
 
 // Secret used to check login tokens: JWT_SECRET from config.env, otherwise a development-only default.
 // (Must be the same setting controllers/auth-controller.js uses to make the tokens.)
-let jwtSecret = 'dev-secret-change-me';
-if (process.env.JWT_SECRET) {
-  jwtSecret = process.env.JWT_SECRET;
+let jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET is not set. Add it to the hosting settings before starting the server.');
+  }
+  jwtSecret = 'dev-secret-change-me'; // development and tests only
 }
 
 function requireAuth(req, res, next) {
