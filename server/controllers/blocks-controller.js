@@ -360,7 +360,17 @@ function percentEffect(logDifference) {
   return Math.round(percent * 10) / 10;
 }
 
-// What makes this flat dearer or cheaper than a typical flat, each as a % (all else equal)
+// "ANG MO KIO" -> "Ang Mo Kio", "3 ROOM" -> "3 Room" (for the factor labels)
+function titleCase(text) {
+  const words = [];
+  for (const word of text.toLowerCase().split(' ')) {
+    words.push(word.charAt(0).toUpperCase() + word.slice(1));
+  }
+  return words.join(' ');
+}
+
+// How this flat compares with a typical flat, each factor as a % effect on price (all else equal)
+// Each factor: name ("Lease left"), this flat's value ("45.2 yrs"), what it is compared with ("typical 72.8 yrs")
 // features: the same object estimatePrice() gets
 function buildFactors(features) {
   const weights = priceModel.weights;
@@ -369,37 +379,55 @@ function buildFactors(features) {
 
   // Town, compared with Ang Mo Kio (the baseline, saved as 0)
   factors.push({
-    label: 'Town: ' + features.town + ' vs Ang Mo Kio',
+    key: 'town',
+    name: 'Town',
+    thisFlat: titleCase(features.town),
+    compare: 'vs Ang Mo Kio',
     pct: percentEffect(priceModel.town[features.town]),
   });
 
   // Flat type, compared with 2 ROOM (the baseline, saved as 0)
   factors.push({
-    label: 'Flat type: ' + features.flatType + ' vs 2 ROOM',
+    key: 'flatType',
+    name: 'Flat type',
+    thisFlat: titleCase(features.flatType),
+    compare: 'vs 2 Room',
     pct: percentEffect(priceModel.flatType[features.flatType]),
   });
 
   // Floor, compared with the typical floor
   factors.push({
-    label: 'Floor ' + features.storey + ' vs typical ' + typical.storey,
+    key: 'floor',
+    name: 'Floor',
+    thisFlat: String(features.storey),
+    compare: 'typical ' + typical.storey,
     pct: percentEffect(weights.storey * (features.storey - typical.storey)),
   });
 
   // Lease left, compared with the typical lease
   factors.push({
-    label: features.leaseYears + ' years lease left vs typical ' + typical.lease_years,
+    key: 'lease',
+    name: 'Lease left',
+    thisFlat: features.leaseYears + ' yrs',
+    compare: 'typical ' + typical.lease_years + ' yrs',
     pct: percentEffect(weights.lease_years * (features.leaseYears - typical.lease_years)),
   });
 
   // Size, compared with the typical size (both sides are logs)
   factors.push({
-    label: features.areaSqm + ' m² vs typical ' + typical.areaSqm + ' m²',
+    key: 'size',
+    name: 'Size',
+    thisFlat: features.areaSqm + ' m²',
+    compare: 'typical ' + typical.areaSqm + ' m²',
     pct: percentEffect(weights.log_area * (Math.log(features.areaSqm) - Math.log(typical.areaSqm))),
   });
 
-  // Market rise since the start month (Jan 2021)
+  // Market rise since the start month (Jan 2021): the same for every flat, so the panel shows it under the chart
   factors.push({
-    label: 'Market since Jan 2021',
+    key: 'market',
+    name: 'Market since Jan 2021',
+    thisFlat: '',
+    compare: '',
     pct: percentEffect(weights.months_since_start * features.months),
   });
 
@@ -913,6 +941,8 @@ exports.estimate = async (req, res) => {
       blockId: block._id,
       estimate: Math.round(price / 1000) * 1000,
       maeDollars: priceModel.accuracy.maeDollars,
+      leaseYears: features.leaseYears, // for the short-lease warning in the panel
+
       // The two forces behind the trend line, per year
       yearly: {
         marketPct: percentEffect(priceModel.weights.months_since_start * 12),
