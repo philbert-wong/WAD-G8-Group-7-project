@@ -321,6 +321,17 @@ function monthsSinceStart() {
   return (thisYear-startYear)*12 + (thisMonth-startMonth);
 }
 
+// Lease left right now, in years and months, the same way as prep/priceRegression.ipynb (Step 2b):
+// 99 - (time now as a decimal year - lease start year). E.g. Nov 2026, start 1973 -> 45.2
+// (blockModel.remainingLease() counts whole years only, which is right for the cards but not for the model)
+function leaseYearsNow(leaseCommenceYear) {
+  const now = new Date();
+  const timeNow = now.getFullYear() + now.getMonth() / 12;   // getMonth() is 0-11 = the months already passed this year
+  const leaseLeft = 99 - (timeNow - leaseCommenceYear);
+  return Math.round(leaseLeft * 10) / 10;   // 1 decimal place, so the factor label stays short
+}
+
+
 // features: { town, flatType, storey, leaseYears, areaSqm, months }
 // Returns the estimated price in dollars
 function estimatePrice(features) {
@@ -343,7 +354,92 @@ function estimatePrice(features) {
   return Math.exp(logPrice);
 }
 
+// A difference in log price -> % change in price, 1 decimal place: 0.153442 -> 16.6
+function percentEffect(logDifference) {
+  const percent = (Math.exp(logDifference) - 1) * 100;
+  return Math.round(percent * 10) / 10;
+}
 
+// What makes this flat dearer or cheaper than a typical flat, each as a % (all else equal)
+// features: the same object estimatePrice() gets
+function buildFactors(features) {
+  const weights = priceModel.weights;
+  const typical = priceModel.typical;
+  const factors = [];
+
+  // Town, compared with Ang Mo Kio (the baseline, saved as 0)
+  factors.push({
+    label: 'Town: ' + features.town + ' vs Ang Mo Kio',
+    pct: percentEffect(priceModel.town[features.town]),
+  });
+
+  // Flat type, compared with 2 ROOM (the baseline, saved as 0)
+  factors.push({
+    label: 'Flat type: ' + features.flatType + ' vs 2 ROOM',
+    pct: percentEffect(priceModel.flatType[features.flatType]),
+  });
+
+  // Floor, compared with the typical floor
+  factors.push({
+    label: 'Floor ' + features.storey + ' vs typical ' + typical.storey,
+    pct: percentEffect(weights.storey * (features.storey - typical.storey)),
+  });
+
+  // Lease left, compared with the typical lease
+  factors.push({
+    label: features.leaseYears + ' years lease left vs typical ' + typical.lease_years,
+    pct: percentEffect(weights.lease_years * (features.leaseYears - typical.lease_years)),
+  });
+
+  // Size, compared with the typical size (both sides are logs)
+  factors.push({
+    label: features.areaSqm + ' m² vs typical ' + typical.areaSqm + ' m²',
+    pct: percentEffect(weights.log_area * (Math.log(features.areaSqm) - Math.log(typical.areaSqm))),
+  });
+
+  // Market rise since the start month (Jan 2021)
+  factors.push({
+    label: 'Market since Jan 2021',
+    pct: percentEffect(weights.months_since_start * features.months),
+  });
+
+  return factors;
+}
+
+// The model's price for this flat in every month from the start month (Jan 2021) up to now.
+// The lease was longer in the past, so each month uses the lease the flat had then.
+function buildTrend(features) {
+  const startYear = Number(priceModel.startMonth.slice(0, 4));   // 2021
+  const startMonth = Number(priceModel.startMonth.slice(5, 7));  // 1
+  const trend = [];
+
+  for (let month = 0; month <= features.months; month++) {
+    // Lease left in that month: today's lease plus the years between then and now
+    const monthsBeforeNow = features.months - month;
+    const price = estimatePrice({
+      town: features.town,
+      flatType: features.flatType,
+      storey: features.storey,
+      leaseYears: features.leaseYears + monthsBeforeNow / 12,
+      areaSqm: features.areaSqm,
+      months: month,
+    });
+
+    // Month number -> "2021-01" (same format as the sales' month)
+    const monthsFromJan = (startMonth - 1) + month;
+    const year = startYear + Math.floor(monthsFromJan / 12);
+    const monthNumber = (monthsFromJan % 12) + 1;
+    let label = year + '-';
+    if (monthNumber < 10) {
+      label = label + '0';
+    }
+    label = label + monthNumber;
+
+    trend.push({ month: label, price: Math.round(price / 1000) * 1000 });
+  }
+
+  return trend;
+}
 
 
 // ---------- OneMap token ----------
@@ -634,7 +730,8 @@ exports.liveSales = async (req, res) => {
         flat_type: block.flatType,
       }),
       sort: 'month desc',
-      limit: '50',
+      limit: '500', // enough for every sale since Jan 2021, even for busy blocks
+
     });
 
     let response;
@@ -674,6 +771,9 @@ exports.liveSales = async (req, res) => {
     d.setMonth(d.getMonth() - 12);
     const cutoff = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 
+    // Every sale since the price model's start month (Jan 2021), for the chart's dots and the price-by-year table
+    const history = sales.filter(sale => sale.month >= priceModel.startMonth);
+
     const filteredSales = sales.filter(sale => sale.month >= cutoff);
 
     if (filteredSales.length === 0) {
@@ -686,6 +786,7 @@ exports.liveSales = async (req, res) => {
     const summary = salesSummary(filteredSales);
     summary.blockId = block._id;
     summary.source = 'live';
+    summary.history = history;
     res.json(summary);
 
   } catch (error) {
@@ -794,21 +895,35 @@ exports.estimate = async (req, res) => {
       }
   }
 
-    const price = estimatePrice({
+    // This flat's features, used for both the estimate and the factors
+    const features = {
       town: block.town,
       flatType: block.flatType,
       storey: storey,
-      leaseYears: blockModel.remainingLease(block.leaseCommenceYear),
+      leaseYears: leaseYearsNow(block.leaseCommenceYear),
       areaSqm: area,
       months: monthsSinceStart(),
-    });
+    };
+
+    const price = estimatePrice(features);
+    const factors = buildFactors(features);
 
     res.json({
       blockId: block._id,
       estimate: Math.round(price / 1000) * 1000,
+      maeDollars: priceModel.accuracy.maeDollars,
+      // The two forces behind the trend line, per year
+      yearly: {
+        marketPct: percentEffect(priceModel.weights.months_since_start * 12),
+        leasePct: percentEffect(-priceModel.weights.lease_years),
+      },
+      factors: factors,
+      trend: buildTrend(features),
     });
   } catch (error) {
     sendError(res, error);
   }
 };
+
+
 
