@@ -21,6 +21,16 @@ const chartCanvas = ref(null)
 let chart = null // a normal variable, not a ref (Chart.js does not like Vue's ref)
 const errorMessage = ref('')
 const details = ref(null)
+const estimate = ref(null)
+
+async function loadEstimate() {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/blocks/${props.blockId}/estimate`)
+    estimate.value = response.data.estimate
+  } catch (error) {
+    // 400 (flat type the model does not cover) or 404: just show no estimate line
+  }
+}
 
 // Gets the recent sales of this block from the server
 async function load() {
@@ -48,8 +58,12 @@ async function load() {
 function drawChart() {
   const labels = []
   const prices = []
-  for (let i = details.value.sales.length - 1; i >= 0; i--) {
-    const sale = details.value.sales[i]
+  let chartSales = details.value.sales
+  if (details.value.history && details.value.history.length > 0) {
+    chartSales = details.value.history
+  }
+  for (let i = chartSales.length - 1; i >= 0; i--) {
+    const sale = chartSales[i]
     labels.push(formatMonth(sale.month))
     prices.push(sale.price)
   }
@@ -83,7 +97,10 @@ onUnmounted(function () {
 })
 
 // Fetched once, when the panel is first opened
-onMounted(load)
+onMounted(function () {
+  load()
+  loadEstimate()
+})
 
 const monthNames = [
   'Jan',
@@ -132,6 +149,10 @@ function formatStorey(storey) {
           Median price per m²:
           <strong v-if="details.medianPricePerSqm !== null">{{ '$' + details.medianPricePerSqm.toLocaleString('en-SG') }}</strong>
           <strong v-else>N/A</strong>
+        </li>
+        <li v-if="estimate !== null">
+          Model estimate (typical sale): <strong>{{ '$' + estimate.toLocaleString('en-SG') }}</strong>
+          <span class="text-muted">· typical error about $46k</span>
         </li>
         <li class="text-muted">Based on {{ details.count }} recent sales</li>
         <li class="text-muted">Source: {{ details.source === 'live' ? 'data.gov.sg (live)' : 'Stored data' }}</li>

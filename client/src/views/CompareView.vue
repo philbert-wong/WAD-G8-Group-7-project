@@ -24,6 +24,8 @@ const loading = ref(true)
 // The ids of the ticked items. v-model on the tick boxes adds / removes ids for us.
 const selectedIds = ref([])
 
+const estimates = ref({})
+
 // Your Priorities (school, MRT, hawker, park: ticked + importance), the same ones Search and the Map use.
 // Search saves them in localStorage as 'matchPreferences'; we start from those (or the defaults).
 function loadSavedPreferences() {
@@ -66,12 +68,32 @@ function walkMinutes(block) {
   return block.mrtWalkMinutes
 }
 
+// Asks our server for one block's estimate (GET /api/blocks/<id>/estimate)
+async function loadEstimate(blockId) {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/blocks/${blockId}/estimate`)
+    estimates.value[blockId] = response.data.estimate
+  } catch (error) {
+    // do nothing: a flat the model does not cover (400) or without sales (404) just shows "–"
+  }
+}
+
+// The estimate as text for the table: "$598,000", or "–" when there is none
+function estimateText(block) {
+  if (estimates.value[block.id] !== undefined) {
+    return '$' + estimates.value[block.id].toLocaleString('en-SG')
+  }
+  return '–'
+}
+
+
 // Gets the latest shortlist from the server (you must be logged in), then each flat's walking time
 async function loadShortlist() {
   await shortlist.fetchShortlist()
   loading.value = false
   for (const item of shortlist.items) {
     loadWalk(item.block.id) // not awaited: the walks load at the same time, each fills in when it arrives
+    loadEstimate(item.block.id)  
   }
 }
 
@@ -176,6 +198,10 @@ loadShortlist()
               <td v-for="item in selectedItems()" :key="item.id">{{ '$' + item.block.price.toLocaleString('en-SG') }}</td>
             </tr>
             <tr>
+              <th>Estimated price (model)</th>
+              <td v-for="item in selectedItems()" :key="item.id">{{ estimateText(item.block) }}</td>
+            </tr>
+            <tr>
               <th>Remaining lease</th>
               <td v-for="item in selectedItems()" :key="item.id">{{ item.block.remainingLease }} years</td>
             </tr>
@@ -199,8 +225,10 @@ loadShortlist()
         </table>
         <p class="small text-muted">
           Monthly repayment assumes an HDB loan of {{ HDB_LOAN_LTV_PERCENT }}% of the median price at
-          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Match score uses Your Priorities
-          (set on the Search page).
+          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Match score uses Your Priorities (set on the Search page). 
+          <br>
+          Estimated price comes from our regression model (typical error about $46k).
+
         </p>
       </div>
     </div>

@@ -7,9 +7,34 @@ import { RouterLink } from 'vue-router'
 import ShortlistItem from '../components/ShortlistItem.vue'
 import { useAuthStore } from '../stores/auth'
 import { useShortlistStore } from '../stores/shortlist'
+import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
+
 
 const auth = useAuthStore()
 const shortlist = useShortlistStore()
+
+// Your Priorities (school, MRT, hawker, park), the same ones Search, Compare and the Map use.
+// Search saves them in localStorage as 'matchPreferences'; we start from those (or the defaults).
+function loadSavedPreferences() {
+  const choices = makeDefaultPreferences()
+  const saved = localStorage.getItem('matchPreferences')
+  if (saved !== null) {
+    const savedPanel = JSON.parse(saved)
+    for (const category of CATEGORIES) {
+      if (savedPanel[category.key]) {
+        choices[category.key] = savedPanel[category.key]
+      }
+    }
+  }
+  return choices
+}
+const weights = getWeights(loadSavedPreferences())
+
+// Match score for one saved flat, or null when it cannot be scored (the card then shows "–")
+function scoreFor(block) {
+  return matchScore(block.distances, weights, MAX_DISTANCES)
+}
+
 
 // ShortlistItem sends the item and the new note when "Save note" is pressed
 function changeNote(item, note) {
@@ -51,7 +76,7 @@ onMounted(function () {
 
     <div class="row row-cols-1 g-3">
       <div v-for="item in shortlist.items" :key="item.id" class="col">
-        <ShortlistItem :item="item" @remove="removeItem" @change-note="changeNote" />
+        <ShortlistItem :item="item" :score="scoreFor(item.block)" @remove="removeItem" @change-note="changeNote" />
       </div>
     </div>
   </section>

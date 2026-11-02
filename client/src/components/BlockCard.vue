@@ -59,7 +59,12 @@ async function loadWalk() {
   }
 }
 
-onMounted(loadWalk)
+// Price estimate from our regression model (/api/blocks/:id/estimate). null = not loaded, or none for this block.
+
+onMounted(function () {
+  loadWalk()
+})
+
 
 // Minutes to walk to the nearest MRT: OneMap's real walk once it has arrived, otherwise the stored estimate.
 // Used by the "min walk" line AND the "Near MRT" tag, so the two always agree.
@@ -252,7 +257,8 @@ function barWidth(score) {
       </div>
 
       <!-- Buttons -->
-      <div class="d-flex gap-2 flex-wrap">
+      <div class="d-flex gap-2 flex-wrap btn-row">
+        <div class="d-flex flex-wrap gap-2 btn-trio">
         <button
           v-if="showSave"
           class="act-btn"
@@ -266,12 +272,16 @@ function barWidth(score) {
           <span v-if="showPrices">Hide price details</span>
           <span v-else>Price details</span>
         </button>
+        </div>
+
         <button class="act-btn" @click="toggleDetails">
           <span v-if="open">Hide amenities ▴</span>
           <span v-else>Amenities ▾</span>
         </button>
-        <button class="act-btn" @click="showOnMap">📍 Show on map</button>
-        <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
+        <div class="d-flex gap-2 btn-pair">
+          <button class="act-btn" @click="showOnMap">📍 Show on map</button>
+          <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
+        </div>
       </div>
 
       <PriceDetails v-if="showPrices" :block-id="block.id" />
@@ -335,6 +345,24 @@ a.act-btn {
   text-decoration: none;
   display: inline-block;
 }
+
+.btn-row {
+  gap: 8px;
+}
+.btn-row .act-btn {
+  padding: 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.btn-pair {
+  gap: 8px;
+}
+
+.btn-trio {
+  gap: 8px;
+}
+
 
 
 /* Warm gradient as a stand-in for a real photo */
