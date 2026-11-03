@@ -18,6 +18,7 @@ import PhgCard from '../components/map/PhgCard.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMapFocusStore } from '../stores/mapFocus'
 import { useFiltersStore } from '../stores/filters'
+import { useShortlistStore } from '../stores/shortlist'
 
 // Which block to zoom to when we come from Search's "Show on map" button (small Pinia store)
 const mapFocus = useMapFocusStore()
@@ -38,6 +39,7 @@ const PHG_NEAR_DISTANCE_METRES = 4000
 
 const errorMessage = ref('')
 const blockCount = ref(0)
+const flatCount = ref(0) // the flats in those blocks (one block can hold several flat types)
 
 
 // The place found by the address search above the map: { name, lat, lng }, or null
@@ -90,6 +92,30 @@ const colourBy = ref('price')
 function changeColourBy(value) {
   colourBy.value = value
   loadBlocks()
+}
+
+// "Show": 'all' = every block that fits the filters, 'shortlist' = only the flats you saved
+// (your saved flats are shown even if they do not fit the filters: you picked them on purpose)
+const shortlist = useShortlistStore()
+const showWhich = ref('all')
+
+// The legend's "Show" changed: get the latest shortlist if needed, redraw the dots,
+// and for the shortlist zoom out / in so every saved flat is on the screen
+async function changeShowWhich(value) {
+  showWhich.value = value
+  if (value === 'shortlist') {
+    await shortlist.fetchShortlist()
+  }
+  await loadBlocks()
+
+  if (value === 'shortlist' && shownPlaces.length > 0) {
+    const points = []
+    for (const place of shownPlaces) {
+      points.push([place.lat, place.lng])
+    }
+    // fitBounds (Leaflet): zoom to the smallest view that holds all the points; padding keeps them off the edge
+    map.fitBounds(points, { padding: [40, 40], maxZoom: 16 })
+  }
 }
 
 // The legend's amenity tick box changed, e.g. ('mrt', true): add or remove that type, then redraw the squares
@@ -358,13 +384,24 @@ async function loadBlocks() {
   try {
     // Same request as Search, with the shared filters: the server only sends blocks that match them.
     // (No search text: the map always shows the whole island; you zoom in to a place instead.)
-    const params = {
-      flatType: filterStore.filters.flatType,
-      maxPrice: filterStore.filters.maxPrice,
-      minLease: filterStore.filters.minLease,
+    let cards = []
+    if (showWhich.value === 'shortlist') {
+      // Only your saved flats (already loaded by changeShowWhich). They are the same cards as /api/blocks sends.
+      if (shortlist.error !== '') {
+        errorMessage.value = shortlist.error
+      }
+      for (const item of shortlist.items) {
+        cards.push(item.block)
+      }
+    } else {
+      const params = {
+        flatType: filterStore.filters.flatType,
+        maxPrice: filterStore.filters.maxPrice,
+        minLease: filterStore.filters.minLease,
+      }
+      const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
+      cards = response.data.results
     }
-    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
-    const cards = response.data.results
 
     // The server sends one card per block + flat type. Group them by address, so each block
     // gets ONE dot (otherwise the flat types of one block sit exactly on top of each other).
@@ -408,6 +445,13 @@ async function loadBlocks() {
     }
     blockCount.value = shown.length
     shownPlaces = shown
+
+    // How many flats (block + flat type) those dots hold: two saved flats in one block share one dot
+    let flats = 0
+    for (const place of shown) {
+      flats = flats + place.cards.length
+    }
+    flatCount.value = flats
 
     // Keep the "Selected block" card up to date: if the selected block is still on the map, use its new
     // entry (its flat types may have changed with the filters); if it is gone, close the card and its highlights.
@@ -876,12 +920,16 @@ onUnmounted(function () {
 
 <template>
   <section>
-    <span class="eyebrow">{{ blockCount }} blocks on the map</span>
+    <span v-if="showWhich === 'shortlist'" class="eyebrow">{{ flatCount }} saved flats in {{ blockCount }} blocks</span>
+    <span v-else class="eyebrow">{{ blockCount }} blocks on the map</span>
     <h1 class="page-title serif">See it on <em>the map</em></h1>
     <p class="page-sub">
-      <!-- Says what the colours mean right now ("Colour dots by" on the right) -->
-      <span v-if="colourBy === 'match'">Each dot is a block that fits your filters, coloured by its priority score (from Your Priorities).</span>
-      <span v-else>Each dot is a block, coloured by the median price of its cheapest flat type that fits your filters.</span>
+      <!-- Says which dots are shown ("Show") and what their colours mean ("Colour dots by"), both on the right -->
+      Each dot is a block
+      <span v-if="showWhich === 'shortlist'">from your shortlist (your filters are not used here)</span>
+      <span v-else>that fits your filters</span>,
+      <span v-if="colourBy === 'match'">coloured by its priority score (from Your Priorities).</span>
+      <span v-else>coloured by the median price of its cheapest flat type.</span>
       Click a dot to see every flat type there.
     </p>
 
@@ -919,6 +967,10 @@ onUnmounted(function () {
             :amenity-types="amenityTypes"
             :shown-types="shownTypes"
             :no-score-colour="NO_SCORE_COLOUR"
+            :show-which="showWhich"
+            :logged-in="auth.isLoggedIn"
+            :shortlist-count="shortlist.count"
+            @change-show-which="changeShowWhich"
             @change-colour-by="changeColourBy"
             @toggle-amenity="toggleAmenity"
           />

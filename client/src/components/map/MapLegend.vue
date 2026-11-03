@@ -8,8 +8,11 @@ const props = defineProps({
   amenityTypes: Array, // [{ key, label, one, colour }, ...]
   shownTypes: Array, // the ticked amenity keys, e.g. ['mrt', 'park']
   noScoreColour: String, // the grey for "no score"
+  showWhich: String, // 'all' or 'shortlist'
+  loggedIn: Boolean, // the shortlist option needs a login
+  shortlistCount: Number, // how many flats are saved
 })
-const emit = defineEmits(['change-colour-by', 'toggle-amenity'])
+const emit = defineEmits(['change-show-which', 'change-colour-by', 'toggle-amenity'])
 
 // An amenity tick box changed: send its key and whether it is now ticked, e.g. ('mrt', true)
 function onToggle(key, event) {
@@ -24,6 +27,44 @@ function isShown(key) {
 
 <template>
   <div class="cosy-card cosy-shadow mb-3">
+    <!-- Show: every block that fits the filters, or only the flats in your shortlist -->
+    <div class="small fw-semibold mb-1">Show</div>
+    <div class="form-check form-check-inline">
+      <input
+        id="show-all"
+        :checked="showWhich === 'all'"
+        type="radio"
+        name="show-which"
+        class="form-check-input"
+        @change="emit('change-show-which', 'all')"
+      />
+      <label for="show-all" class="form-check-label">All flats</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input
+        id="show-shortlist"
+        :checked="showWhich === 'shortlist'"
+        :disabled="!loggedIn"
+        type="radio"
+        name="show-which"
+        class="form-check-input"
+        @change="emit('change-show-which', 'shortlist')"
+      />
+      <label for="show-shortlist" class="form-check-label">
+        My shortlist
+        <span v-if="loggedIn">({{ shortlistCount }})</span>
+        <span v-else class="text-muted small">(log in first)</span>
+      </label>
+    </div>
+    <div v-if="showWhich === 'shortlist'" class="small text-muted mt-1">
+      <span v-if="shortlistCount === 0">Your shortlist is empty: save flats on the Search page.</span>
+      <span v-else>
+        Only your saved flats, even if they do not fit your filters.
+        Flats in the same block share one dot: click it to see them all.
+      </span>
+    </div>
+    <div class="mb-3"></div>
+
     <!-- Colour dots by: price or match (like Search's two sort options) -->
     <div class="small fw-semibold mb-1">Colour dots by</div>
     <div class="form-check form-check-inline">
