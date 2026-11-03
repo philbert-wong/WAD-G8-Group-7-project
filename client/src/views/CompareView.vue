@@ -167,7 +167,7 @@ loadShortlist()
       </div>
 
       <!-- Step 2: the side-by-side table (one column per flat) -->
-      <p v-if="selectedIds.length < 2" class="text-muted">Tick at least 2 flats to compare.</p>
+      <p v-if="selectedIds.length < 2" class="text-muted compare-hint">Tick at least 2 flats to compare.</p>
 
       <div v-else class="table-responsive">
         <!-- Which budget the red prices are compared with -->
@@ -175,7 +175,7 @@ loadShortlist()
           Your budget: <b>{{ '$' + budget().toLocaleString('en-SG') }}</b> (the Max budget filter on Search and the Map).
           Prices <span class="text-danger fw-semibold">in red</span> are over it.
         </p>
-        <table class="table table-bordered align-middle bg-white">
+        <table class="table table-bordered align-middle bg-white compare-table">
           <thead class="table-light">
             <tr>
               <th></th>
@@ -194,7 +194,8 @@ loadShortlist()
                 :key="item.id"
                 :class="{ 'text-danger': isOverBudget(item.block.price) }"
               >
-                {{ formatRange(item.block.priceLow, item.block.priceHigh) }}
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value">{{ formatRange(item.block.priceLow, item.block.priceHigh) }}</div>
               </td>
             </tr>
             <tr>
@@ -204,8 +205,9 @@ loadShortlist()
                 :key="item.id"
                 :class="{ 'text-danger fw-semibold': isOverBudget(item.block.price) }"
               >
-                {{ '$' + item.block.price.toLocaleString('en-SG') }}
-                <div v-if="isOverBudget(item.block.price)" class="small">Over budget</div>
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value">{{ '$' + item.block.price.toLocaleString('en-SG') }}
+                <div v-if="isOverBudget(item.block.price)" class="small">Over budget</div></div>
               </td>
             </tr>
             <tr>
@@ -215,31 +217,45 @@ loadShortlist()
                 :key="item.id"
                 :class="{ 'text-danger fw-semibold': isEstimateOverBudget(item.block) }"
               >
-                {{ estimateText(item.block) }}
-                <div v-if="isEstimateOverBudget(item.block)" class="small">Over budget</div>
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value">{{ estimateText(item.block) }}
+                <div v-if="isEstimateOverBudget(item.block)" class="small">Over budget</div></div>
               </td>
             </tr>
             <tr>
               <th>Remaining lease</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ item.block.remainingLease }} years</td>
+              <td v-for="item in selectedItems()" :key="item.id">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value">{{ item.block.remainingLease }} years</div>
+              </td>
             </tr>
             <tr>
               <th>Nearest MRT</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ item.block.mrtName }} ({{ item.block.mrtWalkMinutes }} min walk)</td>
+              <td v-for="item in selectedItems()" :key="item.id">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value">{{ item.block.mrtName }} ({{ item.block.mrtWalkMinutes }} min walk)</div>
+              </td>
             </tr>
             <tr>
               <th>Priority score</th>
-              <td v-for="item in selectedItems()" :key="item.id">
-                <MatchScore :score="scoreFor(item.block)" :distances="item.block.distances" :weights="weights" />
+              <td v-for="item in selectedItems()" :key="item.id" class="score-cell">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value"><MatchScore :score="scoreFor(item.block)" :distances="item.block.distances" :weights="weights" /></div>
               </td>
             </tr>
             <tr>
               <th>Est. monthly repayment</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ monthlyText(item.block) }}</td>
+              <td v-for="item in selectedItems()" :key="item.id">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value">{{ monthlyText(item.block) }}</div>
+              </td>
             </tr>
             <tr>
               <th>My note</th>
-              <td v-for="item in selectedItems()" :key="item.id" class="small">{{ item.note }}</td>
+              <td v-for="item in selectedItems()" :key="item.id" class="small">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <div class="cell-value">{{ item.note }}</div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -254,3 +270,87 @@ loadShortlist()
     </div>
   </section>
 </template>
+
+<style scoped>
+/* The flat's name at the start of each line is only for the stacked layout below, so it is hidden otherwise */
+.compare-table .flat-label {
+  display: none;
+}
+
+/* Phones and small tablets (narrower than 768px, Bootstrap's "md"): a table with one column per flat is wider than the screen and its row names
+   scroll out of sight. So the table is turned on its side: each row becomes a bordered card, with the metric
+   name as its heading and one line per flat under it (the flat's name on the left, its value on the right).
+   From 768px up the normal table is used. */
+@media (max-width: 767px) {
+  .compare-table,
+  .compare-table tbody,
+  .compare-table tr,
+  .compare-table th,
+  .compare-table td {
+    display: block;
+    width: 100%;
+    border: 0;
+  }
+
+  /* The flat names are in every line instead of in a header row */
+  .compare-table thead {
+    display: none;
+  }
+
+  /* One metric = one card, with a border, rounded corners and some space between the cards */
+  .compare-table tbody tr {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  /* The metric name: the grey header of its card */
+  .compare-table tbody th {
+    padding: 0.5rem 0.75rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+
+  /* One flat's line: name on the left, value on the right, with a line between one flat and the next */
+  .compare-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+  .compare-table td + td {
+    border-top: 1px solid var(--line);
+  }
+  .compare-table .flat-label {
+    display: block;
+    flex: 0 0 42%;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .compare-table .cell-value {
+    flex: 1 1 0;
+    text-align: right;
+  }
+
+  /* The priority score is a bar with text on it: it needs the whole width, so the flat's name goes above it */
+  .compare-table .score-cell {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .compare-table .score-cell .flat-label {
+    flex: 0 0 auto;
+  }
+  .compare-table .score-cell .cell-value {
+    flex: 0 0 auto;
+    width: 100%;
+    text-align: left;
+  }
+}
+</style>

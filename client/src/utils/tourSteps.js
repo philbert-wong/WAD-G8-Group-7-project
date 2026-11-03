@@ -3,6 +3,8 @@
 //   target: ''  = nothing to light up: the card shows in the middle of the screen
 //   several selectors with commas = the first one that is visible on this screen is used,
 //   e.g. the "☰ Filters" button on phones and the filter sidebar on computers
+//   targetSmall (optional): used instead of target on phones (narrower than 768px), for a part that is too tall
+//   to light up as a whole there
 // The pages are not changed for the tour: it finds their parts by the ids and classes they already have.
 
 export const TOUR_STEPS = {
@@ -87,8 +89,12 @@ export const TOUR_STEPS = {
     },
     {
       title: 'Side by side',
-      text: 'Prices in red are over your budget.',
-      target: 'table.table-bordered',
+      text: 'Tick 2 flats above and they are compared here, price, lease, MRT and more. Prices in red are over your budget.',
+      // Computers: the whole table. Phones (targetSmall): the table is stacked and taller than the screen, so only
+      // its first card is lit up and the tour card sits under it. With fewer than 2 flats ticked there is no table:
+      // the "Tick at least 2 flats" line is lit up instead (it and the table are never on the page together).
+      target: 'table.table-bordered, .compare-hint',
+      targetSmall: '.compare-table tbody tr:first-child, .compare-hint',
     },
   ],
 

@@ -216,7 +216,13 @@ function placeCard() {
 // Shows this step: the light glides in a straight line from the last part to this one, while the page scrolls
 // smoothly to it at the same time (both move together, so the light never wanders).
 async function showStep() {
-  currentTarget = findTarget(step.value.target)
+  // A step may give a smaller thing to light up on phones (targetSmall): a part that is taller than the screen
+  // cannot be lit up as a whole, and the card would have no room next to it (see tourSteps.js)
+  let selector = step.value.target
+  if (step.value.targetSmall !== undefined && window.innerWidth < 768) {
+    selector = step.value.targetSmall
+  }
+  currentTarget = findTarget(selector)
 
   // Wait for Vue to put the new text in the card, so its height is right before it is placed
   await nextTick()
