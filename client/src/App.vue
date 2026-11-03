@@ -15,7 +15,7 @@ const auth = useAuthStore()
   <!-- Presets popup: asks for the town, parents' postal code and starting filters (logged out only, after every refresh) -->
   <ProfileModal v-if="auth.needsProfile" />
 
-  <main class="container py-5">
+  <main class="container pt-4 pb-5">
     <RouterView/>
   </main>
 

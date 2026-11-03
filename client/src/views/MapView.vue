@@ -1086,8 +1086,6 @@ onUnmounted(function () {
 
 <template>
   <section>
-    <span v-if="showWhich === 'shortlist'" class="eyebrow">{{ flatCount }} saved flats in {{ blockCount }} blocks</span>
-    <span v-else class="eyebrow">{{ blockCount }} blocks on the map</span>
     <h1 class="page-title serif">See it on <em>the map</em></h1>
     <p class="page-sub">
       <!-- Says which dots are shown ("Show") and what their colours mean ("Colour dots by"), both on the right -->
@@ -1138,6 +1136,8 @@ onUnmounted(function () {
             :show-which="showWhich"
             :logged-in="auth.isLoggedIn"
             :shortlist-count="shortlist.count"
+            :shown-flats="flatCount"
+            :shown-blocks="blockCount"
             @change-show-which="changeShowWhich"
             @change-colour-by="changeColourBy"
             @toggle-amenity="toggleAmenity"
