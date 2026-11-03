@@ -127,11 +127,20 @@ function onClear() {
       @input="onChange('minLease', $event)"
     />
 
-    <!-- PHG (Proximity Housing Grant): the switch, with the parents' postal code right under it. On both Search and the Map.
+    <!-- PHG (Proximity Housing Grant): the parents' postal code, then the switch that uses it. On both Search and the Map.
          On = only flats within 4 km of the parents. Enter in the box (or Apply Filters) uses a new postal code. -->
     <div class="phg-row">
-      <!-- A heading like the other filters, then a switch whose words say exactly what turning it on does -->
-      <div class="flab mt-0">Near your parents (Proximity Housing Grant)</div>
+      <!-- Short placeholder so it fits the narrow sidebar; the label says what the box is for -->
+      <label for="filter-parents" class="flab parents-label">Parents' postal code</label>
+      <input
+        id="filter-parents"
+        :value="props.filters.parentsPostal"
+        type="text"
+        inputmode="numeric"
+        class="form-control cosy-input mb-2"
+        placeholder="e.g. 560314"
+        @input="onChange('parentsPostal', $event)"
+      />
       <div class="form-check form-switch">
         <input
           id="filter-phg"
@@ -143,20 +152,10 @@ function onClear() {
         />
         <label for="filter-phg" class="form-check-label">Only show flats within 4 km of my parents</label>
       </div>
-      <!-- Short placeholder so it fits the narrow sidebar; the label says what the box is for -->
-      <label for="filter-parents" class="flab parents-label">Parents' postal code</label>
-      <input
-        id="filter-parents"
-        :value="props.filters.parentsPostal"
-        type="text"
-        inputmode="numeric"
-        class="form-control cosy-input"
-        placeholder="e.g. 560314"
-        @input="onChange('parentsPostal', $event)"
-      />
-      <div v-if="!props.filters.phg" class="hint">Off: showing flats anywhere. Living within 4 km of your parents can get you the PHG grant.</div>
+      <!-- Off: why it matters. On: what it is using (or what is missing) -->
+      <div v-if="!props.filters.phg" class="hint">Living this close can get you the Proximity Housing Grant (PHG).</div>
       <div v-else-if="props.filters.parentsPostal.trim() === ''" class="hint">
-        Type your parents' postal code, then press Enter.
+        Type your parents' postal code above, then press Enter.
       </div>
       <div v-else-if="props.phgPlaceName !== ''" class="hint">
         Only flats within 4 km of <strong>{{ props.phgPlaceName }}</strong>.
@@ -209,10 +208,10 @@ function onClear() {
 .phg-row .form-check-label {
   font-size: 13px;
 }
-/* "Parents' postal code": dark like the other filter labels (not grey), a little closer to the switch */
+/* "Parents' postal code": dark like the other filter labels (not grey); the row already has a gap above */
 .parents-label {
   color: var(--char);
-  margin-top: 10px;
+  margin-top: 0;
 }
 
 /* Chips: a row of equal buttons (Flexbox + flex-wrap); the chosen one is dark */
