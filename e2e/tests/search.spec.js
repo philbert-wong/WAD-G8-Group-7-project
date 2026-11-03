@@ -53,14 +53,14 @@ test('should show a clear message when the search matches nothing', async ({ pag
   await expect(page.getByText('Nothing found for "zzzzqqqq"')).toBeVisible();
 });
 
-test('should show only one account message when a visitor with saved presets tries to save a flat', async ({ page }) => {
-  // setup: save the presets in the first-visit popup (that shows the "create an account" banner),
+test('should show the one account message, not two, when a visitor with saved presets tries to save a flat', async ({ page }) => {
+  // setup: save the presets in the first-visit popup (that shows the "create an account" message),
   // then search a postal code that has exactly one flat
   await page.goto('/');
   await page.getByRole('button', { name: 'Show me flats' }).click();
   await page.getByRole('button', { name: 'Skip tour' }).click();
   await expect(page.getByText('flat(s) match your filters')).toBeVisible();
-  await expect(page.getByText('Presets saved on this device.')).toBeVisible();
+  await expect(page.getByText('to save flats and keep your presets on any device')).toBeVisible();
   await page.getByRole('searchbox').fill('761672');
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page.getByText('672A YISHUN AVE 4')).toBeVisible();
@@ -68,9 +68,9 @@ test('should show only one account message when a visitor with saved presets tri
   // actions
   await page.getByRole('button', { name: 'Save to Shortlist' }).click();
 
-  // assert: the "needs an account" message is shown, and the banner has made way for it
-  await expect(page.getByText('Saving flats needs an account.')).toBeVisible();
-  await expect(page.getByText('Presets saved on this device.')).not.toBeVisible();
+  // assert: still just the one message (two of them would be a strict-mode error here), and no second one
+  await expect(page.getByText('to save flats and keep your presets on any device')).toBeVisible();
+  await expect(page.getByText('Saving flats needs an account.')).not.toBeVisible();
 });
 
 test('should tell a visitor without an account that saving a flat needs one', async ({ page }) => {
@@ -84,11 +84,12 @@ test('should tell a visitor without an account that saving a flat needs one', as
   await page.getByRole('searchbox').fill('761672');
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page.getByText('672A YISHUN AVE 4')).toBeVisible();
+  await expect(page.getByText('to save flats and keep your presets on any device')).not.toBeVisible();
 
   // actions
   await page.getByRole('button', { name: 'Save to Shortlist' }).click();
 
-  // assert: the message, with a way to create an account
-  await expect(page.getByText('Saving flats needs an account.')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'create a free account' })).toBeVisible();
+  // assert: the account message appears, with a way to create an account
+  await expect(page.getByText('to save flats and keep your presets on any device')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Create a free account' })).toBeVisible();
 });
