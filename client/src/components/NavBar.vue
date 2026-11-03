@@ -56,12 +56,13 @@ onMounted(function () {
       <!-- Logged in: email + Logout. Logged out: a Login button. -->
       <div v-if="auth.isLoggedIn" class="d-flex align-items-center gap-2">
         <span class="small text-muted d-none d-sm-inline">{{ auth.user.email }}</span>
-        <!-- Account icon: opens the profile settings page -->
-        <RouterLink to="/profile" class="account" :class="{ act: route.path === '/profile' }" title="Your profile" aria-label="Your profile">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- Profile button (icon + word, same pill as Logout, so it is clear it can be pressed): opens the profile settings page -->
+        <RouterLink to="/profile" class="btn-short account" :class="{ act: route.path === '/profile' }" title="Your profile">
+          <svg width="16" height="16"viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="8" r="4" />
             <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
           </svg>
+          Profile
         </RouterLink>
         <button class="btn-short" @click="onLogout">Logout</button>
       </div>
@@ -147,14 +148,15 @@ onMounted(function () {
   color: var(--terra);
 }
 
-/* Account icon: dark, terracotta when hovered or when we are on the profile page */
+/* Profile button: the Login / Logout pill (below) with the icon next to the word;
+   terracotta outline and text while we are on the profile page */
 .account {
-  color: var(--char);
   display: inline-flex;
-  padding: 4px;
+  align-items: center;
+  gap: 6px;
 }
-.account:hover,
 .account.act {
+  border-color: var(--terra);
   color: var(--terra);
 }
 
