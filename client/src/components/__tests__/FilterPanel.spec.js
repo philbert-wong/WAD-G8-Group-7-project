@@ -10,7 +10,7 @@ import FilterPanel from '../FilterPanel.vue'
 
 // The filters the Search page starts with
 function startFilters() {
-  return { q: '', flatType: '', maxPrice: '760000', minLease: '60', phg: false }
+  return { q: '', flatType: '', maxPrice: '760000', minLease: '60', phg: false, parentsPostal: '' }
 }
 
 // Mounts the panel with the link stubbed. Extra props (like filters) are given by each test.
@@ -56,24 +56,46 @@ describe('TestSuite1: FilterPanel shows the filters it is given', () => {
   })
 })
 
-describe('TestSuite2: FilterPanel conditional rendering', () => {
-  // The Near parents switch is only for the Map: Search gives no phgPostal, so it is hidden there
-  it('Test1: hides the Near parents switch on the Search page', () => {
+describe('TestSuite2: FilterPanel parents section (PHG)', () => {
+  // The parents' postal code and the switch that uses it are on Search and on the Map
+  it('Test1: has a parents postal code box and a switch to use it', () => {
     const wrapper = mountPanel({ filters: startFilters() })
 
-    expect(wrapper.text()).not.toContain('Near parents')
+    expect(wrapper.text()).toContain("Parents' postal code")
+    expect(wrapper.text()).toContain('Only show flats within 4 km of my parents')
   })
 
-  it('Test2: shows the Near parents switch on the Map page', () => {
-    const wrapper = mountPanel({ filters: startFilters(), phgPostal: '560314' })
+  // Different states: the hint under the switch says what is going on
+  it('Test2: explains the grant while the switch is off', () => {
+    const wrapper = mountPanel({ filters: startFilters() })
 
-    expect(wrapper.text()).toContain('Near parents')
+    expect(wrapper.text()).toContain('Proximity Housing Grant (PHG)')
   })
 
-  it('Test3: tells the user to add a postal code when the profile has none', () => {
-    const wrapper = mountPanel({ filters: startFilters(), phgPostal: '' })
+  it('Test3: asks for the postal code when the switch is on and there is none', () => {
+    const filters = startFilters()
+    filters.phg = true
+    const wrapper = mountPanel({ filters: filters })
 
-    expect(wrapper.text()).toContain("Add your parents' postal code")
+    expect(wrapper.text()).toContain("Type your parents' postal code above")
+  })
+
+  it('Test4: shows the postal code it is using when the place has not been found yet', () => {
+    const filters = startFilters()
+    filters.phg = true
+    filters.parentsPostal = '560314'
+    const wrapper = mountPanel({ filters: filters })
+
+    expect(wrapper.text()).toContain('Only flats within 4 km of 560314')
+  })
+
+  it('Test5: shows the place that was found, so the user can check it is the right one', () => {
+    const filters = startFilters()
+    filters.phg = true
+    filters.parentsPostal = '530959'
+    const wrapper = mountPanel({ filters: filters, phgPlaceName: 'BLK 959 HOUGANG STREET 91' })
+
+    expect(wrapper.text()).toContain('Only flats within 4 km of BLK 959 HOUGANG STREET 91')
   })
 })
 
@@ -110,5 +132,27 @@ describe('TestSuite3: FilterPanel tells its parent what the user did', () => {
     await buttonSaying(wrapper, 'Clear all').trigger('click')
 
     expect(wrapper.emitted('clear')).toBeTruthy()
+  })
+
+  // Emitted events: flipping the switch changes the filter and applies it straight away
+  it('Test5: turns the parents filter on and searches when the switch is flipped', async () => {
+    const wrapper = mountPanel({ filters: startFilters() })
+    const switchBox = wrapper.find('#filter-phg')
+
+    switchBox.element.checked = true
+    await switchBox.trigger('change')
+
+    expect(wrapper.emitted('change-filter')[0]).toEqual(['phg', true])
+    expect(wrapper.emitted('search')).toBeTruthy()
+  })
+
+  it('Test6: sends the parents postal code up as it is typed', async () => {
+    const wrapper = mountPanel({ filters: startFilters() })
+    const box = wrapper.find('#filter-parents')
+
+    box.element.value = '560314'
+    await box.trigger('input')
+
+    expect(wrapper.emitted('change-filter')[0]).toEqual(['parentsPostal', '560314'])
   })
 })

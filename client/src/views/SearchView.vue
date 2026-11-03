@@ -38,13 +38,23 @@ const shortlistErrorMessage = ref('')
 // The "create an account" strip for a guest who has saved presets. Closing it is remembered on this device.
 const accountBannerClosed = ref(localStorage.getItem('accountBannerClosed') === 'yes')
 
-// Only for someone who is not logged in and has presets saved on this device.
-// Hidden while the "Saving flats needs an account" alert is showing: both say "create an account", and one message is enough.
-const showAccountBanner = computed(function () {
-  return !auth.isLoggedIn && auth.profile !== null && !accountBannerClosed.value && shortlistErrorMessage.value === ''
+// true after a guest tries to save a flat: the message then shows even if it was closed before
+const accountPromptOpen = ref(false)
+
+// The ONE "create an account" message, for someone who is not logged in. It shows when they have presets
+// saved on this device (unless they closed it), or when they just tried to save a flat.
+const showAccountPrompt = computed(function () {
+  if (auth.isLoggedIn) {
+    return false
+  }
+  if (accountPromptOpen.value) {
+    return true
+  }
+  return auth.profile !== null && !accountBannerClosed.value
 })
 
-function closeAccountBanner() {
+function closeAccountPrompt() {
+  accountPromptOpen.value = false
   accountBannerClosed.value = true
   localStorage.setItem('accountBannerClosed', 'yes')
 }
@@ -451,7 +461,7 @@ function goToPage(number) {
 function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
   if (!auth.isLoggedIn) {
-    shortlistErrorMessage.value = 'Saving flats needs an account.'
+    accountPromptOpen.value = true // the one "create an account" message, under the search box
     // The message is at the top of the page, and the card that was clicked may be far down: scroll up to it
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
@@ -504,11 +514,6 @@ onMounted(loadPage)
 
     <div v-if="shortlistErrorMessage" class="alert alert-warning">
       {{ shortlistErrorMessage }}
-      <!-- A guest who tried to save a flat: the best moment to offer an account -->
-      <span v-if="!auth.isLoggedIn">
-        <RouterLink to="/login">Log in</RouterLink> or
-        <RouterLink to="/createaccount"><strong>create a free account</strong></RouterLink>.
-      </span>
     </div>
     <div v-if="shortlist.error" class="alert alert-warning">
       {{ shortlist.error }}
@@ -531,18 +536,19 @@ onMounted(loadPage)
       Showing flats within 1 km of <strong>{{ placeName }}</strong> (place found by OneMap)
     </p>
 
-    <!-- A guest who saved presets: offer an account, so the presets (and the shortlist) follow them to any device -->
+    <!-- The one "create an account" message for a guest: shown when they have saved presets, and when they try
+         to save a flat (which also scrolls the page up to here). The same words and look both times. -->
     <div
-      v-if="showAccountBanner"
+      v-if="showAccountPrompt"
       class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2"
       role="status"
     >
       <span>
-        Presets saved on this device.
         <RouterLink to="/createaccount"><strong>Create a free account</strong></RouterLink>
-        to keep them on any device and save flats.
+        to save flats and keep your presets on any device.
+        Already have one? <RouterLink to="/login">Log in</RouterLink>.
       </span>
-      <button type="button" class="btn-close" aria-label="Close" @click="closeAccountBanner"></button>
+      <button type="button" class="btn-close" aria-label="Close" @click="closeAccountPrompt"></button>
     </div>
 
     <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->

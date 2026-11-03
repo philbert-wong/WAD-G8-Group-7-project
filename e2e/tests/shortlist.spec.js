@@ -26,7 +26,7 @@ test('should save a flat to the shortlist when logged in', async ({ page }) => {
   // actions
   await page.getByRole('button', { name: 'Save to Shortlist' }).click();
 
-  // assert: the button now says Saved, and no "needs an account" message appears
+  // assert: the button now says Saved, and no "create an account" message appears
   await expect(page.getByRole('button', { name: 'Saved' })).toBeVisible();
-  await expect(page.getByText('Saving flats needs an account.')).not.toBeVisible();
+  await expect(page.getByText('to save flats and keep your presets on any device')).not.toBeVisible();
 });
