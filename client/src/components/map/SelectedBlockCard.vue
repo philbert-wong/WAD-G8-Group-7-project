@@ -3,7 +3,7 @@
 // MapView owns the data and the map; this card shows it and sends the button clicks up (props down, emit up).
 const props = defineProps({
   place: Object, // { label, lat, lng, cards: [...] }: one card per flat type
-  matchText: { type: String, default: '' }, // e.g. "62 / 100" in Best match mode, '' otherwise
+  matchText: { type: String, default: '' }, // e.g. "62/100 · Good" when the dots are coloured by Your Priorities, '' otherwise
   nearestAmenities: { type: Array, default: null }, // [{ category, name, distance }] or null (not loaded yet)
   amenityTypes: Array, // [{ key, label, one, colour }], for the names in the nearest list
 })
@@ -37,7 +37,7 @@ function amenityName(category) {
     </div>
     <p class="small text-muted mb-3">
       {{ place.cards[0].town }} · {{ place.cards[0].mrtWalkMinutes }} min walk to {{ place.cards[0].mrtName }}
-      <span v-if="matchText !== ''"><br />Match score: <strong>{{ matchText }}</strong></span>
+      <span v-if="matchText !== ''"><br />Priority score: <strong>{{ matchText }}</strong></span>
     </p>
 
     <!-- One row per flat type at this block that fits the filters -->

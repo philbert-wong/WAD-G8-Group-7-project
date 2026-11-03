@@ -4,7 +4,7 @@ IS216 Web Application Development II, Section G8, Group 7
 
 Helps HDB resale buyers decide WHERE to look, using real transacted prices (last 12 months)
 instead of asking prices. You search blocks (not listings), filter them, compare cards with a
-personal match score, look at each block's recent sales and nearby amenities, keep a shortlist
+personal priority score, look at each block's recent sales and nearby amenities, keep a shortlist
 with notes, work out an affordable budget, and see every block on a map.
 
 Data store:     MongoDB (with Mongoose). Local MongoDB or MongoDB Atlas.
@@ -85,9 +85,9 @@ Terminal 2 (website):
 Pages:
     /            Search: one search box (town, street, block address, postal code or any place: our own
                  data first, then OneMap for flats within 1 km of a place), filters (budget, flat type,
-                 remaining lease), "What matters to you?" match score, block cards with price details,
+                 remaining lease), Your Priorities and the priority score, block cards with price details,
                  nearest amenities and "Show on map"
-    /map         Map: one dot per block, coloured by price or by match score ("Colour dots by"),
+    /map         Map: one dot per block, coloured by price or by priority score ("Colour dots by"),
                  with the same filters and Your Priorities as Search; amenity layers (MRT, hawker,
                  park, school); an address search; the PHG (Proximity Housing Grant) layer (type your
                  parents' postal code to see only blocks within 4 km); click a dot for its flat types
@@ -141,7 +141,7 @@ Manual check of the main user journeys (with both terminals running):
     2. Same search box: type "Blk 314 Ang Mo Kio Ave 3" (its card), then "560314" or "Bishan MRT":
        flats within 1 km of that place appear, still following the filters (needs OneMap login).
     3. Open a card's price details: recent sales, median price, chart; nearest amenities and walk time.
-       Search "Ang Mo Kio" with Sort: Best match and only Transport ticked: the "min walk" goes up down the list.
+       Search "Ang Mo Kio" with Sort: Priority score and only Transport ticked: the "min walk" goes up down the list.
     4. Click Shortlist while logged out: you are sent to Login; log in: you come back to Shortlist.
     5. On Search press Save on 2 flats: the navbar shows "Shortlist (2)". Add a note on Shortlist.
     6. Compare: tick the 2 flats and see them side by side.
@@ -149,7 +149,7 @@ Manual check of the main user journeys (with both terminals running):
     8. Map: dots coloured by price. Click 4-Rm in the filters: the dots change. Click a dot: its popup
        and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
     9. Map: tick "MRT / LRT stations": blue squares appear; untick: they go. Switch "Colour dots by" to
-       Best match: dots change colour (red = poor ... blue/purple = great), using Your Priorities.
+       Colour dots by Priority score: dots change colour (red = weak ... blue/purple = excellent), using Your Priorities.
    10. Map: type "560314" in the PHG box: a 4 km circle, and only the blocks inside it remain.
        Type "Bishan MRT" in the search bar above the map: the map jumps there with a marker.
    11. Refresh the page: you stay logged in. Logout: the shortlist count disappears.
@@ -259,10 +259,10 @@ Geospatial search
   The walk to the nearest MRT / LRT is a REAL walking route: prep/addWalks.js asked OneMap's walking
   routes once for every block (to its nearest station, and to the second-nearest when that is almost
   as close) and saved the shortest walk in blocks.json. The seed turns it into the station name,
-  the walking minutes (walking metres / 80 metres per minute) and the MRT distance of the match score,
+  the walking minutes (walking metres / 80 metres per minute) and the MRT distance of the priority score,
   so all three come from the same walk. (A block without a route falls back to straight-line x 1.3.)
 
-Match score ("What matters to you?")
+Priority score ("Your Priorities"; called matchScore in the code)
   The seed script stores the distance from each block to its nearest school, hawker centre and park
   (straight line) and MRT / LRT station (walking route, see above). The browser scores every card itself
   (client/src/utils/matchScore.js), so changing the panel updates the scores straight away.
@@ -276,7 +276,7 @@ The map (Leaflet + OpenStreetMap tiles)
   change on one page also applies on the other. The map loads the blocks with them (no search text: it
   always shows the whole island), then groups the cards by address, so each
   block is ONE dot (its flat types would otherwise sit on top of each other). A dot's colour is the
-  price band of its cheapest flat type, or its match score on a rainbow scale (red 0 ... purple 100).
+  price band of its cheapest flat type, or its priority score on a rainbow scale (red 0 ... purple 100).
   The PHG layer looks up the parents' address with OneMap and keeps only the blocks within 4 km
   (Leaflet's map.distance, straight-line), on top of the filters. Amenities come from /api/amenities
   and are drawn as small squares in their own layer.
@@ -298,7 +298,7 @@ Real HDB resale sales from the last 12 months (data.gov.sg), grouped per block a
 for up to the 40 busiest blocks in each of the 26 HDB towns of Singapore.
 Coordinates come from OneMap; MRT stations, hawker centres, parks and primary schools from data.gov.sg.
 LRT stations (Punggol, Sengkang and Bukit Panjang LRT) are stored with the MRT stations (category "mrt"), so the
-nearest-station walk and the match score's Transport part count them too.
+nearest-station walk and the priority score's Transport part count them too.
 
 The prep/ scripts built the two JSON files once. To rebuild them:
     cd prep
@@ -322,7 +322,7 @@ Then run  pnpm seed  in the server folder.
 ------------------------------------------------------------------------------------------
 
 - Only the 40 busiest blocks in each of the 26 towns (974 blocks), not every block in Singapore.
-- The match score uses straight-line distances for schools, hawker centres and parks (only the MRT uses a
+- The priority score uses straight-line distances for schools, hawker centres and parks (only the MRT uses a
   real walking route). Walking routes end at the station's centre point, not its nearest exit.
 - Distances to an amenity are measured to ONE point per amenity (from the NParks / data.gov.sg
   datasets). Big parks are split into a few sections with their own points (e.g. Bishan-Ang Mo Kio

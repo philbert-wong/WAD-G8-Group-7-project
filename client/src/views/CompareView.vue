@@ -9,6 +9,7 @@ import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
 import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 import { useShortlistStore } from '../stores/shortlist'
+import MatchScore from '../components/MatchScore.vue'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -98,13 +99,9 @@ function formatRange(low, high) {
   return '$' + low.toLocaleString('en-SG') + ' – ' + '$' + high.toLocaleString('en-SG')
 }
 
-// Match score for one block, or "–" when it cannot be scored
-function scoreText(block) {
-  const score = matchScore(block.distances, weights, MAX_DISTANCES)
-  if (score === null) {
-    return '–'
-  }
-  return score
+// Match score for one block (0 to 100), or null when it cannot be scored (MatchScore then shows "–")
+function scoreFor(block) {
+  return matchScore(block.distances, weights, MAX_DISTANCES)
 }
 
 // Estimated monthly repayment for the median price, rounded to the dollar
@@ -187,8 +184,10 @@ loadShortlist()
               <td v-for="item in selectedItems()" :key="item.id">{{ item.block.mrtName }} ({{ item.block.mrtWalkMinutes }} min walk)</td>
             </tr>
             <tr>
-              <th>Match score</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ scoreText(item.block) }}</td>
+              <th>Priority score</th>
+              <td v-for="item in selectedItems()" :key="item.id">
+                <MatchScore :score="scoreFor(item.block)" :distances="item.block.distances" :weights="weights" />
+              </td>
             </tr>
             <tr>
               <th>Est. monthly repayment</th>
@@ -202,7 +201,7 @@ loadShortlist()
         </table>
         <p class="small text-muted">
           Monthly repayment assumes an HDB loan of {{ HDB_LOAN_LTV_PERCENT }}% of the median price at
-          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Match score uses Your Priorities (set on the Search page). 
+          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Priority score uses Your Priorities (set on the Search page). 
           <br>
           Estimated price comes from our regression model (typical error about $46k).
 

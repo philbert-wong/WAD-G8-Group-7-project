@@ -24,7 +24,7 @@ function isShown(key) {
 
 <template>
   <div class="cosy-card cosy-shadow mb-3">
-    <!-- Colour dots by: price or match (like Search's "Cheapest first / Best match") -->
+    <!-- Colour dots by: price or match (like Search's two sort options) -->
     <div class="small fw-semibold mb-1">Colour dots by</div>
     <div class="form-check form-check-inline">
       <input
@@ -46,7 +46,7 @@ function isShown(key) {
         class="form-check-input"
         @change="emit('change-colour-by', 'match')"
       />
-      <label for="colour-match" class="form-check-label">Best match</label>
+      <label for="colour-match" class="form-check-label">Priority score</label>
     </div>
 
     <!-- Price legend -->
@@ -60,13 +60,15 @@ function isShown(key) {
 
     <!-- Match legend: a smooth gradient from 0 to 100 -->
     <div v-else>
-      <h5 class="serif">Match score (Your Priorities)</h5>
+      <h5 class="serif">Priority score (from Your Priorities)</h5>
       <div class="gradient-bar"></div>
       <div class="d-flex justify-content-between small text-muted">
-        <span>0 (poor)</span>
+        <span>0</span>
         <span>50</span>
-        <span>100 (great)</span>
+        <span>100</span>
       </div>
+      <!-- The same words as the match bar on the flat cards (scoreWord in utils/matchScore.js) -->
+      <div class="small text-muted mt-1">Weak 0–24 · Fair 25–49 · Good 50–74 · Excellent 75+</div>
       <div class="d-flex align-items-center gap-2 small mt-2">
         <span class="dot" :style="{ background: noScoreColour }"></span>
         No score (no priorities ticked)

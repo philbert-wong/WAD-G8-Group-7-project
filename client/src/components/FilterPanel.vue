@@ -68,7 +68,7 @@ function onClear() {
 <template>
   <form id="filters-panel" class="filters" @submit.prevent="onSubmit">
     <h4 class="serif">Filter Results</h4>
-    <div class="hint">Refine by what matters to you.</div>
+    <div class="hint">Only flats that fit these are shown, on both Search and the Map.</div>
 
     <!-- Flat type chips -->
     <label class="flab">Flat type</label>

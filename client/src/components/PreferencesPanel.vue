@@ -7,6 +7,7 @@ import { CATEGORIES, IMPORTANCE_LEVELS } from '../utils/matchScore.js'
 
 defineProps({
   preferences: Object, // { school: { ticked: true, level: 3 }, mrt: { ... }, ... }
+  onMap: { type: Boolean, default: false }, // true on the Map page, which colours dots instead of sorting cards
 })
 const emit = defineEmits(['change-ticked', 'change-level'])
 
@@ -24,7 +25,13 @@ function onLevelChange(key, event) {
 <template>
   <div id="priorities-panel" class="prio">
     <h4 class="serif">Your Priorities</h4>
-    <div class="hint">Tick what matters. The match score on each card follows these.</div>
+    <!-- How these change what you see: the sort on Search, the dot colours on the Map -->
+    <div v-if="onMap" class="hint">
+      Tick what matters. These set each block's priority score: colour the dots by "Priority score" to see it.
+    </div>
+    <div v-else class="hint">
+      Tick what matters. These set each flat's priority score, and "Sort: Priority score" puts the best first.
+    </div>
 
     <div v-for="category in CATEGORIES" :key="category.key" class="prio-row">
       <!-- Tick box: unticked means this category is ignored (weight 0) -->

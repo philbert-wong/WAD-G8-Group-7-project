@@ -181,8 +181,8 @@ function clearFilters() {
 // "What matters to you?" panel: all ticked, Important (3) to start with
 const preferences = ref(makeDefaultPreferences())
 
-// 'price' = cheapest first (the order the server sends), 'match' = best match first
-const sortBy = ref('price')
+// 'match' = highest match score first (the default), 'price' = cheapest first (the order the server sends)
+const sortBy = ref('match')
 
 // The panel's choices and the sort are remembered in the browser (localStorage),
 // so they are still there when you come back from the Shortlist page.
@@ -272,7 +272,7 @@ function changeLevel(key, level) {
   saveChoices()
 }
 
-// Puts the best match first. Blocks with no score ("–") go to the end.
+// Puts the highest match score first. Blocks with no score ("–") go to the end.
 // Same score (e.g. every block more than 1300 m' walk from a station scores 0 for Transport):
 // the shorter walk to the MRT goes first, so the "min walk" on the cards still goes up down the list.
 // Returning a negative number puts a before b, a positive number puts b before a.
@@ -429,8 +429,8 @@ onMounted(loadPage)
             aria-label="Sort"
             @change="saveChoices"
           >
+            <option value="match">Sort: Priority score</option>
             <option value="price">Sort: Cheapest first</option>
-            <option value="match">Sort: Best match</option>
           </select>
         </div>
 
@@ -440,6 +440,7 @@ onMounted(loadPage)
           :block="item.block"
           :saved="shortlist.isSaved(item.block.id)"
           :score="item.score"
+          :weights="getWeights(preferences)"
           show-match
           @toggle-save="toggleSave"
         />

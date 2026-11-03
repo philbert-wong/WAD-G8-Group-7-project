@@ -24,7 +24,7 @@ const mapFocus = useMapFocusStore()
 // The filters (flat type, budget, lease) live in a Pinia store shared with Search, so both pages show the same results
 const filterStore = useFiltersStore()
 // The same match score maths as Search (shared file, not changed here)
-import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
+import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES, scoreWord } from '../utils/matchScore.js'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -133,8 +133,8 @@ async function saveChoices() {
   localStorage.setItem('matchPreferences', JSON.stringify(preferences.value))
 
   if (auth.isLoggedIn) {
-    // The account also stores Search's sort choice; keep whatever Search saved (or 'price')
-    let sortBy = 'price'
+    // The account also stores Search's sort choice; keep whatever Search saved (or 'match', Search's default)
+    let sortBy = 'match'
     if (localStorage.getItem('sortBy') !== null) {
       sortBy = localStorage.getItem('sortBy')
     }
@@ -157,7 +157,7 @@ async function saveChoices() {
 function changeTicked(key, ticked) {
   preferences.value[key].ticked = ticked
   saveChoices()
-  // In "Best match" mode the colours depend on the priorities, so redraw the dots
+  // When the dots are coloured by Your Priorities the colours depend on the priorities, so redraw the dots
   if (colourBy.value === 'match') {
     loadBlocks()
   }
@@ -249,7 +249,7 @@ function popupText(place) {
   }
   // When the dots are coloured by match, show the score too
   if (colourBy.value === 'match') {
-    text = text + '<br><b>Match: ' + scoreText(place) + '</b>'
+    text = text + '<br><b>Priority score: ' + scoreText(place) + '</b>'
   }
   return text
 }
@@ -342,13 +342,13 @@ function dotColour(place) {
   return priceColour(cheapestPrice(place))
 }
 
-// The match score as text, for the popup and the card: "62 / 100", or "–" when there is no score
+// The match score as text, for the popup and the card: "62/100 · Good", or "–" when there is no score
 function scoreText(place) {
   const score = placeScore(place)
   if (score === null) {
     return '– (no priorities ticked)'
   }
-  return score + ' / 100'
+  return score + '/100 · ' + scoreWord(score)
 }
 
 // Gets the blocks that match the filters and puts a dot for each on the map
@@ -685,7 +685,7 @@ async function searchPlace(text) {
 }
 
 // One of our blocks that the filters hide: a grey dot the size of a block dot, with a dashed dark ring
-// (so it does not look like the light grey "no score" dots of Best match), and its usual popup plus why it is
+// (so it does not look like the light grey "no score" dots when coloured by Your Priorities), and its usual popup plus why it is
 // not shown. Used by the address search and by "Show on map" (e.g. a shortlisted flat that does not fit the filters).
 // It is kept in searchMarker, so the address bar's "Clear" removes it.
 function showHiddenBlock(hiddenBlock) {
@@ -840,7 +840,7 @@ function clearParent() {
   loadBlocks()
 }
 
-// The match score text for the Selected block card: "62 / 100" in Best match mode, '' otherwise (not shown)
+// The match score text for the Selected block card: "62/100 · Good" when the dots are coloured by Your Priorities, '' otherwise (not shown)
 function selectedMatchText() {
   if (colourBy.value === 'match') {
     return scoreText(selectedPlace.value)
@@ -879,7 +879,9 @@ onUnmounted(function () {
     <span class="eyebrow">{{ blockCount }} blocks on the map</span>
     <h1 class="page-title serif">See it on <em>the map</em></h1>
     <p class="page-sub">
-      Each dot is a block, coloured by the median price of its cheapest flat type that fits your filters.
+      <!-- Says what the colours mean right now ("Colour dots by" on the right) -->
+      <span v-if="colourBy === 'match'">Each dot is a block that fits your filters, coloured by its priority score (from Your Priorities).</span>
+      <span v-else>Each dot is a block, coloured by the median price of its cheapest flat type that fits your filters.</span>
       Click a dot to see every flat type there.
     </p>
 
@@ -936,6 +938,7 @@ onUnmounted(function () {
           <CollapsiblePanel title="Your Priorities" :start-open="false">
             <PreferencesPanel
               :preferences="preferences"
+              on-map
               @change-ticked="changeTicked"
               @change-level="changeLevel"
             />

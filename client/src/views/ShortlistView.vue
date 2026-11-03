@@ -76,7 +76,7 @@ onMounted(function () {
 
     <div class="row row-cols-1 g-3">
       <div v-for="item in shortlist.items" :key="item.id" class="col">
-        <ShortlistItem :item="item" :score="scoreFor(item.block)" @remove="removeItem" @change-note="changeNote" />
+        <ShortlistItem :item="item" :score="scoreFor(item.block)" :weights="weights" @remove="removeItem" @change-note="changeNote" />
       </div>
     </div>
   </section>
