@@ -504,6 +504,12 @@ onUnmounted(function () {
 .help-btn:hover {
   background: var(--terra-d);
 }
+/* Phones and tablets: lift the "?" above the page tab bar at the bottom (NavBar.vue) */
+@media (max-width: 991.98px) {
+  .help-btn {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}
 
 /* Over the whole page, under the light and the card (above the presets popup's 2000, which is closed by now) */
 .tour-blocker {
