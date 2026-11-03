@@ -13,7 +13,7 @@ import { useAuthStore } from '../stores/auth'
 const auth = useAuthStore()
 const router = useRouter()
 
-// Opened from the "Presets" button (true), or the first-visit welcome (false).
+// Opened from the "Presets" button (true), or the first-visit welcome (false)..
 // Read once: App.vue makes a new popup each time it opens.
 const reopened = auth.presetsOpen
 
