@@ -44,7 +44,8 @@ function onSkip() {
       <span class="eyebrow">{{ reopened ? 'Your presets' : 'Welcome' }}</span>
       <h2 id="profile-title" class="serif">What are you <em>looking for?</em></h2>
       <p class="small text-muted">
-        These set your starting filters on Search and the Map, and are saved on this device for next time.
+        These set your starting filters and what matters to you (Your Priorities) on Search and the Map,
+        and are saved on this device for next time.
       </p>
 
       <ProfileForm

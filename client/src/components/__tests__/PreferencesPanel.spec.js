@@ -56,6 +56,17 @@ describe('TestSuite1: PreferencesPanel', () => {
     expect(parkLevel.element.disabled).toBe(false)
   })
 
+  // Props: the presets form shows this panel over the Search page, which has one too, so the ids can be changed
+  it('Test5b: uses the ids it is given, so two panels on one page do not clash', () => {
+    const wrapper = mount(PreferencesPanel, {
+      props: { preferences: makeDefaultPreferences(), panelId: 'presets-priorities', idPrefix: 'presets-matters-' },
+    })
+
+    expect(wrapper.find('#presets-priorities').exists()).toBe(true)
+    expect(wrapper.find('#presets-matters-mrt').exists()).toBe(true)
+    expect(wrapper.find('#matters-mrt').exists()).toBe(false)
+  })
+
   // Emitted events: the category and the new choice go up to the page
   it('Test6: tells its parent when a tick box is unticked', async () => {
     const wrapper = mount(PreferencesPanel, { props: { preferences: makeDefaultPreferences() } })
