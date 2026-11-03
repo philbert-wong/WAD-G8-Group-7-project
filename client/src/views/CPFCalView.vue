@@ -250,11 +250,11 @@ function applyBudget() {
       <h4 class="mb-3">Step 1: Household finances</h4>
 
       <div class="card shadow-sm">
-        <div class="card-body p-4" @change="saveDetails" >
+        <div class="card-body p-3 p-md-4" @change="saveDetails">
           <!-- FEATURE 1 (Yujia): who is buying -->
-          <div class="row g-3">
-            <div class="col-12 col-md-6">
-              <label for="cal-buyer-type" class="form-label">Buying as</label>
+          <div class="row g-2 g-md-3">
+            <div class="col-md-6" :class="buyerType === 'single' ? 'col-12' : 'col-7'">
+              <label for="cal-buyer-type" class="form-label mb-1">Buying as</label>
               <select id="cal-buyer-type" v-model="buyerType" class="form-select">
                 <option value="single">Single buyer (35 or older)</option>
                 <option value="couple">Couple / family</option>
@@ -262,8 +262,8 @@ function applyBudget() {
               </select>
             </div>
 
-            <div v-if="buyerType !== 'single'" class="col-12 col-md-6">
-              <label for="cal-co-owners" class="form-label">Number of co-owners</label>
+            <div v-if="buyerType !== 'single'" class="col-5 col-md-6">
+              <label for="cal-co-owners" class="form-label mb-1">Number of co-owners</label>
               <select id="cal-co-owners" v-model="coOwnerCount" class="form-select">
                 <option :value="0">0</option>
                 <option :value="1">1</option>
@@ -275,59 +275,59 @@ function applyBudget() {
 
           <!-- FEATURE 1 (Yujia): one block per owner -->
           <div v-for="(owner, index) in activeOwners()" :key="index">
-            <hr />
-            <h5 class="mb-3">
+            <hr class="my-2 my-md-3" />
+            <h5 class="mb-2 mb-md-3">
               <span v-if="index === 0">Main owner</span>
               <span v-else>Co-owner {{ index }}</span>
             </h5>
 
-            <div class="row g-3">
-              <div class="col-12 col-md-6 col-lg-3">
-                <label :for="'cal-status-' + index" class="form-label">Buyer status</label>
+            <div class="row g-2 g-md-3">
+              <div class="col-5 col-md-6 col-lg-3">
+                <label :for="'cal-status-' + index" class="form-label mb-1">Buyer status</label>
                 <select :id="'cal-status-' + index" v-model="owner.status" class="form-select">
                   <option value="first">First-timer</option>
                   <option value="second">Second-timer</option>
                 </select>
               </div>
-              <div class="col-12 col-md-6 col-lg-3">
-                <label :for="'cal-income-' + index" class="form-label">Monthly gross income ($)</label>
+              <div class="col-7 col-md-6 col-lg-3">
+                <label :for="'cal-income-' + index" class="form-label mb-1">Monthly gross income ($)</label>
                 <input :id="'cal-income-' + index" v-model="owner.income" type="number" min="0" step="100" class="form-control" placeholder="e.g. 4000"   />
               </div>
-              <div class="col-12 col-md-6 col-lg-3">
-                <label :for="'cal-cpf-' + index" class="form-label">CPF OA savings ($)</label>
+              <div class="col-6 col-md-6 col-lg-3">
+                <label :for="'cal-cpf-' + index" class="form-label mb-1">CPF OA savings ($)</label>
                 <input :id="'cal-cpf-' + index" v-model="owner.cpf" type="number" min="0" step="1000" class="form-control" placeholder="e.g. 50000" />
               </div>
-              <div class="col-12 col-md-6 col-lg-3">
-                <label :for="'cal-cash-' + index" class="form-label">Cash savings ($)</label>
+              <div class="col-6 col-md-6 col-lg-3">
+                <label :for="'cal-cash-' + index" class="form-label mb-1">Cash savings ($)</label>
                 <input :id="'cal-cash-' + index" v-model="owner.cash" type="number" min="0" step="1000" class="form-control" placeholder="e.g. 20000" />
               </div>
             </div>
           </div>
 
           <!-- FEATURE 2 (Jihao): extra questions for the grants and the loan -->
-          <hr />
-          <h5 class="mb-3">About the flat</h5>
-          <div class="row g-3">
-            <div class="col-12 col-md-6 col-lg-3">
-              <label for="cal-flat-type" class="form-label">Flat type</label>
+          <hr class="my-2 my-md-3" />
+          <h5 class="mb-2 mb-md-3">About the flat</h5>
+          <div class="row g-2 g-md-3">
+            <div class="col-6 col-md-6 col-lg-3 order-1 order-md-0">
+              <label for="cal-flat-type" class="form-label mb-1">Flat type</label>
               <select id="cal-flat-type" v-model="flatType" class="form-select">
                 <option v-for="type in flatTypes" :key="type" :value="type">{{ type }}</option>
               </select>
             </div>
-            <div class="col-12 col-md-6 col-lg-3">
-              <label for="cal-phg" class="form-label">Parents / child</label>
+            <div class="col-12 col-md-6 col-lg-3 order-3 order-md-0">
+              <label for="cal-phg" class="form-label mb-1">Parents / child</label>
               <select id="cal-phg" v-model="phgOption" class="form-select">
                 <option value="none">Not living with or near them</option>
                 <option value="with">Will live WITH them</option>
                 <option value="near">Will live NEAR them (within 4 km)</option>
               </select>
             </div>
-            <div class="col-12 col-md-6 col-lg-3">
-              <label for="cal-years" class="form-label">Loan period (years)</label>
+            <div class="col-6 col-md-6 col-lg-3 order-2 order-md-0">
+              <label for="cal-years" class="form-label mb-1">Loan period (years)</label>
               <input id="cal-years" v-model="loanYears" type="number" min="1" :max="MAX_LOAN_YEARS" class="form-control" />
             </div>
-            <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
-              <div class="form-check mb-2">
+            <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end order-4 order-md-0">
+              <div class="form-check mb-md-2">
                 <input id="cal-employed" v-model="employed12Months" type="checkbox" class="form-check-input" />
                 <label for="cal-employed" class="form-check-label">Working for the past 12 months</label>
               </div>
