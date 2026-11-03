@@ -218,7 +218,7 @@ function distanceText(row) {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -269,7 +269,7 @@ function distanceText(row) {
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  font-size: 13px;
+  font-size: 14px;
 }
 /* Little arrow on top of the box, pointing up at the "i" button */
 .how-arrow {
@@ -295,7 +295,7 @@ function distanceText(row) {
 }
 .how-table thead th {
   border-top: none;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -308,7 +308,7 @@ function distanceText(row) {
 }
 /* Small grey line under a name or weight: the distance, or the importance word */
 .how-table .sub {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 /* The total row stands out */

@@ -1131,6 +1131,7 @@ onUnmounted(function () {
 
           <!-- Map options: show all flats / my shortlist, colour dots by price / priority score, and the amenity tick boxes
                (the colour key itself floats on the map: MapKey) -->
+          <CollapsiblePanel title="Map options" :start-open="true">
           <MapLegend
             :colour-by="colourBy"
             :amenity-types="amenityTypes"
@@ -1144,6 +1145,7 @@ onUnmounted(function () {
             @change-colour-by="changeColourBy"
             @toggle-amenity="toggleAmenity"
           />
+          </CollapsiblePanel>
 
         </div>
       </div>

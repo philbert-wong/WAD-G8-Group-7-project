@@ -19,22 +19,50 @@ function onSubmit() {
 </script>
 
 <template>
-  <form class="search-box d-flex gap-2 mb-3" @submit.prevent="onSubmit">
-    <input
-      :value="text"
-      type="search"
-      class="form-control cosy-input flex-grow-1"
-      placeholder="Town, street, block, postal code or any place e.g. Punggol, 560314"
-      @input="onInput"
-    />
-    <button class="act-btn primary" type="submit">Search</button>
+  <form class="search-box mb-3" role="search" @submit.prevent="onSubmit">
+    <!-- A short placeholder that fits on a phone; the examples are written out underneath, where they never get cut off -->
+    <label for="flat-search" class="visually-hidden">Search for flats</label>
+    <div class="d-flex gap-2">
+      <input
+        id="flat-search"
+        :value="text"
+        type="search"
+        class="form-control cosy-input flex-grow-1"
+        placeholder="Town, street or postal code"
+        aria-describedby="flat-search-hint"
+        @input="onInput"
+      />
+      <button class="act-btn primary search-btn" type="submit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-4-4" />
+        </svg>
+        Search
+      </button>
+    </div>
+    <div id="flat-search-hint" class="search-hint">For example: Punggol, Tampines St 21, Blk 314, or 560314</div>
   </form>
 </template>
 
 <style scoped>
-/* Slightly bigger text in the search box */
+/* A big, easy box (48px tall) with 16px text, so phones do not zoom in when you tap it */
 .search-box input {
   font-size: 16px;
+  min-height: 48px;
   padding: 11px 14px;
+}
+.search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+/* The examples under the box */
+.search-hint {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
 }
 </style>

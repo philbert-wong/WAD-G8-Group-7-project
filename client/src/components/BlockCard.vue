@@ -173,17 +173,21 @@ function barWidth(score) {
     </div>
 
     <div class="cbody">
-      <MatchScore v-if="showMatch" class="mb-2" :score="score" :distances="block.distances" :weights="weights" />
-
-      <!-- Price: the headline of the card -->
-      <div class="price serif">{{ formatRange(block.priceLow, block.priceHigh) }}</div>
-      <div class="price-sub">
-        Median {{ '$' + block.price.toLocaleString('en-SG') }} · {{ block.salesCount }} sale(s) in the last 12 months
+      <!-- Price (the headline of the card) and the priority score: side by side from tablets up, stacked on phones -->
+      <div class="summary">
+        <div class="price-block">
+          <div class="price-label">Price range, last 12 months</div>
+          <div class="price serif">{{ formatRange(block.priceLow, block.priceHigh) }}</div>
+          <div class="price-sub">
+            Median {{ '$' + block.price.toLocaleString('en-SG') }} · {{ block.salesCount }} sale(s)
+          </div>
+        </div>
+        <MatchScore v-if="showMatch" class="score-block" :score="score" :distances="block.distances" :weights="weights" />
       </div>
 
       <!-- Lease + MRT on one line -->
       <div class="facts">
-        <span>⏳ <b>{{ block.remainingLease }} years</b> lease</span>
+        <span>⏳ <b>{{ block.remainingLease }} years</b> left on the lease</span>
         <span>🚆 <b>{{ block.mrtWalkMinutes }} min walk</b> to {{ block.mrtName }}</span>
       </div>
 
@@ -288,7 +292,7 @@ function barWidth(score) {
   bottom: 12px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 12px;
   padding: 3px 8px;
   font-weight: 700;
 }
@@ -300,13 +304,13 @@ function barWidth(score) {
   align-self: center;
 }
 .head h3 {
-  font-size: 19px;
+  font-size: 20px;
   line-height: 1.2;
   margin: 0;
 }
 .meta {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 4px;
 }
 
@@ -314,83 +318,173 @@ function barWidth(score) {
 .cbody {
   grid-area: body;
   min-width: 0;
-  padding-top: 12px;
+  padding-top: 14px;
+}
+
+/* ---------- Phones (the base styles) ----------
+   Written for older users too (40-60): big text, one fact per line, big buttons, nothing extra. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.summary .score-block {
+  width: 100%;
+}
+/* Bigger text inside the priority score on phones */
+.summary .score-block :deep(.row1) {
+  font-size: 14px;
+}
+.summary .score-block :deep(.bar) {
+  height: 9px;
+}
+.price-label {
+  font-size: 14px;
+  color: var(--muted);
 }
 .price {
-  font-size: 25px;
+  font-size: 26px;
   line-height: 1.15;
   font-weight: 700;
 }
 .price-sub {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 2px;
 }
+/* One fact per line on phones */
 .facts {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  font-size: 14px;
-  margin: 10px 0 8px;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 16px;
+  margin: 14px 0;
 }
+/* Tags only from tablets up: on a phone they repeat the facts above */
 .tags {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
-/* Buttons. Phones: Save full width, then the other four in a 2 x 2 grid */
+/* Buttons. Phones: a big Save button, then the other four in an even 2 x 2 grid */
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-.save-btn {
-  width: 100%;
-  padding: 10px 14px;
+  gap: 10px;
 }
 .more-btns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
 }
-.more-btns .act-btn {
+.actions .act-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 48px; /* easy to tap */
   padding: 8px 6px;
-  font-size: 13px;
-  text-align: center;
+  font-size: 15px;
   white-space: nowrap;
+}
+.save-btn {
+  width: 100%;
+  font-size: 16px !important;
 }
 a.act-btn {
   text-decoration: none;
-  display: inline-block;
 }
 
-/* Big phones and tablets (Bootstrap sm, 576px, and up): there is room for the buttons in one row that wraps.
-   display: contents lets the four smaller buttons join Save in the same row */
+/* ---------- Big phones (Bootstrap sm, 576px): a bigger thumbnail, price and score side by side ---------- */
 @media (min-width: 576px) {
+  .bcard {
+    grid-template-columns: 110px 1fr;
+    column-gap: 18px;
+    padding: 18px;
+  }
+  .photo {
+    width: 110px;
+    height: 110px;
+  }
+  .head h3 {
+    font-size: 21px;
+  }
+  .meta {
+    font-size: 13px;
+  }
+  .summary {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+  }
+  /* The price never breaks onto two lines; the score bar takes the rest of the width (up to 320px) */
+  .price-block {
+    flex-shrink: 0;
+  }
+  .price {
+    font-size: 28px;
+    white-space: nowrap;
+  }
+  .price-label {
+    font-size: 13px;
+  }
+  .price-sub {
+    font-size: 14px;
+  }
+  .summary .score-block {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 190px;
+    max-width: 320px;
+  }
+  /* "Priority score" and "71/100 · Good" each stay on one line */
+  .summary .score-block :deep(.row1) {
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .summary .score-block :deep(.bar) {
+    height: 7px;
+  }
+  .facts {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    font-size: 14px;
+    margin: 10px 0 12px;
+  }
+  .tags {
+    display: flex;
+  }
+  /* All five buttons in rows that fill the card; display: contents lets the four join Save */
   .actions {
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: center;
-  }
-  .save-btn {
-    width: auto;
+    gap: 8px;
   }
   .more-btns {
     display: contents;
   }
   .actions .act-btn {
-    padding: 7px 12px;
+    flex: 1 1 0;
+    min-height: 40px;
+    padding: 8px 10px;
     font-size: 13px;
+  }
+  .save-btn {
+    width: auto;
+    font-size: 13px !important;
+    flex-grow: 1.4 !important; /* the main button is a bit wider */
   }
 }
 
-/* Laptops and bigger (Bootstrap lg, 992px): the map becomes a full-height column on the left,
-   the title and details sit on the right, and all five buttons share one row */
-@media (min-width: 992px) {
+/* ---------- Tablets and bigger (Bootstrap md, 768px): the map becomes a full-height column on the left,
+   the title and details sit on the right ---------- */
+@media (min-width: 768px) {
   .bcard {
-    grid-template-columns: 230px 1fr;
+    grid-template-columns: 200px 1fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:
       'photo head'
@@ -418,10 +512,27 @@ a.act-btn {
     padding: 20px 22px 0 0;
   }
   .head h3 {
+    font-size: 23px;
+  }
+  .cbody {
+    padding: 12px 22px 20px 0;
+  }
+}
+
+/* ---------- Laptops (Bootstrap lg, 992px): a wider map column, bigger price ---------- */
+@media (min-width: 992px) {
+  .bcard {
+    grid-template-columns: 230px 1fr;
+    column-gap: 24px;
+  }
+  .head {
+    padding: 22px 24px 0 0;
+  }
+  .head h3 {
     font-size: 24px;
   }
   .cbody {
-    padding: 10px 22px 20px 0;
+    padding: 14px 24px 22px 0;
   }
   .price {
     font-size: 30px;

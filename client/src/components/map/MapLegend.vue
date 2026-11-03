@@ -94,7 +94,7 @@ function isShown(key) {
     <!-- The colour key itself floats on the map (MapKey.vue), so it is in view next to the dots -->
 
     <!-- Amenity layers: tick a type to show its squares (the coloured square is its legend) -->
-    <h5 class="serif mt-3">Show amenities</h5>
+    <div class="small fw-semibold mt-3 mb-1">Show amenities</div>
     <div v-for="type in amenityTypes" :key="type.key" class="form-check">
       <input
         :id="'amenity-' + type.key"

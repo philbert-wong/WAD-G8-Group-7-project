@@ -86,7 +86,7 @@ function onLevelChange(key, event) {
 }
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 /* "priority score" in the hint: bold, in the accent colour, so the eye lands on it */
@@ -97,25 +97,31 @@ function onLevelChange(key, event) {
 /* One row per category: tick box on the left, dropdown on the right (Flexbox) */
 .prio-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+}
+.prio-row + .prio-row {
+  border-top: 1px solid var(--beige);
 }
 .chk {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
 }
 .chk input {
   width: 17px;
   height: 17px;
 }
+/* The dropdown sits under its name, lined up with the text (17px box + 10px gap = 27px) */
 .level {
-  width: 135px;
-  flex-shrink: 0;
+  width: calc(100% - 27px);
+  margin-left: 27px;
+  font-size: 14px;
+  min-height: 38px;
 }
 /* Green tick boxes (accent-color) */
 .chk input {

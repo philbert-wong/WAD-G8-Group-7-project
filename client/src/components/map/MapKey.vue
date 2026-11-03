@@ -139,7 +139,7 @@ function toggle() {
     left: 6px;
     bottom: 20px;
     padding: 5px 21px 5px 8px; /* room on the right for the arrow strip */
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.3;
   }
   .dot {

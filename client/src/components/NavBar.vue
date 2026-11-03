@@ -101,6 +101,7 @@ onMounted(function () {
       :to="tab.to"
       class="bottom-tab"
       :class="{ act: route.path === tab.to }"
+      :aria-label="tab.label"
       :aria-current="route.path === tab.to ? 'page' : null"
     >
       <span class="tab-icon">

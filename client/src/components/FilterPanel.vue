@@ -188,11 +188,11 @@ function onClear() {
 }
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 8px;
 }
 .flab {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   margin: 16px 0 6px;
   display: block;
@@ -206,7 +206,7 @@ function onClear() {
   margin-top: 16px;
 }
 .phg-row .form-check-label {
-  font-size: 13px;
+  font-size: 14px;
 }
 /* "Parents' postal code": dark like the other filter labels (not grey); the row already has a gap above */
 .parents-label {
@@ -226,7 +226,7 @@ function onClear() {
   background: #fffdf9;
   border-radius: 10px;
   padding: 7px 0;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #5c5449;
 }
@@ -254,7 +254,7 @@ function onClear() {
 /* Small terracotta link to the affordability calculator */
 .calc-link {
   display: inline-block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--terra);
   margin-top: 2px;
@@ -281,7 +281,7 @@ function onClear() {
   background: none;
   text-align: center;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   margin-top: 10px;
   text-decoration: underline;
 }
