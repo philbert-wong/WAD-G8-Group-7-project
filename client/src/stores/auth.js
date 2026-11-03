@@ -13,6 +13,7 @@ import { defineStore } from 'pinia'
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
 import { useFiltersStore } from './filters'
+import { mergeWithDefaults, readSavedPriorities, saveSavedPriorities } from '../utils/priorities.js'
 
 // Tells axios to add the token to every request from now on
 function sendTokenWithEveryRequest(token) {
@@ -128,12 +129,20 @@ export const useAuthStore = defineStore('auth', function () {
   // They go in localStorage (so they work without an account, and come back after a refresh),
   // and when logged in, on the account too (so they follow you to another computer).
   // On a problem, profileError holds the message to show.
-  async function saveProfile(answers) {
+  async function saveProfile(allAnswers) {
+    // The form also sends Your Priorities. They are not part of the profile, so they are taken out and saved apart
+    const answers = Object.assign({}, allAnswers)
+    const priorities = answers.priorities
+    delete answers.priorities
+
     profileError.value = ''
     presetsAsked.value = true
     presetsOpen.value = false
     profile.value = answers
     localStorage.setItem('presets', JSON.stringify(answers))
+    if (priorities) {
+      saveSavedPriorities(priorities) // on this device: Search, the Map, Compare and the Shortlist read them from here
+    }
     useFiltersStore().applyProfile(answers)
     presetsVersion.value = presetsVersion.value + 1
     if (token.value === null) {
@@ -147,6 +156,14 @@ export const useAuthStore = defineStore('auth', function () {
       profile.value = response.data.profile
       profileLoaded.value = true
       localStorage.setItem('presets', JSON.stringify(profile.value))
+      if (priorities) {
+        // ...and on the account, so they follow you to another computer (the sort is kept as it was)
+        let sortBy = localStorage.getItem('sortBy')
+        if (sortBy === null) {
+          sortBy = 'match'
+        }
+        await axios.put(`${BASE_URL}/api/auth/preferences`, { preferences: { panel: priorities, sortBy: sortBy } })
+      }
     } catch (e) {
       // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
       if (e.response && e.response.data && e.response.data.message) {
@@ -156,6 +173,23 @@ export const useAuthStore = defineStore('auth', function () {
       }
     }
     profileSaving.value = false
+  }
+
+  // Your Priorities for the profile page. Logged in, the account's copy is asked for and kept on this device too
+  // (the same thing Search does when it opens); otherwise, or if the server cannot be reached, the copy on this device.
+  async function loadPriorities() {
+    if (token.value !== null) {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/auth/preferences`)
+        const saved = response.data.preferences
+        if (saved && saved.panel) {
+          saveSavedPriorities(mergeWithDefaults(saved.panel))
+        }
+      } catch (e) {
+        // The copy on this device is used instead
+      }
+    }
+    return readSavedPriorities()
   }
 
   // "Skip for now" in the popup: close it and keep the presets as they are. Remembered on this device,
@@ -251,6 +285,7 @@ export const useAuthStore = defineStore('auth', function () {
     register,
     loadProfile,
     saveProfile,
+    loadPriorities,
     skipPresets,
     openPresets,
     savePhgToggle,

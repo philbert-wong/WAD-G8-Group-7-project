@@ -8,6 +8,10 @@ import { CATEGORIES, IMPORTANCE_LEVELS } from '../utils/matchScore.js'
 defineProps({
   preferences: Object, // { school: { ticked: true, level: 3 }, mrt: { ... }, ... }
   onMap: { type: Boolean, default: false }, // true on the Map page, which colours dots instead of sorting cards
+  // The ids of the panel and its tick boxes. The presets form shows this panel too, so it gives its own ids:
+  // two panels on the same page (the popup over Search) must not share ids.
+  panelId: { type: String, default: 'priorities-panel' },
+  idPrefix: { type: String, default: 'matters-' },
 })
 const emit = defineEmits(['change-ticked', 'change-level'])
 
@@ -23,7 +27,7 @@ function onLevelChange(key, event) {
 </script>
 
 <template>
-  <div id="priorities-panel" class="prio">
+  <div :id="panelId" class="prio">
     <h4 class="serif">Your Priorities</h4>
     <!-- How these change what you see: the sort on Search, the dot colours on the Map -->
     <div v-if="onMap" class="hint">
@@ -35,9 +39,9 @@ function onLevelChange(key, event) {
 
     <div v-for="category in CATEGORIES" :key="category.key" class="prio-row">
       <!-- Tick box: unticked means this category is ignored (weight 0) -->
-      <label class="chk" :for="'matters-' + category.key">
+      <label class="chk" :for="idPrefix + category.key">
         <input
-          :id="'matters-' + category.key"
+          :id="idPrefix + category.key"
           type="checkbox"
           :checked="preferences[category.key].ticked"
           @change="onTickChange(category.key, $event)"

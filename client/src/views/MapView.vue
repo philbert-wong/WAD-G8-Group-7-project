@@ -968,6 +968,8 @@ watch(
     return auth.presetsVersion
   },
   async function () {
+    // Your Priorities may have changed in the form too: start from the saved ones again
+    preferences.value = loadSavedPreferences()
     // Like Search: the new town becomes the search (so both pages show that town)
     if (auth.profile !== null && auth.profile.town) {
       filterStore.setFilter('q', auth.profile.town)

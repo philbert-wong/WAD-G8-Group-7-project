@@ -37,9 +37,10 @@ const shortlistErrorMessage = ref('')
 // The "create an account" strip for a guest who has saved presets. Closing it is remembered on this device.
 const accountBannerClosed = ref(localStorage.getItem('accountBannerClosed') === 'yes')
 
-// Only for someone who is not logged in and has presets saved on this device
+// Only for someone who is not logged in and has presets saved on this device.
+// Hidden while the "Saving flats needs an account" alert is showing: both say "create an account", and one message is enough.
 const showAccountBanner = computed(function () {
-  return !auth.isLoggedIn && auth.profile !== null && !accountBannerClosed.value
+  return !auth.isLoggedIn && auth.profile !== null && !accountBannerClosed.value && shortlistErrorMessage.value === ''
 })
 
 function closeAccountBanner() {
@@ -140,6 +141,7 @@ watch(
   },
   function () {
     applyTownPreset()
+    loadChoices() // Your Priorities may have changed in the form too
     search()
   },
 )
@@ -414,6 +416,8 @@ function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
   if (!auth.isLoggedIn) {
     shortlistErrorMessage.value = 'Saving flats needs an account.'
+    // The message is at the top of the page, and the card that was clicked may be far down: scroll up to it
+    window.scrollTo({ top: 0, behavior: 'smooth' })
     return
   }
 

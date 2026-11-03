@@ -53,6 +53,26 @@ test('should show a clear message when the search matches nothing', async ({ pag
   await expect(page.getByText('Nothing found for "zzzzqqqq"')).toBeVisible();
 });
 
+test('should show only one account message when a visitor with saved presets tries to save a flat', async ({ page }) => {
+  // setup: save the presets in the first-visit popup (that shows the "create an account" banner),
+  // then search a postal code that has exactly one flat
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Show me flats' }).click();
+  await page.getByRole('button', { name: 'Skip tour' }).click();
+  await expect(page.getByText('flat(s) match your filters')).toBeVisible();
+  await expect(page.getByText('Presets saved on this device.')).toBeVisible();
+  await page.getByRole('searchbox').fill('761672');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(page.getByText('672A YISHUN AVE 4')).toBeVisible();
+
+  // actions
+  await page.getByRole('button', { name: 'Save to Shortlist' }).click();
+
+  // assert: the "needs an account" message is shown, and the banner has made way for it
+  await expect(page.getByText('Saving flats needs an account.')).toBeVisible();
+  await expect(page.getByText('Presets saved on this device.')).not.toBeVisible();
+});
+
 test('should tell a visitor without an account that saving a flat needs one', async ({ page }) => {
   // setup: search a postal code that has exactly one flat, so there is only one Save button on the page
   // (761672 is Blk 672A Yishun Ave 4, from the seed data)
