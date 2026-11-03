@@ -3,7 +3,9 @@
 // (Logged in it never shows: the presets entered before signing up are copied to the account.)
 // It starts with the presets saved last time (localStorage); the answers become the starting filters on Search and the Map.
 // "Show me flats" keeps them on this device and opens Search with them applied (an account made later keeps them too).
-// "Skip for now" closes it for this visit without using what is typed above, keeps the saved presets, and opens Search.
+// "Skip for now" closes it without using what is typed above, keeps the saved presets, and opens Search.
+// A guest can open it again any time with the "Presets" button in the top bar (NavBar.vue): then it says
+// "Your presets", saves with "Save presets", closes with "Cancel", and stays on the page they are on.
 import { useRouter } from 'vue-router'
 import ProfileForm from './ProfileForm.vue'
 import { useAuthStore } from '../stores/auth'
@@ -11,18 +13,27 @@ import { useAuthStore } from '../stores/auth'
 const auth = useAuthStore()
 const router = useRouter()
 
-// "Show me flats": save the presets on this device and use them as the filters, then open Search, which reloads
-// its cards with them (SearchView watches auth.presetsVersion). Creating an account later copies them to the account.
-// (Once saved, App.vue stops showing this popup.)
+// Opened from the "Presets" button (true), or the first-visit welcome (false).
+// Read once: App.vue makes a new popup each time it opens.
+const reopened = auth.presetsOpen
+
+// "Show me flats" / "Save presets": save the presets on this device and use them as the filters.
+// The first time, open Search; from the button, stay on this page (Search and the Map both watch
+// auth.presetsVersion and reload with them). Creating an account later copies them to the account.
 async function onSave(answers) {
   await auth.saveProfile(answers)
-  router.push('/')
+  if (!reopened) {
+    router.push('/')
+  }
 }
 
-// "Skip for now": close the popup for this visit (the form's answers are not used), and go to Search
+// "Skip for now": close the popup (the form's answers are not used) and go to Search.
+// "Cancel" (opened from the button): just close it, on the same page.
 function onSkip() {
   auth.skipPresets()
-  router.push('/')
+  if (!reopened) {
+    router.push('/')
+  }
 }
 </script>
 
@@ -30,7 +41,7 @@ function onSkip() {
   <!-- The dark layer over the page, with the white box in the middle -->
   <div class="overlay">
     <div class="box cosy-card cosy-shadow" role="dialog" aria-modal="true" aria-labelledby="profile-title">
-      <span class="eyebrow">Welcome</span>
+      <span class="eyebrow">{{ reopened ? 'Your presets' : 'Welcome' }}</span>
       <h2 id="profile-title" class="serif">What are you <em>looking for?</em></h2>
       <p class="small text-muted">
         These set your starting filters on Search and the Map, and are saved on this device for next time.
@@ -40,11 +51,17 @@ function onSkip() {
         :profile="auth.profile"
         :saving="auth.profileSaving"
         :error="auth.profileError"
-        button-text="Show me flats"
+        :button-text="reopened ? 'Save presets' : 'Show me flats'"
         @save="onSave"
       />
 
-      <button type="button" class="skip" :disabled="auth.profileSaving" @click="onSkip">Skip for now</button>
+      <button type="button" class="skip" :disabled="auth.profileSaving" @click="onSkip">
+        {{ reopened ? 'Cancel' : 'Skip for now' }}
+      </button>
+      <!-- First visit: say where to find this again, so skipping is not a dead end -->
+      <p v-if="!reopened" class="small text-muted text-center mt-1 mb-0">
+        You can change these any time with the <strong>Presets</strong> button at the top.
+      </p>
     </div>
   </div>
 </template>

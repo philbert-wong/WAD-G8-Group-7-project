@@ -47,7 +47,8 @@ function closeAccountBanner() {
   localStorage.setItem('accountBannerClosed', 'yes')
 }
 
-// The search box text ('' = not used). Only the Search page has a search box, so it is not in the filters store.
+// The search box text ('' = not used). It changes on every key; the text actually SEARCHED goes in the filters store
+// (filters.q, see search() below), so the Map shows the same flats and the box is filled in again when you come back.
 const searchText = ref('')
 const results = ref([])
 const total = ref(0)
@@ -153,6 +154,8 @@ async function search() {
   placeName.value = ''
   showSuggestions.value = false // searching (Enter, the button, a filter) closes the suggestions
   const typed = searchText.value.trim()
+  // Share what was searched: the Map shows these same flats (MapView reads filters.q)
+  filterStore.setFilter('q', typed)
 
   try {
     // The search text plus the shared filters
@@ -436,7 +439,12 @@ function loadPage() {
   if (budget !== undefined) {
     filterStore.setFilter('maxPrice', String(budget))
   }
-  applyTownPreset()
+  // Back from the Map (or another page): keep the last search. Nothing searched yet: start with the preset town.
+  if (filterStore.filters.q !== '') {
+    searchText.value = filterStore.filters.q
+  } else {
+    applyTownPreset()
+  }
   search()
   loadAreas()
   if (auth.isLoggedIn) {

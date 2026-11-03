@@ -36,6 +36,8 @@ export const useAuthStore = defineStore('auth', function () {
   // true when "Skip for now" was pressed on this device before. It is saved in localStorage, so the popup
   // does not come back after a refresh (logging out forgets it, so the next person is asked)
   const presetsSkipped = ref(localStorage.getItem('presetsSkipped') === 'yes')
+  // true while a guest has the popup open from the "Presets" button in the top bar (to change their presets later)
+  const presetsOpen = ref(false)
   // Goes up by 1 every time new presets are saved, so Search and the Map can watch it and reload with them
   const presetsVersion = ref(0)
   const profileSaving = ref(false)
@@ -47,11 +49,14 @@ export const useAuthStore = defineStore('auth', function () {
   })
 
   // Show the presets popup: only to a logged-out visitor who has no presets saved on this device and has not
-  // skipped it before. A returning guest keeps their presets (localStorage) and changes them with the filters.
+  // skipped it before. A returning guest opens it again with the "Presets" button in the top bar (presetsOpen).
   // Logged in, it never shows: the presets were entered before signing up (and are copied to the account),
-  // or come from the account; they can be changed on the profile page.
+  // or come from the account; they can be changed on the profile page (the "Profile" button in the same place).
   const needsProfile = computed(function () {
-    return token.value === null && !presetsAsked.value && profile.value === null && !presetsSkipped.value
+    if (token.value !== null) {
+      return false
+    }
+    return presetsOpen.value || (!presetsAsked.value && profile.value === null && !presetsSkipped.value)
   })
 
   // ---------- actions ----------
@@ -126,6 +131,7 @@ export const useAuthStore = defineStore('auth', function () {
   async function saveProfile(answers) {
     profileError.value = ''
     presetsAsked.value = true
+    presetsOpen.value = false
     profile.value = answers
     localStorage.setItem('presets', JSON.stringify(answers))
     useFiltersStore().applyProfile(answers)
@@ -157,7 +163,13 @@ export const useAuthStore = defineStore('auth', function () {
   function skipPresets() {
     presetsAsked.value = true
     presetsSkipped.value = true
+    presetsOpen.value = false
     localStorage.setItem('presetsSkipped', 'yes')
+  }
+
+  // The "Presets" button in the top bar (guests): open the popup again, filled in with the saved presets
+  function openPresets() {
+    presetsOpen.value = true
   }
 
   // The "Near parents (PHG)" switch on the map was flipped: remember it on the profile.
@@ -233,12 +245,14 @@ export const useAuthStore = defineStore('auth', function () {
     profileSaving,
     profileError,
     needsProfile,
+    presetsOpen,
     presetsVersion,
     login,
     register,
     loadProfile,
     saveProfile,
     skipPresets,
+    openPresets,
     savePhgToggle,
     logout,
   }

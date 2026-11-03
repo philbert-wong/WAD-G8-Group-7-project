@@ -53,20 +53,40 @@ onMounted(function () {
         </RouterLink>
       </div>
 
-      <!-- Logged in: email + Logout. Logged out: a Login button. -->
+      <!-- Logged in: Profile + Logout. Logged out: Presets + Login. Same place, same pills, so "my settings" are always top right. -->
       <div v-if="auth.isLoggedIn" class="d-flex align-items-center gap-2">
-        <span class="small text-muted d-none d-sm-inline">{{ auth.user.email }}</span>
-        <!-- Profile button (icon + word, same pill as Logout, so it is clear it can be pressed): opens the profile settings page -->
-        <RouterLink to="/profile" class="btn-short account" :class="{ act: route.path === '/profile' }" title="Your profile">
-          <svg width="16" height="16"viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- Profile button (icon + word, same pill as Logout, so it is clear it can be pressed): opens the profile settings page.
+             The email is in the tooltip (and on the profile page), so the bar stays on one line. -->
+        <RouterLink
+          to="/profile"
+          class="btn-short account"
+          :class="{ act: route.path === '/profile' }"
+          :title="'Your profile (' + auth.user.email + ')'"
+          aria-label="Your profile"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="8" r="4" />
             <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
           </svg>
-          Profile
+          <!-- The word only from sm up: on a phone the pill keeps just the icon, so it fits next to the logo -->
+          <span class="d-none d-sm-inline">Profile</span>
         </RouterLink>
         <button class="btn-short" @click="onLogout">Logout</button>
       </div>
-      <RouterLink v-else to="/login" class="btn-short">Login</RouterLink>
+      <div v-else class="d-flex align-items-center gap-2">
+        <!-- Presets button (guests): opens the presets popup again, to change the town, budget... saved on this device -->
+        <button type="button" class="btn-short account" title="Change your presets" aria-label="Your presets" @click="auth.openPresets()">
+          <!-- Three sliders: the usual "settings / filters" icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" />
+            <circle cx="16" cy="6" r="2" />
+            <circle cx="10" cy="12" r="2" />
+            <circle cx="18" cy="18" r="2" />
+          </svg>
+          <span class="d-none d-sm-inline">Presets</span>
+        </button>
+        <RouterLink to="/login" class="btn-short">Login</RouterLink>
+      </div>
 
       <!-- Small screens: the tabs as a scrollable row under the logo -->
       <div class="tabs-small d-lg-none w-100">
@@ -148,7 +168,7 @@ onMounted(function () {
   color: var(--terra);
 }
 
-/* Profile button: the Login / Logout pill (below) with the icon next to the word;
+/* Profile / Presets buttons: the Login / Logout pill (below) with the icon next to the word;
    terracotta outline and text while we are on the profile page */
 .account {
   display: inline-flex;

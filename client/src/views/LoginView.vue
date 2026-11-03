@@ -12,7 +12,7 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-// Opened as /createaccount (the presets popup's "Save my presets" comes here): open "Create account" and say why
+// Opened as /createaccount (the "create a free account" links on Search come here): open "Create account" and say why
 const fromPresets = computed(function () {
   return route.path === '/createaccount'
 })
@@ -20,7 +20,7 @@ const fromPresets = computed(function () {
 // 'login' or 'register': which tab is open
 const mode = ref(fromPresets.value ? 'register' : 'login')
 
-// Already on this page (e.g. /login) when "Save my presets" sends us to /createaccount: Vue keeps the same page,
+// Already on this page (e.g. /login) when a link sends us to /createaccount: Vue keeps the same page,
 // so switch to the "Create account" tab here
 watch(fromPresets, function (yes) {
   if (yes) {
@@ -102,8 +102,10 @@ async function submit() {
           </div>
 
           <div v-else>
-            <!-- From the presets popup: a small reminder of why to make an account -->
-            <p v-if="fromPresets" class="small text-muted mb-2">Create an account to save your presets.</p>
+            <!-- From a "create a free account" link: a small reminder of why to make an account -->
+            <p v-if="fromPresets" class="small text-muted mb-2">
+              Create an account to keep your presets and shortlist on any device.
+            </p>
 
             <!-- Tabs: Log in / Create account -->
             <ul class="nav nav-tabs mb-3">
