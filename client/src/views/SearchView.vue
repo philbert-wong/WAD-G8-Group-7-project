@@ -40,6 +40,8 @@ const accountBannerClosed = ref(localStorage.getItem('accountBannerClosed') === 
 
 // true after a guest tries to save a flat: the message then shows even if it was closed before
 const accountPromptOpen = ref(false)
+// The flat a guest last tried to save (e.g. "Blk 225 PENDING RD"), so the message can name it. '' = none.
+const triedToSave = ref('')
 
 // The ONE "create an account" message, for someone who is not logged in. It shows when they have presets
 // saved on this device (unless they closed it), or when they just tried to save a flat.
@@ -252,6 +254,13 @@ const filtersOpen = ref(false)
 // The "☰ Filters" button opens the drawer
 function openFilters() {
   filtersOpen.value = true
+  // Move the keyboard focus into the drawer, so Tab starts there and Esc can close it
+  setTimeout(function () {
+    const drawer = document.getElementById('filter-drawer')
+    if (drawer !== null) {
+      drawer.focus()
+    }
+  }, 50)
 }
 
 // The ✕ button and the dark backdrop close it
@@ -462,6 +471,7 @@ function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
   if (!auth.isLoggedIn) {
     accountPromptOpen.value = true // the one "create an account" message, under the search box
+    triedToSave.value = 'Blk ' + block.block + ' ' + block.street
     // The message is at the top of the page, and the card that was clicked may be far down: scroll up to it
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
@@ -510,7 +520,7 @@ onMounted(loadPage)
   <section>
     <!-- Hero title, then results (left) + sidebar (right) -->
     <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
-    <p class="page-sub">Search blocks, compare real sale prices, and keep a shortlist.</p>
+    <p class="page-sub">Explore HDB blocks using past resale prices, compare them, and keep a shortlist.</p>
 
     <div v-if="shortlistErrorMessage" class="alert alert-warning">
       {{ shortlistErrorMessage }}
@@ -544,16 +554,18 @@ onMounted(loadPage)
       role="status"
     >
       <span>
+        <!-- After a guest pressed Save: name the flat, so the jump up to this message makes sense -->
+        <template v-if="triedToSave">To save <strong>{{ triedToSave }}</strong>, you need an account. </template>
         <RouterLink to="/createaccount"><strong>Create a free account</strong></RouterLink>
         to save flats and keep your presets on any device.
-        Already have one? <RouterLink to="/login">Log in</RouterLink>.
+        Already have one? <RouterLink to="/login">Log in</RouterLink><template v-if="triedToSave">, then press Save on it again</template>.
       </span>
       <button type="button" class="btn-close" aria-label="Close" @click="closeAccountPrompt"></button>
     </div>
 
     <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->
     <div class="row g-4 mt-1">
-      <div class="col-lg-8 order-2 order-lg-1">
+      <div class="col-lg-8 order-2 order-lg-1 results-col">
         <!-- Results bar. Computers: count on the left, Sort on the right.
              Phones and tablets: "☰ Filters" and Sort side by side on top, the count on the line below.
              (order-1 / order-2 swap their places on small screens.) Always shown, so the filters can
@@ -588,9 +600,38 @@ onMounted(loadPage)
           </div>
         </div>
 
+        <!-- What is being used to pick these flats, in words, so nobody has to remember what they set -->
+        <div class="active-filters mb-3" aria-label="Filters in use">
+          <span class="af-label">Showing:</span>
+          <span v-if="filterStore.filters.q" class="af-chip">"{{ filterStore.filters.q }}"</span>
+          <span class="af-chip">
+            <template v-if="filterStore.filters.maxPrice === ''">Any budget</template>
+            <template v-else>Up to {{ '$' + Number(filterStore.filters.maxPrice).toLocaleString('en-SG') }}</template>
+          </span>
+          <span class="af-chip">
+            <template v-if="filterStore.filters.flatType === ''">Any flat type</template>
+            <template v-else>{{ filterStore.filters.flatType.toLowerCase() }}</template>
+          </span>
+          <span class="af-chip">{{ filterStore.filters.minLease }}+ years left on lease</span>
+          <span v-if="parentName" class="af-chip">Near {{ parentName }}</span>
+          <button type="button" class="af-edit d-lg-none" @click="openFilters">Edit filters</button>
+        </div>
+
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
 
+        <!-- Nothing matched: say so plainly and offer the two ways out -->
+        <div v-else-if="total === 0" class="empty-panel" role="status">
+          <h2 class="h5 mb-1">No flats match these filters</h2>
+          <p class="mb-3">Try a higher budget, a shorter lease, or any flat type.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="act-btn primary" @click="openFilters">Edit filters</button>
+            <button type="button" class="act-btn" @click="clearFilters">Clear all filters</button>
+          </div>
+        </div>
+
+        <!-- results-list: lets a design look place the cards in a grid -->
+        <div class="results-list">
         <BlockCard
           v-for="item in visibleResults"
           :key="item.block.id"
@@ -601,6 +642,7 @@ onMounted(loadPage)
           show-match
           @toggle-save="toggleSave"
         />
+        </div>
 
         <nav v-if="totalPages > 1" class="d-flex justify-content-center align-items-center gap-2 mb-4">
           <button class="act-btn" type="button" :disabled="page === 1" @click="goToPage(page - 1)">
@@ -613,12 +655,20 @@ onMounted(loadPage)
         </nav>
       </div>
 
-      <div class="col-lg-4 order-1 order-lg-2">
+      <div class="col-lg-4 order-1 order-lg-2 side-col">
         <!-- Dark backdrop behind the open drawer; tapping it closes the drawer -->
         <div v-if="filtersOpen" class="drawer-backdrop d-lg-none" @click="closeFilters"></div>
 
         <!-- On a computer: the normal sidebar. On phones and tablets: a drawer from the left (see the CSS below) -->
-        <div id="filter-drawer" class="sidebar filter-drawer" :class="{ open: filtersOpen }">
+        <!-- Esc closes the drawer (phones / tablets) -->
+        <div
+          id="filter-drawer"
+          tabindex="-1"
+          class="sidebar filter-drawer"
+          :class="{ open: filtersOpen }"
+          :aria-label="filtersOpen ? 'Filters' : null"
+          @keydown.esc="closeFilters"
+        >
           <div class="d-flex justify-content-between align-items-center mb-3 d-lg-none">
             <strong>Filters</strong>
             <button type="button" class="btn-close" aria-label="Close filters" @click="closeFilters"></button>
@@ -627,13 +677,14 @@ onMounted(loadPage)
           <!-- Your Priorities first: the results are sorted by priority score by default, so it should not be
                hidden under the filters (mb-3: the gap before the filters card) -->
           <PreferencesPanel
-            class="mb-3"
+            class="mb-3 drawer-prio"
             :preferences="preferences"
             @change-ticked="changeTicked"
             @change-level="changeLevel"
           />
 
           <FilterPanel
+            class="drawer-filters"
             :filters="filterStore.filters"
             :phg-place-name="parentName"
             @change-filter="setFilter"
@@ -711,4 +762,56 @@ onMounted(loadPage)
 
 
 
+
+/* "Showing: Up to $760,000 · Any flat type · 60+ years left on lease  [Edit filters]" */
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+.af-label {
+  color: var(--muted);
+  margin-right: 2px;
+}
+.af-chip {
+  background: var(--beige);
+  border-radius: 999px;
+  padding: 4px 12px;
+  text-transform: none;
+}
+.af-edit {
+  border: 0;
+  background: none;
+  color: var(--terra);
+  font-weight: 700;
+  text-decoration: underline;
+  min-height: 44px;
+  padding: 0 6px;
+}
+
+/* No results */
+.empty-panel {
+  background: #fff;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+/* Phones and tablets: in the filter drawer, the budget and flat type come first, then Your Priorities */
+@media (max-width: 991.98px) {
+  .filter-drawer {
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer-filters {
+    order: 1;
+    margin-bottom: 16px;
+  }
+  .drawer-prio {
+    order: 2;
+  }
+}
 </style>

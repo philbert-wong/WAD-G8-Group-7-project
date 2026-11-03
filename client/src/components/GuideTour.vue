@@ -356,6 +356,22 @@ function backStep() {
 
 let autoStartTimer = null
 
+// First visit to a page: instead of starting the tour by itself, show a small invitation ("Take the tour" / "Skip tour"),
+// so a new visitor can look at the page first. true = the invitation is showing.
+const inviting = ref(false)
+
+// "Take the tour" in the invitation
+function acceptInvite() {
+  inviting.value = false
+  startTour()
+}
+
+// "Skip tour" in the invitation: the same as skipping the tour, so it is not offered again on this page
+function declineInvite() {
+  inviting.value = false
+  localStorage.setItem(seenKey(route.path), 'yes')
+}
+
 // First visit to a page that has a tour, and the presets popup is closed: start that page's tour.
 // It waits a moment first, so the page and its cards (or map dots) have loaded.
 function autoStartIfNew() {
@@ -370,7 +386,7 @@ function autoStartIfNew() {
   autoStartTimer = setTimeout(function () {
     // Check again: the user may have moved to another page in the meantime
     if (route.path === page && !auth.needsProfile && !open.value) {
-      startTour()
+      inviting.value = true
     }
   }, 1200)
 }
@@ -385,6 +401,7 @@ watch(
     if (open.value) {
       closeTour()
     }
+    inviting.value = false
     autoStartIfNew()
   },
 )
@@ -436,6 +453,15 @@ onUnmounted(function () {
 
 <template>
   <!-- The round Help button, bottom-right on every page -->
+  <!-- First visit to a page: a small invitation above the "?" button (it does not cover the page) -->
+  <div v-if="inviting && !open" class="tour-invite" role="dialog" aria-label="Tour of this page">
+    <p class="mb-2"><strong>New here?</strong> A 30-second tour shows you around this page.</p>
+    <div class="d-flex gap-2">
+      <button type="button" class="invite-yes" @click="acceptInvite">Take the tour</button>
+      <button type="button" class="invite-no" @click="declineInvite">Skip tour</button>
+    </div>
+  </div>
+
   <button
     v-if="!open"
     type="button"
@@ -504,6 +530,44 @@ onUnmounted(function () {
 .help-btn:hover {
   background: var(--terra-d);
 }
+/* The first-visit invitation: a small card above the "?" button */
+.tour-invite {
+  position: fixed;
+  right: 20px;
+  bottom: 84px;
+  z-index: 1031;
+  width: min(320px, calc(100vw - 40px));
+  background: #0f172a;
+  color: #fff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  font-size: 15px;
+}
+.invite-yes,
+.invite-no {
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0 16px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.invite-yes {
+  border: 0;
+  background: #fff;
+  color: #0f172a;
+}
+.invite-no {
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: #fff;
+}
+@media (max-width: 991.98px) {
+  .tour-invite {
+    bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* Phones and tablets: lift the "?" above the page tab bar at the bottom (NavBar.vue) */
 @media (max-width: 991.98px) {
   .help-btn {

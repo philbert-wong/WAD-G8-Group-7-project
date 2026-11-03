@@ -243,7 +243,19 @@ function applyBudget() {
     <!-- Page heading -->
     <span class="eyebrow">Affordability</span>
     <h1 class="page-title serif">How much can I <em>afford?</em></h1>
-    <p class="text-muted small mb-4">Step {{ currentStep }} of 3 · an estimate for a resale flat with an HDB loan</p>
+    <p class="text-muted mb-3">An estimate for a resale flat with an HDB loan. Three short steps:</p>
+    <!-- The three steps by name, the current one highlighted, so you know what is coming -->
+    <ol class="stepper mb-4" aria-label="Steps">
+      <li :class="{ now: currentStep === 1, done: currentStep > 1 }" :aria-current="currentStep === 1 ? 'step' : null">
+        <span class="num">1</span> Your finances
+      </li>
+      <li :class="{ now: currentStep === 2, done: currentStep > 2 }" :aria-current="currentStep === 2 ? 'step' : null">
+        <span class="num">2</span> Grants
+      </li>
+      <li :class="{ now: currentStep === 3 }" :aria-current="currentStep === 3 ? 'step' : null">
+        <span class="num">3</span> Your budget
+      </li>
+    </ol>
 
     <!-- ===================== STEP 1: Household (FEATURE 1 + FEATURE 2) ===================== -->
     <div v-if="currentStep === 1">
@@ -253,7 +265,7 @@ function applyBudget() {
         <div class="card-body p-3 p-md-4" @change="saveDetails">
           <!-- FEATURE 1 (Yujia): who is buying -->
           <div class="row g-2 g-md-3">
-            <div class="col-md-6" :class="buyerType === 'single' ? 'col-12' : 'col-7'">
+            <div class="col-12 col-md-6">
               <label for="cal-buyer-type" class="form-label mb-1">Buying as</label>
               <select id="cal-buyer-type" v-model="buyerType" class="form-select">
                 <option value="single">Single buyer (35 or older)</option>
@@ -262,8 +274,9 @@ function applyBudget() {
               </select>
             </div>
 
-            <div v-if="buyerType !== 'single'" class="col-5 col-md-6">
+            <div v-if="buyerType !== 'single'" class="col-12 col-md-6">
               <label for="cal-co-owners" class="form-label mb-1">Number of co-owners</label>
+              <div class="help-text">Other buyers, not counting you</div>
               <select id="cal-co-owners" v-model="coOwnerCount" class="form-select">
                 <option :value="0">0</option>
                 <option :value="1">1</option>
@@ -282,22 +295,29 @@ function applyBudget() {
             </h5>
 
             <div class="row g-2 g-md-3">
-              <div class="col-5 col-md-6 col-lg-3">
+              <div class="col-12 col-md-6 col-lg-3">
                 <label :for="'cal-status-' + index" class="form-label mb-1">Buyer status</label>
                 <select :id="'cal-status-' + index" v-model="owner.status" class="form-select">
                   <option value="first">First-timer</option>
                   <option value="second">Second-timer</option>
                 </select>
+                <!-- A short explanation, only when you want it (plain HTML <details>) -->
+                <details class="help-more">
+                  <summary>What is this?</summary>
+                  First-timer: has never bought a subsidised HDB flat or received a CPF housing grant.
+                  Second-timer: has done one of these before.
+                </details>
               </div>
-              <div class="col-7 col-md-6 col-lg-3">
+              <div class="col-12 col-md-6 col-lg-3">
                 <label :for="'cal-income-' + index" class="form-label mb-1">Monthly gross income ($)</label>
+                <div class="help-text">Before CPF deductions</div>
                 <input :id="'cal-income-' + index" v-model="owner.income" type="number" min="0" step="100" class="form-control" placeholder="e.g. 4000"   />
               </div>
-              <div class="col-6 col-md-6 col-lg-3">
-                <label :for="'cal-cpf-' + index" class="form-label mb-1">CPF OA savings ($)</label>
+              <div class="col-12 col-md-6 col-lg-3">
+                <label :for="'cal-cpf-' + index" class="form-label mb-1">CPF Ordinary Account (OA) savings ($)</label>
                 <input :id="'cal-cpf-' + index" v-model="owner.cpf" type="number" min="0" step="1000" class="form-control" placeholder="e.g. 50000" />
               </div>
-              <div class="col-6 col-md-6 col-lg-3">
+              <div class="col-12 col-md-6 col-lg-3">
                 <label :for="'cal-cash-' + index" class="form-label mb-1">Cash savings ($)</label>
                 <input :id="'cal-cash-' + index" v-model="owner.cash" type="number" min="0" step="1000" class="form-control" placeholder="e.g. 20000" />
               </div>
@@ -308,13 +328,13 @@ function applyBudget() {
           <hr class="my-2 my-md-3" />
           <h5 class="mb-2 mb-md-3">About the flat</h5>
           <div class="row g-2 g-md-3">
-            <div class="col-6 col-md-6 col-lg-3 order-1 order-md-0">
+            <div class="col-12 col-md-6 col-lg-3">
               <label for="cal-flat-type" class="form-label mb-1">Flat type</label>
               <select id="cal-flat-type" v-model="flatType" class="form-select">
                 <option v-for="type in flatTypes" :key="type" :value="type">{{ type }}</option>
               </select>
             </div>
-            <div class="col-12 col-md-6 col-lg-3 order-3 order-md-0">
+            <div class="col-12 col-md-6 col-lg-3">
               <label for="cal-phg" class="form-label mb-1">Parents / child</label>
               <select id="cal-phg" v-model="phgOption" class="form-select">
                 <option value="none">Not living with or near them</option>
@@ -322,11 +342,11 @@ function applyBudget() {
                 <option value="near">Will live NEAR them (within 4 km)</option>
               </select>
             </div>
-            <div class="col-6 col-md-6 col-lg-3 order-2 order-md-0">
+            <div class="col-12 col-md-6 col-lg-3">
               <label for="cal-years" class="form-label mb-1">Loan period (years)</label>
               <input id="cal-years" v-model="loanYears" type="number" min="1" :max="MAX_LOAN_YEARS" class="form-control" />
             </div>
-            <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end order-4 order-md-0">
+            <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
               <div class="form-check mb-md-2">
                 <input id="cal-employed" v-model="employed12Months" type="checkbox" class="form-check-input" />
                 <label for="cal-employed" class="form-check-label">Working for the past 12 months</label>
@@ -347,9 +367,9 @@ function applyBudget() {
             </div>
           </div>
 
-          <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0">{{ errorMessage }}</div>
+          <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0" role="alert">{{ errorMessage }}</div>
 
-          <button type="button" class="btn btn-primary mt-3" @click="goToStep2">Next</button>
+          <button type="button" class="btn btn-primary btn-big mt-3" @click="goToStep2">Next: see estimated grants →</button>
         </div>
       </div>
     </div>
@@ -392,17 +412,20 @@ function applyBudget() {
 
           <p class="text-muted small">
             This is an indicative estimate. Actual grant eligibility depends on HDB requirements,
-            household composition, income assessment and other conditions. Your HFE letter has the real amounts.
+            household composition, income assessment and other conditions. Your HFE (HDB Flat Eligibility) letter has the real amounts.
           </p>
 
-          <button type="button" class="btn btn-secondary" @click="goToStep(1)">Back</button>
-          <button type="button" class="btn btn-primary ms-2" @click="goToStep(3)">Next</button>
-        </div>
-      </div>
+          <!-- FEATURE 6 (Jihao): PHG checker, only when they plan to live near parents / child.
+               Before the buttons, so it is seen before moving on. -->
+          <div v-if="phgOption === 'near'" class="mb-3">
+            <PhgChecker />
+          </div>
 
-      <!-- FEATURE 6 (Jihao): PHG checker, only when they plan to live near parents / child -->
-      <div v-if="phgOption === 'near'" class="mt-3">
-        <PhgChecker />
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-secondary btn-big" @click="goToStep(1)">← Back</button>
+            <button type="button" class="btn btn-primary btn-big" @click="goToStep(3)">Next: see my budget →</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -450,7 +473,7 @@ function applyBudget() {
             </tbody>
           </table>
 
-          <button type="button" class="btn btn-secondary" @click="goToStep(2)">Back</button>
+          <button type="button" class="btn btn-secondary btn-big" @click="goToStep(2)">← Back</button>
           <!-- FEATURE 5 (Yujia): send the budget to the Search page -->
           <button type="button" class="btn btn-primary ms-2" @click="applyBudget">Apply Budget to Search</button>
           <!-- FEATURE 7 (Jihao): Compare page -->
@@ -460,3 +483,76 @@ function applyBudget() {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 1 Your finances  2 Grants  3 Your budget */
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  list-style: none;
+  padding: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+.stepper li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stepper .num {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line);
+  font-weight: 700;
+  background: #fff;
+}
+.stepper li.now {
+  color: var(--char);
+  font-weight: 700;
+}
+.stepper li.now .num {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: #fff;
+}
+.stepper li.done .num {
+  border-color: var(--terra);
+  color: var(--terra);
+}
+
+/* Small plain-English help under a label */
+.help-text {
+  font-size: 14px;
+  color: var(--muted);
+  margin: -2px 0 6px;
+}
+.help-more {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.help-more summary {
+  color: var(--terra);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+/* Big, easy buttons for Back / Next */
+.btn-big {
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 16px;
+}
+@media (max-width: 575.98px) {
+  .btn-big {
+    width: 100%;
+  }
+}
+</style>

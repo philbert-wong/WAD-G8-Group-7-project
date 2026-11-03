@@ -161,7 +161,7 @@ function formatDistance(metres) {
         </div>
       </form>
 
-      <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0">{{ errorMessage }}</div>
+      <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0" role="alert">{{ errorMessage }}</div>
       <p v-else-if="loading" class="text-muted mt-3 mb-0">Loading...</p>
 
       <div v-else-if="checked" class="mt-3">

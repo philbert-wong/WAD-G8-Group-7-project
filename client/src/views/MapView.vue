@@ -216,13 +216,14 @@ function changeLevel(key, level) {
 // The match score gradient: a rainbow from 0 (poor) to 100 (great). Each stop = a score and its colour
 // as [red, green, blue] numbers. A score between two stops gets a colour partway between them.
 // Red, orange and yellow are squeezed to the left, so the usual scores (mostly below 75) spread over more colours.
+// The SAME colours as the priority score bar on the flat cards (SCORE_STOPS in utils/matchScore.js),
+// so a block looks the same colour on the map as its score bar on Search
 const MATCH_STOPS = [
-  { score: 0, rgb: [230, 57, 70] }, // red
-  { score: 12, rgb: [247, 140, 40] }, // orange
-  { score: 25, rgb: [250, 215, 60] }, // yellow
-  { score: 45, rgb: [76, 175, 80] }, // green
-  { score: 70, rgb: [33, 102, 172] }, // blue
-  { score: 100, rgb: [123, 50, 148] }, // purple
+  { score: 0, rgb: [224, 123, 57] }, // orange   #e07b39
+  { score: 25, rgb: [240, 193, 63] }, // yellow  #f0c13f
+  { score: 50, rgb: [79, 166, 106] }, // green   #4fa66a
+  { score: 75, rgb: [47, 111, 168] }, // blue    #2f6fa8
+  { score: 100, rgb: [28, 58, 107] }, // navy    #1c3a6b
 ]
 const NO_SCORE_COLOUR = '#bdbdbd' // grey: no score (every priority unticked)
 
@@ -1042,7 +1043,9 @@ onUnmounted(function () {
 <template>
   <section>
     <h1 class="page-title serif">See it on <em>the map</em></h1>
-    <p class="page-sub">
+    <!-- Phones and tablets: two short instructions instead of the long sentence -->
+    <p class="page-sub d-lg-none">Tap a town bubble to zoom in. Tap a block to see its prices.</p>
+    <p class="page-sub d-none d-lg-block">
       <!-- Says which dots are shown ("Show") and what their colours mean ("Colour dots by"), both on the right -->
       Each dot is a block
       <span v-if="showWhich === 'shortlist'">from your shortlist (your filters are not used here)</span>
@@ -1060,7 +1063,9 @@ onUnmounted(function () {
     <!-- Bootstrap grid: the map takes 8 of 12 columns on laptops and 9 of 12 on big screens, the sidebar the rest.
          On phones and tablets (below lg) the sidebar goes under the map. -->
     <div class="row g-4">
-      <div class="col-lg-8 col-xl-9">
+      <!-- order-2 / order-lg-1: on phones and tablets the option panels (closed) come ABOVE the map,
+           so you see the map change right under the boxes you tick -->
+      <div class="col-lg-8 col-xl-9 order-2 order-lg-1">
         <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
         <MapSearchBar :searched="filterStore.filters.q" @search="searchFromMap" />
 
@@ -1087,12 +1092,25 @@ onUnmounted(function () {
           <div id="mapBox" class="map-box"></div>
           <MapKey :colour-by="colourBy" :price-bands="priceBands" :no-score-colour="NO_SCORE_COLOUR" />
         </div>
+        <!-- Phones and tablets: the block you tapped shows right under the map (the sidebar is above the map there) -->
+        <SelectedBlockCard
+          class="d-lg-none mt-3"
+          v-if="selectedPlace !== null"
+          :place="selectedPlace"
+          :match-text="selectedMatchText()"
+          :nearest-amenities="nearestAmenities"
+          :amenity-types="amenityTypes"
+          @close="closePlace"
+          @show-nearest="showNearest"
+          @hide-nearest="hideNearest"
+        />
       </div>
 
-      <div class="col-lg-4 col-xl-3">
+      <div class="col-lg-4 col-xl-3 order-1 order-lg-2">
         <div class="map-sidebar">
           <!-- Selected block: appears when a dot is clicked -->
           <SelectedBlockCard
+            class="d-none d-lg-block"
             v-if="selectedPlace !== null"
             :place="selectedPlace"
             :match-text="selectedMatchText()"
@@ -1131,7 +1149,7 @@ onUnmounted(function () {
 
           <!-- Map options: show all flats / my shortlist, colour dots by price / priority score, and the amenity tick boxes
                (the colour key itself floats on the map: MapKey) -->
-          <CollapsiblePanel title="Map options" :start-open="true">
+          <CollapsiblePanel title="Map options" :start-open="isWideScreen">
           <MapLegend
             :colour-by="colourBy"
             :amenity-types="amenityTypes"

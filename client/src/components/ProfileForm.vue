@@ -18,6 +18,7 @@ const props = defineProps({
   saving: { type: Boolean, default: false }, // true while the server is saving (disables the button)
   error: { type: String, default: '' }, // a problem from the server, shown under the form
   buttonText: { type: String, default: 'Save' },
+  moreOpen: { type: Boolean, default: true }, // show the optional questions open (profile page) or closed (welcome popup)
 })
 const emit = defineEmits(['save'])
 
@@ -128,6 +129,33 @@ loadTowns()
     </div>
 
     <div class="mb-3">
+      <label for="profile-flat" class="form-label">Flat type</label>
+      <select id="profile-flat" v-model="flatType" class="form-select">
+        <option v-for="type in flatTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <div class="col-12 mb-3">
+        <label for="profile-budget" class="form-label">Max budget ($)</label>
+        <input
+          id="profile-budget"
+          v-model="maxPrice"
+          type="number"
+          min="100000"
+          step="10000"
+          placeholder="Any"
+          class="form-control"
+        />
+        <div class="form-text">Leave empty for no limit.</div>
+      </div>
+    </div>
+    <!-- Everything else is optional: tucked under one clearly named heading (plain HTML <details>), so a first visit
+         only asks for the town, flat type and budget. Open by default on the profile page (moreOpen). -->
+    <details class="more-prefs mb-3" :open="props.moreOpen">
+      <summary>More preferences (optional)</summary>
+      <div class="more-body">
+    <div class="mb-3">
       <label for="profile-parents" class="form-label">Parents' postal code</label>
       <input
         id="profile-parents"
@@ -149,32 +177,9 @@ loadTowns()
     </div>
 
     <div class="mb-3">
-      <label for="profile-flat" class="form-label">Flat type</label>
-      <select id="profile-flat" v-model="flatType" class="form-select">
-        <option v-for="type in flatTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
-      </select>
+      <label for="profile-lease" class="form-label">Minimum years left on the lease</label>
+      <input id="profile-lease" v-model="minLease" type="number" min="20" max="99" class="form-control" />
     </div>
-
-    <div class="row">
-      <div class="col-7 mb-3">
-        <label for="profile-budget" class="form-label">Max budget ($)</label>
-        <input
-          id="profile-budget"
-          v-model="maxPrice"
-          type="number"
-          min="100000"
-          step="10000"
-          placeholder="Any"
-          class="form-control"
-        />
-        <div class="form-text">Leave empty for no limit.</div>
-      </div>
-      <div class="col-5 mb-3">
-        <label for="profile-lease" class="form-label">Min lease (yrs)</label>
-        <input id="profile-lease" v-model="minLease" type="number" min="20" max="99" class="form-control" />
-      </div>
-    </div>
-
     <!-- Your Priorities: what matters about a flat. They rank the flats on Search and colour the dots on the Map.
          This panel gets its own ids, because the Search page has one too. -->
     <div class="mb-3">
@@ -187,8 +192,11 @@ loadTowns()
       />
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger py-2">{{ errorMessage }}</div>
-    <div v-else-if="props.error" class="alert alert-danger py-2">{{ props.error }}</div>
+      </div>
+    </details>
+
+    <div v-if="errorMessage" class="alert alert-danger py-2" role="alert">{{ errorMessage }}</div>
+    <div v-else-if="props.error" class="alert alert-danger py-2" role="alert">{{ props.error }}</div>
 
     <button type="submit" class="btn btn-primary w-100" :disabled="props.saving">
       <span v-if="props.saving">Please wait...</span>
@@ -196,3 +204,35 @@ loadTowns()
     </button>
   </form>
 </template>
+
+<style scoped>
+/* "More preferences (optional)": a big, clearly tappable row with an arrow */
+.more-prefs {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+.more-prefs summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.more-prefs summary::-webkit-details-marker {
+  display: none;
+}
+.more-prefs summary::after {
+  content: '▾';
+  margin-left: auto;
+  color: var(--muted);
+}
+.more-prefs[open] summary::after {
+  content: '▴';
+}
+.more-body {
+  padding: 4px 14px 6px;
+}
+</style>

@@ -166,6 +166,15 @@ function distanceText(row) {
               How close this flat is to what you ticked in <b>Your Priorities</b>.
               Each one scores 100 right next door, down to 0 when it is too far to count.
             </p>
+            <!-- The plain version first: one line per priority -->
+            <ul class="how-plain">
+              <li v-for="row in breakdownRows()" :key="row.key">
+                <b>{{ shortLabel(row.label) }}</b>: {{ distanceText(row) }} → {{ row.score }} out of 100
+              </li>
+            </ul>
+            <!-- The full sums, only for those who want them (plain HTML <details>) -->
+            <details class="how-maths">
+              <summary>How this is calculated</summary>
             <table class="how-table">
               <thead>
                 <tr>
@@ -200,6 +209,7 @@ function distanceText(row) {
               Weighted score = raw score × weight. A more important priority gets a bigger weight, and the
               weights add up to 1. Change them in Your Priorities on the Search page.
             </p>
+            </details>
           </template>
       </div>
     </Teleport>
@@ -240,6 +250,27 @@ function distanceText(row) {
   font-weight: 700;
   line-height: 16px;
   cursor: pointer;
+}
+/* A bigger invisible tap area around the small "i" (44 x 44 px), so it is easy to hit */
+.info-btn {
+  position: relative;
+}
+.info-btn::before {
+  content: '';
+  position: absolute;
+  inset: -13px;
+}
+.how-plain {
+  padding-left: 18px;
+  margin-bottom: 8px;
+}
+.how-maths summary {
+  color: var(--terra);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
 }
 .info-btn:hover {
   border-color: var(--terra);

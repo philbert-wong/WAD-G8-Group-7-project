@@ -1,4 +1,5 @@
 <script setup>
+import { RouterLink } from 'vue-router'
 // FEATURE 7 (Jihao). To remove it: delete this file, its route in router/index.js
 // and the "Compare my shortlisted flats" link on Step 3 of CPFCalView.vue.
 // The Compare page: tick 2 or 3 flats from your shortlist and see them side by side
@@ -142,7 +143,7 @@ loadShortlist()
     <p v-else-if="loading" class="text-muted">Loading...</p>
 
     <p v-else-if="shortlist.count < 2" class="text-muted">
-      Save at least 2 flats to your shortlist first, then come back to compare them.
+      Save at least 2 flats to your shortlist first (<RouterLink to="/">go to Search</RouterLink>), then come back to compare them.
     </p>
 
     <div v-else>

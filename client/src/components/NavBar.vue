@@ -76,7 +76,7 @@ onMounted(function () {
       </div>
       <div v-else class="d-flex align-items-center gap-2">
         <!-- Presets button (guests): opens the presets popup again, to change the town, budget... saved on this device -->
-        <button type="button" class="btn-short account" title="Change your presets" aria-label="Your presets" @click="auth.openPresets()">
+        <button type="button" class="btn-short account" title="Change your preferences" aria-label="Your preferences" @click="auth.openPresets()">
           <!-- Three sliders: the usual "settings / filters" icon -->
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
             <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" />
@@ -84,7 +84,7 @@ onMounted(function () {
             <circle cx="10" cy="12" r="2" />
             <circle cx="18" cy="18" r="2" />
           </svg>
-          <span class="d-none d-sm-inline">Presets</span>
+          <span class="pref-word">Preferences</span>
         </button>
         <RouterLink to="/login" class="btn-short">Login</RouterLink>
       </div>
@@ -198,7 +198,7 @@ onMounted(function () {
   min-height: 60px; /* a big enough target for a thumb */
   color: var(--muted);
   text-decoration: none;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   border-top: 3px solid transparent;
 }
@@ -243,13 +243,23 @@ onMounted(function () {
   color: var(--terra);
 }
 
+/* The word "Preferences" next to the sliders icon: hidden only on the narrowest phones, where it does not fit */
+@media (max-width: 399.98px) {
+  .pref-word {
+    display: none;
+  }
+}
+
 /* Login / Logout pill button */
 .btn-short {
   border: 1.5px solid var(--char);
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
   padding: 6px 14px;
   background: #fff;
   color: var(--char);

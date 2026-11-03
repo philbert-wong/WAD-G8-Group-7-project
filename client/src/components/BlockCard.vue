@@ -34,6 +34,10 @@ function showOnMap() {
 // Price details (each sale) are shown when you press the "Price details" button
 const showPrices = ref(false)
 
+// Phones only: Street View, Price details and Amenities sit under "More details", so a card is calmer to read.
+// (From 576px wide they are always shown, see the style.) true = open
+const moreOpen = ref(false)
+
 // Nearby amenities are only fetched when you press the button
 const open = ref(false)
 const loading = ref(false)
@@ -176,10 +180,10 @@ function barWidth(score) {
       <!-- Price (the headline of the card) and the priority score: side by side from tablets up, stacked on phones -->
       <div class="summary">
         <div class="price-block">
-          <div class="price-label">Price range, last 12 months</div>
+          <div class="price-label">Past sale prices · last 12 months</div>
           <div class="price serif">{{ formatRange(block.priceLow, block.priceHigh) }}</div>
           <div class="price-sub">
-            Median {{ '$' + block.price.toLocaleString('en-SG') }} · {{ block.salesCount }} sale(s)
+            Median {{ '$' + block.price.toLocaleString('en-SG') }} (the middle price) · {{ block.salesCount }} sale(s)
           </div>
         </div>
         <MatchScore v-if="showMatch" class="score-block" :score="score" :distances="block.distances" :weights="weights" />
@@ -209,6 +213,12 @@ function barWidth(score) {
         </button>
         <div class="more-btns">
           <button class="act-btn" @click="showOnMap">📍 Show on map</button>
+          <!-- Phones: one button that opens the other three -->
+          <button class="act-btn more-toggle" :aria-expanded="moreOpen" @click="moreOpen = !moreOpen">
+            <span v-if="moreOpen">Less ▴</span>
+            <span v-else>More details ▾</span>
+          </button>
+          <div class="extra-btns" :class="{ open: moreOpen }">
           <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
           <button class="act-btn" :aria-expanded="showPrices" @click="showPrices = !showPrices">
             <span v-if="showPrices">Hide price details</span>
@@ -218,6 +228,7 @@ function barWidth(score) {
             <span v-if="open">Hide amenities ▴</span>
             <span v-else>🏫 Amenities ▾</span>
           </button>
+          </div>
         </div>
       </div>
 
@@ -379,6 +390,16 @@ function barWidth(score) {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+/* Phones: Street View / Price details / Amenities only show after "More details" (full width, one per line) */
+.extra-btns {
+  display: none;
+  grid-column: 1 / -1;
+  flex-direction: column;
+  gap: 10px;
+}
+.extra-btns.open {
+  display: flex;
+}
 .actions .act-btn {
   display: flex;
   align-items: center;
@@ -464,8 +485,14 @@ a.act-btn {
     flex-wrap: wrap;
     gap: 8px;
   }
-  .more-btns {
+  .more-btns,
+  .extra-btns,
+  .extra-btns.open {
     display: contents;
+  }
+  /* there is room for every button, so no "More details" */
+  .more-toggle {
+    display: none !important;
   }
   .actions .act-btn {
     flex: 1 1 0;

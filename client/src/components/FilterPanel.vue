@@ -79,21 +79,7 @@ function onClear() {
     <h4 class="serif">Filter Results</h4>
     <div class="hint">Only flats that fit these are shown, on both Search and the Map.</div>
 
-    <!-- Flat type chips -->
-    <label class="flab">Flat type</label>
-    <div class="chips">
-      <button
-        v-for="type in flatTypes"
-        :key="type.value"
-        type="button"
-        class="chip"
-        :class="{ on: props.filters.flatType === type.value }"
-        @click="chooseFlatType(type.value)"
-      >
-        {{ type.label }}
-      </button>
-    </div>
-
+    <div class="fgroup fg-budget">
     <!-- Budget slider: $300k to $1.2M, and "Any" at the very end (see ANY_BUDGET_STEP above) -->
     <label for="filter-budget" class="flab d-flex justify-content-between align-items-end">
       Max budget
@@ -110,8 +96,31 @@ function onClear() {
       class="form-range"
       @input="onBudgetChange"
     />
+    <div class="hint mb-1">Shows flats whose middle (median) past sale price is at or below this.</div>
     <RouterLink to="/CPFCal" class="calc-link">Not sure? Calculate my budget →</RouterLink>
 
+
+    </div>
+
+    <div class="fgroup fg-type">
+    <!-- Flat type chips -->
+    <label class="flab">Flat type</label>
+    <div class="chips">
+      <button
+        v-for="type in flatTypes"
+        :key="type.value"
+        type="button"
+        class="chip"
+        :class="{ on: props.filters.flatType === type.value }"
+        @click="chooseFlatType(type.value)"
+      >
+        {{ type.label }}
+      </button>
+    </div>
+
+    </div>
+
+    <div class="fgroup fg-lease">
     <!-- Lease slider -->
     <label for="filter-lease" class="flab d-flex justify-content-between align-items-end">
       Min remaining lease <span class="big-val serif">{{ props.filters.minLease }} yrs</span>
@@ -127,8 +136,11 @@ function onClear() {
       @input="onChange('minLease', $event)"
     />
 
+    </div>
+
+    <div class="fgroup fg-phg">
     <!-- PHG (Proximity Housing Grant): the parents' postal code, then the switch that uses it. On both Search and the Map.
-         On = only flats within 4 km of the parents. Enter in the box (or Apply Filters) uses a new postal code. -->
+         On = only flats within 4 km of the parents. Enter in the box (or "Show matching flats") uses a new postal code. -->
     <div class="phg-row">
       <!-- Short placeholder so it fits the narrow sidebar; the label says what the box is for -->
       <label for="filter-parents" class="flab parents-label">Parents' postal code</label>
@@ -163,8 +175,13 @@ function onClear() {
       <div v-else class="hint">Only flats within 4 km of {{ props.filters.parentsPostal }}.</div>
     </div>
 
-    <button type="submit" class="apply">Apply Filters</button>
+    </div>
+
+    <!-- fgroup: each part of the panel in its own box, so a design look can lay them out in a row -->
+    <div class="fgroup fg-actions">
+    <button type="submit" class="apply">Show matching flats</button>
     <button type="button" class="clear" @click="onClear">Clear all</button>
+    </div>
   </form>
 </template>
 

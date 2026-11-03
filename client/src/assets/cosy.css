@@ -10,7 +10,7 @@
   --cream: #fbfcff;
   --terra: #4a5ac0; /* terracotta, the main accent */
   --terra-d: #354091; /* darker terracotta for hover */
-  --sage: #6b8c6b; /* green for "good" things */
+  --sage: #4a7a4c; /* green for "good" things (dark enough for white text: 5:1) */
   --char: #2d2d2d; /* charcoal text */
   --beige: #e9eaf8;
   --line: #cbcce7; /* light border colour */
@@ -246,4 +246,23 @@ body {
   padding: 0 !important;
   margin: 0 !important;
   background: transparent !important;
+}
+
+
+/* Form boxes: a border dark enough to see where to type (3:1 against white) */
+.form-control,
+.form-select,
+.cosy-input {
+  border-color: #8a8fb0;
+}
+
+/* Keyboard users: a clear outline on whatever has focus */
+:focus-visible {
+  outline: 3px solid #1d4ed8 !important;
+  outline-offset: 2px;
+}
+/* A box that only receives focus so the keyboard starts inside it (tabindex="-1": popup, drawer) needs no outline */
+[tabindex='-1']:focus,
+[tabindex='-1']:focus-visible {
+  outline: none !important;
 }

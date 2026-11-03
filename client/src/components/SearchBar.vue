@@ -28,7 +28,7 @@ function onSubmit() {
         :value="text"
         type="search"
         class="form-control cosy-input flex-grow-1"
-        placeholder="Town, street or postal code"
+        placeholder="Town or postal code"
         aria-describedby="flat-search-hint"
         @input="onInput"
       />

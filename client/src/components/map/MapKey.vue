@@ -52,11 +52,12 @@ function toggle() {
       <!-- Priority score: the gradient bar with the same words as the score bar on the cards -->
       <div v-else>
         <div class="gradient-bar"></div>
-        <div class="d-flex justify-content-between text-muted">
-          <span>Weak</span>
-          <span>Fair</span>
-          <span>Good</span>
-          <span>Excellent</span>
+        <!-- Four equal bands under the bar, each with its score range -->
+        <div class="bands">
+          <span>Weak<br /><small>0–24</small></span>
+          <span>Fair<br /><small>25–49</small></span>
+          <span>Good<br /><small>50–74</small></span>
+          <span>Excellent<br /><small>75–100</small></span>
         </div>
         <div class="no-score d-flex align-items-center gap-1 text-muted mt-1">
           <span class="dot" :style="{ background: noScoreColour }"></span>
@@ -114,20 +115,23 @@ function toggle() {
   border-radius: 50%;
   flex-shrink: 0;
 }
+/* Weak / Fair / Good / Excellent: four equal columns, like the four quarters of the bar */
+.bands {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  text-align: center;
+  line-height: 1.2;
+  color: var(--muted);
+}
+.bands small {
+  font-size: 0.85em;
+}
 /* The priority score gradient: the same colours AND positions as MATCH_STOPS in MapView
    (linear-gradient is not in our course) */
 .gradient-bar {
   height: 10px;
   border-radius: 5px;
-  background: linear-gradient(
-    to right,
-    rgb(230, 57, 70) 0%,
-    rgb(247, 140, 40) 12%,
-    rgb(250, 215, 60) 25%,
-    rgb(76, 175, 80) 45%,
-    rgb(33, 102, 172) 70%,
-    rgb(123, 50, 148) 100%
-  );
+  background: linear-gradient(to right, #e07b39 0%, #f0c13f 25%, #4fa66a 50%, #2f6fa8 75%, #1c3a6b 100%);
   margin-bottom: 2px;
 }
 

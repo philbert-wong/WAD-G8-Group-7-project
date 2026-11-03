@@ -90,7 +90,11 @@ async function submit() {
     <!-- Page heading -->
     <div class="col-12 text-center mb-4">
       <h1 class="page-title serif">Welcome <em>home</em></h1>
-      <p class="page-sub">Log in to keep a shortlist and save your priorities.</p>
+      <!-- Sent here from a page that needs an account: say which, so the user knows why they are here -->
+      <p v-if="route.query.redirect === '/compare'" class="login-reason">Log in to compare your shortlisted flats.</p>
+      <p v-else-if="route.query.redirect === '/shortlist'" class="login-reason">Log in to open your shortlist.</p>
+      <p v-else-if="route.query.redirect === '/profile'" class="login-reason">Log in to see your profile.</p>
+      <p class="page-sub">Log in to keep a shortlist and save your priorities. After logging in, you go straight back.</p>
     </div>
     <div class="col-12 col-md-8 col-lg-5">
       <div class="card shadow-sm">
@@ -151,8 +155,8 @@ async function submit() {
                 />
               </div>
 
-              <div v-if="errorMessage" class="alert alert-danger py-2">{{ errorMessage }}</div>
-              <div v-else-if="auth.error" class="alert alert-danger py-2">{{ auth.error }}</div>
+              <div v-if="errorMessage" class="alert alert-danger py-2" role="alert">{{ errorMessage }}</div>
+              <div v-else-if="auth.error" class="alert alert-danger py-2" role="alert">{{ auth.error }}</div>
 
               <button type="submit" class="btn btn-primary w-100" :disabled="auth.loading">
                 <span v-if="auth.loading">Please wait...</span>
@@ -166,3 +170,16 @@ async function submit() {
     </div>
   </section>
 </template>
+
+<style scoped>
+/* "Log in to compare your shortlisted flats." */
+.login-reason {
+  display: inline-block;
+  background: var(--beige);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 0 8px;
+}
+</style>
