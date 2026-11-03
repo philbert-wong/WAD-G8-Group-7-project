@@ -66,19 +66,8 @@ function isShown(key) {
     </div>
     <div class="mb-3"></div>
 
-    <!-- Colour dots by: price or match (like Search's two sort options) -->
+    <!-- Colour dots by: priority score or price, in the same order as Search's sort (priority score first, the default) -->
     <div class="small fw-semibold mb-1">Colour dots by</div>
-    <div class="form-check form-check-inline">
-      <input
-        id="colour-price"
-        :checked="colourBy === 'price'"
-        type="radio"
-        name="colour-by"
-        class="form-check-input"
-        @change="emit('change-colour-by', 'price')"
-      />
-      <label for="colour-price" class="form-check-label">Cheapest price</label>
-    </div>
     <div class="form-check form-check-inline">
       <input
         id="colour-match"
@@ -89,6 +78,17 @@ function isShown(key) {
         @change="emit('change-colour-by', 'match')"
       />
       <label for="colour-match" class="form-check-label">Priority score</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input
+        id="colour-price"
+        :checked="colourBy === 'price'"
+        type="radio"
+        name="colour-by"
+        class="form-check-input"
+        @change="emit('change-colour-by', 'price')"
+      />
+      <label for="colour-price" class="form-check-label">Cheapest price</label>
     </div>
 
     <!-- The colour key itself floats on the map (MapKey.vue), so it is in view next to the dots -->
