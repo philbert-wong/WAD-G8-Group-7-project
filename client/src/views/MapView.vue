@@ -1082,8 +1082,8 @@ onUnmounted(function () {
           </template>
         </div>
 
-        <!-- position: relative, so the colour key can float in the map's bottom-left corner -->
-        <div class="position-relative">
+        <!-- position: relative, so the colour key can float in the map's bottom-left corner; overflow-hidden: on phones, the part of the key slid off to the left is not shown -->
+        <div class="position-relative overflow-hidden">
           <div id="mapBox" class="map-box"></div>
           <MapKey :colour-by="colourBy" :price-bands="priceBands" :no-score-colour="NO_SCORE_COLOUR" />
         </div>
