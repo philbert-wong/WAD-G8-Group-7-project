@@ -48,8 +48,8 @@ const parentsPostal = ref(start.parentsPostal)
 const flatType = ref(start.flatType)
 const maxPrice = ref(start.maxPrice)
 const minLease = ref(start.minLease)
-// The "Near parents (PHG)" switch: on unless it was switched off
-const showPhg = ref(start.showPhg !== false)
+// The "Near parents (PHG)" switch: off unless it was switched on
+const showPhg = ref(start.showPhg === true)
 
 // Town names for the dropdown, from the same server address Search uses for its suggestions
 const towns = ref([])

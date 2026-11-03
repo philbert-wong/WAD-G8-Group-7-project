@@ -11,6 +11,8 @@ const props = defineProps({
   showWhich: String, // 'all' or 'shortlist'
   loggedIn: Boolean, // the shortlist option needs a login
   shortlistCount: Number, // how many flats are saved
+  shownFlats: Number, // flats on the map now (in shortlist mode: the saved ones that are shown)
+  shownBlocks: Number, // dots on the map now (one block can hold several flat types)
 })
 const emit = defineEmits(['change-show-which', 'change-colour-by', 'toggle-amenity'])
 
@@ -50,16 +52,17 @@ function isShown(key) {
         class="form-check-input"
         @change="emit('change-show-which', 'shortlist')"
       />
+      <!-- text-nowrap (Bootstrap): each piece stays whole, so "(log in first)" is on the same line or fully below, never split -->
       <label for="show-shortlist" class="form-check-label">
-        My shortlist
-        <span v-if="loggedIn">({{ shortlistCount }})</span>
-        <span v-else class="text-muted small">(log in first)</span>
+        <span class="text-nowrap">My shortlist</span>
+        <span v-if="loggedIn" class="text-nowrap ms-1">({{ shortlistCount }})</span>
+        <span v-else class="text-nowrap text-muted small ms-1">(log in first)</span>
       </label>
     </div>
     <div v-if="showWhich === 'shortlist'" class="small text-muted mt-1">
       <span v-if="shortlistCount === 0">Your shortlist is empty: save flats on the Search page.</span>
       <span v-else>
-        Only your saved flats, even if they do not fit your filters.
+        Showing {{ shownFlats }} saved flat(s) in {{ shownBlocks }} block(s), even if they do not fit your filters.
         Flats in the same block share one dot: click it to see them all.
       </span>
     </div>
