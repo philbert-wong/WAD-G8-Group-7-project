@@ -13,8 +13,8 @@ import PreferencesPanel from '../components/PreferencesPanel.vue'
 import MapSearchBar from '../components/map/MapSearchBar.vue'
 import SelectedBlockCard from '../components/map/SelectedBlockCard.vue'
 import MapLegend from '../components/map/MapLegend.vue'
+import MapKey from '../components/map/MapKey.vue'
 import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
-import PhgCard from '../components/map/PhgCard.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMapFocusStore } from '../stores/mapFocus'
 import { useFiltersStore } from '../stores/filters'
@@ -51,7 +51,7 @@ const searchNearName = ref('')
 const showAllFlats = ref(false)
 
 // The parents' place found by the PHG search: { name, lat, lng }, or null = no circle
-// (the typed text itself lives in PhgCard)
+// (the parents' postal code itself is in the filters store: filterStore.filters.parentsPostal)
 const parentPlace = ref(null)
 const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circle (null = no circle)
 // The 4 kinds of amenity that can be shown on the map. key = the category the server uses.
@@ -88,12 +88,24 @@ let searchMarker = null // the searched place's white dot, or a hidden block's g
 // whether the place it found is one of them
 let shownPlaces = []
 
-// "Colour dots by": 'price' (the price bands) or 'match' (the match score gradient)
-const colourBy = ref('price')
+// "Colour dots by": 'match' (the priority score gradient) or 'price' (the price bands).
+// The SAME choice as Search's sort ("Sort: Priority score" / "Cheapest first"), saved as 'sortBy' in localStorage
+// (and on the account), so the two pages always match. Search's default is 'match', so it is the map's too.
+function loadSavedSort() {
+  const saved = localStorage.getItem('sortBy')
+  if (saved === 'price') {
+    return 'price'
+  }
+  return 'match'
+}
+const colourBy = ref(loadSavedSort())
 
-// The legend's "Colour dots by" changed: remember it and redraw the dots in the new colours
+// The legend's "Colour dots by" changed: save it as the shared sort (so Search sorts the same way),
+// then redraw the dots in the new colours
 function changeColourBy(value) {
   colourBy.value = value
+  localStorage.setItem('sortBy', value)
+  saveChoices() // also on the account when logged in (saveChoices sends the sort saved just above)
   loadBlocks()
 }
 
@@ -719,28 +731,27 @@ function focusOnRequestedBlock(places) {
 function setFilter(name, value) {
   filterStore.setFilter(name, value)
   if (name === 'phg') {
-    changePhg(value)
+    auth.savePhgToggle(value) // remembered on the presets, so it is the same next time
   }
-}
-
-// The "Near parents (PHG)" switch was flipped. On: draw the 4 km circle around the parents' postal code saved on
-// the profile and keep only the blocks inside. Off: remove the circle and show every block again.
-// Either way the choice is saved on the account, so it is the same next time.
-async function changePhg(on) {
-  if (on) {
-    if (savedParentsPostal() !== '') {
-      await searchParent(savedParentsPostal())
-    }
-  } else {
-    clearParent()
-  }
-  auth.savePhgToggle(on)
 }
 
 // "Clear all": back to the starting filters (also on Search, since they are shared), then reload the dots
 function clearFilters() {
   filterStore.clearFilters()
-  loadBlocks()
+  applyFilters()
+}
+
+// "Apply Filters" (or the PHG switch, a flat type chip, Enter in a box): load the dots with the shared filters.
+// PHG on with a postal code: draw the 4 km circle around the parents and keep only the blocks inside
+// (searchParent loads the blocks). Otherwise: no circle, every block that fits the filters.
+async function applyFilters() {
+  if (filterStore.filters.phg && filterStore.filters.parentsPostal.trim() !== '') {
+    await searchParent(filterStore.filters.parentsPostal)
+  } else {
+    removeParentDrawings()
+    parentPlace.value = null
+    await loadBlocks()
+  }
 }
 
 // A tick box changed: draw the amenity dots for every ticked type (and none for the unticked ones)
@@ -884,7 +895,7 @@ function removeParentDrawings() {
   }
 }
 
-// PHG search (PhgCard sends the typed text): find where the parents live (any address or postal code),
+// PHG search (the parents' postal code from the Filters card): find where the parents live (any address or postal code),
 // draw a marker and the 4 km circle there, then reload the dots so only the blocks inside are shown
 async function searchParent(text) {
   errorMessage.value = ''
@@ -936,28 +947,10 @@ async function searchParent(text) {
   await loadBlocks()
 }
 
-// PhgCard's "Clear": remove the circle and marker, and show every block that fits the filters again
-// (PhgCard empties its own box)
-function clearParent() {
-  removeParentDrawings()
-  parentPlace.value = null
-  loadBlocks()
-}
-
 // The match score text for the Selected block card: "62/100 · Good" when the dots are coloured by Your Priorities, '' otherwise (not shown)
 function selectedMatchText() {
   if (colourBy.value === 'match') {
     return scoreText(selectedPlace.value)
-  }
-  return ''
-}
-
-// The parents' postal code saved in the presets (popup / profile page). '' when there is none.
-// It fills the PHG box, and while the "Near parents (PHG)" switch is on (off by default) the map draws its 4 km circle.
-// A function, so it always reads the latest presets (they can be saved while the map is open).
-function savedParentsPostal() {
-  if (auth.profile !== null && auth.profile.parentsPostal) {
-    return auth.profile.parentsPostal
   }
   return ''
 }
@@ -973,13 +966,7 @@ watch(
       filterStore.setFilter('q', auth.profile.town)
       showAllFlats.value = false
     }
-    if (filterStore.filters.phg && savedParentsPostal() !== '') {
-      await searchParent(savedParentsPostal())
-    } else {
-      removeParentDrawings()
-      parentPlace.value = null
-      await loadBlocks()
-    }
+    await applyFilters()
     zoomToProfileTown()
   },
 )
@@ -1028,11 +1015,7 @@ onMounted(async function () {
 
   // Load the blocks once: with the PHG circle if the switch is on and the parents' postal code is known
   // (searchParent draws the circle, then loads the blocks inside it), otherwise every block that fits the filters
-  if (filterStore.filters.phg && savedParentsPostal() !== '') {
-    await searchParent(savedParentsPostal())
-  } else {
-    await loadBlocks()
-  }
+  await applyFilters()
 
   // Zoom to what was searched on the Search page; nothing searched: to the profile's town.
   // Both even when the PHG circle is drawn (if none of the blocks are shown, e.g. outside the circle, the map stays as it is)
@@ -1097,7 +1080,11 @@ onUnmounted(function () {
           </template>
         </div>
 
-        <div id="mapBox" class="map-box"></div>
+        <!-- position: relative, so the colour key can float in the map's bottom-left corner -->
+        <div class="position-relative">
+          <div id="mapBox" class="map-box"></div>
+          <MapKey :colour-by="colourBy" :price-bands="priceBands" :no-score-colour="NO_SCORE_COLOUR" />
+        </div>
       </div>
 
       <div class="col-lg-4 col-xl-3">
@@ -1114,14 +1101,38 @@ onUnmounted(function () {
             @hide-nearest="hideNearest"
           />
 
-          <!-- Legend: colour dots by price / match, and the amenity tick boxes
-               (2nd card, so on a phone it is right under the map, before the filters) -->
+
+
+
+          <!-- Your Priorities FIRST, like Search: the dots are coloured by priority score by default, so it should
+               not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen. -->
+          <CollapsiblePanel title="Your Priorities" :start-open="isWideScreen">
+            <PreferencesPanel
+              :preferences="preferences"
+              on-map
+              @change-ticked="changeTicked"
+              @change-level="changeLevel"
+            />
+          </CollapsiblePanel>
+
+          <!-- Filters: the same panel as Search, near the top so it is easy to find. Closed at the start
+               (its title is in view: one click opens it), so the map options below are not pushed far down -->
+          <CollapsiblePanel title="Filters" :start-open="false">
+            <FilterPanel
+              :filters="filterStore.filters"
+              :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
+              @change-filter="setFilter"
+              @search="applyFilters"
+              @clear="clearFilters"
+            />
+          </CollapsiblePanel>
+
+          <!-- Map options: show all flats / my shortlist, colour dots by price / priority score, and the amenity tick boxes
+               (the colour key itself floats on the map: MapKey) -->
           <MapLegend
             :colour-by="colourBy"
-            :price-bands="priceBands"
             :amenity-types="amenityTypes"
             :shown-types="shownTypes"
-            :no-score-colour="NO_SCORE_COLOUR"
             :show-which="showWhich"
             :logged-in="auth.isLoggedIn"
             :shortlist-count="shortlist.count"
@@ -1132,40 +1143,6 @@ onUnmounted(function () {
             @toggle-amenity="toggleAmenity"
           />
 
-          <!-- Filters: the same panel as Search, inside a panel that opens / closes
-               (open at the start on a wide screen, closed on a phone so the PHG card is not far down) -->
-          <CollapsiblePanel title="Filters" :start-open="isWideScreen">
-            <FilterPanel
-              :filters="filterStore.filters"
-              :phg-postal="savedParentsPostal()"
-              @change-filter="setFilter"
-              @search="loadBlocks"
-              @clear="clearFilters"
-            />
-          </CollapsiblePanel>
-
-          <!-- Your Priorities: the same panel as Search (they share the saved choices), closed at the start -->
-          <CollapsiblePanel title="Your Priorities" :start-open="false">
-            <PreferencesPanel
-              :preferences="preferences"
-              on-map
-              @change-ticked="changeTicked"
-              @change-level="changeLevel"
-            />
-          </CollapsiblePanel>
-
-          <!-- PHG layer: the parents' postal code, the 4 km circle and the count.
-               Open at the start on a wide screen, closed on a phone -->
-          <CollapsiblePanel title="Proximity Grant (PHG)" :start-open="isWideScreen">
-            <PhgCard
-              :parent-place="parentPlace"
-              :nearby-count="nearbyCount"
-              :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
-              :initial-text="savedParentsPostal()"
-              @search="searchParent"
-              @clear="clearParent"
-            />
-          </CollapsiblePanel>
         </div>
       </div>
     </div>

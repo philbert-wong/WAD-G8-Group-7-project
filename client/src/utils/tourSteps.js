@@ -14,8 +14,8 @@ export const TOUR_STEPS = {
       target: '.search-box',
     },
     {
-      title: 'Set your filters and priorities',
-      text: 'Pick a flat type, budget and lease, then tick what matters to you: MRT, schools, food or parks.',
+      title: 'Set your priorities and filters',
+      text: 'Tick what matters to you (MRT, schools, food or parks) for the priority score on each flat, then pick a flat type, budget and lease.',
       target: '[aria-controls="filter-drawer"], #filter-drawer',
     },
     {

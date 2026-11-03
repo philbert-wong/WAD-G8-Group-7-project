@@ -25,12 +25,15 @@ function onLevelChange(key, event) {
 <template>
   <div id="priorities-panel" class="prio">
     <h4 class="serif">Your Priorities</h4>
-    <!-- How these change what you see: the sort on Search, the dot colours on the Map -->
+    <!-- How these change what you see: the sort on Search, the dot colours on the Map.
+         "priority score" stands out (.key-word), so it is clear these set the score on every card / dot -->
     <div v-if="onMap" class="hint">
-      Tick what matters. These set each block's priority score: colour the dots by "Priority score" to see it.
+      Tick what matters. These set each block's <strong class="key-word">priority score</strong>: colour the dots by
+      "Priority score" to see it.
     </div>
     <div v-else class="hint">
-      Tick what matters. These set each flat's priority score, and "Sort: Priority score" puts the best first.
+      Tick what matters. These set each flat's <strong class="key-word">priority score</strong>, and
+      "Sort: Priority score" puts the best first.
     </div>
 
     <div v-for="category in CATEGORIES" :key="category.key" class="prio-row">
@@ -81,6 +84,10 @@ function onLevelChange(key, event) {
   color: var(--muted);
   font-size: 13px;
   margin-bottom: 10px;
+}
+/* "priority score" in the hint: bold, in the accent colour, so the eye lands on it */
+.key-word {
+  color: var(--terra);
 }
 
 /* One row per category: tick box on the left, dropdown on the right (Flexbox) */
