@@ -54,7 +54,8 @@ const total = ref(0)
 const loading = ref(false)
 const errorMessage = ref('')
 const area = ref([]) // town names, for the suggestions under the search box
-const showSuggestions = ref(true)
+// Only after the user types: the preset town filled in on page load should not open the list
+const showSuggestions = ref(false)
 
 // Town names that contain what is typed in the search box
 const suggestions = computed(function () {
@@ -150,6 +151,7 @@ async function search() {
   loading.value = true
   errorMessage.value = ''
   placeName.value = ''
+  showSuggestions.value = false // searching (Enter, the button, a filter) closes the suggestions
   const typed = searchText.value.trim()
 
   try {
