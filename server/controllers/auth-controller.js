@@ -1,5 +1,5 @@
 // The /api/auth controller: register and login (both answer with a token the frontend sends back later),
-// and the logged-in user's saved preferences.
+// the logged-in user's saved preferences, and their profile (the sign-up popup / profile page answers).
 // routes/auth-routes.js decides which address runs which function below.
 // bcrypt hashes passwords; jsonwebtoken makes and checks login tokens
 const bcrypt = require('bcrypt');
@@ -47,6 +47,53 @@ function makeToken(user) {
 
 }
 
+// ---------------------------------------------------------------------
+// Stricter register checks (used by register() below; tested in tests/auth.test.js, "register input checks")
+// ---------------------------------------------------------------------
+
+// The longest password bcrypt really uses, counted in BYTES (not characters)
+const MAX_PASSWORD_BYTES = 72;
+
+// Very common passwords, all lowercase: register refuses them.
+// 'password123' is left out on purpose: the other tests and tests/helpers.js use it.
+const COMMON_PASSWORDS = [
+  'password',
+  '12345678',
+  '123456789',
+  'qwerty123',
+  'iloveyou',
+  'letmein1',
+  'admin123',
+  'welcome1'
+];
+
+// True when the text looks like an email: no spaces, exactly one "@", something before it,
+// and a "." in the part after the "@" with something before and after the dot.
+function isValidEmail(text) {
+  if (typeof text !== 'string') return false;
+
+  // no spaces
+  if (text.indexOf(' ') !== -1) return false;
+
+  // exactly one "@"
+  const parts = text.split('@');
+  if (parts.length !== 2) return false;
+
+  const local = parts[0];
+  const domain = parts[1];
+
+  // something before the "@"
+  if (local.length === 0) return false;
+
+  // a "." after the "@", with something after it
+  const dot = domain.lastIndexOf('.');
+  if (dot === 0) return false;
+  if (dot === -1) return false;
+  if (dot === domain.length - 1) return false;
+
+  return true;
+}
+
 // =====================================================================
 // Controller functions (one per address, see routes/auth-routes.js)
 // =====================================================================
@@ -63,8 +110,36 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: "Password must be at least 8 characters"})
   }
 
+  const password = req.body.password;
+
+  // A password of only spaces is rejected
+  if (password.trim() === '') {
+    return res.status(400).json({ message: 'Password cannot be only spaces' });
+  }
+
+  // bcrypt only uses the first 72 BYTES ("é" is 1 character but 2 bytes), so a longer password is rejected
+  if (Buffer.byteLength(password, 'utf8') > MAX_PASSWORD_BYTES) {
+    return res.status(400).json({ message: 'Password must be at most 72 bytes' });
+  }
+
   // Lowercase and without spaces, so "A@B.com " and "a@b.com" are the same account
   const email = req.body.email.trim().toLowerCase();
+
+  // The email must look like an email
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Please enter a valid email address' });
+  }
+
+  // The password must not be the same as the email
+  if (password.toLowerCase() === email) {
+    return res.status(400).json({ message: 'Password cannot be the same as your email' });
+  }
+
+  // Very common passwords are rejected
+  if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
+    return res.status(400).json({ message: 'That password is too common' });
+  }
+
   try {
     // An account with this email already exists: 409
     const existing = await User.findOne({ email: email})
@@ -160,6 +235,105 @@ exports.savePreferences = async (req, res) => {
     await user.save();
 
     res.json({ preferences: user.preferences });
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
+// =====================================================================
+// Profile: the answers from the sign-up popup and the profile page
+// =====================================================================
+
+// An answer as trimmed text: "  PUNGGOL " -> "PUNGGOL", a number 600000 -> "600000", anything else -> ''
+function asText(value) {
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+  return '';
+}
+
+// A Singapore postal code is exactly 6 digits
+function isPostalCode(text) {
+  return /^[0-9]{6}$/.test(text);
+}
+
+// READ   GET /api/auth/profile   (needs a token)
+// { profile: { town, parentsPostal, flatType, maxPrice, minLease } }, or { profile: null } if never answered
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ profile: user.profile });
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
+// UPDATE PUT /api/auth/profile   (needs a token)
+// body: { "profile": { "town": "PUNGGOL", "parentsPostal": "560314", "flatType": "4 ROOM", "maxPrice": "700000", "minLease": "60" } }
+//   or  { "profile": { "skipped": true } }   ("Skip for now": remember they were asked, so the popup does not come back)
+// Every answer may be '' (not answered). maxPrice '' means "Any budget", the same as on the Filters panel.
+// showPhg is the "Near parents (PHG)" switch: false unless it was switched on (so older profiles count as off).
+exports.saveProfile = async (req, res) => {
+  // profile must be an object like { ... } (not missing, not text, not a list)
+  if (
+    req.body === undefined ||
+    typeof req.body.profile !== 'object' ||
+    req.body.profile === null ||
+    Array.isArray(req.body.profile)
+  ) {
+    return res.status(400).json({ message: 'profile must be an object' });
+  }
+  const answers = req.body.profile;
+
+  const showPhg = answers.showPhg === true;
+
+  // We only keep the answers we know about, so nothing else can be stored by sending extra fields
+  let cleanProfile = { skipped: true, showPhg: showPhg };
+
+  if (answers.skipped !== true) {
+    const parentsPostal = asText(answers.parentsPostal);
+    if (parentsPostal !== '' && !isPostalCode(parentsPostal)) {
+      return res.status(400).json({ message: 'Postal code must be 6 digits' });
+    }
+
+    const maxPrice = asText(answers.maxPrice);
+    if (maxPrice !== '' && !(Number(maxPrice) > 0)) {
+      return res.status(400).json({ message: 'Budget must be a number' });
+    }
+
+    const minLease = asText(answers.minLease);
+    if (minLease !== '' && !(Number(minLease) >= 20 && Number(minLease) <= 99)) {
+      return res.status(400).json({ message: 'Remaining lease must be between 20 and 99 years' });
+    }
+
+    cleanProfile = {
+      town: asText(answers.town),
+      parentsPostal: parentsPostal,
+      flatType: asText(answers.flatType),
+      maxPrice: maxPrice,
+      minLease: minLease,
+      showPhg: showPhg,
+    };
+  }
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.profile = cleanProfile;
+    // "profile" can hold anything, so tell Mongoose it changed before saving (same as preferences)
+    user.markModified('profile');
+    await user.save();
+
+    res.json({ profile: user.profile });
   } catch (error) {
     sendError(res, error);
   }

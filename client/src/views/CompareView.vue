@@ -9,6 +9,8 @@ import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
 import { CATEGORIES, getWeights, makeDefaultPreferences, matchScore, MAX_DISTANCES } from '../utils/matchScore.js'
 import { useShortlistStore } from '../stores/shortlist'
+import { useFiltersStore } from '../stores/filters'
+import MatchScore from '../components/MatchScore.vue'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -25,6 +27,23 @@ const loading = ref(true)
 const selectedIds = ref([])
 
 const estimates = ref({})
+
+// Your budget: the "Max budget" filter, shared with Search and the Map (stores/filters.js).
+// Prices over it are shown in red. null = "Any" budget, so nothing is red.
+const filterStore = useFiltersStore()
+function budget() {
+  return filterStore.filters.maxPrice === '' ? null : Number(filterStore.filters.maxPrice)
+}
+
+// Is this price over your budget?
+function isOverBudget(price) {
+  return budget() !== null && price > budget()
+}
+
+// Is the model's estimate for this flat over your budget? (false while it is loading or when there is none)
+function isEstimateOverBudget(block) {
+  return estimates.value[block.id] !== undefined && isOverBudget(estimates.value[block.id])
+}
 
 // Your Priorities (school, MRT, hawker, park: ticked + importance), the same ones Search and the Map use.
 // Search saves them in localStorage as 'matchPreferences'; we start from those (or the defaults).
@@ -98,13 +117,9 @@ function formatRange(low, high) {
   return '$' + low.toLocaleString('en-SG') + ' – ' + '$' + high.toLocaleString('en-SG')
 }
 
-// Match score for one block, or "–" when it cannot be scored
-function scoreText(block) {
-  const score = matchScore(block.distances, weights, MAX_DISTANCES)
-  if (score === null) {
-    return '–'
-  }
-  return score
+// Match score for one block (0 to 100), or null when it cannot be scored (MatchScore then shows "–")
+function scoreFor(block) {
+  return matchScore(block.distances, weights, MAX_DISTANCES)
 }
 
 // Estimated monthly repayment for the median price, rounded to the dollar
@@ -155,6 +170,11 @@ loadShortlist()
       <p v-if="selectedIds.length < 2" class="text-muted">Tick at least 2 flats to compare.</p>
 
       <div v-else class="table-responsive">
+        <!-- Which budget the red prices are compared with -->
+        <p v-if="budget() !== null" class="small mb-2">
+          Your budget: <b>{{ '$' + budget().toLocaleString('en-SG') }}</b> (the Max budget filter on Search and the Map).
+          Prices <span class="text-danger fw-semibold">in red</span> are over it.
+        </p>
         <table class="table table-bordered align-middle bg-white">
           <thead class="table-light">
             <tr>
@@ -168,15 +188,36 @@ loadShortlist()
           <tbody>
             <tr>
               <th>Price range</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ formatRange(item.block.priceLow, item.block.priceHigh) }}</td>
+              <!-- Red when the median price is over your budget (text-danger = Bootstrap's red) -->
+              <td
+                v-for="item in selectedItems()"
+                :key="item.id"
+                :class="{ 'text-danger': isOverBudget(item.block.price) }"
+              >
+                {{ formatRange(item.block.priceLow, item.block.priceHigh) }}
+              </td>
             </tr>
             <tr>
               <th>Median price</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ '$' + item.block.price.toLocaleString('en-SG') }}</td>
+              <td
+                v-for="item in selectedItems()"
+                :key="item.id"
+                :class="{ 'text-danger fw-semibold': isOverBudget(item.block.price) }"
+              >
+                {{ '$' + item.block.price.toLocaleString('en-SG') }}
+                <div v-if="isOverBudget(item.block.price)" class="small">Over budget</div>
+              </td>
             </tr>
             <tr>
               <th>Estimated price (model)</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ estimateText(item.block) }}</td>
+              <td
+                v-for="item in selectedItems()"
+                :key="item.id"
+                :class="{ 'text-danger fw-semibold': isEstimateOverBudget(item.block) }"
+              >
+                {{ estimateText(item.block) }}
+                <div v-if="isEstimateOverBudget(item.block)" class="small">Over budget</div>
+              </td>
             </tr>
             <tr>
               <th>Remaining lease</th>
@@ -187,8 +228,10 @@ loadShortlist()
               <td v-for="item in selectedItems()" :key="item.id">{{ item.block.mrtName }} ({{ item.block.mrtWalkMinutes }} min walk)</td>
             </tr>
             <tr>
-              <th>Match score</th>
-              <td v-for="item in selectedItems()" :key="item.id">{{ scoreText(item.block) }}</td>
+              <th>Priority score</th>
+              <td v-for="item in selectedItems()" :key="item.id">
+                <MatchScore :score="scoreFor(item.block)" :distances="item.block.distances" :weights="weights" />
+              </td>
             </tr>
             <tr>
               <th>Est. monthly repayment</th>
@@ -202,7 +245,7 @@ loadShortlist()
         </table>
         <p class="small text-muted">
           Monthly repayment assumes an HDB loan of {{ HDB_LOAN_LTV_PERCENT }}% of the median price at
-          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Match score uses Your Priorities (set on the Search page). 
+          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Priority score uses Your Priorities (set on the Search page). 
           <br>
           Estimated price comes from our regression model (typical error about $46k).
 

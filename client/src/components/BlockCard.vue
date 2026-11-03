@@ -5,6 +5,8 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useMapFocusStore } from '../stores/mapFocus'
 import PriceDetails from './PriceDetails.vue'
+import MatchScore from './MatchScore.vue'
+import { scoreColor } from '../utils/matchScore.js'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -15,6 +17,7 @@ const props = defineProps({
   showSave: { type: Boolean, default: true }, // the shortlist page hides the Save button
   showMatch: { type: Boolean, default: false }, // only the search page shows the match score
   score: { type: Number, default: null }, // match score 0 to 100, or null for "–"
+  weights: { type: Object, default: null }, // Your Priorities as weights, for the match score's "i" breakdown
 })
 defineEmits(['toggle-save'])
 
@@ -122,46 +125,7 @@ function makeTags(block) {
   return tags
 }
 
-const SCORE_STOPS = [
-  { at: 0,   color: '#e07b39' },   // orange
-  { at: 25,  color: '#f0c13f' },   // yellow
-  { at: 50,  color: '#4fa66a' },   // green
-  { at: 75,  color: '#2f6fa8' },   // blue
-  { at: 100, color: '#1c3a6b' },   // navy
-]
-
-function scoreColor(score) {
-  let i = 0
-  while (i < SCORE_STOPS.length - 2 && score > SCORE_STOPS[i + 1].at) {
-    i++
-  }
-  const a = SCORE_STOPS[i]
-  const b = SCORE_STOPS[i + 1]
-  const t = ((score - a.at) / (b.at - a.at)) * 100   // how far from a to b, in %
-  return `color-mix(in oklab, ${b.color} ${t}%, ${a.color})`
-}
-
-// The match bar: filled to the score, showing the ramp from orange up to the score's colour
-function barStyle(score) {
-  if (score === null || score <= 0) {
-    return { width: '0%' }
-  }
-  const parts = SCORE_STOPS
-    .filter(function (stop) {
-      return stop.at < score
-    })
-    .map(function (stop) {
-      return `${stop.color} ${(stop.at / score) * 100}%`
-    })
-  parts.push(`${scoreColor(score)} 100%`)
-  return {
-    width: score + '%',
-    background: `linear-gradient(90deg, ${parts.join(', ')})`,
-  }
-}
-
-
-
+// The photo box takes the colour of the match score (the bar itself is in MatchScore.vue)
 function photoStyle(score) {
   if (score === null) {
     return {}   // no score: keep the default warm gradient
@@ -212,14 +176,7 @@ function barWidth(score) {
           <h3 class="serif">Blk {{ block.block }} {{ block.street }}</h3>
           <div class="meta">{{ block.town }} · {{ block.flatType }}</div>
         </div>
-        <div v-if="showMatch" class="match">
-          <div class="row1">
-            <span>Match</span>
-            <b v-if="score === null">–</b>
-            <b v-else>{{ score }}/100</b>
-          </div>
-          <div class="bar"><i :style="barStyle(score)"></i></div>
-        </div>
+        <MatchScore v-if="showMatch" :score="score" :distances="block.distances" :weights="weights" />
       </div>
 
       <!-- Price box -->
@@ -411,38 +368,6 @@ a.act-btn {
   color: var(--muted);
   font-size: 13px;
   margin-top: 4px;
-}
-
-/* Match score label and the bar behind it */
-.match {
-  min-width: 150px;
-}
-.row1 {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 600;
-}
-.row1 b {
-  color: var(--terra);
-}
-.bar {
-  height: 7px;
-  background: var(--beige);
-  border-radius: 9px;
-  overflow: hidden;
-  margin-top: 6px;
-}
-.bar i {
-  display: block;
-  height: 100%;
-  border-radius: 9px;
-}
-/* Gradient fill that slides to its width (transition) */
-.bar i {
-  background: linear-gradient(90deg, #d98a63, var(--terra));
-  transition: width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Beige price box */

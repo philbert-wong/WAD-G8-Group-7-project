@@ -5,6 +5,8 @@
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import axios from 'axios'
+// The "Title … Show ▾" bar from the Map page, so each section below can be opened and closed
+import CollapsiblePanel from './map/CollapsiblePanel.vue'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -15,10 +17,13 @@ const props = defineProps({
 
 // Chart.js needs its parts registered once before it can draw
 Chart.register(...registerables)
+// Chart text in the app's font (Chart.js uses Helvetica otherwise)
+Chart.defaults.font.family = "'DM Sans', sans-serif"
 
 const loading = ref(true)
 const chartCanvas = ref(null)
 let chart = null // a normal variable, not a ref (Chart.js does not like Vue's ref)
+let observer = null // watches the chart box and draws the chart when it scrolls into view
 const errorMessage = ref('')
 const details = ref(null)
 const model = ref(null) // the price model's answer: estimate, yearly, factors, trend (null = not available)
@@ -56,91 +61,302 @@ async function load() {
   }
   loading.value = false
 
-  // The <canvas> only exists after Vue has shown the results, so wait for that (nextTick)
+  // The <canvas> only exists after Vue has shown the results, so wait for that (nextTick),
+  // then draw the chart when it scrolls into view (so the user sees the line animate)
   if (details.value !== null) {
     await nextTick()
-    drawChart()
+    drawWhenVisible()
   }
 }
 
-// Draws the model's line (one point per month) and each real sale as a dot on the same months
+// Chart colours: from the app's cosy theme (the blue / terracotta pair passes a colour-blind check)
+const MODEL_COLOUR = '#1f6fa3'
+const BAND_COLOUR = 'rgba(31, 111, 163, 0.10)' // the model's blue as a light wash
+const SALE_COLOUR = 'rgba(192, 97, 74, 0.85)' // terracotta, slightly see-through for busy blocks
+const GRID_COLOUR = '#efe7db'
+const AXIS_TEXT_COLOUR = '#7a7166'
+
+// 367000 -> "$367k"
+function formatK(price) {
+  return '$' + Math.round(price / 1000) + 'k'
+}
+
+// Draws the chart the first time at least 40% of it is on screen.
+// this is not taught in our course - IntersectionObserver (a browser feature that tells us when an element becomes visible).
+function drawWhenVisible() {
+  observer = new IntersectionObserver(function (entries) {
+    for (const entry of entries) {
+      if (entry.isIntersecting && chart === null) {
+        drawChart()
+        observer.disconnect() // only once: scrolling away and back does not replay it
+      }
+    }
+  }, { threshold: 0.4 })
+  observer.observe(chartCanvas.value)
+}
+
+// A soft blue glow under the model line, so it looks lifted off the chart (depth without a 3D chart)
+const lineGlow = {
+  id: 'lineGlow',
+  beforeDatasetDraw: function (chart, args) {
+    if (chart.data.datasets[args.index].label === 'Model price (this flat)') {
+      chart.ctx.save()
+      chart.ctx.shadowColor = 'rgba(31, 111, 163, 0.35)'
+      chart.ctx.shadowBlur = 10
+      chart.ctx.shadowOffsetY = 4
+    }
+  },
+  afterDatasetDraw: function (chart, args) {
+    if (chart.data.datasets[args.index].label === 'Model price (this flat)') {
+      chart.ctx.restore()
+    }
+  },
+}
+
+
+// A thin vertical line that follows the mouse, so a month is easy to read (Chart.js has no built-in one)
+const crosshair = {
+  id: 'crosshair',
+  afterDatasetsDraw: function (chart) {
+    const active = chart.tooltip.getActiveElements()
+    if (active.length === 0) {
+      return
+    }
+    const x = active[0].element.x
+    const ctx = chart.ctx
+    ctx.save()
+    ctx.beginPath()
+    ctx.moveTo(x, chart.chartArea.top)
+    ctx.lineTo(x, chart.chartArea.bottom)
+    ctx.lineWidth = 1
+    ctx.strokeStyle = '#b8ab9c'
+    ctx.stroke()
+    ctx.restore()
+  },
+}
+
+// Draws the model's line with its typical error band, and each real sale as a dot on its month
 function drawChart() {
   const labels = []
   const datasets = []
 
-  // Real sales since Jan 2021, oldest first (the server sends newest first, so we go backwards)
+  // Real sales since Jan 2021, oldest first (the server sends newest first, so we go backwards).
+  // The floor is kept on each point for the tooltip.
   const salePoints = []
   for (let i = history.value.length - 1; i >= 0; i--) {
     const sale = history.value[i]
-    salePoints.push({ x: formatMonth(sale.month), y: sale.price })
+    salePoints.push({ x: formatMonth(sale.month), y: sale.price, storey: sale.storey })
   }
 
   if (model.value !== null) {
-    // Model line: the months on the bottom come from the trend (Jan 2021 to now)
+    // Model line, plus a band of ± the model's average miss (MAE) on sales it never saw
     const modelPrices = []
+    const lowPrices = []
+    const highPrices = []
     for (const point of model.value.trend) {
       labels.push(formatMonth(point.month))
       modelPrices.push(point.price)
+      lowPrices.push(point.price - model.value.maeDollars)
+      highPrices.push(point.price + model.value.maeDollars)
     }
+
+    // Band: the low edge is drawn invisibly, then the high edge fills down to it ('-1' = the dataset just before)
+    datasets.push({
+      label: 'low edge',
+      data: lowPrices,
+      borderWidth: 0,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      fill: false,
+    })
+    datasets.push({
+      label: 'Typical error (±' + formatK(model.value.maeDollars) + ')',
+      data: highPrices,
+      borderWidth: 0,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      pointStyle: 'rect',
+      backgroundColor: BAND_COLOUR,
+      fill: '-1',
+    })
     datasets.push({
       label: 'Model price (this flat)',
       data: modelPrices,
-      borderColor: '#2f6f8f',
-      backgroundColor: '#2f6f8f',
+      borderColor: MODEL_COLOUR,
+      backgroundColor: MODEL_COLOUR,
+      borderWidth: 2,
       pointRadius: 0,
-      tension: 0.3,
+      pointHoverRadius: 0,
+      pointStyle: 'line',
     })
   } else {
-    // No model: the months on the bottom are just the sale months (the old chart)
+    // No model: the months on the bottom are just the sale months
     for (const point of salePoints) {
       labels.push(point.x)
     }
   }
 
-  // Sales as small see-through dots (no line), placed on their month, so busy blocks stay readable
+  // Real sales: solid dots with a thin white ring, so overlapping dots stay readable
   datasets.push({
     label: 'Real sale',
     data: salePoints,
-    borderColor: 'rgba(192, 97, 74, 0.6)',
-    backgroundColor: 'rgba(192, 97, 74, 0.45)',
     showLine: false,
-    pointRadius: 3,
+    backgroundColor: SALE_COLOUR,
+    borderColor: '#ffffff',
+    borderWidth: 1.5,
+    pointRadius: 4,
+    pointHoverRadius: 6,
+    pointStyle: 'circle',
   })
 
   // Bottom axis: with the model's months (Jan 2021 to now), only label each January with its year
-  const xAxis = {}
+  const xTicks = { color: AXIS_TEXT_COLOUR, font: { size: 11 }, maxRotation: 0 }
   if (model.value !== null) {
-    xAxis.ticks = {
-      autoSkip: false,
-      maxRotation: 0,
-      callback: function (value) {
-        const label = labels[value] // e.g. "Jan 2022"
-        if (label.startsWith('Jan')) {
-          return label.slice(4) // "2022"
-        }
-        return null // no label for the other months
-      },
+    xTicks.autoSkip = false
+    xTicks.callback = function (value) {
+      const label = labels[value] // e.g. "Jan 2022"
+      if (label.startsWith('Jan')) {
+        return label.slice(4) // "2022"
+      }
+      return null
     }
+  }
+
+  // The line draws itself from 2021 to now in about 1.5 s: each month starts a little after the one before,
+  // and each sale dot appears when the line reaches its month (Chart.js "progressive line" animation).
+  // Chart.js animation options is not taught in our course
+  const totalDuration = 1500
+  const stepTime = totalDuration / labels.length
+
+  // Which month (0, 1, 2, ...) a point belongs to: its position for the line, its month label for a sale dot
+  function monthIndex(context) {
+    if (context.raw !== null && typeof context.raw === 'object') {
+      return labels.indexOf(context.raw.x)
+    }
+    return context.index
+  }
+
+  // How long a point waits before it starts: later months wait longer (only the first time it is drawn)
+  function delayFor(context, flag) {
+    if (context.type !== 'data' || context[flag]) {
+      return 0
+    }
+    context[flag] = true
+    return monthIndex(context) * stepTime
+  }
+
+  // Where a point's height starts: at the previous month's point, so the line grows out of itself.
+  // Sale dots and the first month start where they end (they appear instead of sliding).
+  function startY(context) {
+    if (context.raw !== null && typeof context.raw === 'object') {
+      return context.chart.scales.y.getPixelForValue(context.raw.y)
+    }
+    if (context.index === 0) {
+      return context.chart.scales.y.getPixelForValue(context.raw)
+    }
+    const previousPoint = context.chart.getDatasetMeta(context.datasetIndex).data[context.index - 1]
+    return previousPoint.getProps(['y'], true).y
+  }
+
+  let animation = {
+    x: {
+      type: 'number',
+      easing: 'linear',
+      duration: stepTime,
+      from: NaN, // hidden until its turn
+      delay: function (context) {
+        return delayFor(context, 'xStarted')
+      },
+    },
+    y: {
+      type: 'number',
+      easing: 'linear',
+      duration: stepTime,
+      from: startY,
+      delay: function (context) {
+        return delayFor(context, 'yStarted')
+      },
+    },
+  }
+
+  // Users who turned on "Reduce motion" in their computer's settings get the chart straight away
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    animation = false
   }
 
   chart = new Chart(chartCanvas.value, {
     type: 'line',
-    data: {
-      labels: labels,
-      datasets: datasets,
-    },
+    data: { labels: labels, datasets: datasets },
+    plugins: [crosshair, lineGlow],
     options: {
-      plugins: { legend: { display: true, labels: { boxWidth: 12 } } },
+      animation: animation,
+      // Hovering anywhere above a month shows that month (no need to aim at the thin line)
+      interaction: { mode: 'x', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'start',
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            color: AXIS_TEXT_COLOUR,
+            font: { size: 11 },
+            // The invisible low edge of the band is not shown in the legend
+            filter: function (item) {
+              return item.text !== 'low edge'
+            },
+          },
+        },
+        tooltip: {
+          backgroundColor: '#2d2d2d',
+          padding: 10,
+          cornerRadius: 6,
+          usePointStyle: true,
+          boxWidth: 8,
+          boxHeight: 8,
+          // Only the model and the sales in the tooltip (not the two band edges)
+          filter: function (item) {
+            return item.dataset.label === 'Model price (this flat)' || item.dataset.label === 'Real sale'
+          },
+          callbacks: {
+            label: function (item) {
+              if (item.dataset.label === 'Real sale') {
+                return ' Sale: ' + formatK(item.raw.y) + ' · floor ' + formatStorey(item.raw.storey)
+              }
+              return ' Model: ' + formatK(item.raw)
+            },
+          },
+        },
+      },
       scales: {
-        x: xAxis,
-        y: { ticks: { callback: function (value) { return '$' + value / 1000 + 'k' } } },
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: xTicks,
+        },
+        y: {
+          grid: { color: GRID_COLOUR },
+          border: { display: false },
+          ticks: {
+            color: AXIS_TEXT_COLOUR,
+            font: { size: 11 },
+            maxTicksLimit: 5,
+            callback: function (value) {
+              return formatK(value)
+            },
+          },
+        },
       },
     },
   })
 }
 
-// Remove the chart when the panel closes
+// Remove the chart (and stop watching for it) when the panel closes
 onUnmounted(function () {
+  if (observer !== null) {
+    observer.disconnect()
+  }
   if (chart !== null) {
     chart.destroy()
   }
@@ -296,18 +512,25 @@ function buildYearRows(sales) {
         <li class="text-muted">Source: {{ details.source === 'live' ? 'data.gov.sg (live)' : 'Stored data' }}</li>
       </ul>
 
-      <!-- Price chart: model line + real sales -->
-      <div class="mb-2"><canvas ref="chartCanvas" height="160"></canvas></div>
+      <!-- Each section below opens and closes on its own, so the panel is not one long page.
+           Only the price trend starts open. CollapsiblePanel uses v-show, so a closed chart still exists
+           and draws itself the first time it is opened (the IntersectionObserver sees it appear). -->
 
-      <!-- The two forces behind the line -->
-      <p v-if="model !== null" class="small text-muted mb-3">
-        Price trend for this flat: market {{ formatPct(model.yearly.marketPct) }} a year,
-        lease ageing {{ formatPct(model.yearly.leasePct) }} a year (since Jan 2021).
-      </p>
+      <!-- Price chart: model line + real sales -->
+      <CollapsiblePanel title="Price trend since 2021">
+        <div class="chart-box mb-2">
+          <canvas ref="chartCanvas" height="190"></canvas>
+        </div>
+
+        <!-- The two forces behind the line -->
+        <p v-if="model !== null" class="small text-muted mb-0">
+          Price trend for this flat: market {{ formatPct(model.yearly.marketPct) }} a year,
+          lease ageing {{ formatPct(model.yearly.leasePct) }} a year (since Jan 2021).
+        </p>
+      </CollapsiblePanel>
 
       <!-- Price by year: real sales since Jan 2021, so buyers can check the trend themselves -->
-      <div v-if="yearRows.length > 0" class="mb-3">
-        <h6 class="small fw-bold mb-2">Price by year</h6>
+      <CollapsiblePanel v-if="yearRows.length > 0" title="Price by year" :start-open="false">
         <div class="table-responsive">
           <table class="table table-sm small mb-0">
             <thead>
@@ -337,12 +560,10 @@ function buildYearRows(sales) {
           </table>
         </div>
         <p class="small text-muted mt-1 mb-0">Real sales of this block and flat type. The current year is only part of a year.</p>
-      </div>
+      </CollapsiblePanel>
 
       <!-- How this flat compares with a typical flat: bars going left (costs less) or right (costs more) from the centre line -->
-      <div v-if="model !== null" class="mb-3">
-        <h6 class="small fw-bold mb-2">How this flat compares with a typical resale flat</h6>
-
+      <CollapsiblePanel v-if="model !== null" title="Compared with a typical flat" :start-open="false">
         <!-- Direction labels, above the bar area only -->
         <div class="factor-row factor-head small text-muted">
           <span class="factor-label"></span>
@@ -375,36 +596,47 @@ function buildYearRows(sales) {
           Each bar compares this flat with a typical resale flat (town vs Ang Mo Kio, flat type vs 2-room),
           with everything else held the same. The market rise since 2021 applies to every flat, so it is shown under the chart.
         </p>
-      </div>
+      </CollapsiblePanel>
 
-      <div class="table-responsive">
-        <table class="table table-sm small mb-0">
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Floor</th>
-              <th class="text-end">Size</th>
-              <th class="text-end">Price</th>
-              <th class="text-end">Per m²</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(sale, i) in details.sales" :key="i">
-              <td class="text-nowrap">{{ formatMonth(sale.month) }}</td>
-              <td class="text-nowrap">{{ formatStorey(sale.storey) }}</td>
-              <td class="text-end text-nowrap">{{ sale.areaSqm }} m²</td>
-              <td class="text-end">{{ '$' + sale.price.toLocaleString('en-SG') }}</td>
-              <td class="text-end">{{ '$' + sale.pricePerSqm.toLocaleString('en-SG') }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <!-- Each sale in the last 12 months, with the count in the title -->
+      <CollapsiblePanel :title="'Sales in the last 12 months (' + details.sales.length + ')'" :start-open="false">
+        <div class="table-responsive">
+          <table class="table table-sm small mb-0">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Floor</th>
+                <th class="text-end">Size</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Per m²</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(sale, i) in details.sales" :key="i">
+                <td class="text-nowrap">{{ formatMonth(sale.month) }}</td>
+                <td class="text-nowrap">{{ formatStorey(sale.storey) }}</td>
+                <td class="text-end text-nowrap">{{ sale.areaSqm }} m²</td>
+                <td class="text-end">{{ '$' + sale.price.toLocaleString('en-SG') }}</td>
+                <td class="text-end">{{ '$' + sale.pricePerSqm.toLocaleString('en-SG') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </CollapsiblePanel>
     </template>
   </div>
 </template>
 
 
 <style scoped>
+/* Soft card around the price chart */
+.chart-box {
+  background: #fffdf9;
+  border: 1px solid #efe7db;
+  border-radius: 10px;
+  padding: 10px 12px 6px;
+}
+
 /* "What drives this flat's price": one row = label | bar area | % */
 .factor-row {
   display: flex;

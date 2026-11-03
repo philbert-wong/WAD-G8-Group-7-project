@@ -3,15 +3,16 @@
 // and keeps only the blocks inside it. This component only collects the text and shows the result.
 import { ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   parentPlace: { type: Object, default: null }, // the parents' place found: { name, lat, lng }, or null
   nearbyCount: { type: Number, default: null }, // blocks inside the circle (null = no circle)
   distanceKm: { type: Number, default: 4 }, // the PHG "live near" distance in km
+  initialText: { type: String, default: '' }, // what the box starts with, e.g. the postal code saved on the profile page
 })
 const emit = defineEmits(['search', 'clear'])
 
 // What is typed in the box (only this component needs it)
-const text = ref('')
+const text = ref(props.initialText)
 
 // Search button / Enter: send the typed text up to MapView
 function onSearch() {
@@ -27,10 +28,8 @@ function onClear() {
 
 <template>
   <div class="cosy-card cosy-shadow">
-    <h5 class="serif">Proximity Grant (PHG) layer</h5>
     <p class="small text-muted">
-      Type your parents' postal code (or home address) to draw the {{ distanceKm }} km circle.
-      Only the blocks inside it are shown (together with your filters): they can get the "live near" grant.
+      Enter your parents' postal code to show only flats within {{ distanceKm }} km (Proximity Housing Grant).
     </p>
 
     <!-- Search box: any address or postal code (looked up by OneMap) -->

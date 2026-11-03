@@ -6,6 +6,11 @@ const userSchema = new mongoose.Schema({
 
   passwordHash: { type: String, required: true},
   preferences: { type: Object, default: {} },
+
+  // The "About you" answers from the sign-up popup / profile page:
+  // { town, parentsPostal, flatType, maxPrice, minLease }, or { skipped: true } if they pressed "Skip for now".
+  // null = never asked yet, which is what makes the popup show.
+  profile: { type: Object, default: null },
 });
 
 const User = mongoose.model("User", userSchema);

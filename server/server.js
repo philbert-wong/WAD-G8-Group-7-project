@@ -15,6 +15,9 @@ const authRoutes = require('./routes/auth-routes');
 const amenitiesRoutes = require('./routes/amenities-routes');
 const errorHandler = require('./middleware/errorHandler');
 
+// ADDED: Affordability
+const affordabilityRoutes = require('./routes/affordability-routes');
+
 const server = express();
 
 // Lets our Vue site (a different port, e.g. localhost:5173) read this API's answers. Same one line as the class servers.
@@ -39,6 +42,10 @@ server.use('/api/blocks', blocksRoutes);
 server.use('/api/shortlist', shortlistRoutes);
 server.use('/api/auth', authRoutes);
 server.use('/api/amenities', amenitiesRoutes); // map: MRT / hawker / park / school dots
+
+// ADDED: Affordability
+server.use('/api/affordability', affordabilityRoutes);
+
 server.use('/api', notFound);
 
 server.use(errorHandler); // must be last

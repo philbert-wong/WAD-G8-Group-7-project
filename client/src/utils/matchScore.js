@@ -116,3 +116,86 @@ export function matchScore(distances, weights, maxDistances) {
   // Step 5: weighted average, rounded to a whole number
   return Math.round(weightedSum / totalWeight)
 }
+
+// Colours of the match bar, from a low score to a high one
+export const SCORE_STOPS = [
+  { at: 0,   color: '#e07b39' },   // orange
+  { at: 25,  color: '#f0c13f' },   // yellow
+  { at: 50,  color: '#4fa66a' },   // green
+  { at: 75,  color: '#2f6fa8' },   // blue
+  { at: 100, color: '#1c3a6b' },   // navy
+]
+
+// The colour for one score, mixed between the two stops around it
+export function scoreColor(score) {
+  let i = 0
+  while (i < SCORE_STOPS.length - 2 && score > SCORE_STOPS[i + 1].at) {
+    i++
+  }
+  const a = SCORE_STOPS[i]
+  const b = SCORE_STOPS[i + 1]
+  const t = ((score - a.at) / (b.at - a.at)) * 100   // how far from a to b, in %
+  return `color-mix(in oklab, ${b.color} ${t}%, ${a.color})`
+}
+
+// One word for a score, so users do not have to guess what the number means.
+// The bands match the colours of the match bar (orange, yellow, green, blue).
+export function scoreWord(score) {
+  if (score === null) {
+    return ''
+  }
+  if (score >= 75) {
+    return 'Excellent'
+  }
+  if (score >= 50) {
+    return 'Good'
+  }
+  if (score >= 25) {
+    return 'Fair'
+  }
+  return 'Weak'
+}
+
+// How the score was made: one row per ticked category, for the "i" button.
+// Uses the same subScore as matchScore, so the rows explain the real number.
+// share = this category's part of the score (its weight / all the weights), so the shares add up to 1
+// and the score is each row's score x its share, added up.
+// weighted = score x share: these add up to the match score.
+// Gives [{ label: 'Transport (MRT stations)', key: 'mrt', distance: 741, maxDistance: 1300, score: 43, level: 'Important', share: 0.25, weighted: 10.75 }, ...]
+export function scoreBreakdown(distances, weights, maxDistances) {
+  const rows = []
+  if (distances === undefined || distances === null) {
+    return rows
+  }
+
+  // Add up the weights first, to work out each category's share
+  let totalWeight = 0
+  for (let i = 0; i < CATEGORIES.length; i++) {
+    totalWeight = totalWeight + weights[CATEGORIES[i].key]
+  }
+
+  for (let i = 0; i < CATEGORIES.length; i++) {
+    const key = CATEGORIES[i].key
+    const weight = weights[key]
+    if (weight > 0) {
+      // The importance word for this weight, e.g. 3 -> 'Important'
+      let level = ''
+      for (let j = 0; j < IMPORTANCE_LEVELS.length; j++) {
+        if (IMPORTANCE_LEVELS[j].value === weight) {
+          level = IMPORTANCE_LEVELS[j].label
+        }
+      }
+      rows.push({
+        label: CATEGORIES[i].label,
+        key: key,
+        distance: distances[key],
+        maxDistance: maxDistances[key],
+        score: Math.round(subScore(distances[key], maxDistances[key])),
+        level: level,
+        share: weight / totalWeight,
+        weighted: (subScore(distances[key], maxDistances[key]) * weight) / totalWeight, // score x share, not rounded
+      })
+    }
+  }
+  return rows
+}

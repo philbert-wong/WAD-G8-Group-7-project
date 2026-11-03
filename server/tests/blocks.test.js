@@ -37,6 +37,17 @@ describe('GET /api/blocks (search and filter)', () => {
     expect(res.body.results.map((b) => b.town)).toEqual(['PUNGGOL']);
   });
 
+  it('searches by postal code', async () => {
+    const res = await search({ q: '823233' });
+    expect(res.body.results.map((b) => b.town)).toEqual(['PUNGGOL']);
+    expect(res.body.results[0].postal).toBe('823233');
+  });
+
+  it('finds nothing for a postal code that is not one of our blocks', async () => {
+    const res = await search({ q: '018989' });
+    expect(res.body.total).toBe(0);
+  });
+
   it('filters by flat type', async () => {
     const res = await search({ flatType: '3 ROOM' });
     expect(res.body.results.map((b) => b.town)).toEqual(['BEDOK']);

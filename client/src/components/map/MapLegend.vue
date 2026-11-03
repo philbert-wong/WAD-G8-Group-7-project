@@ -8,8 +8,13 @@ const props = defineProps({
   amenityTypes: Array, // [{ key, label, one, colour }, ...]
   shownTypes: Array, // the ticked amenity keys, e.g. ['mrt', 'park']
   noScoreColour: String, // the grey for "no score"
+  showWhich: String, // 'all' or 'shortlist'
+  loggedIn: Boolean, // the shortlist option needs a login
+  shortlistCount: Number, // how many flats are saved
+  shownFlats: Number, // flats on the map now (in shortlist mode: the saved ones that are shown)
+  shownBlocks: Number, // dots on the map now (one block can hold several flat types)
 })
-const emit = defineEmits(['change-colour-by', 'toggle-amenity'])
+const emit = defineEmits(['change-show-which', 'change-colour-by', 'toggle-amenity'])
 
 // An amenity tick box changed: send its key and whether it is now ticked, e.g. ('mrt', true)
 function onToggle(key, event) {
@@ -24,7 +29,46 @@ function isShown(key) {
 
 <template>
   <div class="cosy-card cosy-shadow mb-3">
-    <!-- Colour dots by: price or match (like Search's "Cheapest first / Best match") -->
+    <!-- Show: every block that fits the filters, or only the flats in your shortlist -->
+    <div class="small fw-semibold mb-1">Show</div>
+    <div class="form-check form-check-inline">
+      <input
+        id="show-all"
+        :checked="showWhich === 'all'"
+        type="radio"
+        name="show-which"
+        class="form-check-input"
+        @change="emit('change-show-which', 'all')"
+      />
+      <label for="show-all" class="form-check-label">All flats</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input
+        id="show-shortlist"
+        :checked="showWhich === 'shortlist'"
+        :disabled="!loggedIn"
+        type="radio"
+        name="show-which"
+        class="form-check-input"
+        @change="emit('change-show-which', 'shortlist')"
+      />
+      <!-- text-nowrap (Bootstrap): each piece stays whole, so "(log in first)" is on the same line or fully below, never split -->
+      <label for="show-shortlist" class="form-check-label">
+        <span class="text-nowrap">My shortlist</span>
+        <span v-if="loggedIn" class="text-nowrap ms-1">({{ shortlistCount }})</span>
+        <span v-else class="text-nowrap text-muted small ms-1">(log in first)</span>
+      </label>
+    </div>
+    <div v-if="showWhich === 'shortlist'" class="small text-muted mt-1">
+      <span v-if="shortlistCount === 0">Your shortlist is empty: save flats on the Search page.</span>
+      <span v-else>
+        Showing {{ shownFlats }} saved flat(s) in {{ shownBlocks }} block(s), even if they do not fit your filters.
+        Flats in the same block share one dot: click it to see them all.
+      </span>
+    </div>
+    <div class="mb-3"></div>
+
+    <!-- Colour dots by: price or match (like Search's two sort options) -->
     <div class="small fw-semibold mb-1">Colour dots by</div>
     <div class="form-check form-check-inline">
       <input
@@ -46,7 +90,7 @@ function isShown(key) {
         class="form-check-input"
         @change="emit('change-colour-by', 'match')"
       />
-      <label for="colour-match" class="form-check-label">Best match</label>
+      <label for="colour-match" class="form-check-label">Priority score</label>
     </div>
 
     <!-- Price legend -->
@@ -60,13 +104,15 @@ function isShown(key) {
 
     <!-- Match legend: a smooth gradient from 0 to 100 -->
     <div v-else>
-      <h5 class="serif">Match score (Your Priorities)</h5>
+      <h5 class="serif">Priority score (from Your Priorities)</h5>
       <div class="gradient-bar"></div>
       <div class="d-flex justify-content-between small text-muted">
-        <span>0 (poor)</span>
+        <span>0</span>
         <span>50</span>
-        <span>100 (great)</span>
+        <span>100</span>
       </div>
+      <!-- The same words as the match bar on the flat cards (scoreWord in utils/matchScore.js) -->
+      <div class="small text-muted mt-1">Weak 0–24 · Fair 25–49 · Good 50–74 · Excellent 75+</div>
       <div class="d-flex align-items-center gap-2 small mt-2">
         <span class="dot" :style="{ background: noScoreColour }"></span>
         No score (no priorities ticked)

@@ -15,11 +15,13 @@
 //   FEATURE 7 (Jihao)  Link to the Compare page (CompareView.vue, route /compare)
 //
 // All the maths is in utils/affordability.js and every number in utils/affordabilityRules.js.
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { calculateBudget } from '../utils/affordability.js'
 import { MAX_LOAN_YEARS, HDB_LOAN_INTEREST_RATE, HDB_LOAN_LTV_PERCENT, MSR_PERCENT } from '../utils/affordabilityRules.js'
 import PhgChecker from '../components/PhgChecker.vue'
+import axios from 'axios'
+import { BASE_URL } from '../config.js'
 
 const router = useRouter()
 
@@ -67,6 +69,54 @@ const flatType = ref('4 ROOM')
 const employed12Months = ref(true)
 const phgOption = ref('none') // 'none', 'with' or 'near'
 const loanYears = ref(MAX_LOAN_YEARS)
+
+//load the users saved inputs (yujia)
+async function loadDetails() {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/affordability`)
+    const data = response.data
+
+    if (data) {
+      buyerType.value = data.buyerType
+      coOwnerCount.value = data.coOwnerCount
+
+      for (let i = 0; i < data.owners.length; i++) {
+        owners.value[i] = {
+          status: data.owners[i].status,
+          income: data.owners[i].income ?? '',
+          cpf: data.owners[i].cpf ?? '',
+          cash: data.owners[i].cash ?? ''
+        }
+      }
+
+      flatType.value = data.flatType
+      employed12Months.value = data.employed12Months
+      phgOption.value = data.phgOption
+      loanYears.value = data.loanYears
+    }
+  } catch (error) {
+    console.log('Cannot load affordability details')
+  }
+}
+
+onMounted(loadDetails)
+// auto save users input to mongo (yujia)
+async function saveDetails() {
+  try {
+    await axios.put(`${BASE_URL}/api/affordability`, {
+      buyerType: buyerType.value,
+      coOwnerCount: coOwnerCount.value,
+      owners: owners.value,
+      flatType: flatType.value,
+      employed12Months: employed12Months.value,
+      phgOption: phgOption.value,
+      loanYears: loanYears.value
+    })
+  } catch (error) {
+    console.log('Cannot save affordability details')
+  }
+}
+
 
 // ---------- Turning the form into numbers ----------
 
@@ -207,7 +257,7 @@ function applyBudget() {
       <h4 class="mb-3">Step 1: Household finances</h4>
 
       <div class="card shadow-sm">
-        <div class="card-body p-4">
+        <div class="card-body p-4" @change="saveDetails" >
           <!-- FEATURE 1 (Yujia): who is buying -->
           <div class="row g-3">
             <div class="col-12 col-md-6">
@@ -248,7 +298,7 @@ function applyBudget() {
               </div>
               <div class="col-12 col-md-6 col-lg-3">
                 <label :for="'cal-income-' + index" class="form-label">Monthly gross income ($)</label>
-                <input :id="'cal-income-' + index" v-model="owner.income" type="number" min="0" step="100" class="form-control" placeholder="e.g. 4000" />
+                <input :id="'cal-income-' + index" v-model="owner.income" type="number" min="0" step="100" class="form-control" placeholder="e.g. 4000"   />
               </div>
               <div class="col-12 col-md-6 col-lg-3">
                 <label :for="'cal-cpf-' + index" class="form-label">CPF OA savings ($)</label>

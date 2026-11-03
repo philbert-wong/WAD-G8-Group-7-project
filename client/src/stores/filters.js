@@ -5,8 +5,9 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 // The filters at the start and after "Clear all". maxPrice '' would mean "Any" budget.
+// phg = the "Near parents (PHG)" switch on the Map: true = only show blocks within 4 km of the parents (off by default)
 function makeDefaultFilters() {
-  return { q: '', flatType: '', maxPrice: '760000', minLease: '60' }
+  return { q: '', flatType: '', maxPrice: '760000', minLease: '60', phg: false }
 }
 
 export const useFiltersStore = defineStore('filters', function () {
@@ -22,10 +23,31 @@ export const useFiltersStore = defineStore('filters', function () {
   }
 
   // "Clear all": back to the starting filters
+  // (The PHG switch is a choice, not a filter value, so "Clear all" leaves it as it is.)
   function clearFilters() {
+    const phg = filters.value.phg
     filters.value = makeDefaultFilters()
+    filters.value.phg = phg
+  }
+
+  // The account's profile answers (stores/auth.js) become the starting filters, on Search and on the Map.
+  // Nothing changes when there is no profile yet, or when the user pressed "Skip for now".
+  function applyProfile(profile) {
+    if (profile === null) {
+      return
+    }
+    // Only on when it was switched on (profiles saved before the switch existed have no showPhg: that counts as off)
+    filters.value.phg = profile.showPhg === true
+    if (profile.skipped) {
+      return
+    }
+    filters.value.flatType = profile.flatType
+    filters.value.maxPrice = profile.maxPrice // '' = Any budget
+    if (profile.minLease !== '') {
+      filters.value.minLease = profile.minLease
+    }
   }
 
   // You must return every state and action, or pages cannot use them (slide 21)
-  return { filters, setFilter, clearFilters }
+  return { filters, setFilter, clearFilters, applyProfile }
 })

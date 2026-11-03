@@ -1,6 +1,6 @@
 <script setup>
 // The Search page: search box, filters, "What matters to you?" panel and the flat cards
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
@@ -16,7 +16,7 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
-import { useRoute } from 'vue-router'
+import { useRoute, RouterLink } from 'vue-router'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -33,6 +33,19 @@ const filterStore = useFiltersStore()
 // Messages for the top alert: "please log in" and problems saving your choices
 // (problems with the shortlist itself are in shortlist.error)
 const shortlistErrorMessage = ref('')
+
+// The "create an account" strip for a guest who has saved presets. Closing it is remembered on this device.
+const accountBannerClosed = ref(localStorage.getItem('accountBannerClosed') === 'yes')
+
+// Only for someone who is not logged in and has presets saved on this device
+const showAccountBanner = computed(function () {
+  return !auth.isLoggedIn && auth.profile !== null && !accountBannerClosed.value
+})
+
+function closeAccountBanner() {
+  accountBannerClosed.value = true
+  localStorage.setItem('accountBannerClosed', 'yes')
+}
 
 // The search box text ('' = not used). Only the Search page has a search box, so it is not in the filters store.
 const searchText = ref('')
@@ -88,20 +101,6 @@ async function loadAreas() {
 // ('' = a normal search). Shown above the results.
 const placeName = ref('')
 
-// True when the text is a 6-digit Singapore postal code, e.g. "560314".
-// Our data has no postal codes, so a postal code always goes to OneMap.
-function isPostalCode(text) {
-  if (text.length !== 6) {
-    return false
-  }
-  for (const character of text) {
-    if (character < '0' || character > '9') {
-      return false
-    }
-  }
-  return true
-}
-
 // Flats near any place in Singapore: our server asks OneMap where the place is (/api/blocks/place),
 // then finds our flats within 1 km of it that fit the filters (/api/blocks/nearby).
 // Errors are caught by search() below.
@@ -124,10 +123,29 @@ async function searchNearPlace(text) {
   placeName.value = place.name
 }
 
+
+// The town preset becomes the search text, so Search focuses on it like the Map does
+function applyTownPreset() {
+  if (auth.profile !== null && auth.profile.town) {
+    searchText.value = auth.profile.town
+  }
+}
+
+// New presets were saved in the popup: search again with the new filters
+watch(
+  function () {
+    return auth.presetsVersion
+  },
+  function () {
+    applyTownPreset()
+    search()
+  },
+)
+
 // The one search box (and the filters). Empty filters are ignored by the server, so we can send them all.
-//   1. A postal code ("560314"): straight to OneMap, flats near it
-//   2. Anything else: search our own data (town, street, block or full address, e.g. "Blk 314 Ang Mo Kio Ave 3")
-//   3. Our data has nothing, but something was typed (e.g. "Northpoint City"): ask OneMap, flats near it
+//   1. Search our own data: town, street, block, full address ("Blk 314 Ang Mo Kio Ave 3") or postal code ("560323")
+//   2. Our data has nothing, but something was typed (e.g. "Northpoint City", or a condo's postal code):
+//      ask OneMap, flats near it
 async function search() {
   loading.value = true
   errorMessage.value = ''
@@ -135,23 +153,19 @@ async function search() {
   const typed = searchText.value.trim()
 
   try {
-    if (isPostalCode(typed)) {
+    // The search text plus the shared filters
+    const params = {
+      q: searchText.value,
+      flatType: filterStore.filters.flatType,
+      maxPrice: filterStore.filters.maxPrice,
+      minLease: filterStore.filters.minLease,
+    }
+    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
+    if (response.data.total === 0 && typed !== '') {
       await searchNearPlace(typed)
     } else {
-      // The search text plus the shared filters
-      const params = {
-        q: searchText.value,
-        flatType: filterStore.filters.flatType,
-        maxPrice: filterStore.filters.maxPrice,
-        minLease: filterStore.filters.minLease,
-      }
-      const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
-      if (response.data.total === 0 && typed !== '') {
-        await searchNearPlace(typed)
-      } else {
-        results.value = response.data.results
-        total.value = response.data.total
-      }
+      results.value = response.data.results
+      total.value = response.data.total
     }
   } catch (error) {
     // Nothing to show: empty the list, so old cards do not stay under the message
@@ -178,11 +192,31 @@ function clearFilters() {
   search()
 }
 
+// Phones and tablets: the filters live in a drawer that slides in from the left (on a computer they are always
+// shown on the right). true = drawer open
+const filtersOpen = ref(false)
+
+// The "☰ Filters" button opens the drawer
+function openFilters() {
+  filtersOpen.value = true
+}
+
+// The ✕ button and the dark backdrop close it
+function closeFilters() {
+  filtersOpen.value = false
+}
+
+// "Search" in the filter panel: close the drawer, so the new results are in view, then search
+function searchFromFilters() {
+  filtersOpen.value = false
+  search()
+}
+
 // "What matters to you?" panel: all ticked, Important (3) to start with
 const preferences = ref(makeDefaultPreferences())
 
-// 'price' = cheapest first (the order the server sends), 'match' = best match first
-const sortBy = ref('price')
+// 'match' = highest match score first (the default), 'price' = cheapest first (the order the server sends)
+const sortBy = ref('match')
 
 // The panel's choices and the sort are remembered in the browser (localStorage),
 // so they are still there when you come back from the Shortlist page.
@@ -272,7 +306,7 @@ function changeLevel(key, level) {
   saveChoices()
 }
 
-// Puts the best match first. Blocks with no score ("–") go to the end.
+// Puts the highest match score first. Blocks with no score ("–") go to the end.
 // Same score (e.g. every block more than 1300 m' walk from a station scores 0 for Transport):
 // the shorter walk to the MRT goes first, so the "min walk" on the cards still goes up down the list.
 // Returning a negative number puts a before b, a positive number puts b before a.
@@ -308,20 +342,47 @@ const scoredResults = computed(function () {
   return list
 })
 
-// Pages: show PAGE_SIZE cards at a time
-const PAGE_SIZE = 12
+// Pages: show pageSize cards at a time.
+// Phones and tablets stack each card (map on top), so they get fewer per page than a computer.
+// 991px is the same break as the "☰ Filters" button and the stacked card.
+const isSmallScreen = ref(window.innerWidth <= 991)
+
+// the window was resized (e.g. the DevTools device toolbar): work out the screen size again
+function onResize() {
+  isSmallScreen.value = window.innerWidth <= 991
+}
+onMounted(function () {
+  window.addEventListener('resize', onResize)
+})
+onUnmounted(function () {
+  window.removeEventListener('resize', onResize)
+})
+
+const pageSize = computed(function () {
+  if (isSmallScreen.value) {
+    return 6
+  }
+  return 12
+})
 const page = ref(1)
 
 // how many pages the whole list needs (at least 1)
 const totalPages = computed(function () {
-  return Math.max(1, Math.ceil(scoredResults.value.length / PAGE_SIZE))
+  return Math.max(1, Math.ceil(scoredResults.value.length / pageSize.value))
 })
 
 // the cards for the current page
 const visibleResults = computed(function () {
-  const start = (page.value - 1) * PAGE_SIZE
-  const end = start + PAGE_SIZE
+  const start = (page.value - 1) * pageSize.value
+  const end = start + pageSize.value
   return scoredResults.value.slice(start, end)
+})
+
+// a bigger window means fewer pages: if we were past the new last page, go to the last one
+watch(totalPages, function () {
+  if (page.value > totalPages.value) {
+    page.value = totalPages.value
+  }
 })
 
 // a new search gives new results: go back to page 1
@@ -347,7 +408,7 @@ function goToPage(number) {
 function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
   if (!auth.isLoggedIn) {
-    shortlistErrorMessage.value = 'Please log in to save flats'
+    shortlistErrorMessage.value = 'Saving flats needs an account.'
     return
   }
 
@@ -373,6 +434,7 @@ function loadPage() {
   if (budget !== undefined) {
     filterStore.setFilter('maxPrice', String(budget))
   }
+  applyTownPreset()
   search()
   loadAreas()
   if (auth.isLoggedIn) {
@@ -387,12 +449,16 @@ onMounted(loadPage)
 <template>
   <section>
     <!-- Hero title, then results (left) + sidebar (right) -->
-    <span class="eyebrow">26 towns · real resale prices · last 12 months</span>
     <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
     <p class="page-sub">Search blocks, compare real sale prices, and keep a shortlist.</p>
 
     <div v-if="shortlistErrorMessage" class="alert alert-warning">
       {{ shortlistErrorMessage }}
+      <!-- A guest who tried to save a flat: the best moment to offer an account -->
+      <span v-if="!auth.isLoggedIn">
+        <RouterLink to="/login">Log in</RouterLink> or
+        <RouterLink to="/createaccount"><strong>create a free account</strong></RouterLink>.
+      </span>
     </div>
     <div v-if="shortlist.error" class="alert alert-warning">
       {{ shortlist.error }}
@@ -415,24 +481,59 @@ onMounted(loadPage)
       Showing flats within 1 km of <strong>{{ placeName }}</strong> (place found by OneMap)
     </p>
 
+    <!-- A guest who saved presets: offer an account, so the presets (and the shortlist) follow them to any device -->
+    <div
+      v-if="showAccountBanner"
+      class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2"
+      role="status"
+    >
+      <span>
+        Presets saved on this device.
+        <RouterLink to="/createaccount"><strong>Create a free account</strong></RouterLink>
+        to keep them on any device and save flats.
+      </span>
+      <button type="button" class="btn-close" aria-label="Close" @click="closeAccountBanner"></button>
+    </div>
+
     <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->
     <div class="row g-4 mt-1">
       <div class="col-lg-8 order-2 order-lg-1">
+        <!-- Results bar. Computers: count on the left, Sort on the right.
+             Phones and tablets: "☰ Filters" and Sort side by side on top, the count on the line below.
+             (order-1 / order-2 swap their places on small screens.) Always shown, so the filters can
+             still be opened when a search found nothing. -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
+          <span v-if="!loading && !errorMessage" class="results-count order-2 order-lg-1">
+            <b>{{ total }} flat(s)</b> match your filters
+          </span>
+
+          <div class="results-controls d-flex justify-content-between align-items-center gap-2 ms-auto order-1 order-lg-2">
+            <!-- Phones and tablets only (d-lg-none): opens the filter drawer -->
+            <button
+              type="button"
+              class="act-btn d-lg-none"
+              aria-controls="filter-drawer"
+              :aria-expanded="filtersOpen"
+              @click="openFilters"
+            >
+              ☰ Filters
+            </button>
+
+            <select
+              id="sort-by"
+              v-model="sortBy"
+              class="form-select form-select-sm cosy-input w-auto"
+              aria-label="Sort"
+              @change="saveChoices"
+            >
+              <option value="match">Sort: Priority score</option>
+              <option value="price">Sort: Cheapest first</option>
+            </select>
+          </div>
+        </div>
+
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
-        <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
-          <span><b>{{ total }} flat(s)</b> match your filters</span>
-          <select
-            id="sort-by"
-            v-model="sortBy"
-            class="form-select form-select-sm cosy-input w-auto"
-            aria-label="Sort"
-            @change="saveChoices"
-          >
-            <option value="price">Sort: Cheapest first</option>
-            <option value="match">Sort: Best match</option>
-          </select>
-        </div>
 
         <BlockCard
           v-for="item in visibleResults"
@@ -440,6 +541,7 @@ onMounted(loadPage)
           :block="item.block"
           :saved="shortlist.isSaved(item.block.id)"
           :score="item.score"
+          :weights="getWeights(preferences)"
           show-match
           @toggle-save="toggleSave"
         />
@@ -456,11 +558,20 @@ onMounted(loadPage)
       </div>
 
       <div class="col-lg-4 order-1 order-lg-2">
-        <div class="sidebar">
+        <!-- Dark backdrop behind the open drawer; tapping it closes the drawer -->
+        <div v-if="filtersOpen" class="drawer-backdrop d-lg-none" @click="closeFilters"></div>
+
+        <!-- On a computer: the normal sidebar. On phones and tablets: a drawer from the left (see the CSS below) -->
+        <div id="filter-drawer" class="sidebar filter-drawer" :class="{ open: filtersOpen }">
+          <div class="d-flex justify-content-between align-items-center mb-3 d-lg-none">
+            <strong>Filters</strong>
+            <button type="button" class="btn-close" aria-label="Close filters" @click="closeFilters"></button>
+          </div>
+
           <FilterPanel
             :filters="filterStore.filters"
             @change-filter="setFilter"
-            @search="search"
+            @search="searchFromFilters"
             @clear="clearFilters"
           />
 
@@ -496,6 +607,44 @@ onMounted(loadPage)
     top: 20px;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
+  }
+}
+
+/* Phones and tablets (narrower than Bootstrap's lg, 992px): the sidebar becomes a drawer on the left.
+   It waits just off the screen (translateX(-100%)) and slides in when it has the "open" class. */
+@media (max-width: 991.98px) {
+  /* Results bar: Filters + Sort fill the first line (Filters left, Sort right), the count gets its own line */
+  .results-controls,
+  .results-count {
+    width: 100%;
+  }
+
+  .filter-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(85vw, 360px);
+    padding: 16px;
+    overflow-y: auto;
+    background: var(--cream);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: 1045; /* above the page and the navbar */
+    transform: translateX(-100%);
+    visibility: hidden; /* while closed, its buttons cannot be reached with the Tab key */
+    transition: transform 0.25s ease, visibility 0.25s;
+  }
+  .filter-drawer.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  /* The dark see-through layer over the page, just under the drawer */
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1040;
   }
 }
 

@@ -112,6 +112,19 @@ function startsWithDigit(text) {
   return firstLetter >= '0' && firstLetter <= '9';
 }
 
+// True when the text is a 6-digit Singapore postal code, e.g. "560323"
+function isPostalCode(text) {
+  if (text.length !== 6) {
+    return false;
+  }
+  for (const character of text) {
+    if (character < '0' || character > '9') {
+      return false;
+    }
+  }
+  return true;
+}
+
 // The words of a text in capitals, ignoring extra spaces and commas: "northshore dr, punggol" -> ['NORTHSHORE', 'DR', 'PUNGGOL']
 function toWords(text) {
   const words = [];
@@ -155,7 +168,8 @@ function shortenStreetWords(words) {
 // Turns the query string (?q=punggol&maxPrice=600000...) into a MongoDB filter object.
 // The route has already checked that the number filters really are numbers.
 //
-//   q          search text, matches block number, street or town, or a full address ("Blk 314 Ang Mo Kio Ave 3")
+//   q          search text, matches block number, street or town, a full address ("Blk 314 Ang Mo Kio Ave 3")
+//              or a postal code ("560323")
 //   flatType   e.g. "4 ROOM"
 //   maxPrice   budget in dollars
 //   minLease   minimum remaining lease in years
@@ -176,6 +190,11 @@ function buildFilter(query) {
       { town: { $regex: text, $options: 'i' } },
       { street: { $regex: shortText, $options: 'i' } },
     ];
+
+    // A postal code ("560323"): the block with exactly that postal code
+    if (isPostalCode(typed)) {
+      filter.$or.push({ postal: typed });
+    }
 
     // A full address: the first word is a block number and the rest is its street.
     // Both must fit: the block number exactly (^...$ = the whole block number, so "314" is not "3140")

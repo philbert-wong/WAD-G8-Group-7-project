@@ -6,6 +6,7 @@ import BlockCard from './BlockCard.vue'
 const props = defineProps({
   item: Object, // { id, note, block }
   score: { type: Number, default: null }, // match score 0 to 100, or null for "–"
+  weights: { type: Object, default: null }, // Your Priorities as weights, for the match score's "i" breakdown
 })
 const emit = defineEmits(['remove', 'change-note'])
 
@@ -26,7 +27,7 @@ function removeItem() {
 <template>
   <div>
     <!-- Same card as on the search page (price details, nearby amenities) -->
-    <BlockCard :block="item.block" :show-save="false" :score="score" show-match />
+    <BlockCard :block="item.block" :show-save="false" :score="score" :weights="weights" show-match />
 
     <!-- The note box, in its own card underneath -->
     <!-- Note box in the cosy card style, sitting under the flat card -->
