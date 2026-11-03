@@ -105,6 +105,7 @@ for (const b of blocks) {
     block: b.block,
     street: b.street,
     town: b.town,
+    postal: b.postal, // from prep/addPostal.js (missing for the few blocks OneMap has no postal code for)
     flatType: b.flatType,
     price: b.price,
     priceLow: b.priceLow,

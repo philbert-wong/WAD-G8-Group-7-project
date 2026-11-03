@@ -31,7 +31,7 @@ export async function getToken(email = 'test@example.com') {
 const testBlocks = [
   { block: '406', street: 'ANG MO KIO AVE 10', town: 'ANG MO KIO', flatType: '4 ROOM', price: 560000, priceLow: 560000, priceHigh: 560000, leaseCommenceYear: 1979, mrtName: 'Ang Mo Kio MRT', mrtWalkMinutes: 6, location: { type: 'Point', coordinates: [103.85, 1.37] } },
   {
-    block: '233C', street: 'SUMANG LANE', town: 'PUNGGOL', flatType: '4 ROOM', price: 680000, priceLow: 650000, priceHigh: 720000, leaseCommenceYear: 2018, mrtName: 'Punggol MRT', mrtWalkMinutes: 3, location: { type: 'Point', coordinates: [103.9, 1.4] },
+    block: '233C', street: 'SUMANG LANE', town: 'PUNGGOL', postal: '823233', flatType: '4 ROOM', price: 680000, priceLow: 650000, priceHigh: 720000, leaseCommenceYear: 2018, mrtName: 'Punggol MRT', mrtWalkMinutes: 3, location: { type: 'Point', coordinates: [103.9, 1.4] },
     distances: { school: 900, mrt: 110, hawker: 560, park: 600 },
     sales: [
       { month: '2026-09', storey: '13 TO 15', areaSqm: 93, price: 720000 },

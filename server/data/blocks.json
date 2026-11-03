@@ -47,7 +47,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 498
-   }
+   },
+   "postal": "560323"
   },
   {
    "block": "172",
@@ -83,7 +84,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 451
-   }
+   },
+   "postal": "560172"
   },
   {
    "block": "319",
@@ -191,7 +193,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 1122
-   }
+   },
+   "postal": "560330"
   },
   {
    "block": "333",
@@ -245,7 +248,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 1215
-   }
+   },
+   "postal": "560333"
   },
   {
    "block": "444",
@@ -293,7 +297,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 1203
-   }
+   },
+   "postal": "560444"
   },
   {
    "block": "313",
@@ -347,7 +352,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 475
-   }
+   },
+   "postal": "560313"
   },
   {
    "block": "346",
@@ -395,7 +401,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 486
-   }
+   },
+   "postal": "560346"
   },
   {
    "block": "211",
@@ -443,7 +450,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 813
-   }
+   },
+   "postal": "560211"
   },
   {
    "block": "119",
@@ -491,7 +499,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 706
-   }
+   },
+   "postal": "560119"
   },
   {
    "block": "584",
@@ -539,7 +548,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 594
-   }
+   },
+   "postal": "560584"
   },
   {
    "block": "174",
@@ -587,7 +597,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 452
-   }
+   },
+   "postal": "560174"
   },
   {
    "block": "631",
@@ -659,7 +670,8 @@
    "walk": {
     "station": "Yio Chu Kang MRT",
     "metres": 742
-   }
+   },
+   "postal": "560631"
   },
   {
    "block": "172",
@@ -695,7 +707,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 451
-   }
+   },
+   "postal": "560172"
   },
   {
    "block": "643",
@@ -749,7 +762,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 958
-   }
+   },
+   "postal": "560643"
   },
   {
    "block": "538",
@@ -797,7 +811,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 1225
-   }
+   },
+   "postal": "560538"
   },
   {
    "block": "182",
@@ -851,7 +866,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 882
-   }
+   },
+   "postal": "560182"
   },
   {
    "block": "180",
@@ -905,7 +921,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 842
-   }
+   },
+   "postal": "560180"
   },
   {
    "block": "502",
@@ -959,7 +976,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 919
-   }
+   },
+   "postal": "560502"
   },
   {
    "block": "650",
@@ -1013,7 +1031,8 @@
    "walk": {
     "station": "Yio Chu Kang MRT",
     "metres": 741
-   }
+   },
+   "postal": "560650"
   },
   {
    "block": "131",
@@ -1061,7 +1080,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 936
-   }
+   },
+   "postal": "560131"
   },
   {
    "block": "260A",
@@ -1115,7 +1135,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 536
-   }
+   },
+   "postal": "561260"
   },
   {
    "block": "227A",
@@ -1271,7 +1292,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 787
-   }
+   },
+   "postal": "561227"
   },
   {
    "block": "350",
@@ -1307,7 +1329,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 901
-   }
+   },
+   "postal": "560350"
   },
   {
    "block": "588A",
@@ -1349,7 +1372,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 814
-   }
+   },
+   "postal": "561588"
   },
   {
    "block": "253",
@@ -1397,7 +1421,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 460
-   }
+   },
+   "postal": "560253"
   },
   {
    "block": "350",
@@ -1439,7 +1464,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 901
-   }
+   },
+   "postal": "560350"
   },
   {
    "block": "588B",
@@ -1499,7 +1525,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 855
-   }
+   },
+   "postal": "562588"
   },
   {
    "block": "588C",
@@ -1547,7 +1574,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 898
-   }
+   },
+   "postal": "563588"
   },
   {
    "block": "314",
@@ -1601,7 +1629,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 646
-   }
+   },
+   "postal": "560314"
   },
   {
    "block": "170",
@@ -1643,7 +1672,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 343
-   }
+   },
+   "postal": "560170"
   },
   {
    "block": "578",
@@ -1703,7 +1733,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 872
-   }
+   },
+   "postal": "560578"
   },
   {
    "block": "558",
@@ -1751,7 +1782,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 1360
-   }
+   },
+   "postal": "560558"
   },
   {
    "block": "536",
@@ -1799,7 +1831,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 1250
-   }
+   },
+   "postal": "560536"
   },
   {
    "block": "570",
@@ -1847,7 +1880,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 808
-   }
+   },
+   "postal": "560570"
   },
   {
    "block": "121",
@@ -1913,7 +1947,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 797
-   }
+   },
+   "postal": "560121"
   },
   {
    "block": "170",
@@ -1949,7 +1984,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 343
-   }
+   },
+   "postal": "560170"
   },
   {
    "block": "591A",
@@ -1985,7 +2021,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 575
-   }
+   },
+   "postal": "561591"
   },
   {
    "block": "612",
@@ -2033,7 +2070,8 @@
    "walk": {
     "station": "Lentor MRT",
     "metres": 1053
-   }
+   },
+   "postal": "560612"
   },
   {
    "block": "640",
@@ -2087,7 +2125,8 @@
    "walk": {
     "station": "Yio Chu Kang MRT",
     "metres": 384
-   }
+   },
+   "postal": "560640"
   },
   {
    "block": "260B",
@@ -2135,7 +2174,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 675
-   }
+   },
+   "postal": "562260"
   },
   {
    "block": "228B",
@@ -2219,7 +2259,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 616
-   }
+   },
+   "postal": "562228"
   },
   {
    "block": "228A",
@@ -2327,7 +2368,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 614
-   }
+   },
+   "postal": "561228"
   },
   {
    "block": "591A",
@@ -2387,7 +2429,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 575
-   }
+   },
+   "postal": "561591"
   },
   {
    "block": "228B",
@@ -2495,7 +2538,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 616
-   }
+   },
+   "postal": "562228"
   },
   {
    "block": "228A",
@@ -2591,7 +2635,8 @@
    "walk": {
     "station": "Mayflower MRT",
     "metres": 614
-   }
+   },
+   "postal": "561228"
   },
   {
    "block": "588A",
@@ -2627,7 +2672,8 @@
    "walk": {
     "station": "Ang Mo Kio MRT",
     "metres": 814
-   }
+   },
+   "postal": "561588"
   },
   {
    "block": "100",
@@ -2741,7 +2787,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 1339
-   }
+   },
+   "postal": "460117"
   },
   {
    "block": "74",
@@ -2801,7 +2848,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 703
-   }
+   },
+   "postal": "460074"
   },
   {
    "block": "430A",
@@ -2843,7 +2891,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 1128
-   }
+   },
+   "postal": "461430"
   },
   {
    "block": "419",
@@ -2897,7 +2946,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 670
-   }
+   },
+   "postal": "460419"
   },
   {
    "block": "213",
@@ -2951,7 +3001,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 648
-   }
+   },
+   "postal": "460213"
   },
   {
    "block": "504",
@@ -3023,7 +3074,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 880
-   }
+   },
+   "postal": "460504"
   },
   {
    "block": "525",
@@ -3083,7 +3135,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 723
-   }
+   },
+   "postal": "460525"
   },
   {
    "block": "542",
@@ -3155,7 +3208,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 1070
-   }
+   },
+   "postal": "460542"
   },
   {
    "block": "545",
@@ -3209,7 +3263,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 1121
-   }
+   },
+   "postal": "460545"
   },
   {
    "block": "18",
@@ -3269,7 +3324,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1098
-   }
+   },
+   "postal": "460018"
   },
   {
    "block": "59",
@@ -3377,7 +3433,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 1227
-   }
+   },
+   "postal": "461050"
   },
   {
    "block": "27",
@@ -3431,7 +3488,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 777
-   }
+   },
+   "postal": "462027"
   },
   {
    "block": "57",
@@ -3485,7 +3543,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 945
-   }
+   },
+   "postal": "461057"
   },
   {
    "block": "508",
@@ -3539,7 +3598,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 845
-   }
+   },
+   "postal": "460508"
   },
   {
    "block": "183",
@@ -3593,7 +3653,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 584
-   }
+   },
+   "postal": "460183"
   },
   {
    "block": "430A",
@@ -3647,7 +3708,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 1128
-   }
+   },
+   "postal": "461430"
   },
   {
    "block": "431A",
@@ -3713,7 +3775,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1113
-   }
+   },
+   "postal": "461431"
   },
   {
    "block": "187B",
@@ -3779,7 +3842,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 1102
-   }
+   },
+   "postal": "462187"
   },
   {
    "block": "186A",
@@ -3839,7 +3903,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 1082
-   }
+   },
+   "postal": "461186"
   },
   {
    "block": "187A",
@@ -3911,7 +3976,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 1602
-   }
+   },
+   "postal": "461187"
   },
   {
    "block": "748B",
@@ -3947,7 +4013,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 616
-   }
+   },
+   "postal": "472748"
   },
   {
    "block": "613B",
@@ -4001,7 +4068,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 369
-   }
+   },
+   "postal": "472613"
   },
   {
    "block": "771",
@@ -4037,7 +4105,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 859
-   }
+   },
+   "postal": "470771"
   },
   {
    "block": "766",
@@ -4103,7 +4172,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 546
-   }
+   },
+   "postal": "470766"
   },
   {
    "block": "769",
@@ -4139,7 +4209,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 730
-   }
+   },
+   "postal": "470769"
   },
   {
    "block": "808A",
@@ -4199,7 +4270,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1107
-   }
+   },
+   "postal": "461808"
   },
   {
    "block": "516",
@@ -4253,7 +4325,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1070
-   }
+   },
+   "postal": "460516"
   },
   {
    "block": "767",
@@ -4289,7 +4362,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 590
-   }
+   },
+   "postal": "470767"
   },
   {
    "block": "769",
@@ -4331,7 +4405,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 730
-   }
+   },
+   "postal": "470769"
   },
   {
    "block": "620",
@@ -4367,7 +4442,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 120
-   }
+   },
+   "postal": "470620"
   },
   {
    "block": "547A",
@@ -4427,7 +4503,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1026
-   }
+   },
+   "postal": "461547"
   },
   {
    "block": "547B",
@@ -4493,7 +4570,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1098
-   }
+   },
+   "postal": "462547"
   },
   {
    "block": "75",
@@ -4559,7 +4637,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 758
-   }
+   },
+   "postal": "460075"
   },
   {
    "block": "748B",
@@ -4595,7 +4674,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 616
-   }
+   },
+   "postal": "472748"
   },
   {
    "block": "620",
@@ -4643,7 +4723,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 120
-   }
+   },
+   "postal": "470620"
   },
   {
    "block": "808C",
@@ -4685,7 +4766,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1045
-   }
+   },
+   "postal": "463808"
   },
   {
    "block": "44",
@@ -4745,7 +4827,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1020
-   }
+   },
+   "postal": "461044"
   },
   {
    "block": "718",
@@ -4805,7 +4888,8 @@
    "walk": {
     "station": "Bedok North MRT",
     "metres": 1097
-   }
+   },
+   "postal": "470718"
   },
   {
    "block": "767",
@@ -4847,7 +4931,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 590
-   }
+   },
+   "postal": "470767"
   },
   {
    "block": "154B",
@@ -4949,7 +5034,8 @@
    "walk": {
     "station": "Bayshore MRT",
     "metres": 1268
-   }
+   },
+   "postal": "462154"
   },
   {
    "block": "153C",
@@ -5045,7 +5131,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 1306
-   }
+   },
+   "postal": "463153"
   },
   {
    "block": "154A",
@@ -5135,7 +5222,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 1347
-   }
+   },
+   "postal": "461154"
   },
   {
    "block": "153B",
@@ -5201,7 +5289,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 1272
-   }
+   },
+   "postal": "462153"
   },
   {
    "block": "808C",
@@ -5237,7 +5326,8 @@
    "walk": {
     "station": "Bedok MRT",
     "metres": 1045
-   }
+   },
+   "postal": "463808"
   },
   {
    "block": "771",
@@ -5279,7 +5369,8 @@
    "walk": {
     "station": "Bedok Reservoir MRT",
     "metres": 859
-   }
+   },
+   "postal": "470771"
   },
   {
    "block": "153B",
@@ -5321,7 +5412,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 1272
-   }
+   },
+   "postal": "462153"
   },
   {
    "block": "153C",
@@ -5363,7 +5455,8 @@
    "walk": {
     "station": "Tanah Merah MRT",
     "metres": 1306
-   }
+   },
+   "postal": "463153"
   },
   {
    "block": "110",
@@ -5423,7 +5516,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 639
-   }
+   },
+   "postal": "570110"
   },
   {
    "block": "176",
@@ -5465,7 +5559,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 754
-   }
+   },
+   "postal": "570176"
   },
   {
    "block": "305",
@@ -5615,7 +5710,8 @@
    "walk": {
     "station": "Bright Hill MRT",
     "metres": 206
-   }
+   },
+   "postal": "570406"
   },
   {
    "block": "23",
@@ -5663,7 +5759,8 @@
    "walk": {
     "station": "Upper Thomson MRT",
     "metres": 612
-   }
+   },
+   "postal": "570023"
   },
   {
    "block": "124",
@@ -5705,7 +5802,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 697
-   }
+   },
+   "postal": "570124"
   },
   {
    "block": "130",
@@ -5747,7 +5845,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 758
-   }
+   },
+   "postal": "570130"
   },
   {
    "block": "153",
@@ -5789,7 +5888,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1016
-   }
+   },
+   "postal": "570153"
   },
   {
    "block": "262",
@@ -5831,7 +5931,8 @@
    "walk": {
     "station": "Bright Hill MRT",
     "metres": 1427
-   }
+   },
+   "postal": "570262"
   },
   {
    "block": "273A",
@@ -5879,7 +5980,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1322
-   }
+   },
+   "postal": "571273"
   },
   {
    "block": "290",
@@ -5933,7 +6035,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1138
-   }
+   },
+   "postal": "570290"
   },
   {
    "block": "149",
@@ -5969,7 +6072,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1270
-   }
+   },
+   "postal": "570149"
   },
   {
    "block": "103",
@@ -6005,7 +6109,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 906
-   }
+   },
+   "postal": "570103"
   },
   {
    "block": "273B",
@@ -6047,7 +6152,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1365
-   }
+   },
+   "postal": "572273"
   },
   {
    "block": "275A",
@@ -6095,7 +6201,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1319
-   }
+   },
+   "postal": "571275"
   },
   {
    "block": "288",
@@ -6131,7 +6238,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1085
-   }
+   },
+   "postal": "570288"
   },
   {
    "block": "291",
@@ -6167,7 +6275,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1138
-   }
+   },
+   "postal": "570291"
   },
   {
    "block": "261",
@@ -6209,7 +6318,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1496
-   }
+   },
+   "postal": "570261"
   },
   {
    "block": "212",
@@ -6251,7 +6361,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 892
-   }
+   },
+   "postal": "570212"
   },
   {
    "block": "301",
@@ -6293,7 +6404,8 @@
    "walk": {
     "station": "Marymount MRT",
     "metres": 224
-   }
+   },
+   "postal": "570301"
   },
   {
    "block": "309",
@@ -6341,7 +6453,8 @@
    "walk": {
     "station": "Marymount MRT",
     "metres": 479
-   }
+   },
+   "postal": "570309"
   },
   {
    "block": "22",
@@ -6407,7 +6520,8 @@
    "walk": {
     "station": "Upper Thomson MRT",
     "metres": 1123
-   }
+   },
+   "postal": "570022"
   },
   {
    "block": "122",
@@ -6443,7 +6557,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 601
-   }
+   },
+   "postal": "570122"
   },
   {
    "block": "113",
@@ -6491,7 +6606,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 572
-   }
+   },
+   "postal": "570113"
   },
   {
    "block": "141",
@@ -6527,7 +6643,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 958
-   }
+   },
+   "postal": "570141"
   },
   {
    "block": "131",
@@ -6563,7 +6680,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 761
-   }
+   },
+   "postal": "570131"
   },
   {
    "block": "123",
@@ -6605,7 +6723,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 638
-   }
+   },
+   "postal": "570123"
   },
   {
    "block": "166",
@@ -6641,7 +6760,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 749
-   }
+   },
+   "postal": "570166"
   },
   {
    "block": "177",
@@ -6677,7 +6797,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 674
-   }
+   },
+   "postal": "570177"
   },
   {
    "block": "235",
@@ -6719,7 +6840,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1240
-   }
+   },
+   "postal": "570235"
   },
   {
    "block": "236",
@@ -6761,7 +6883,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1287
-   }
+   },
+   "postal": "570236"
   },
   {
    "block": "241",
@@ -6803,7 +6926,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1607
-   }
+   },
+   "postal": "570241"
   },
   {
    "block": "263",
@@ -6839,7 +6963,8 @@
    "walk": {
     "station": "Bright Hill MRT",
     "metres": 1408
-   }
+   },
+   "postal": "570263"
   },
   {
    "block": "254",
@@ -6875,7 +7000,8 @@
    "walk": {
     "station": "Bright Hill MRT",
     "metres": 1290
-   }
+   },
+   "postal": "570254"
   },
   {
    "block": "220",
@@ -6923,7 +7049,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1081
-   }
+   },
+   "postal": "570220"
   },
   {
    "block": "25",
@@ -6965,7 +7092,8 @@
    "walk": {
     "station": "Upper Thomson MRT",
     "metres": 791
-   }
+   },
+   "postal": "570025"
   },
   {
    "block": "128",
@@ -7007,7 +7135,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 689
-   }
+   },
+   "postal": "570128"
   },
   {
    "block": "153",
@@ -7049,7 +7178,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1016
-   }
+   },
+   "postal": "570153"
   },
   {
    "block": "273A",
@@ -7091,7 +7221,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1322
-   }
+   },
+   "postal": "571273"
   },
   {
    "block": "257",
@@ -7139,7 +7270,8 @@
    "walk": {
     "station": "Bright Hill MRT",
     "metres": 1425
-   }
+   },
+   "postal": "570257"
   },
   {
    "block": "231",
@@ -7193,7 +7325,8 @@
    "walk": {
     "station": "Bishan MRT",
     "metres": 1062
-   }
+   },
+   "postal": "570231"
   },
   {
    "block": "436A",
@@ -7241,7 +7374,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1733
-   }
+   },
+   "postal": "651436"
   },
   {
    "block": "438C",
@@ -7283,7 +7417,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1750
-   }
+   },
+   "postal": "653438"
   },
   {
    "block": "464B",
@@ -7337,7 +7472,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1500
-   }
+   },
+   "postal": "652464"
   },
   {
    "block": "460D",
@@ -7379,7 +7515,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1570
-   }
+   },
+   "postal": "654460"
   },
   {
    "block": "468B",
@@ -7433,7 +7570,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1287
-   }
+   },
+   "postal": "652468"
   },
   {
    "block": "460C",
@@ -7493,7 +7631,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1714
-   }
+   },
+   "postal": "653460"
   },
   {
    "block": "528",
@@ -7577,7 +7716,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 279
-   }
+   },
+   "postal": "650528"
   },
   {
    "block": "451A",
@@ -7643,7 +7783,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1231
-   }
+   },
+   "postal": "651451"
   },
   {
    "block": "194B",
@@ -7679,7 +7820,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 852
-   }
+   },
+   "postal": "652194"
   },
   {
    "block": "438C",
@@ -7715,7 +7857,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1750
-   }
+   },
+   "postal": "653438"
   },
   {
    "block": "443D",
@@ -7781,7 +7924,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 2078
-   }
+   },
+   "postal": "654443"
   },
   {
    "block": "292B",
@@ -7871,7 +8015,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 949
-   }
+   },
+   "postal": "652292"
   },
   {
    "block": "296B",
@@ -7913,7 +8058,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 746
-   }
+   },
+   "postal": "652296"
   },
   {
    "block": "296A",
@@ -7949,7 +8095,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 674
-   }
+   },
+   "postal": "651296"
   },
   {
    "block": "296C",
@@ -8009,7 +8156,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 809
-   }
+   },
+   "postal": "653296"
   },
   {
    "block": "463A",
@@ -8063,7 +8211,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1354
-   }
+   },
+   "postal": "651463"
   },
   {
    "block": "436A",
@@ -8117,7 +8266,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1733
-   }
+   },
+   "postal": "651436"
   },
   {
    "block": "435C",
@@ -8171,7 +8321,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1803
-   }
+   },
+   "postal": "653435"
   },
   {
    "block": "450B",
@@ -8231,7 +8382,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 986
-   }
+   },
+   "postal": "652450"
   },
   {
    "block": "453B",
@@ -8279,7 +8431,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1191
-   }
+   },
+   "postal": "652453"
   },
   {
    "block": "464B",
@@ -8339,7 +8492,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1500
-   }
+   },
+   "postal": "652464"
   },
   {
    "block": "438C",
@@ -8375,7 +8529,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1750
-   }
+   },
+   "postal": "653438"
   },
   {
    "block": "461C",
@@ -8411,7 +8566,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1496
-   }
+   },
+   "postal": "653461"
   },
   {
    "block": "439B",
@@ -8465,7 +8621,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1733
-   }
+   },
+   "postal": "652439"
   },
   {
    "block": "464A",
@@ -8519,7 +8676,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1430
-   }
+   },
+   "postal": "651464"
   },
   {
    "block": "460A",
@@ -8573,7 +8731,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1705
-   }
+   },
+   "postal": "651460"
   },
   {
    "block": "460D",
@@ -8633,7 +8792,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1570
-   }
+   },
+   "postal": "654460"
   },
   {
    "block": "293A",
@@ -8705,7 +8865,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 894
-   }
+   },
+   "postal": "651293"
   },
   {
    "block": "296C",
@@ -8783,7 +8944,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 809
-   }
+   },
+   "postal": "653296"
   },
   {
    "block": "463B",
@@ -8849,7 +9011,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1442
-   }
+   },
+   "postal": "652463"
   },
   {
    "block": "435C",
@@ -8897,7 +9060,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1803
-   }
+   },
+   "postal": "653435"
   },
   {
    "block": "453B",
@@ -8963,7 +9127,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1191
-   }
+   },
+   "postal": "652453"
   },
   {
    "block": "451B",
@@ -9029,7 +9194,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1152
-   }
+   },
+   "postal": "652451"
   },
   {
    "block": "439B",
@@ -9095,7 +9261,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1733
-   }
+   },
+   "postal": "652439"
   },
   {
    "block": "443C",
@@ -9161,7 +9328,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1981
-   }
+   },
+   "postal": "653443"
   },
   {
    "block": "445A",
@@ -9203,7 +9371,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1517
-   }
+   },
+   "postal": "651445"
   },
   {
    "block": "443A",
@@ -9281,7 +9450,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1938
-   }
+   },
+   "postal": "651443"
   },
   {
    "block": "464A",
@@ -9407,7 +9577,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1430
-   }
+   },
+   "postal": "651464"
   },
   {
    "block": "439C",
@@ -9461,7 +9632,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1814
-   }
+   },
+   "postal": "653439"
   },
   {
    "block": "451A",
@@ -9497,7 +9669,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1231
-   }
+   },
+   "postal": "651451"
   },
   {
    "block": "468A",
@@ -9545,7 +9718,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1276
-   }
+   },
+   "postal": "651468"
   },
   {
    "block": "467C",
@@ -9635,7 +9809,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1243
-   }
+   },
+   "postal": "653467"
   },
   {
    "block": "467A",
@@ -9671,7 +9846,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1260
-   }
+   },
+   "postal": "651467"
   },
   {
    "block": "296B",
@@ -9719,7 +9895,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 746
-   }
+   },
+   "postal": "652296"
   },
   {
    "block": "464B",
@@ -9755,7 +9932,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1500
-   }
+   },
+   "postal": "652464"
   },
   {
    "block": "468A",
@@ -9815,7 +9993,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1276
-   }
+   },
+   "postal": "651468"
   },
   {
    "block": "467A",
@@ -9893,7 +10072,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1260
-   }
+   },
+   "postal": "651467"
   },
   {
    "block": "468B",
@@ -9959,7 +10139,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1287
-   }
+   },
+   "postal": "652468"
   },
   {
    "block": "460A",
@@ -10001,7 +10182,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1705
-   }
+   },
+   "postal": "651460"
   },
   {
    "block": "467C",
@@ -10049,7 +10231,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1243
-   }
+   },
+   "postal": "653467"
   },
   {
    "block": "293C",
@@ -10097,7 +10280,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 912
-   }
+   },
+   "postal": "653293"
   },
   {
    "block": "293A",
@@ -10145,7 +10329,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 894
-   }
+   },
+   "postal": "651293"
   },
   {
    "block": "293D",
@@ -10235,7 +10420,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1095
-   }
+   },
+   "postal": "654293"
   },
   {
    "block": "463B",
@@ -10271,7 +10457,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1442
-   }
+   },
+   "postal": "652463"
   },
   {
    "block": "384",
@@ -10319,7 +10506,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 534
-   }
+   },
+   "postal": "650384"
   },
   {
    "block": "451B",
@@ -10385,7 +10573,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1152
-   }
+   },
+   "postal": "652451"
   },
   {
    "block": "452A",
@@ -10439,7 +10628,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1213
-   }
+   },
+   "postal": "651452"
   },
   {
    "block": "194B",
@@ -10499,7 +10689,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 852
-   }
+   },
+   "postal": "652194"
   },
   {
    "block": "453A",
@@ -10559,7 +10750,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1231
-   }
+   },
+   "postal": "651453"
   },
   {
    "block": "461B",
@@ -10601,7 +10793,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1584
-   }
+   },
+   "postal": "652461"
   },
   {
    "block": "443A",
@@ -10637,7 +10830,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1938
-   }
+   },
+   "postal": "651443"
   },
   {
    "block": "443D",
@@ -10673,7 +10867,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 2078
-   }
+   },
+   "postal": "654443"
   },
   {
    "block": "445A",
@@ -10739,7 +10934,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1517
-   }
+   },
+   "postal": "651445"
   },
   {
    "block": "442A",
@@ -10775,7 +10971,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1824
-   }
+   },
+   "postal": "651442"
   },
   {
    "block": "439C",
@@ -10829,7 +11026,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1814
-   }
+   },
+   "postal": "653439"
   },
   {
    "block": "468A",
@@ -10913,7 +11111,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1276
-   }
+   },
+   "postal": "651468"
   },
   {
    "block": "460C",
@@ -10955,7 +11154,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1714
-   }
+   },
+   "postal": "653460"
   },
   {
    "block": "467B",
@@ -11057,7 +11257,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1144
-   }
+   },
+   "postal": "652467"
   },
   {
    "block": "467A",
@@ -11165,7 +11366,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1260
-   }
+   },
+   "postal": "651467"
   },
   {
    "block": "292B",
@@ -11201,7 +11403,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 949
-   }
+   },
+   "postal": "652292"
   },
   {
    "block": "293C",
@@ -11243,7 +11446,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 912
-   }
+   },
+   "postal": "653293"
   },
   {
    "block": "296A",
@@ -11291,7 +11495,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 674
-   }
+   },
+   "postal": "651296"
   },
   {
    "block": "463A",
@@ -11357,7 +11562,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1354
-   }
+   },
+   "postal": "651463"
   },
   {
    "block": "384",
@@ -11393,7 +11599,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 534
-   }
+   },
+   "postal": "650384"
   },
   {
    "block": "453A",
@@ -11435,7 +11642,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1231
-   }
+   },
+   "postal": "651453"
   },
   {
    "block": "452A",
@@ -11489,7 +11697,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1213
-   }
+   },
+   "postal": "651452"
   },
   {
    "block": "450B",
@@ -11525,7 +11734,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 986
-   }
+   },
+   "postal": "652450"
   },
   {
    "block": "442A",
@@ -11579,7 +11789,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1824
-   }
+   },
+   "postal": "651442"
   },
   {
    "block": "461B",
@@ -11627,7 +11838,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1584
-   }
+   },
+   "postal": "652461"
   },
   {
    "block": "461C",
@@ -11693,7 +11905,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1496
-   }
+   },
+   "postal": "653461"
   },
   {
    "block": "467B",
@@ -11819,7 +12032,8 @@
    "walk": {
     "station": "Bukit Gombak MRT",
     "metres": 1144
-   }
+   },
+   "postal": "652467"
   },
   {
    "block": "28",
@@ -11855,7 +12069,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 1046
-   }
+   },
+   "postal": "152028"
   },
   {
    "block": "127A",
@@ -11891,7 +12106,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 880
-   }
+   },
+   "postal": "161127"
   },
   {
    "block": "48",
@@ -11939,7 +12155,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 653
-   }
+   },
+   "postal": "160048"
   },
   {
    "block": "128",
@@ -11987,7 +12204,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 765
-   }
+   },
+   "postal": "150128"
   },
   {
    "block": "129",
@@ -12035,7 +12253,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 648
-   }
+   },
+   "postal": "150129"
   },
   {
    "block": "105A",
@@ -12089,7 +12308,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 1810
-   }
+   },
+   "postal": "101105"
   },
   {
    "block": "22",
@@ -12143,7 +12363,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 693
-   }
+   },
+   "postal": "160022"
   },
   {
    "block": "77",
@@ -12197,7 +12418,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 842
-   }
+   },
+   "postal": "160077"
   },
   {
    "block": "133",
@@ -12245,7 +12467,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 933
-   }
+   },
+   "postal": "160133"
   },
   {
    "block": "2",
@@ -12293,7 +12516,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 1358
-   }
+   },
+   "postal": "150002"
   },
   {
    "block": "37",
@@ -12341,7 +12565,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 1030
-   }
+   },
+   "postal": "150037"
   },
   {
    "block": "16",
@@ -12389,7 +12614,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 1445
-   }
+   },
+   "postal": "090016"
   },
   {
    "block": "5",
@@ -12437,7 +12663,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 1755
-   }
+   },
+   "postal": "090005"
   },
   {
    "block": "92B",
@@ -12485,7 +12712,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 876
-   }
+   },
+   "postal": "102092"
   },
   {
    "block": "93B",
@@ -12527,7 +12755,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 763
-   }
+   },
+   "postal": "102093"
   },
   {
    "block": "10A",
@@ -12599,7 +12828,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 352
-   }
+   },
+   "postal": "160010"
   },
   {
    "block": "104A",
@@ -12647,7 +12877,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 1751
-   }
+   },
+   "postal": "101104"
   },
   {
    "block": "105A",
@@ -12689,7 +12920,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 1810
-   }
+   },
+   "postal": "101105"
   },
   {
    "block": "95A",
@@ -12737,7 +12969,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 800
-   }
+   },
+   "postal": "151095"
   },
   {
    "block": "118A",
@@ -12791,7 +13024,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 658
-   }
+   },
+   "postal": "161118"
   },
   {
    "block": "25B",
@@ -12845,7 +13079,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 477
-   }
+   },
+   "postal": "164025"
   },
   {
    "block": "21",
@@ -12893,7 +13128,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 287
-   }
+   },
+   "postal": "163021"
   },
   {
    "block": "119D",
@@ -12941,7 +13177,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 640
-   }
+   },
+   "postal": "164119"
   },
   {
    "block": "127A",
@@ -12977,7 +13214,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 880
-   }
+   },
+   "postal": "161127"
   },
   {
    "block": "126C",
@@ -13031,7 +13269,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 809
-   }
+   },
+   "postal": "163126"
   },
   {
    "block": "50",
@@ -13085,7 +13324,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 432
-   }
+   },
+   "postal": "100050"
   },
   {
    "block": "90A",
@@ -13193,7 +13433,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 1165
-   }
+   },
+   "postal": "101090"
   },
   {
    "block": "93B",
@@ -13283,7 +13524,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 763
-   }
+   },
+   "postal": "102093"
   },
   {
    "block": "90B",
@@ -13355,7 +13597,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 1087
-   }
+   },
+   "postal": "102090"
   },
   {
    "block": "2",
@@ -13403,7 +13646,8 @@
    "walk": {
     "station": "Great World MRT",
     "metres": 1034
-   }
+   },
+   "postal": "161002"
   },
   {
    "block": "96A",
@@ -13457,7 +13701,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 674
-   }
+   },
+   "postal": "151096"
   },
   {
    "block": "118C",
@@ -13505,7 +13750,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 542
-   }
+   },
+   "postal": "163118"
   },
   {
    "block": "75C",
@@ -13547,7 +13793,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 134
-   }
+   },
+   "postal": "153075"
   },
   {
    "block": "87",
@@ -13601,7 +13848,8 @@
    "walk": {
     "station": "Havelock MRT",
     "metres": 322
-   }
+   },
+   "postal": "160087"
   },
   {
    "block": "7",
@@ -13673,7 +13921,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 1708
-   }
+   },
+   "postal": "090007"
   },
   {
    "block": "45",
@@ -13733,7 +13982,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 153
-   }
+   },
+   "postal": "100045"
   },
   {
    "block": "57",
@@ -13781,7 +14031,8 @@
    "walk": {
     "station": "Havelock MRT",
     "metres": 788
-   }
+   },
+   "postal": "161057"
   },
   {
    "block": "58",
@@ -13829,7 +14080,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 766
-   }
+   },
+   "postal": "161058"
   },
   {
    "block": "28",
@@ -13871,7 +14123,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 1046
-   }
+   },
+   "postal": "152028"
   },
   {
    "block": "80C",
@@ -13931,7 +14184,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 602
-   }
+   },
+   "postal": "103080"
   },
   {
    "block": "90A",
@@ -13967,7 +14221,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 1165
-   }
+   },
+   "postal": "101090"
   },
   {
    "block": "57",
@@ -14021,7 +14276,8 @@
    "walk": {
     "station": "Havelock MRT",
     "metres": 788
-   }
+   },
+   "postal": "161057"
   },
   {
    "block": "95C",
@@ -14087,7 +14343,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 755
-   }
+   },
+   "postal": "153095"
   },
   {
    "block": "96A",
@@ -14123,7 +14380,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 674
-   }
+   },
+   "postal": "151096"
   },
   {
    "block": "27A",
@@ -14183,7 +14441,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 644
-   }
+   },
+   "postal": "163027"
   },
   {
    "block": "75C",
@@ -14225,7 +14484,8 @@
    "walk": {
     "station": "Redhill MRT",
     "metres": 134
-   }
+   },
+   "postal": "153075"
   },
   {
    "block": "70C",
@@ -14291,7 +14551,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 799
-   }
+   },
+   "postal": "103070"
   },
   {
    "block": "92B",
@@ -14339,7 +14600,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 876
-   }
+   },
+   "postal": "102092"
   },
   {
    "block": "91A",
@@ -14393,7 +14655,8 @@
    "walk": {
     "station": "Telok Blangah MRT",
     "metres": 981
-   }
+   },
+   "postal": "101091"
   },
   {
    "block": "25B",
@@ -14429,7 +14692,8 @@
    "walk": {
     "station": "Tiong Bahru MRT",
     "metres": 477
-   }
+   },
+   "postal": "164025"
   },
   {
    "block": "636A",
@@ -14465,7 +14729,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 772
-   }
+   },
+   "postal": "671636"
   },
   {
    "block": "443A",
@@ -14513,7 +14778,8 @@
    "walk": {
     "station": "Fajar LRT",
     "metres": 439
-   }
+   },
+   "postal": "671443"
   },
   {
    "block": "454",
@@ -14579,7 +14845,8 @@
    "walk": {
     "station": "Fajar LRT",
     "metres": 130
-   }
+   },
+   "postal": "670454"
   },
   {
    "block": "442B",
@@ -14633,7 +14900,8 @@
    "walk": {
     "station": "Bangkit LRT",
     "metres": 345
-   }
+   },
+   "postal": "672442"
   },
   {
    "block": "206",
@@ -14675,7 +14943,8 @@
    "walk": {
     "station": "Pending LRT",
     "metres": 493
-   }
+   },
+   "postal": "670206"
   },
   {
    "block": "548B",
@@ -14711,7 +14980,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 310
-   }
+   },
+   "postal": "672548"
   },
   {
    "block": "485",
@@ -14759,7 +15029,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 353
-   }
+   },
+   "postal": "670485"
   },
   {
    "block": "275",
@@ -14813,7 +15084,8 @@
    "walk": {
     "station": "Pending LRT",
     "metres": 510
-   }
+   },
+   "postal": "670275"
   },
   {
    "block": "240",
@@ -14861,7 +15133,8 @@
    "walk": {
     "station": "Bangkit LRT",
     "metres": 250
-   }
+   },
+   "postal": "670240"
   },
   {
    "block": "407",
@@ -14903,7 +15176,8 @@
    "walk": {
     "station": "Fajar LRT",
     "metres": 522
-   }
+   },
+   "postal": "670407"
   },
   {
    "block": "508",
@@ -14957,7 +15231,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 283
-   }
+   },
+   "postal": "670508"
   },
   {
    "block": "502",
@@ -14999,7 +15274,8 @@
    "walk": {
     "station": "Jelapang LRT",
     "metres": 608
-   }
+   },
+   "postal": "670502"
   },
   {
    "block": "459",
@@ -15059,7 +15335,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 381
-   }
+   },
+   "postal": "670459"
   },
   {
    "block": "548B",
@@ -15119,7 +15396,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 310
-   }
+   },
+   "postal": "672548"
   },
   {
    "block": "550A",
@@ -15161,7 +15439,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 333
-   }
+   },
+   "postal": "671550"
   },
   {
    "block": "486",
@@ -15209,7 +15488,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 413
-   }
+   },
+   "postal": "670486"
   },
   {
    "block": "461",
@@ -15251,7 +15531,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 286
-   }
+   },
+   "postal": "670461"
   },
   {
    "block": "636C",
@@ -15311,7 +15592,8 @@
    "walk": {
     "station": "Jelapang LRT",
     "metres": 778
-   }
+   },
+   "postal": "673636"
   },
   {
    "block": "633B",
@@ -15371,7 +15653,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 654
-   }
+   },
+   "postal": "672633"
   },
   {
    "block": "625",
@@ -15425,7 +15708,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 552
-   }
+   },
+   "postal": "670625"
   },
   {
    "block": "636B",
@@ -15527,7 +15811,8 @@
    "walk": {
     "station": "Jelapang LRT",
     "metres": 882
-   }
+   },
+   "postal": "672636"
   },
   {
    "block": "635B",
@@ -15581,7 +15866,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 814
-   }
+   },
+   "postal": "672635"
   },
   {
    "block": "443B",
@@ -15623,7 +15909,8 @@
    "walk": {
     "station": "Fajar LRT",
     "metres": 499
-   }
+   },
+   "postal": "672443"
   },
   {
    "block": "177",
@@ -15665,7 +15952,8 @@
    "walk": {
     "station": "Petir LRT",
     "metres": 415
-   }
+   },
+   "postal": "670177"
   },
   {
    "block": "550B",
@@ -15743,7 +16031,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 437
-   }
+   },
+   "postal": "670473"
   },
   {
    "block": "605",
@@ -15785,7 +16074,8 @@
    "walk": {
     "station": "Bukit Panjang MRT",
     "metres": 291
-   }
+   },
+   "postal": "670605"
   },
   {
    "block": "635A",
@@ -15845,7 +16135,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 900
-   }
+   },
+   "postal": "671635"
   },
   {
    "block": "503",
@@ -15893,7 +16184,8 @@
    "walk": {
     "station": "Jelapang LRT",
     "metres": 516
-   }
+   },
+   "postal": "670503"
   },
   {
    "block": "205",
@@ -15935,7 +16227,8 @@
    "walk": {
     "station": "Pending LRT",
     "metres": 530
-   }
+   },
+   "postal": "670205"
   },
   {
    "block": "636A",
@@ -16001,7 +16294,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 772
-   }
+   },
+   "postal": "671636"
   },
   {
    "block": "448",
@@ -16043,7 +16337,8 @@
    "walk": {
     "station": "Fajar LRT",
     "metres": 212
-   }
+   },
+   "postal": "670448"
   },
   {
    "block": "172",
@@ -16085,7 +16380,8 @@
    "walk": {
     "station": "Petir LRT",
     "metres": 227
-   }
+   },
+   "postal": "670172"
   },
   {
    "block": "225",
@@ -16127,7 +16423,8 @@
    "walk": {
     "station": "Pending LRT",
     "metres": 193
-   }
+   },
+   "postal": "670225"
   },
   {
    "block": "206",
@@ -16163,7 +16460,8 @@
    "walk": {
     "station": "Pending LRT",
     "metres": 493
-   }
+   },
+   "postal": "670206"
   },
   {
    "block": "547A",
@@ -16217,7 +16515,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 133
-   }
+   },
+   "postal": "671547"
   },
   {
    "block": "550B",
@@ -16289,7 +16588,8 @@
    "walk": {
     "station": "Fajar LRT",
     "metres": 605
-   }
+   },
+   "postal": "670470"
   },
   {
    "block": "635A",
@@ -16325,7 +16625,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 900
-   }
+   },
+   "postal": "671635"
   },
   {
    "block": "601",
@@ -16373,7 +16674,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 125
-   }
+   },
+   "postal": "670601"
   },
   {
    "block": "630",
@@ -16409,7 +16711,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 676
-   }
+   },
+   "postal": "670630"
   },
   {
    "block": "633C",
@@ -16463,7 +16766,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 535
-   }
+   },
+   "postal": "673633"
   },
   {
    "block": "631",
@@ -16577,7 +16881,8 @@
    "walk": {
     "station": "Segar LRT",
     "metres": 219
-   }
+   },
+   "postal": "673546"
   },
   {
    "block": "630",
@@ -16613,7 +16918,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 676
-   }
+   },
+   "postal": "670630"
   },
   {
    "block": "635B",
@@ -16649,7 +16955,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 814
-   }
+   },
+   "postal": "672635"
   },
   {
    "block": "470",
@@ -16691,7 +16998,8 @@
    "walk": {
     "station": "Fajar LRT",
     "metres": 605
-   }
+   },
+   "postal": "670470"
   },
   {
    "block": "607",
@@ -16739,7 +17047,8 @@
    "walk": {
     "station": "Senja LRT",
     "metres": 162
-   }
+   },
+   "postal": "670607"
   },
   {
    "block": "8",
@@ -16787,7 +17096,8 @@
    "walk": {
     "station": "Farrer Road MRT",
     "metres": 350
-   }
+   },
+   "postal": "260008"
   },
   {
    "block": "4",
@@ -16829,7 +17139,8 @@
    "walk": {
     "station": "Farrer Road MRT",
     "metres": 212
-   }
+   },
+   "postal": "260004"
   },
   {
    "block": "13",
@@ -16865,7 +17176,8 @@
    "walk": {
     "station": "Beauty World MRT",
     "metres": 583
-   }
+   },
+   "postal": "590013"
   },
   {
    "block": "4",
@@ -16907,7 +17219,8 @@
    "walk": {
     "station": "Beauty World MRT",
     "metres": 468
-   }
+   },
+   "postal": "590004"
   },
   {
    "block": "5",
@@ -16949,7 +17262,8 @@
    "walk": {
     "station": "Farrer Road MRT",
     "metres": 143
-   }
+   },
+   "postal": "260005"
   },
   {
    "block": "1",
@@ -16985,7 +17299,8 @@
    "walk": {
     "station": "Farrer Road MRT",
     "metres": 90
-   }
+   },
+   "postal": "260001"
   },
   {
    "block": "14",
@@ -17027,7 +17342,8 @@
    "walk": {
     "station": "Beauty World MRT",
     "metres": 546
-   }
+   },
+   "postal": "590014"
   },
   {
    "block": "5",
@@ -17111,7 +17427,8 @@
    "walk": {
     "station": "Beauty World MRT",
     "metres": 356
-   }
+   },
+   "postal": "590003"
   },
   {
    "block": "28",
@@ -17153,7 +17470,8 @@
    "walk": {
     "station": "Jalan Besar MRT",
     "metres": 375
-   }
+   },
+   "postal": "200028"
   },
   {
    "block": "30",
@@ -17189,7 +17507,8 @@
    "walk": {
     "station": "Jalan Besar MRT",
     "metres": 278
-   }
+   },
+   "postal": "200030"
   },
   {
    "block": "640",
@@ -17231,7 +17550,8 @@
    "walk": {
     "station": "Jalan Besar MRT",
     "metres": 378
-   }
+   },
+   "postal": "200640"
   },
   {
    "block": "4",
@@ -17267,7 +17587,8 @@
    "walk": {
     "station": "Tanjong Pagar MRT",
     "metres": 560
-   }
+   },
+   "postal": "081004"
   },
   {
    "block": "533",
@@ -17303,7 +17624,8 @@
    "walk": {
     "station": "Chinatown MRT",
     "metres": 380
-   }
+   },
+   "postal": "050533"
   },
   {
    "block": "635",
@@ -17339,7 +17661,8 @@
    "walk": {
     "station": "Jalan Besar MRT",
     "metres": 238
-   }
+   },
+   "postal": "200635"
   },
   {
    "block": "633",
@@ -17417,7 +17740,8 @@
    "walk": {
     "station": "Bras Basah MRT",
     "metres": 420
-   }
+   },
+   "postal": "180264"
   },
   {
    "block": "1D",
@@ -17543,7 +17867,8 @@
    "walk": {
     "station": "Maxwell MRT",
     "metres": 505
-   }
+   },
+   "postal": "085301"
   },
   {
    "block": "26",
@@ -17585,7 +17910,8 @@
    "walk": {
     "station": "Jalan Besar MRT",
     "metres": 426
-   }
+   },
+   "postal": "200026"
   },
   {
    "block": "334",
@@ -17621,7 +17947,8 @@
    "walk": {
     "station": "Maxwell MRT",
     "metres": 349
-   }
+   },
+   "postal": "080334"
   },
   {
    "block": "1E",
@@ -17699,7 +18026,8 @@
    "walk": {
     "station": "Bugis MRT",
     "metres": 324
-   }
+   },
+   "postal": "180271"
   },
   {
    "block": "4",
@@ -17735,7 +18063,8 @@
    "walk": {
     "station": "Maxwell MRT",
     "metres": 275
-   }
+   },
+   "postal": "050004"
   },
   {
    "block": "9",
@@ -17771,7 +18100,8 @@
    "walk": {
     "station": "Rochor MRT",
     "metres": 526
-   }
+   },
+   "postal": "180009"
   },
   {
    "block": "5",
@@ -17807,7 +18137,8 @@
    "walk": {
     "station": "Tanjong Pagar MRT",
     "metres": 590
-   }
+   },
+   "postal": "081005"
   },
   {
    "block": "1",
@@ -17849,7 +18180,8 @@
    "walk": {
     "station": "Tanjong Pagar MRT",
     "metres": 566
-   }
+   },
+   "postal": "082001"
   },
   {
    "block": "536",
@@ -17897,7 +18229,8 @@
    "walk": {
     "station": "Clarke Quay MRT",
     "metres": 398
-   }
+   },
+   "postal": "050536"
   },
   {
    "block": "34",
@@ -17933,7 +18266,8 @@
    "walk": {
     "station": "Chinatown MRT",
     "metres": 347
-   }
+   },
+   "postal": "050034"
   },
   {
    "block": "662",
@@ -17969,7 +18303,8 @@
    "walk": {
     "station": "Little India MRT",
     "metres": 179
-   }
+   },
+   "postal": "210662"
   },
   {
    "block": "1G",
@@ -18035,7 +18370,8 @@
    "walk": {
     "station": "Outram Park MRT",
     "metres": 830
-   }
+   },
+   "postal": "085701"
   },
   {
    "block": "1A",
@@ -18083,7 +18419,8 @@
    "walk": {
     "station": "Outram Park MRT",
     "metres": 547
-   }
+   },
+   "postal": "085101"
   },
   {
    "block": "1E",
@@ -18173,7 +18510,8 @@
    "walk": {
     "station": "Bugis MRT",
     "metres": 368
-   }
+   },
+   "postal": "182269"
   },
   {
    "block": "8",
@@ -18209,7 +18547,8 @@
    "walk": {
     "station": "Tanjong Pagar MRT",
     "metres": 421
-   }
+   },
+   "postal": "080008"
   },
   {
    "block": "634",
@@ -18245,7 +18584,8 @@
    "walk": {
     "station": "Jalan Besar MRT",
     "metres": 304
-   }
+   },
+   "postal": "200634"
   },
   {
    "block": "1A",
@@ -18281,7 +18621,8 @@
    "walk": {
     "station": "Outram Park MRT",
     "metres": 547
-   }
+   },
+   "postal": "085101"
   },
   {
    "block": "1B",
@@ -18323,7 +18664,8 @@
    "walk": {
     "station": "Maxwell MRT",
     "metres": 474
-   }
+   },
+   "postal": "085201"
   },
   {
    "block": "672A",
@@ -18359,7 +18701,8 @@
    "walk": {
     "station": "Little India MRT",
     "metres": 458
-   }
+   },
+   "postal": "211672"
   },
   {
    "block": "535",
@@ -18395,7 +18738,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 944
-   }
+   },
+   "postal": "680535"
   },
   {
    "block": "574",
@@ -18431,7 +18775,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 550
-   }
+   },
+   "postal": "680574"
   },
   {
    "block": "110",
@@ -18473,7 +18818,8 @@
    "walk": {
     "station": "Teck Whye LRT",
     "metres": 355
-   }
+   },
+   "postal": "680110"
   },
   {
    "block": "818B",
@@ -18551,7 +18897,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 277
-   }
+   },
+   "postal": "682818"
   },
   {
    "block": "423",
@@ -18593,7 +18940,8 @@
    "walk": {
     "station": "Choa Chu Kang MRT",
     "metres": 685
-   }
+   },
+   "postal": "680423"
   },
   {
    "block": "484D",
@@ -18659,7 +19007,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1266
-   }
+   },
+   "postal": "684484"
   },
   {
    "block": "490C",
@@ -18701,7 +19050,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 860
-   }
+   },
+   "postal": "683490"
   },
   {
    "block": "812C",
@@ -18743,7 +19093,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 1105
-   }
+   },
+   "postal": "683812"
   },
   {
    "block": "682",
@@ -18785,7 +19136,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 902
-   }
+   },
+   "postal": "680682"
   },
   {
    "block": "660",
@@ -18827,7 +19179,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 586
-   }
+   },
+   "postal": "680660"
   },
   {
    "block": "686C",
@@ -18875,7 +19228,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 1030
-   }
+   },
+   "postal": "683686"
   },
   {
    "block": "702",
@@ -18917,7 +19271,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 772
-   }
+   },
+   "postal": "680702"
   },
   {
    "block": "157",
@@ -18959,7 +19314,8 @@
    "walk": {
     "station": "Phoenix LRT",
     "metres": 180
-   }
+   },
+   "postal": "680157"
   },
   {
    "block": "154",
@@ -18995,7 +19351,8 @@
    "walk": {
     "station": "Phoenix LRT",
     "metres": 188
-   }
+   },
+   "postal": "680154"
   },
   {
    "block": "801C",
@@ -19037,7 +19394,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1038
-   }
+   },
+   "postal": "683801"
   },
   {
    "block": "817B",
@@ -19085,7 +19443,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 367
-   }
+   },
+   "postal": "682817"
   },
   {
    "block": "817A",
@@ -19127,7 +19486,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 424
-   }
+   },
+   "postal": "681817"
   },
   {
    "block": "20",
@@ -19169,7 +19529,8 @@
    "walk": {
     "station": "Teck Whye LRT",
     "metres": 634
-   }
+   },
+   "postal": "680020"
   },
   {
    "block": "808C",
@@ -19205,7 +19566,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 792
-   }
+   },
+   "postal": "683808"
   },
   {
    "block": "249",
@@ -19247,7 +19609,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 166
-   }
+   },
+   "postal": "680249"
   },
   {
    "block": "487C",
@@ -19295,7 +19658,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 938
-   }
+   },
+   "postal": "683487"
   },
   {
    "block": "488D",
@@ -19343,7 +19707,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 928
-   }
+   },
+   "postal": "684488"
   },
   {
    "block": "489B",
@@ -19421,7 +19786,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 433
-   }
+   },
+   "postal": "682815"
   },
   {
    "block": "682",
@@ -19457,7 +19823,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 902
-   }
+   },
+   "postal": "680682"
   },
   {
    "block": "683A",
@@ -19499,7 +19866,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 1043
-   }
+   },
+   "postal": "681683"
   },
   {
    "block": "805C",
@@ -19553,7 +19921,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1328
-   }
+   },
+   "postal": "683805"
   },
   {
    "block": "805D",
@@ -19607,7 +19976,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1464
-   }
+   },
+   "postal": "684805"
   },
   {
    "block": "817B",
@@ -19655,7 +20025,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 367
-   }
+   },
+   "postal": "682817"
   },
   {
    "block": "282",
@@ -19703,7 +20074,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 309
-   }
+   },
+   "postal": "680282"
   },
   {
    "block": "807A",
@@ -19739,7 +20111,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 776
-   }
+   },
+   "postal": "681807"
   },
   {
    "block": "153",
@@ -19799,7 +20172,8 @@
    "walk": {
     "station": "Phoenix LRT",
     "metres": 226
-   }
+   },
+   "postal": "680153"
   },
   {
    "block": "807A",
@@ -19847,7 +20221,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 776
-   }
+   },
+   "postal": "681807"
   },
   {
    "block": "535",
@@ -19883,7 +20258,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 944
-   }
+   },
+   "postal": "680535"
   },
   {
    "block": "803A",
@@ -19919,7 +20295,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1132
-   }
+   },
+   "postal": "681803"
   },
   {
    "block": "10",
@@ -20021,7 +20398,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 792
-   }
+   },
+   "postal": "683808"
   },
   {
    "block": "487B",
@@ -20069,7 +20447,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1052
-   }
+   },
+   "postal": "682487"
   },
   {
    "block": "488C",
@@ -20123,7 +20502,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 872
-   }
+   },
+   "postal": "683488"
   },
   {
    "block": "488D",
@@ -20159,7 +20539,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 928
-   }
+   },
+   "postal": "684488"
   },
   {
    "block": "815B",
@@ -20201,7 +20582,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 433
-   }
+   },
+   "postal": "682815"
   },
   {
    "block": "815A",
@@ -20249,7 +20631,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 595
-   }
+   },
+   "postal": "681815"
   },
   {
    "block": "668",
@@ -20297,7 +20680,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 616
-   }
+   },
+   "postal": "680668"
   },
   {
    "block": "230",
@@ -20357,7 +20741,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 176
-   }
+   },
+   "postal": "680230"
   },
   {
    "block": "574",
@@ -20393,7 +20778,8 @@
    "walk": {
     "station": "Yew Tee MRT",
     "metres": 550
-   }
+   },
+   "postal": "680574"
   },
   {
    "block": "803A",
@@ -20441,7 +20827,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1132
-   }
+   },
+   "postal": "681803"
   },
   {
    "block": "803B",
@@ -20495,7 +20882,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 1156
-   }
+   },
+   "postal": "682803"
   },
   {
    "block": "817C",
@@ -20543,7 +20931,8 @@
    "walk": {
     "station": "Keat Hong LRT",
     "metres": 429
-   }
+   },
+   "postal": "683817"
   },
   {
    "block": "487A",
@@ -20603,7 +20992,8 @@
    "walk": {
     "station": "South View LRT",
     "metres": 978
-   }
+   },
+   "postal": "681487"
   },
   {
    "block": "154",
@@ -20639,7 +21029,8 @@
    "walk": {
     "station": "Phoenix LRT",
     "metres": 188
-   }
+   },
+   "postal": "680154"
   },
   {
    "block": "330",
@@ -20693,7 +21084,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 455
-   }
+   },
+   "postal": "120330"
   },
   {
    "block": "374",
@@ -20759,7 +21151,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 670
-   }
+   },
+   "postal": "120374"
   },
   {
    "block": "311B",
@@ -20807,7 +21200,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 696
-   }
+   },
+   "postal": "122311"
   },
   {
    "block": "346",
@@ -20861,7 +21255,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 855
-   }
+   },
+   "postal": "120346"
   },
   {
    "block": "608",
@@ -20909,7 +21304,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1837
-   }
+   },
+   "postal": "120608"
   },
   {
    "block": "607",
@@ -20957,7 +21353,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1784
-   }
+   },
+   "postal": "120607"
   },
   {
    "block": "715",
@@ -21011,7 +21408,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1838
-   }
+   },
+   "postal": "120715"
   },
   {
    "block": "706",
@@ -21071,7 +21469,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1442
-   }
+   },
+   "postal": "120706"
   },
   {
    "block": "507",
@@ -21107,7 +21506,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 707
-   }
+   },
+   "postal": "120507"
   },
   {
    "block": "510",
@@ -21161,7 +21561,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 955
-   }
+   },
+   "postal": "120510"
   },
   {
    "block": "704",
@@ -21197,7 +21598,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1612
-   }
+   },
+   "postal": "120704"
   },
   {
    "block": "703",
@@ -21245,7 +21647,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1556
-   }
+   },
+   "postal": "120703"
   },
   {
    "block": "421",
@@ -21317,7 +21720,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 994
-   }
+   },
+   "postal": "120421"
   },
   {
    "block": "420",
@@ -21365,7 +21769,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 915
-   }
+   },
+   "postal": "120420"
   },
   {
    "block": "445A",
@@ -21467,7 +21872,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 390
-   }
+   },
+   "postal": "121445"
   },
   {
    "block": "445B",
@@ -21533,7 +21939,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 369
-   }
+   },
+   "postal": "122445"
   },
   {
    "block": "311A",
@@ -21575,7 +21982,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 585
-   }
+   },
+   "postal": "121311"
   },
   {
    "block": "312C",
@@ -21629,7 +22037,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 662
-   }
+   },
+   "postal": "123312"
   },
   {
    "block": "311C",
@@ -21767,7 +22176,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 696
-   }
+   },
+   "postal": "122311"
   },
   {
    "block": "208B",
@@ -21809,7 +22219,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1087
-   }
+   },
+   "postal": "122208"
   },
   {
    "block": "716",
@@ -21851,7 +22262,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1908
-   }
+   },
+   "postal": "120716"
   },
   {
    "block": "511",
@@ -21893,7 +22305,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1003
-   }
+   },
+   "postal": "120511"
   },
   {
    "block": "414",
@@ -21935,7 +22348,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 846
-   }
+   },
+   "postal": "120414"
   },
   {
    "block": "425",
@@ -21983,7 +22397,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 1085
-   }
+   },
+   "postal": "120425"
   },
   {
    "block": "416",
@@ -22037,7 +22452,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 1023
-   }
+   },
+   "postal": "120416"
   },
   {
    "block": "445A",
@@ -22139,7 +22555,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 390
-   }
+   },
+   "postal": "121445"
   },
   {
    "block": "445B",
@@ -22193,7 +22610,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 369
-   }
+   },
+   "postal": "122445"
   },
   {
    "block": "312B",
@@ -22235,7 +22653,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 678
-   }
+   },
+   "postal": "122312"
   },
   {
    "block": "312A",
@@ -22271,7 +22690,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 577
-   }
+   },
+   "postal": "121312"
   },
   {
    "block": "329",
@@ -22325,7 +22745,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 433
-   }
+   },
+   "postal": "120329"
   },
   {
    "block": "434",
@@ -22373,7 +22794,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 525
-   }
+   },
+   "postal": "120434"
   },
   {
    "block": "440B",
@@ -22415,7 +22837,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 352
-   }
+   },
+   "postal": "122440"
   },
   {
    "block": "304",
@@ -22457,7 +22880,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 841
-   }
+   },
+   "postal": "120304"
   },
   {
    "block": "311C",
@@ -22535,7 +22959,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 585
-   }
+   },
+   "postal": "121311"
   },
   {
    "block": "375",
@@ -22583,7 +23008,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 560
-   }
+   },
+   "postal": "120375"
   },
   {
    "block": "312A",
@@ -22631,7 +23057,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 577
-   }
+   },
+   "postal": "121312"
   },
   {
    "block": "345",
@@ -22673,7 +23100,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 718
-   }
+   },
+   "postal": "120345"
   },
   {
    "block": "379",
@@ -22715,7 +23143,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 667
-   }
+   },
+   "postal": "120379"
   },
   {
    "block": "611",
@@ -22763,7 +23192,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1767
-   }
+   },
+   "postal": "120611"
   },
   {
    "block": "728",
@@ -22805,7 +23235,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1566
-   }
+   },
+   "postal": "120728"
   },
   {
    "block": "416",
@@ -22841,7 +23272,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 1023
-   }
+   },
+   "postal": "120416"
   },
   {
    "block": "454",
@@ -22889,7 +23321,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 399
-   }
+   },
+   "postal": "120454"
   },
   {
    "block": "312B",
@@ -22931,7 +23364,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 678
-   }
+   },
+   "postal": "122312"
   },
   {
    "block": "707",
@@ -22979,7 +23413,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1523
-   }
+   },
+   "postal": "120707"
   },
   {
    "block": "311C",
@@ -23057,7 +23492,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1778
-   }
+   },
+   "postal": "120724"
   },
   {
    "block": "115",
@@ -23099,7 +23535,8 @@
    "walk": {
     "station": "Clementi MRT",
     "metres": 1838
-   }
+   },
+   "postal": "120115"
   },
   {
    "block": "20",
@@ -23159,7 +23596,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 823
-   }
+   },
+   "postal": "370020"
   },
   {
    "block": "24",
@@ -23201,7 +23639,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 762
-   }
+   },
+   "postal": "370024"
   },
   {
    "block": "52",
@@ -23285,7 +23724,8 @@
    "walk": {
     "station": "Dakota MRT",
     "metres": 750
-   }
+   },
+   "postal": "390052"
   },
   {
    "block": "36",
@@ -23327,7 +23767,8 @@
    "walk": {
     "station": "Mountbatten MRT",
     "metres": 624
-   }
+   },
+   "postal": "390036"
   },
   {
    "block": "62",
@@ -23369,7 +23810,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 438
-   }
+   },
+   "postal": "370062"
   },
   {
    "block": "58",
@@ -23411,7 +23853,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 646
-   }
+   },
+   "postal": "370058"
   },
   {
    "block": "18D",
@@ -23453,7 +23896,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 374
-   }
+   },
+   "postal": "374018"
   },
   {
    "block": "43",
@@ -23501,7 +23945,8 @@
    "walk": {
     "station": "Mattar MRT",
     "metres": 494
-   }
+   },
+   "postal": "370043"
   },
   {
    "block": "57",
@@ -23549,7 +23994,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 619
-   }
+   },
+   "postal": "370057"
   },
   {
    "block": "49",
@@ -23597,7 +24043,8 @@
    "walk": {
     "station": "Mattar MRT",
     "metres": 583
-   }
+   },
+   "postal": "370049"
   },
   {
    "block": "18A",
@@ -23633,7 +24080,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 483
-   }
+   },
+   "postal": "371018"
   },
   {
    "block": "18C",
@@ -23681,7 +24129,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 361
-   }
+   },
+   "postal": "373018"
   },
   {
    "block": "17",
@@ -23735,7 +24184,8 @@
    "walk": {
     "station": "Eunos MRT",
     "metres": 576
-   }
+   },
+   "postal": "400017"
   },
   {
    "block": "21",
@@ -23813,7 +24263,8 @@
    "walk": {
     "station": "Eunos MRT",
     "metres": 770
-   }
+   },
+   "postal": "400021"
   },
   {
    "block": "10",
@@ -23873,7 +24324,8 @@
    "walk": {
     "station": "Paya Lebar MRT",
     "metres": 682
-   }
+   },
+   "postal": "430010"
   },
   {
    "block": "97",
@@ -23927,7 +24379,8 @@
    "walk": {
     "station": "Dakota MRT",
     "metres": 174
-   }
+   },
+   "postal": "390097"
   },
   {
    "block": "41",
@@ -23981,7 +24434,8 @@
    "walk": {
     "station": "Kallang MRT",
     "metres": 934
-   }
+   },
+   "postal": "380041"
   },
   {
    "block": "82B",
@@ -24071,7 +24525,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 473
-   }
+   },
+   "postal": "372082"
   },
   {
    "block": "17B",
@@ -24119,7 +24574,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 412
-   }
+   },
+   "postal": "372017"
   },
   {
    "block": "18A",
@@ -24173,7 +24629,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 483
-   }
+   },
+   "postal": "371018"
   },
   {
    "block": "8",
@@ -24221,7 +24678,8 @@
    "walk": {
     "station": "Paya Lebar MRT",
     "metres": 768
-   }
+   },
+   "postal": "430008"
   },
   {
    "block": "121",
@@ -24281,7 +24739,8 @@
    "walk": {
     "station": "Aljunied MRT",
     "metres": 866
-   }
+   },
+   "postal": "381121"
   },
   {
    "block": "320",
@@ -24329,7 +24788,8 @@
    "walk": {
     "station": "Ubi MRT",
     "metres": 731
-   }
+   },
+   "postal": "400320"
   },
   {
    "block": "7",
@@ -24383,7 +24843,8 @@
    "walk": {
     "station": "Paya Lebar MRT",
     "metres": 883
-   }
+   },
+   "postal": "430007"
   },
   {
    "block": "97",
@@ -24431,7 +24892,8 @@
    "walk": {
     "station": "Aljunied MRT",
     "metres": 902
-   }
+   },
+   "postal": "380097"
   },
   {
    "block": "82B",
@@ -24467,7 +24929,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 473
-   }
+   },
+   "postal": "372082"
   },
   {
    "block": "61",
@@ -24515,7 +24978,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 502
-   }
+   },
+   "postal": "370061"
   },
   {
    "block": "36",
@@ -24563,7 +25027,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 560
-   }
+   },
+   "postal": "370036"
   },
   {
    "block": "82A",
@@ -24611,7 +25076,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 283
-   }
+   },
+   "postal": "371082"
   },
   {
    "block": "19",
@@ -24659,7 +25125,8 @@
    "walk": {
     "station": "Eunos MRT",
     "metres": 678
-   }
+   },
+   "postal": "400019"
   },
   {
    "block": "33",
@@ -24695,7 +25162,8 @@
    "walk": {
     "station": "Eunos MRT",
     "metres": 363
-   }
+   },
+   "postal": "400033"
   },
   {
    "block": "9",
@@ -24743,7 +25211,8 @@
    "walk": {
     "station": "Paya Lebar MRT",
     "metres": 737
-   }
+   },
+   "postal": "430009"
   },
   {
    "block": "1",
@@ -24791,7 +25260,8 @@
    "walk": {
     "station": "Dakota MRT",
     "metres": 1126
-   }
+   },
+   "postal": "430001"
   },
   {
    "block": "63",
@@ -24845,7 +25315,8 @@
    "walk": {
     "station": "Aljunied MRT",
     "metres": 497
-   }
+   },
+   "postal": "380063"
   },
   {
    "block": "53",
@@ -24899,7 +25370,8 @@
    "walk": {
     "station": "Aljunied MRT",
     "metres": 523
-   }
+   },
+   "postal": "380053"
   },
   {
    "block": "83B",
@@ -24947,7 +25419,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 449
-   }
+   },
+   "postal": "372083"
   },
   {
    "block": "18D",
@@ -24989,7 +25462,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 374
-   }
+   },
+   "postal": "374018"
   },
   {
    "block": "11",
@@ -25043,7 +25517,8 @@
    "walk": {
     "station": "Eunos MRT",
     "metres": 379
-   }
+   },
+   "postal": "400011"
   },
   {
    "block": "33",
@@ -25079,7 +25554,8 @@
    "walk": {
     "station": "Eunos MRT",
     "metres": 363
-   }
+   },
+   "postal": "400033"
   },
   {
    "block": "2C",
@@ -25133,7 +25609,8 @@
    "walk": {
     "station": "Eunos MRT",
     "metres": 759
-   }
+   },
+   "postal": "405002"
   },
   {
    "block": "2B",
@@ -25187,7 +25664,8 @@
    "walk": {
     "station": "Paya Lebar MRT",
     "metres": 690
-   }
+   },
+   "postal": "404002"
   },
   {
    "block": "54",
@@ -25241,7 +25719,8 @@
    "walk": {
     "station": "Macpherson MRT",
     "metres": 622
-   }
+   },
+   "postal": "370054"
   },
   {
    "block": "315",
@@ -25289,7 +25768,8 @@
    "walk": {
     "station": "Ubi MRT",
     "metres": 610
-   }
+   },
+   "postal": "400315"
   },
   {
    "block": "1",
@@ -25337,7 +25817,8 @@
    "walk": {
     "station": "Mountbatten MRT",
     "metres": 356
-   }
+   },
+   "postal": "390001"
   },
   {
    "block": "995A",
@@ -25385,7 +25866,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1982
-   }
+   },
+   "postal": "531995"
   },
   {
    "block": "994A",
@@ -25433,7 +25915,8 @@
    "walk": {
     "station": "Tongkang LRT",
     "metres": 2607
-   }
+   },
+   "postal": "531994"
   },
   {
    "block": "114",
@@ -25481,7 +25964,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 1420
-   }
+   },
+   "postal": "530114"
   },
   {
    "block": "23",
@@ -25535,7 +26019,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 917
-   }
+   },
+   "postal": "530023"
   },
   {
    "block": "327",
@@ -25571,7 +26056,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 735
-   }
+   },
+   "postal": "530327"
   },
   {
    "block": "528",
@@ -25625,7 +26111,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 754
-   }
+   },
+   "postal": "530528"
   },
   {
    "block": "241",
@@ -25673,7 +26160,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 1252
-   }
+   },
+   "postal": "530241"
   },
   {
    "block": "365C",
@@ -25709,7 +26197,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 1069
-   }
+   },
+   "postal": "533365"
   },
   {
    "block": "998B",
@@ -25757,7 +26246,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1763
-   }
+   },
+   "postal": "532998"
   },
   {
    "block": "996B",
@@ -25823,7 +26313,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1969
-   }
+   },
+   "postal": "532996"
   },
   {
    "block": "999B",
@@ -25877,7 +26368,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1805
-   }
+   },
+   "postal": "532999"
   },
   {
    "block": "996A",
@@ -25931,7 +26423,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 825
-   }
+   },
+   "postal": "531996"
   },
   {
    "block": "997A",
@@ -25997,7 +26490,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1889
-   }
+   },
+   "postal": "531997"
   },
   {
    "block": "987A",
@@ -26057,7 +26551,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 1919
-   }
+   },
+   "postal": "531987"
   },
   {
    "block": "992B",
@@ -26111,7 +26606,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1861
-   }
+   },
+   "postal": "532992"
   },
   {
    "block": "994C",
@@ -26177,7 +26673,8 @@
    "walk": {
     "station": "Tongkang LRT",
     "metres": 2375
-   }
+   },
+   "postal": "536994"
   },
   {
    "block": "994A",
@@ -26225,7 +26722,8 @@
    "walk": {
     "station": "Tongkang LRT",
     "metres": 2607
-   }
+   },
+   "postal": "531994"
   },
   {
    "block": "15",
@@ -26303,7 +26801,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 1119
-   }
+   },
+   "postal": "530015"
   },
   {
    "block": "327",
@@ -26339,7 +26838,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 735
-   }
+   },
+   "postal": "530327"
   },
   {
    "block": "532",
@@ -26375,7 +26875,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 867
-   }
+   },
+   "postal": "530532"
   },
   {
    "block": "158",
@@ -26423,7 +26924,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 1545
-   }
+   },
+   "postal": "530158"
   },
   {
    "block": "699C",
@@ -26483,7 +26985,8 @@
    "walk": {
     "station": "Buangkok MRT",
     "metres": 1252
-   }
+   },
+   "postal": "533699"
   },
   {
    "block": "693",
@@ -26531,7 +27034,8 @@
    "walk": {
     "station": "Buangkok MRT",
     "metres": 1294
-   }
+   },
+   "postal": "530693"
   },
   {
    "block": "909",
@@ -26579,7 +27083,8 @@
    "walk": {
     "station": "Renjong LRT",
     "metres": 1539
-   }
+   },
+   "postal": "530909"
   },
   {
    "block": "969",
@@ -26633,7 +27138,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 2135
-   }
+   },
+   "postal": "530969"
   },
   {
    "block": "473B",
@@ -26681,7 +27187,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1231
-   }
+   },
+   "postal": "532473"
   },
   {
    "block": "470A",
@@ -26735,7 +27242,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 900
-   }
+   },
+   "postal": "531470"
   },
   {
    "block": "471B",
@@ -26795,7 +27303,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1099
-   }
+   },
+   "postal": "532471"
   },
   {
    "block": "471A",
@@ -26855,7 +27364,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1092
-   }
+   },
+   "postal": "531471"
   },
   {
    "block": "477A",
@@ -26903,7 +27413,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 928
-   }
+   },
+   "postal": "531477"
   },
   {
    "block": "409",
@@ -26951,7 +27462,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 867
-   }
+   },
+   "postal": "530409"
   },
   {
    "block": "532",
@@ -26993,7 +27505,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 867
-   }
+   },
+   "postal": "530532"
   },
   {
    "block": "475C",
@@ -27041,7 +27554,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1406
-   }
+   },
+   "postal": "533475"
   },
   {
    "block": "473A",
@@ -27089,7 +27603,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1302
-   }
+   },
+   "postal": "531473"
   },
   {
    "block": "986B",
@@ -27125,7 +27640,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1719
-   }
+   },
+   "postal": "532986"
   },
   {
    "block": "998A",
@@ -27161,7 +27677,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1710
-   }
+   },
+   "postal": "531998"
   },
   {
    "block": "998B",
@@ -27197,7 +27714,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1763
-   }
+   },
+   "postal": "532998"
   },
   {
    "block": "986B",
@@ -27239,7 +27757,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1719
-   }
+   },
+   "postal": "532986"
   },
   {
    "block": "24",
@@ -27293,7 +27812,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 810
-   }
+   },
+   "postal": "530024"
   },
   {
    "block": "321",
@@ -27347,7 +27867,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 1090
-   }
+   },
+   "postal": "530321"
   },
   {
    "block": "623",
@@ -27401,7 +27922,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 1443
-   }
+   },
+   "postal": "530623"
   },
   {
    "block": "473B",
@@ -27437,7 +27959,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1231
-   }
+   },
+   "postal": "532473"
   },
   {
    "block": "998A",
@@ -27473,7 +27996,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 1710
-   }
+   },
+   "postal": "531998"
   },
   {
    "block": "377A",
@@ -27527,7 +28051,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 1338
-   }
+   },
+   "postal": "531377"
   },
   {
    "block": "377B",
@@ -27593,7 +28118,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 1333
-   }
+   },
+   "postal": "532377"
   },
   {
    "block": "475A",
@@ -27653,7 +28179,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1371
-   }
+   },
+   "postal": "531475"
   },
   {
    "block": "473A",
@@ -27689,7 +28216,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1302
-   }
+   },
+   "postal": "531473"
   },
   {
    "block": "365C",
@@ -27731,7 +28259,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 1069
-   }
+   },
+   "postal": "533365"
   },
   {
    "block": "477B",
@@ -27767,7 +28296,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 844
-   }
+   },
+   "postal": "532477"
   },
   {
    "block": "377A",
@@ -27833,7 +28363,8 @@
    "walk": {
     "station": "Hougang MRT",
     "metres": 1338
-   }
+   },
+   "postal": "531377"
   },
   {
    "block": "377B",
@@ -27881,7 +28412,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 1333
-   }
+   },
+   "postal": "532377"
   },
   {
    "block": "471B",
@@ -27917,7 +28449,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1099
-   }
+   },
+   "postal": "532471"
   },
   {
    "block": "475A",
@@ -27953,7 +28486,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 1371
-   }
+   },
+   "postal": "531475"
   },
   {
    "block": "477B",
@@ -27989,7 +28523,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 844
-   }
+   },
+   "postal": "532477"
   },
   {
    "block": "477A",
@@ -28025,7 +28560,8 @@
    "walk": {
     "station": "Kangkar LRT",
     "metres": 928
-   }
+   },
+   "postal": "531477"
   },
   {
    "block": "371",
@@ -28061,7 +28597,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 906
-   }
+   },
+   "postal": "600371"
   },
   {
    "block": "23",
@@ -28097,7 +28634,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2505
-   }
+   },
+   "postal": "600023"
   },
   {
    "block": "211",
@@ -28145,7 +28683,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 1038
-   }
+   },
+   "postal": "600211"
   },
   {
    "block": "247",
@@ -28193,7 +28732,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 942
-   }
+   },
+   "postal": "600247"
   },
   {
    "block": "257",
@@ -28265,7 +28805,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 1007
-   }
+   },
+   "postal": "600257"
   },
   {
    "block": "252",
@@ -28301,7 +28842,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 843
-   }
+   },
+   "postal": "600252"
   },
   {
    "block": "264",
@@ -28349,7 +28891,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 1287
-   }
+   },
+   "postal": "600264"
   },
   {
    "block": "372",
@@ -28403,7 +28946,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 936
-   }
+   },
+   "postal": "600372"
   },
   {
    "block": "304",
@@ -28445,7 +28989,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 775
-   }
+   },
+   "postal": "600304"
   },
   {
    "block": "23",
@@ -28493,7 +29038,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2505
-   }
+   },
+   "postal": "600023"
   },
   {
    "block": "57",
@@ -28553,7 +29099,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2765
-   }
+   },
+   "postal": "600057"
   },
   {
    "block": "34",
@@ -28589,7 +29136,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2248
-   }
+   },
+   "postal": "600034"
   },
   {
    "block": "35",
@@ -28625,7 +29173,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2121
-   }
+   },
+   "postal": "600035"
   },
   {
    "block": "204",
@@ -28661,7 +29210,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 650
-   }
+   },
+   "postal": "600204"
   },
   {
    "block": "316",
@@ -28697,7 +29247,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 567
-   }
+   },
+   "postal": "600316"
   },
   {
    "block": "21",
@@ -28763,7 +29314,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2641
-   }
+   },
+   "postal": "600021"
   },
   {
    "block": "24",
@@ -28799,7 +29351,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2729
-   }
+   },
+   "postal": "600024"
   },
   {
    "block": "60",
@@ -28841,7 +29394,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2574
-   }
+   },
+   "postal": "600060"
   },
   {
    "block": "283",
@@ -28883,7 +29437,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 1124
-   }
+   },
+   "postal": "600283"
   },
   {
    "block": "213",
@@ -28919,7 +29474,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 1095
-   }
+   },
+   "postal": "600213"
   },
   {
    "block": "404",
@@ -28961,7 +29517,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2272
-   }
+   },
+   "postal": "600404"
   },
   {
    "block": "265",
@@ -29015,7 +29572,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1191
-   }
+   },
+   "postal": "600265"
   },
   {
    "block": "267",
@@ -29063,7 +29621,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1150
-   }
+   },
+   "postal": "600267"
   },
   {
    "block": "285A",
@@ -29105,7 +29664,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 988
-   }
+   },
+   "postal": "601285"
   },
   {
    "block": "372",
@@ -29153,7 +29713,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 936
-   }
+   },
+   "postal": "600372"
   },
   {
    "block": "102",
@@ -29207,7 +29768,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 771
-   }
+   },
+   "postal": "600102"
   },
   {
    "block": "110",
@@ -29297,7 +29859,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 803
-   }
+   },
+   "postal": "600101"
   },
   {
    "block": "210",
@@ -29345,7 +29908,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 888
-   }
+   },
+   "postal": "600210"
   },
   {
    "block": "241",
@@ -29399,7 +29963,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1204
-   }
+   },
+   "postal": "600241"
   },
   {
    "block": "250",
@@ -29441,7 +30006,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 1084
-   }
+   },
+   "postal": "600250"
   },
   {
    "block": "301",
@@ -29483,7 +30049,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 704
-   }
+   },
+   "postal": "600301"
   },
   {
    "block": "371",
@@ -29519,7 +30086,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 906
-   }
+   },
+   "postal": "600371"
   },
   {
    "block": "306",
@@ -29567,7 +30135,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 890
-   }
+   },
+   "postal": "600306"
   },
   {
    "block": "412",
@@ -29615,7 +30184,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 1964
-   }
+   },
+   "postal": "600412"
   },
   {
    "block": "20",
@@ -29663,7 +30233,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2706
-   }
+   },
+   "postal": "600020"
   },
   {
    "block": "20",
@@ -29705,7 +30276,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2706
-   }
+   },
+   "postal": "600020"
   },
   {
    "block": "55",
@@ -29801,7 +30373,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 1010
-   }
+   },
+   "postal": "604288"
   },
   {
    "block": "305",
@@ -29843,7 +30416,8 @@
    "walk": {
     "station": "Chinese Garden MRT",
     "metres": 842
-   }
+   },
+   "postal": "600305"
   },
   {
    "block": "63",
@@ -29885,7 +30459,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2482
-   }
+   },
+   "postal": "600063"
   },
   {
    "block": "21",
@@ -29921,7 +30496,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 2641
-   }
+   },
+   "postal": "600021"
   },
   {
    "block": "269",
@@ -29963,7 +30539,8 @@
    "walk": {
     "station": "Bukit Batok MRT",
     "metres": 1249
-   }
+   },
+   "postal": "600269"
   },
   {
    "block": "271",
@@ -30047,7 +30624,8 @@
    "walk": {
     "station": "Jurong East MRT",
     "metres": 985
-   }
+   },
+   "postal": "602286"
   },
   {
    "block": "140C",
@@ -30095,7 +30673,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 2531
-   }
+   },
+   "postal": "613140"
   },
   {
    "block": "187",
@@ -30191,7 +30770,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1239
-   }
+   },
+   "postal": "640187"
   },
   {
    "block": "186",
@@ -30269,7 +30849,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1325
-   }
+   },
+   "postal": "640186"
   },
   {
    "block": "185",
@@ -30347,7 +30928,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1356
-   }
+   },
+   "postal": "640185"
   },
   {
    "block": "181B",
@@ -30389,7 +30971,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1593
-   }
+   },
+   "postal": "642181"
   },
   {
    "block": "210",
@@ -30437,7 +31020,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1337
-   }
+   },
+   "postal": "640210"
   },
   {
    "block": "209",
@@ -30485,7 +31069,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 898
-   }
+   },
+   "postal": "640209"
   },
   {
    "block": "208",
@@ -30605,7 +31190,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1087
-   }
+   },
+   "postal": "640208"
   },
   {
    "block": "213",
@@ -30665,7 +31251,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1373
-   }
+   },
+   "postal": "640213"
   },
   {
    "block": "481",
@@ -30719,7 +31306,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1191
-   }
+   },
+   "postal": "640481"
   },
   {
    "block": "561A",
@@ -30755,7 +31343,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1544
-   }
+   },
+   "postal": "641561"
   },
   {
    "block": "528",
@@ -30803,7 +31392,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 861
-   }
+   },
+   "postal": "640528"
   },
   {
    "block": "518",
@@ -30845,7 +31435,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 442
-   }
+   },
+   "postal": "640518"
   },
   {
    "block": "339C",
@@ -30905,7 +31496,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 898
-   }
+   },
+   "postal": "613339"
   },
   {
    "block": "122",
@@ -30953,7 +31545,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1247
-   }
+   },
+   "postal": "610122"
   },
   {
    "block": "180C",
@@ -31001,7 +31594,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1576
-   }
+   },
+   "postal": "643180"
   },
   {
    "block": "196B",
@@ -31043,7 +31637,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 858
-   }
+   },
+   "postal": "642196"
   },
   {
    "block": "140C",
@@ -31085,7 +31680,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 2531
-   }
+   },
+   "postal": "613140"
   },
   {
    "block": "449",
@@ -31133,7 +31729,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1344
-   }
+   },
+   "postal": "640449"
   },
   {
    "block": "561A",
@@ -31187,7 +31784,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1544
-   }
+   },
+   "postal": "641561"
   },
   {
    "block": "518",
@@ -31229,7 +31827,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 442
-   }
+   },
+   "postal": "640518"
   },
   {
    "block": "655A",
@@ -31277,7 +31876,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 451
-   }
+   },
+   "postal": "641655"
   },
   {
    "block": "642",
@@ -31331,7 +31931,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 503
-   }
+   },
+   "postal": "640642"
   },
   {
    "block": "668D",
@@ -31379,7 +31980,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 618
-   }
+   },
+   "postal": "644668"
   },
   {
    "block": "663A",
@@ -31427,7 +32029,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 597
-   }
+   },
+   "postal": "641663"
   },
   {
    "block": "711",
@@ -31517,7 +32120,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1958
-   }
+   },
+   "postal": "612165"
   },
   {
    "block": "196B",
@@ -31553,7 +32157,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 858
-   }
+   },
+   "postal": "642196"
   },
   {
    "block": "652B",
@@ -31601,7 +32206,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 279
-   }
+   },
+   "postal": "642652"
   },
   {
    "block": "653A",
@@ -31649,7 +32255,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 184
-   }
+   },
+   "postal": "641653"
   },
   {
    "block": "940",
@@ -31685,7 +32292,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 1402
-   }
+   },
+   "postal": "640940"
   },
   {
    "block": "175A",
@@ -31775,7 +32383,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1555
-   }
+   },
+   "postal": "610180"
   },
   {
    "block": "180A",
@@ -31811,7 +32420,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1418
-   }
+   },
+   "postal": "641180"
   },
   {
    "block": "181B",
@@ -31853,7 +32463,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1593
-   }
+   },
+   "postal": "642181"
   },
   {
    "block": "150A",
@@ -31889,7 +32500,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 2349
-   }
+   },
+   "postal": "611150"
   },
   {
    "block": "180A",
@@ -31931,7 +32543,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1418
-   }
+   },
+   "postal": "641180"
   },
   {
    "block": "150A",
@@ -31985,7 +32598,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 2349
-   }
+   },
+   "postal": "611150"
   },
   {
    "block": "183A",
@@ -32045,7 +32659,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 1581
-   }
+   },
+   "postal": "641183"
   },
   {
    "block": "431",
@@ -32099,7 +32714,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1565
-   }
+   },
+   "postal": "640431"
   },
   {
    "block": "430",
@@ -32153,7 +32769,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1627
-   }
+   },
+   "postal": "640430"
   },
   {
    "block": "643",
@@ -32207,7 +32824,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 354
-   }
+   },
+   "postal": "640643"
   },
   {
    "block": "617",
@@ -32261,7 +32879,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 800
-   }
+   },
+   "postal": "640617"
   },
   {
    "block": "667A",
@@ -32297,7 +32916,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 837
-   }
+   },
+   "postal": "641667"
   },
   {
    "block": "657A",
@@ -32351,7 +32971,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 640
-   }
+   },
+   "postal": "641657"
   },
   {
    "block": "940",
@@ -32393,7 +33014,8 @@
    "walk": {
     "station": "Pioneer MRT",
     "metres": 1402
-   }
+   },
+   "postal": "640940"
   },
   {
    "block": "166A",
@@ -32435,7 +33057,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 2066
-   }
+   },
+   "postal": "611166"
   },
   {
    "block": "180",
@@ -32477,7 +33100,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1555
-   }
+   },
+   "postal": "610180"
   },
   {
    "block": "667A",
@@ -32513,7 +33137,8 @@
    "walk": {
     "station": "Boon Lay MRT",
     "metres": 837
-   }
+   },
+   "postal": "641667"
   },
   {
    "block": "165B",
@@ -32549,7 +33174,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 1958
-   }
+   },
+   "postal": "612165"
   },
   {
    "block": "166A",
@@ -32591,7 +33217,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 2066
-   }
+   },
+   "postal": "611166"
   },
   {
    "block": "469",
@@ -32651,7 +33278,8 @@
    "walk": {
     "station": "Lakeside MRT",
     "metres": 863
-   }
+   },
+   "postal": "640469"
   },
   {
    "block": "24",
@@ -32699,7 +33327,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 210
-   }
+   },
+   "postal": "330024"
   },
   {
    "block": "44",
@@ -32777,7 +33406,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 732
-   }
+   },
+   "postal": "330044"
   },
   {
    "block": "50",
@@ -32831,7 +33461,8 @@
    "walk": {
     "station": "Farrer Park MRT",
     "metres": 619
-   }
+   },
+   "postal": "210050"
   },
   {
    "block": "15",
@@ -32891,7 +33522,8 @@
    "walk": {
     "station": "Farrer Park MRT",
     "metres": 578
-   }
+   },
+   "postal": "210015"
   },
   {
    "block": "68",
@@ -32969,7 +33601,8 @@
    "walk": {
     "station": "Geylang Bahru MRT",
     "metres": 396
-   }
+   },
+   "postal": "330068"
   },
   {
    "block": "57",
@@ -33059,7 +33692,8 @@
    "walk": {
     "station": "Geylang Bahru MRT",
     "metres": 567
-   }
+   },
+   "postal": "330057"
   },
   {
    "block": "117A",
@@ -33107,7 +33741,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1325
-   }
+   },
+   "postal": "321117"
   },
   {
    "block": "116B",
@@ -33173,7 +33808,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1297
-   }
+   },
+   "postal": "322116"
   },
   {
    "block": "116A",
@@ -33215,7 +33851,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1292
-   }
+   },
+   "postal": "321116"
   },
   {
    "block": "63",
@@ -33263,7 +33900,8 @@
    "walk": {
     "station": "Geylang Bahru MRT",
     "metres": 596
-   }
+   },
+   "postal": "330063"
   },
   {
    "block": "65",
@@ -33329,7 +33967,8 @@
    "walk": {
     "station": "Geylang Bahru MRT",
     "metres": 577
-   }
+   },
+   "postal": "330065"
   },
   {
    "block": "806",
@@ -33377,7 +34016,8 @@
    "walk": {
     "station": "Lavender MRT",
     "metres": 285
-   }
+   },
+   "postal": "200806"
   },
   {
    "block": "77",
@@ -33479,7 +34119,8 @@
    "walk": {
     "station": "Farrer Park MRT",
     "metres": 866
-   }
+   },
+   "postal": "320123"
   },
   {
    "block": "685",
@@ -33527,7 +34168,8 @@
    "walk": {
     "station": "Farrer Park MRT",
     "metres": 350
-   }
+   },
+   "postal": "210685"
   },
   {
    "block": "20",
@@ -33581,7 +34223,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 726
-   }
+   },
+   "postal": "321020"
   },
   {
    "block": "11",
@@ -33641,7 +34284,8 @@
    "walk": {
     "station": "Kallang MRT",
     "metres": 390
-   }
+   },
+   "postal": "380011"
   },
   {
    "block": "10C",
@@ -33713,7 +34357,8 @@
    "walk": {
     "station": "Bendemeer MRT",
     "metres": 540
-   }
+   },
+   "postal": "333010"
   },
   {
    "block": "117B",
@@ -33749,7 +34394,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1345
-   }
+   },
+   "postal": "322117"
   },
   {
    "block": "78",
@@ -33863,7 +34509,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1212
-   }
+   },
+   "postal": "320078"
   },
   {
    "block": "113B",
@@ -33917,7 +34564,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 350
-   }
+   },
+   "postal": "323113"
   },
   {
    "block": "113A",
@@ -34007,7 +34655,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 423
-   }
+   },
+   "postal": "322113"
   },
   {
    "block": "25A",
@@ -34091,7 +34740,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 360
-   }
+   },
+   "postal": "321025"
   },
   {
    "block": "26B",
@@ -34223,7 +34873,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 301
-   }
+   },
+   "postal": "322026"
   },
   {
    "block": "26A",
@@ -34295,7 +34946,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 398
-   }
+   },
+   "postal": "321026"
   },
   {
    "block": "15",
@@ -34349,7 +35001,8 @@
    "walk": {
     "station": "Kallang MRT",
     "metres": 694
-   }
+   },
+   "postal": "380015"
   },
   {
    "block": "8A",
@@ -34403,7 +35056,8 @@
    "walk": {
     "station": "Kallang MRT",
     "metres": 423
-   }
+   },
+   "postal": "381008"
   },
   {
    "block": "8B",
@@ -34445,7 +35099,8 @@
    "walk": {
     "station": "Kallang MRT",
     "metres": 355
-   }
+   },
+   "postal": "382008"
   },
   {
    "block": "8",
@@ -34499,7 +35154,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 516
-   }
+   },
+   "postal": "330008"
   },
   {
    "block": "9",
@@ -34565,7 +35221,8 @@
    "walk": {
     "station": "Bendemeer MRT",
     "metres": 523
-   }
+   },
+   "postal": "330009"
   },
   {
    "block": "108B",
@@ -34601,7 +35258,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 494
-   }
+   },
+   "postal": "323108"
   },
   {
    "block": "104",
@@ -34655,7 +35313,8 @@
    "walk": {
     "station": "Farrer Park MRT",
     "metres": 1002
-   }
+   },
+   "postal": "323104"
   },
   {
    "block": "10C",
@@ -34697,7 +35356,8 @@
    "walk": {
     "station": "Bendemeer MRT",
     "metres": 540
-   }
+   },
+   "postal": "333010"
   },
   {
    "block": "117B",
@@ -34733,7 +35393,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1345
-   }
+   },
+   "postal": "322117"
   },
   {
    "block": "26A",
@@ -34775,7 +35436,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 398
-   }
+   },
+   "postal": "321026"
   },
   {
    "block": "3",
@@ -34829,7 +35491,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 448
-   }
+   },
+   "postal": "320003"
   },
   {
    "block": "8B",
@@ -34865,7 +35528,8 @@
    "walk": {
     "station": "Kallang MRT",
     "metres": 355
-   }
+   },
+   "postal": "382008"
   },
   {
    "block": "74",
@@ -34919,7 +35583,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 890
-   }
+   },
+   "postal": "320074"
   },
   {
    "block": "82",
@@ -34979,7 +35644,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1116
-   }
+   },
+   "postal": "320082"
   },
   {
    "block": "98",
@@ -35033,7 +35699,8 @@
    "walk": {
     "station": "Farrer Park MRT",
     "metres": 1124
-   }
+   },
+   "postal": "320098"
   },
   {
    "block": "10B",
@@ -35105,7 +35772,8 @@
    "walk": {
     "station": "Bendemeer MRT",
     "metres": 621
-   }
+   },
+   "postal": "332010"
   },
   {
    "block": "38A",
@@ -35159,7 +35827,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 737
-   }
+   },
+   "postal": "331038"
   },
   {
    "block": "9",
@@ -35201,7 +35870,8 @@
    "walk": {
     "station": "Bendemeer MRT",
     "metres": 523
-   }
+   },
+   "postal": "330009"
   },
   {
    "block": "8",
@@ -35237,7 +35907,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 516
-   }
+   },
+   "postal": "330008"
   },
   {
    "block": "102",
@@ -35291,7 +35962,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 987
-   }
+   },
+   "postal": "321102"
   },
   {
    "block": "116A",
@@ -35327,7 +35999,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 1292
-   }
+   },
+   "postal": "321116"
   },
   {
    "block": "108B",
@@ -35369,7 +36042,8 @@
    "walk": {
     "station": "Boon Keng MRT",
     "metres": 494
-   }
+   },
+   "postal": "323108"
   },
   {
    "block": "102",
@@ -35423,7 +36097,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1031
-   }
+   },
+   "postal": "320102"
   },
   {
    "block": "33",
@@ -35471,7 +36146,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 730
-   }
+   },
+   "postal": "440033"
   },
   {
    "block": "66",
@@ -35543,7 +36219,8 @@
    "walk": {
     "station": "Marine Parade MRT",
     "metres": 698
-   }
+   },
+   "postal": "440066"
   },
   {
    "block": "67",
@@ -35597,7 +36274,8 @@
    "walk": {
     "station": "Marine Parade MRT",
     "metres": 656
-   }
+   },
+   "postal": "440067"
   },
   {
    "block": "65",
@@ -35657,7 +36335,8 @@
    "walk": {
     "station": "Marine Parade MRT",
     "metres": 708
-   }
+   },
+   "postal": "440065"
   },
   {
    "block": "5",
@@ -35699,7 +36378,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 439
-   }
+   },
+   "postal": "440005"
   },
   {
    "block": "7",
@@ -35741,7 +36421,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 507
-   }
+   },
+   "postal": "440007"
   },
   {
    "block": "75",
@@ -35789,7 +36470,8 @@
    "walk": {
     "station": "Marine Parade MRT",
     "metres": 378
-   }
+   },
+   "postal": "440075"
   },
   {
    "block": "78",
@@ -35825,7 +36507,8 @@
    "walk": {
     "station": "Marine Parade MRT",
     "metres": 546
-   }
+   },
+   "postal": "440078"
   },
   {
    "block": "31",
@@ -35873,7 +36556,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 661
-   }
+   },
+   "postal": "440031"
   },
   {
    "block": "46",
@@ -35909,7 +36593,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 396
-   }
+   },
+   "postal": "440046"
   },
   {
    "block": "6",
@@ -35951,7 +36636,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 480
-   }
+   },
+   "postal": "440006"
   },
   {
    "block": "45",
@@ -36011,7 +36697,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 475
-   }
+   },
+   "postal": "440045"
   },
   {
    "block": "17",
@@ -36077,7 +36764,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 517
-   }
+   },
+   "postal": "440017"
   },
   {
    "block": "20",
@@ -36113,7 +36801,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 461
-   }
+   },
+   "postal": "440020"
   },
   {
    "block": "29",
@@ -36161,7 +36850,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 638
-   }
+   },
+   "postal": "440029"
   },
   {
    "block": "79",
@@ -36203,7 +36893,8 @@
    "walk": {
     "station": "Marine Parade MRT",
     "metres": 463
-   }
+   },
+   "postal": "440079"
   },
   {
    "block": "3",
@@ -36239,7 +36930,8 @@
    "walk": {
     "station": "Marine Terrace MRT",
     "metres": 563
-   }
+   },
+   "postal": "440003"
   },
   {
    "block": "527D",
@@ -36281,7 +36973,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 470
-   }
+   },
+   "postal": "514527"
   },
   {
    "block": "528A",
@@ -36317,7 +37010,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 422
-   }
+   },
+   "postal": "511528"
   },
   {
    "block": "527C",
@@ -36365,7 +37059,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 481
-   }
+   },
+   "postal": "513527"
   },
   {
    "block": "527B",
@@ -36413,7 +37108,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 550
-   }
+   },
+   "postal": "512527"
   },
   {
    "block": "530B",
@@ -36449,7 +37145,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 829
-   }
+   },
+   "postal": "512530"
   },
   {
    "block": "634",
@@ -36485,7 +37182,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1493
-   }
+   },
+   "postal": "510634"
   },
   {
    "block": "530C",
@@ -36587,7 +37285,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1633
-   }
+   },
+   "postal": "510484"
   },
   {
    "block": "417",
@@ -36623,7 +37322,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1163
-   }
+   },
+   "postal": "510417"
   },
   {
    "block": "473",
@@ -36659,7 +37359,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1188
-   }
+   },
+   "postal": "510473"
   },
   {
    "block": "412",
@@ -36701,7 +37402,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1023
-   }
+   },
+   "postal": "510412"
   },
   {
    "block": "421",
@@ -36743,7 +37445,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1129
-   }
+   },
+   "postal": "510421"
   },
   {
    "block": "472",
@@ -36785,7 +37488,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1246
-   }
+   },
+   "postal": "510472"
   },
   {
    "block": "114",
@@ -36821,7 +37525,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1053
-   }
+   },
+   "postal": "510114"
   },
   {
    "block": "109",
@@ -36857,7 +37562,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1167
-   }
+   },
+   "postal": "510109"
   },
   {
    "block": "527A",
@@ -36899,7 +37605,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 612
-   }
+   },
+   "postal": "511527"
   },
   {
    "block": "525A",
@@ -36935,7 +37642,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 615
-   }
+   },
+   "postal": "511525"
   },
   {
    "block": "526B",
@@ -36983,7 +37691,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 717
-   }
+   },
+   "postal": "512526"
   },
   {
    "block": "559",
@@ -37019,7 +37728,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1057
-   }
+   },
+   "postal": "510559"
   },
   {
    "block": "524B",
@@ -37055,7 +37765,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 484
-   }
+   },
+   "postal": "512524"
   },
   {
    "block": "718",
@@ -37097,7 +37808,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 2114
-   }
+   },
+   "postal": "510718"
   },
   {
    "block": "234",
@@ -37139,7 +37851,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1813
-   }
+   },
+   "postal": "510234"
   },
   {
    "block": "749",
@@ -37175,7 +37888,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 2174
-   }
+   },
+   "postal": "510749"
   },
   {
    "block": "603",
@@ -37223,7 +37937,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1093
-   }
+   },
+   "postal": "510603"
   },
   {
    "block": "101",
@@ -37295,7 +38010,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1523
-   }
+   },
+   "postal": "510101"
   },
   {
    "block": "537",
@@ -37337,7 +38053,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 462
-   }
+   },
+   "postal": "510537"
   },
   {
    "block": "544",
@@ -37379,7 +38096,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 693
-   }
+   },
+   "postal": "510544"
   },
   {
    "block": "530A",
@@ -37433,7 +38151,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 461
-   }
+   },
+   "postal": "511530"
   },
   {
    "block": "631",
@@ -37481,7 +38200,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1580
-   }
+   },
+   "postal": "510631"
   },
   {
    "block": "429",
@@ -37523,7 +38243,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1250
-   }
+   },
+   "postal": "510429"
   },
   {
    "block": "525C",
@@ -37571,7 +38292,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 558
-   }
+   },
+   "postal": "513525"
   },
   {
    "block": "526D",
@@ -37619,7 +38341,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 636
-   }
+   },
+   "postal": "514526"
   },
   {
    "block": "749",
@@ -37655,7 +38378,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 2174
-   }
+   },
+   "postal": "510749"
   },
   {
    "block": "776",
@@ -37697,7 +38421,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1835
-   }
+   },
+   "postal": "510776"
   },
   {
    "block": "762",
@@ -37739,7 +38464,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 2304
-   }
+   },
+   "postal": "510762"
   },
   {
    "block": "721",
@@ -37781,7 +38507,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 2166
-   }
+   },
+   "postal": "510721"
   },
   {
    "block": "607",
@@ -37823,7 +38550,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1116
-   }
+   },
+   "postal": "510607"
   },
   {
    "block": "531",
@@ -37865,7 +38593,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 498
-   }
+   },
+   "postal": "510531"
   },
   {
    "block": "422",
@@ -37907,7 +38636,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1024
-   }
+   },
+   "postal": "510422"
   },
   {
    "block": "466",
@@ -37949,7 +38679,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 1450
-   }
+   },
+   "postal": "510466"
   },
   {
    "block": "505",
@@ -37991,7 +38722,8 @@
    "walk": {
     "station": "Pasir Ris MRT",
     "metres": 844
-   }
+   },
+   "postal": "510505"
   },
   {
    "block": "408A",
@@ -38051,7 +38783,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 211
-   }
+   },
+   "postal": "821408"
   },
   {
    "block": "405B",
@@ -38111,7 +38844,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 61
-   }
+   },
+   "postal": "822405"
   },
   {
    "block": "408C",
@@ -38171,7 +38905,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 326
-   }
+   },
+   "postal": "823408"
   },
   {
    "block": "232C",
@@ -38249,7 +38984,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 1572
-   }
+   },
+   "postal": "823232"
   },
   {
    "block": "670A",
@@ -38315,7 +39051,8 @@
    "walk": {
     "station": "Oasis LRT",
     "metres": 507
-   }
+   },
+   "postal": "821670"
   },
   {
    "block": "221A",
@@ -38363,7 +39100,8 @@
    "walk": {
     "station": "Soo Teck LRT",
     "metres": 605
-   }
+   },
+   "postal": "821221"
   },
   {
    "block": "684A",
@@ -38411,7 +39149,8 @@
    "walk": {
     "station": "Oasis LRT",
     "metres": 557
-   }
+   },
+   "postal": "821684"
   },
   {
    "block": "408B",
@@ -38459,7 +39198,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 264
-   }
+   },
+   "postal": "822408"
   },
   {
    "block": "406C",
@@ -38525,7 +39265,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 253
-   }
+   },
+   "postal": "823406"
   },
   {
    "block": "408A",
@@ -38585,7 +39326,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 211
-   }
+   },
+   "postal": "821408"
   },
   {
    "block": "405B",
@@ -38621,7 +39363,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 61
-   }
+   },
+   "postal": "822405"
   },
   {
    "block": "409A",
@@ -38675,7 +39418,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 194
-   }
+   },
+   "postal": "821409"
   },
   {
    "block": "617D",
@@ -38735,7 +39479,8 @@
    "walk": {
     "station": "Oasis LRT",
     "metres": 119
-   }
+   },
+   "postal": "824617"
   },
   {
    "block": "271D",
@@ -38795,7 +39540,8 @@
    "walk": {
     "station": "Punggol MRT",
     "metres": 336
-   }
+   },
+   "postal": "824271"
   },
   {
    "block": "310A",
@@ -38849,7 +39595,8 @@
    "walk": {
     "station": "Sumang LRT",
     "metres": 453
-   }
+   },
+   "postal": "821310"
   },
   {
    "block": "308C",
@@ -38897,7 +39644,8 @@
    "walk": {
     "station": "Sumang LRT",
     "metres": 112
-   }
+   },
+   "postal": "823308"
   },
   {
    "block": "308A",
@@ -39095,7 +39843,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 422
-   }
+   },
+   "postal": "822310"
   },
   {
    "block": "313C",
@@ -39155,7 +39904,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 231
-   }
+   },
+   "postal": "823313"
   },
   {
    "block": "134",
@@ -39221,7 +39971,8 @@
    "walk": {
     "station": "Rumbia LRT",
     "metres": 625
-   }
+   },
+   "postal": "820134"
   },
   {
    "block": "132",
@@ -39281,7 +40032,8 @@
    "walk": {
     "station": "Coral Edge LRT",
     "metres": 275
-   }
+   },
+   "postal": "820132"
   },
   {
    "block": "684A",
@@ -39335,7 +40087,8 @@
    "walk": {
     "station": "Oasis LRT",
     "metres": 557
-   }
+   },
+   "postal": "821684"
   },
   {
    "block": "406A",
@@ -39383,7 +40136,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 196
-   }
+   },
+   "postal": "821406"
   },
   {
    "block": "406C",
@@ -39419,7 +40173,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 253
-   }
+   },
+   "postal": "823406"
   },
   {
    "block": "409C",
@@ -39461,7 +40216,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 324
-   }
+   },
+   "postal": "823409"
   },
   {
    "block": "409A",
@@ -39527,7 +40283,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 194
-   }
+   },
+   "postal": "821409"
   },
   {
    "block": "664A",
@@ -39563,7 +40320,8 @@
    "walk": {
     "station": "Kadaloor LRT",
     "metres": 178
-   }
+   },
+   "postal": "821664"
   },
   {
    "block": "310B",
@@ -39599,7 +40357,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 422
-   }
+   },
+   "postal": "822310"
   },
   {
    "block": "310A",
@@ -39641,7 +40400,8 @@
    "walk": {
     "station": "Sumang LRT",
     "metres": 453
-   }
+   },
+   "postal": "821310"
   },
   {
    "block": "233C",
@@ -39683,7 +40443,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 1523
-   }
+   },
+   "postal": "823233"
   },
   {
    "block": "323A",
@@ -39725,7 +40486,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 425
-   }
+   },
+   "postal": "821323"
   },
   {
    "block": "408B",
@@ -39785,7 +40547,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 264
-   }
+   },
+   "postal": "822408"
   },
   {
    "block": "421A",
@@ -39863,7 +40626,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 545
-   }
+   },
+   "postal": "821421"
   },
   {
    "block": "421B",
@@ -39905,7 +40669,8 @@
    "walk": {
     "station": "Punggol Point LRT",
     "metres": 574
-   }
+   },
+   "postal": "822421"
   },
   {
    "block": "421C",
@@ -39947,7 +40712,8 @@
    "walk": {
     "station": "Punggol Point LRT",
     "metres": 495
-   }
+   },
+   "postal": "823421"
   },
   {
    "block": "222A",
@@ -39995,7 +40761,8 @@
    "walk": {
     "station": "Soo Teck LRT",
     "metres": 825
-   }
+   },
+   "postal": "821222"
   },
   {
    "block": "327A",
@@ -40037,7 +40804,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 420
-   }
+   },
+   "postal": "821327"
   },
   {
    "block": "413C",
@@ -40073,7 +40841,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 296
-   }
+   },
+   "postal": "823413"
   },
   {
    "block": "421C",
@@ -40133,7 +40902,8 @@
    "walk": {
     "station": "Punggol Point LRT",
     "metres": 495
-   }
+   },
+   "postal": "823421"
   },
   {
    "block": "613C",
@@ -40169,7 +40939,8 @@
    "walk": {
     "station": "Damai LRT",
     "metres": 218
-   }
+   },
+   "postal": "823613"
   },
   {
    "block": "663A",
@@ -40271,7 +41042,8 @@
    "walk": {
     "station": "Kadaloor LRT",
     "metres": 178
-   }
+   },
+   "postal": "821664"
   },
   {
    "block": "212A",
@@ -40313,7 +41085,8 @@
    "walk": {
     "station": "Punggol MRT",
     "metres": 793
-   }
+   },
+   "postal": "821212"
   },
   {
    "block": "310B",
@@ -40355,7 +41128,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 422
-   }
+   },
+   "postal": "822310"
   },
   {
    "block": "327A",
@@ -40397,7 +41171,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 420
-   }
+   },
+   "postal": "821327"
   },
   {
    "block": "408C",
@@ -40445,7 +41220,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 326
-   }
+   },
+   "postal": "823408"
   },
   {
    "block": "409B",
@@ -40529,7 +41305,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 286
-   }
+   },
+   "postal": "822409"
   },
   {
    "block": "409C",
@@ -40589,7 +41366,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 324
-   }
+   },
+   "postal": "823409"
   },
   {
    "block": "422A",
@@ -40649,7 +41427,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 618
-   }
+   },
+   "postal": "821422"
   },
   {
    "block": "406A",
@@ -40691,7 +41470,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 196
-   }
+   },
+   "postal": "821406"
   },
   {
    "block": "415B",
@@ -40739,7 +41519,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 462
-   }
+   },
+   "postal": "822415"
   },
   {
    "block": "421B",
@@ -40793,7 +41574,8 @@
    "walk": {
     "station": "Punggol Point LRT",
     "metres": 574
-   }
+   },
+   "postal": "822421"
   },
   {
    "block": "422B",
@@ -40847,7 +41629,8 @@
    "walk": {
     "station": "Punggol Point LRT",
     "metres": 571
-   }
+   },
+   "postal": "822422"
   },
   {
    "block": "413C",
@@ -40901,7 +41684,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 296
-   }
+   },
+   "postal": "823413"
   },
   {
    "block": "420C",
@@ -40943,7 +41727,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 509
-   }
+   },
+   "postal": "823420"
   },
   {
    "block": "664A",
@@ -40979,7 +41764,8 @@
    "walk": {
     "station": "Kadaloor LRT",
     "metres": 178
-   }
+   },
+   "postal": "821664"
   },
   {
    "block": "613C",
@@ -41021,7 +41807,8 @@
    "walk": {
     "station": "Damai LRT",
     "metres": 218
-   }
+   },
+   "postal": "823613"
   },
   {
    "block": "212A",
@@ -41057,7 +41844,8 @@
    "walk": {
     "station": "Punggol MRT",
     "metres": 793
-   }
+   },
+   "postal": "821212"
   },
   {
    "block": "221A",
@@ -41093,7 +41881,8 @@
    "walk": {
     "station": "Soo Teck LRT",
     "metres": 605
-   }
+   },
+   "postal": "821221"
   },
   {
    "block": "222A",
@@ -41129,7 +41918,8 @@
    "walk": {
     "station": "Soo Teck LRT",
     "metres": 825
-   }
+   },
+   "postal": "821222"
   },
   {
    "block": "233C",
@@ -41165,7 +41955,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 1523
-   }
+   },
+   "postal": "823233"
   },
   {
    "block": "323A",
@@ -41207,7 +41998,8 @@
    "walk": {
     "station": "Nibong LRT",
     "metres": 425
-   }
+   },
+   "postal": "821323"
   },
   {
    "block": "409D",
@@ -41273,7 +42065,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 375
-   }
+   },
+   "postal": "824409"
   },
   {
    "block": "422A",
@@ -41381,7 +42174,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 618
-   }
+   },
+   "postal": "821422"
   },
   {
    "block": "409B",
@@ -41417,7 +42211,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 286
-   }
+   },
+   "postal": "822409"
   },
   {
    "block": "422B",
@@ -41477,7 +42272,8 @@
    "walk": {
     "station": "Punggol Point LRT",
     "metres": 571
-   }
+   },
+   "postal": "822422"
   },
   {
    "block": "415B",
@@ -41525,7 +42321,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 462
-   }
+   },
+   "postal": "822415"
   },
   {
    "block": "420C",
@@ -41567,7 +42364,8 @@
    "walk": {
     "station": "Samudera LRT",
     "metres": 509
-   }
+   },
+   "postal": "823420"
   },
   {
    "block": "308A",
@@ -41717,7 +42515,8 @@
    "walk": {
     "station": "Sumang LRT",
     "metres": 112
-   }
+   },
+   "postal": "823308"
   },
   {
    "block": "83",
@@ -41753,7 +42552,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 615
-   }
+   },
+   "postal": "140083"
   },
   {
    "block": "95",
@@ -41801,7 +42601,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 974
-   }
+   },
+   "postal": "141095"
   },
   {
    "block": "85",
@@ -41849,7 +42650,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 586
-   }
+   },
+   "postal": "140085"
   },
   {
    "block": "83",
@@ -41897,7 +42699,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 615
-   }
+   },
+   "postal": "140083"
   },
   {
    "block": "97",
@@ -41957,7 +42760,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 821
-   }
+   },
+   "postal": "140097"
   },
   {
    "block": "50",
@@ -42005,7 +42809,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 351
-   }
+   },
+   "postal": "142050"
   },
   {
    "block": "89",
@@ -42047,7 +42852,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 849
-   }
+   },
+   "postal": "142089"
   },
   {
    "block": "79",
@@ -42095,7 +42901,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 637
-   }
+   },
+   "postal": "141079"
   },
   {
    "block": "87",
@@ -42167,7 +42974,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 634
-   }
+   },
+   "postal": "141087"
   },
   {
    "block": "30",
@@ -42203,7 +43011,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 886
-   }
+   },
+   "postal": "272030"
   },
   {
    "block": "5",
@@ -42251,7 +43060,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 933
-   }
+   },
+   "postal": "270005"
   },
   {
    "block": "6",
@@ -42317,7 +43127,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 878
-   }
+   },
+   "postal": "270006"
   },
   {
    "block": "2",
@@ -42389,7 +43200,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 1066
-   }
+   },
+   "postal": "270002"
   },
   {
    "block": "4",
@@ -42437,7 +43249,8 @@
    "walk": {
     "station": "Holland Village MRT",
     "metres": 526
-   }
+   },
+   "postal": "271004"
   },
   {
    "block": "11",
@@ -42491,7 +43304,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 2420
-   }
+   },
+   "postal": "278859"
   },
   {
    "block": "169",
@@ -42557,7 +43371,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 694
-   }
+   },
+   "postal": "140169"
   },
   {
    "block": "53",
@@ -42617,7 +43432,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 440
-   }
+   },
+   "postal": "140053"
   },
   {
    "block": "50",
@@ -42671,7 +43487,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 351
-   }
+   },
+   "postal": "142050"
   },
   {
    "block": "87",
@@ -42731,7 +43548,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 634
-   }
+   },
+   "postal": "141087"
   },
   {
    "block": "88",
@@ -42869,7 +43687,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 663
-   }
+   },
+   "postal": "142088"
   },
   {
    "block": "86",
@@ -42989,7 +43808,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 678
-   }
+   },
+   "postal": "141086"
   },
   {
    "block": "91",
@@ -43049,7 +43869,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 951
-   }
+   },
+   "postal": "144091"
   },
   {
    "block": "92",
@@ -43109,7 +43930,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 745
-   }
+   },
+   "postal": "141092"
   },
   {
    "block": "90",
@@ -43157,7 +43979,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 901
-   }
+   },
+   "postal": "142090"
   },
   {
    "block": "23",
@@ -43211,7 +44034,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 753
-   }
+   },
+   "postal": "271023"
   },
   {
    "block": "30",
@@ -43253,7 +44077,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 886
-   }
+   },
+   "postal": "272030"
   },
   {
    "block": "33",
@@ -43331,7 +44156,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 1118
-   }
+   },
+   "postal": "270033"
   },
   {
    "block": "28",
@@ -43391,7 +44217,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 929
-   }
+   },
+   "postal": "270028"
   },
   {
    "block": "18D",
@@ -43439,7 +44266,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 668
-   }
+   },
+   "postal": "275018"
   },
   {
    "block": "50",
@@ -43487,7 +44315,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 393
-   }
+   },
+   "postal": "140050"
   },
   {
    "block": "52",
@@ -43541,7 +44370,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 399
-   }
+   },
+   "postal": "141052"
   },
   {
    "block": "90",
@@ -43607,7 +44437,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 296
-   }
+   },
+   "postal": "141090"
   },
   {
    "block": "89",
@@ -43667,7 +44498,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 191
-   }
+   },
+   "postal": "141089"
   },
   {
    "block": "79",
@@ -43709,7 +44541,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 637
-   }
+   },
+   "postal": "141079"
   },
   {
    "block": "96",
@@ -43769,7 +44602,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 1061
-   }
+   },
+   "postal": "141096"
   },
   {
    "block": "23",
@@ -43805,7 +44639,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 753
-   }
+   },
+   "postal": "271023"
   },
   {
    "block": "20",
@@ -43853,7 +44688,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 693
-   }
+   },
+   "postal": "271020"
   },
   {
    "block": "52",
@@ -43889,7 +44725,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 399
-   }
+   },
+   "postal": "141052"
   },
   {
    "block": "96",
@@ -44027,7 +44864,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 1061
-   }
+   },
+   "postal": "141096"
   },
   {
    "block": "95",
@@ -44189,7 +45027,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 974
-   }
+   },
+   "postal": "141095"
   },
   {
    "block": "94",
@@ -44315,7 +45154,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 911
-   }
+   },
+   "postal": "141094"
   },
   {
    "block": "9",
@@ -44405,7 +45245,8 @@
    "walk": {
     "station": "Holland Village MRT",
     "metres": 591
-   }
+   },
+   "postal": "272009"
   },
   {
    "block": "12",
@@ -44471,7 +45312,8 @@
    "walk": {
     "station": "Holland Village MRT",
     "metres": 471
-   }
+   },
+   "postal": "272012"
   },
   {
    "block": "13",
@@ -44531,7 +45373,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 670
-   }
+   },
+   "postal": "271013"
   },
   {
    "block": "90",
@@ -44567,7 +45410,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 296
-   }
+   },
+   "postal": "141090"
   },
   {
    "block": "53",
@@ -44633,7 +45477,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 329
-   }
+   },
+   "postal": "142053"
   },
   {
    "block": "79",
@@ -44687,7 +45532,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 637
-   }
+   },
+   "postal": "141079"
   },
   {
    "block": "89",
@@ -44741,7 +45587,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 849
-   }
+   },
+   "postal": "142089"
   },
   {
    "block": "94",
@@ -44873,7 +45720,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 911
-   }
+   },
+   "postal": "141094"
   },
   {
    "block": "96",
@@ -44945,7 +45793,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 1061
-   }
+   },
+   "postal": "141096"
   },
   {
    "block": "31",
@@ -45035,7 +45884,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 991
-   }
+   },
+   "postal": "271031"
   },
   {
    "block": "22",
@@ -45089,7 +45939,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 890
-   }
+   },
+   "postal": "271022"
   },
   {
    "block": "29",
@@ -45149,7 +46000,8 @@
    "walk": {
     "station": "Dover MRT",
     "metres": 855
-   }
+   },
+   "postal": "270029"
   },
   {
    "block": "53",
@@ -45197,7 +46049,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 440
-   }
+   },
+   "postal": "140053"
   },
   {
    "block": "91",
@@ -45257,7 +46110,8 @@
    "walk": {
     "station": "Commonwealth MRT",
     "metres": 281
-   }
+   },
+   "postal": "142091"
   },
   {
    "block": "92",
@@ -45293,7 +46147,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 745
-   }
+   },
+   "postal": "141092"
   },
   {
    "block": "86",
@@ -45329,7 +46184,8 @@
    "walk": {
     "station": "Queenstown MRT",
     "metres": 678
-   }
+   },
+   "postal": "141086"
   },
   {
    "block": "22",
@@ -45365,7 +46221,8 @@
    "walk": {
     "station": "Buona Vista MRT",
     "metres": 890
-   }
+   },
+   "postal": "271022"
   },
   {
    "block": "130B",
@@ -45413,7 +46270,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 666
-   }
+   },
+   "postal": "752130"
   },
   {
    "block": "101B",
@@ -45449,7 +46307,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1420
-   }
+   },
+   "postal": "752101"
   },
   {
    "block": "103B",
@@ -45491,7 +46350,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1237
-   }
+   },
+   "postal": "752103"
   },
   {
    "block": "102B",
@@ -45551,7 +46411,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1324
-   }
+   },
+   "postal": "752102"
   },
   {
    "block": "132B",
@@ -45593,7 +46454,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 321
-   }
+   },
+   "postal": "752132"
   },
   {
    "block": "590A",
@@ -45629,7 +46491,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 988
-   }
+   },
+   "postal": "751590"
   },
   {
    "block": "593B",
@@ -45677,7 +46540,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1186
-   }
+   },
+   "postal": "752593"
   },
   {
    "block": "363B",
@@ -45737,7 +46601,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1769
-   }
+   },
+   "postal": "752363"
   },
   {
    "block": "366A",
@@ -45785,7 +46650,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1392
-   }
+   },
+   "postal": "751366"
   },
   {
    "block": "363A",
@@ -45827,7 +46693,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1727
-   }
+   },
+   "postal": "751363"
   },
   {
    "block": "463A",
@@ -45875,7 +46742,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1218
-   }
+   },
+   "postal": "751463"
   },
   {
    "block": "104A",
@@ -45929,7 +46797,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1167
-   }
+   },
+   "postal": "751104"
   },
   {
    "block": "128B",
@@ -45977,7 +46846,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 754
-   }
+   },
+   "postal": "752128"
   },
   {
    "block": "365C",
@@ -46013,7 +46883,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1295
-   }
+   },
+   "postal": "753365"
   },
   {
    "block": "403",
@@ -46049,7 +46920,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 915
-   }
+   },
+   "postal": "750403"
   },
   {
    "block": "116A",
@@ -46097,7 +46969,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 407
-   }
+   },
+   "postal": "751116"
   },
   {
    "block": "132A",
@@ -46163,7 +47036,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 234
-   }
+   },
+   "postal": "751132"
   },
   {
    "block": "119A",
@@ -46223,7 +47097,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 685
-   }
+   },
+   "postal": "751119"
   },
   {
    "block": "104A",
@@ -46259,7 +47134,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1167
-   }
+   },
+   "postal": "751104"
   },
   {
    "block": "101B",
@@ -46343,7 +47219,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1420
-   }
+   },
+   "postal": "752101"
   },
   {
    "block": "103A",
@@ -46397,7 +47274,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1332
-   }
+   },
+   "postal": "751103"
   },
   {
    "block": "126D",
@@ -46445,7 +47323,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 780
-   }
+   },
+   "postal": "754126"
   },
   {
    "block": "107C",
@@ -46493,7 +47372,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1026
-   }
+   },
+   "postal": "753107"
   },
   {
    "block": "126B",
@@ -46547,7 +47427,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 882
-   }
+   },
+   "postal": "752126"
   },
   {
    "block": "102A",
@@ -46613,7 +47494,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1281
-   }
+   },
+   "postal": "751102"
   },
   {
    "block": "107B",
@@ -46661,7 +47543,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1053
-   }
+   },
+   "postal": "752107"
   },
   {
    "block": "103B",
@@ -46709,7 +47592,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1237
-   }
+   },
+   "postal": "752103"
   },
   {
    "block": "126A",
@@ -46757,7 +47641,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 828
-   }
+   },
+   "postal": "751126"
   },
   {
    "block": "121D",
@@ -46811,7 +47696,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 759
-   }
+   },
+   "postal": "754121"
   },
   {
    "block": "101A",
@@ -46877,7 +47763,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1337
-   }
+   },
+   "postal": "751101"
   },
   {
    "block": "592C",
@@ -46973,7 +47860,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 931
-   }
+   },
+   "postal": "753590"
   },
   {
    "block": "463C",
@@ -47039,7 +47927,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1220
-   }
+   },
+   "postal": "753463"
   },
   {
    "block": "403",
@@ -47081,7 +47970,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 915
-   }
+   },
+   "postal": "750403"
   },
   {
    "block": "484",
@@ -47135,7 +48025,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1303
-   }
+   },
+   "postal": "750484"
   },
   {
    "block": "120A",
@@ -47177,7 +48068,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 611
-   }
+   },
+   "postal": "751120"
   },
   {
    "block": "126C",
@@ -47255,7 +48147,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 836
-   }
+   },
+   "postal": "753126"
   },
   {
    "block": "102A",
@@ -47303,7 +48196,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1281
-   }
+   },
+   "postal": "751102"
   },
   {
    "block": "108C",
@@ -47339,7 +48233,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 903
-   }
+   },
+   "postal": "753108"
   },
   {
    "block": "335",
@@ -47387,7 +48282,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 789
-   }
+   },
+   "postal": "750335"
   },
   {
    "block": "423",
@@ -47435,7 +48331,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 848
-   }
+   },
+   "postal": "750423"
   },
   {
    "block": "103A",
@@ -47489,7 +48386,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1332
-   }
+   },
+   "postal": "751103"
   },
   {
    "block": "131C",
@@ -47537,7 +48435,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 172
-   }
+   },
+   "postal": "753131"
   },
   {
    "block": "103B",
@@ -47585,7 +48484,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1237
-   }
+   },
+   "postal": "752103"
   },
   {
    "block": "107A",
@@ -47627,7 +48527,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1173
-   }
+   },
+   "postal": "751107"
   },
   {
    "block": "590A",
@@ -47663,7 +48564,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 988
-   }
+   },
+   "postal": "751590"
   },
   {
    "block": "363B",
@@ -47699,7 +48601,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1769
-   }
+   },
+   "postal": "752363"
   },
   {
    "block": "463B",
@@ -47795,7 +48698,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1016
-   }
+   },
+   "postal": "750489"
   },
   {
    "block": "120A",
@@ -47849,7 +48753,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 611
-   }
+   },
+   "postal": "751120"
   },
   {
    "block": "128B",
@@ -47885,7 +48790,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 754
-   }
+   },
+   "postal": "752128"
   },
   {
    "block": "107A",
@@ -47927,7 +48833,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1173
-   }
+   },
+   "postal": "751107"
   },
   {
    "block": "126C",
@@ -47969,7 +48876,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 836
-   }
+   },
+   "postal": "753126"
   },
   {
    "block": "132B",
@@ -48005,7 +48913,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 321
-   }
+   },
+   "postal": "752132"
   },
   {
    "block": "108C",
@@ -48041,7 +48950,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 903
-   }
+   },
+   "postal": "753108"
   },
   {
    "block": "363A",
@@ -48077,7 +48987,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1727
-   }
+   },
+   "postal": "751363"
   },
   {
    "block": "365C",
@@ -48119,7 +49030,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1295
-   }
+   },
+   "postal": "753365"
   },
   {
    "block": "366A",
@@ -48155,7 +49067,8 @@
    "walk": {
     "station": "Sembawang MRT",
     "metres": 1392
-   }
+   },
+   "postal": "751366"
   },
   {
    "block": "126B",
@@ -48197,7 +49110,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 882
-   }
+   },
+   "postal": "752126"
   },
   {
    "block": "101A",
@@ -48233,7 +49147,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1337
-   }
+   },
+   "postal": "751101"
   },
   {
    "block": "418A",
@@ -48275,7 +49190,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 219
-   }
+   },
+   "postal": "791418"
   },
   {
    "block": "457B",
@@ -48329,7 +49245,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 773
-   }
+   },
+   "postal": "792457"
   },
   {
    "block": "456B",
@@ -48389,7 +49306,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 978
-   }
+   },
+   "postal": "792456"
   },
   {
    "block": "355A",
@@ -48437,7 +49355,8 @@
    "walk": {
     "station": "Tongkang LRT",
     "metres": 559
-   }
+   },
+   "postal": "541355"
   },
   {
    "block": "414B",
@@ -48479,7 +49398,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 443
-   }
+   },
+   "postal": "792414"
   },
   {
    "block": "453D",
@@ -48521,7 +49441,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 277
-   }
+   },
+   "postal": "794453"
   },
   {
    "block": "471C",
@@ -48563,7 +49484,8 @@
    "walk": {
     "station": "Kupang LRT",
     "metres": 388
-   }
+   },
+   "postal": "793471"
   },
   {
    "block": "456A",
@@ -48605,7 +49527,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 861
-   }
+   },
+   "postal": "791456"
   },
   {
    "block": "448B",
@@ -48647,7 +49570,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 563
-   }
+   },
+   "postal": "792448"
   },
   {
    "block": "338A",
@@ -48701,7 +49625,8 @@
    "walk": {
     "station": "Farmway LRT",
     "metres": 496
-   }
+   },
+   "postal": "541338"
   },
   {
    "block": "355A",
@@ -48749,7 +49674,8 @@
    "walk": {
     "station": "Tongkang LRT",
     "metres": 559
-   }
+   },
+   "postal": "541355"
   },
   {
    "block": "332C",
@@ -48803,7 +49729,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 679
-   }
+   },
+   "postal": "543332"
   },
   {
    "block": "289A",
@@ -48857,7 +49784,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 641
-   }
+   },
+   "postal": "541289"
   },
   {
    "block": "287A",
@@ -48911,7 +49839,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 554
-   }
+   },
+   "postal": "541287"
   },
   {
    "block": "286C",
@@ -48947,7 +49876,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 517
-   }
+   },
+   "postal": "543286"
   },
   {
    "block": "273D",
@@ -49001,7 +49931,8 @@
    "walk": {
     "station": "Buangkok MRT",
     "metres": 375
-   }
+   },
+   "postal": "544273"
   },
   {
    "block": "275C",
@@ -49055,7 +49986,8 @@
    "walk": {
     "station": "Buangkok MRT",
     "metres": 286
-   }
+   },
+   "postal": "543275"
   },
   {
    "block": "299A",
@@ -49091,7 +50023,8 @@
    "walk": {
     "station": "Compassvale LRT",
     "metres": 400
-   }
+   },
+   "postal": "541299"
   },
   {
    "block": "416B",
@@ -49139,7 +50072,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 560
-   }
+   },
+   "postal": "792416"
   },
   {
    "block": "415B",
@@ -49199,7 +50133,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 581
-   }
+   },
+   "postal": "792415"
   },
   {
    "block": "411B",
@@ -49277,7 +50212,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 439
-   }
+   },
+   "postal": "792411"
   },
   {
    "block": "410A",
@@ -49337,7 +50273,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 319
-   }
+   },
+   "postal": "791410"
   },
   {
    "block": "471A",
@@ -49409,7 +50346,8 @@
    "walk": {
     "station": "Kupang LRT",
     "metres": 370
-   }
+   },
+   "postal": "791471"
   },
   {
    "block": "472C",
@@ -49445,7 +50383,8 @@
    "walk": {
     "station": "Kupang LRT",
     "metres": 286
-   }
+   },
+   "postal": "793472"
   },
   {
    "block": "471B",
@@ -49481,7 +50420,8 @@
    "walk": {
     "station": "Kupang LRT",
     "metres": 334
-   }
+   },
+   "postal": "792471"
   },
   {
    "block": "150",
@@ -49535,7 +50475,8 @@
    "walk": {
     "station": "Rumbia LRT",
     "metres": 165
-   }
+   },
+   "postal": "540150"
   },
   {
    "block": "272B",
@@ -49589,7 +50530,8 @@
    "walk": {
     "station": "Buangkok MRT",
     "metres": 410
-   }
+   },
+   "postal": "542272"
   },
   {
    "block": "281A",
@@ -49625,7 +50567,8 @@
    "walk": {
     "station": "Renjong LRT",
     "metres": 359
-   }
+   },
+   "postal": "541281"
   },
   {
    "block": "338D",
@@ -49679,7 +50622,8 @@
    "walk": {
     "station": "Farmway LRT",
     "metres": 479
-   }
+   },
+   "postal": "544338"
   },
   {
    "block": "356B",
@@ -49751,7 +50695,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 649
-   }
+   },
+   "postal": "542356"
   },
   {
    "block": "204A",
@@ -49787,7 +50732,8 @@
    "walk": {
     "station": "Sengkang MRT",
     "metres": 495
-   }
+   },
+   "postal": "541204"
   },
   {
    "block": "299A",
@@ -49829,7 +50775,8 @@
    "walk": {
     "station": "Compassvale LRT",
     "metres": 400
-   }
+   },
+   "postal": "541299"
   },
   {
    "block": "416A",
@@ -49865,7 +50812,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 560
-   }
+   },
+   "postal": "791416"
   },
   {
    "block": "472C",
@@ -49907,7 +50855,8 @@
    "walk": {
     "station": "Kupang LRT",
     "metres": 286
-   }
+   },
+   "postal": "793472"
   },
   {
    "block": "471B",
@@ -49955,7 +50904,8 @@
    "walk": {
     "station": "Kupang LRT",
     "metres": 334
-   }
+   },
+   "postal": "792471"
   },
   {
    "block": "457A",
@@ -50033,7 +50983,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 1011
-   }
+   },
+   "postal": "791457"
   },
   {
    "block": "452A",
@@ -50069,7 +51020,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 422
-   }
+   },
+   "postal": "791452"
   },
   {
    "block": "418B",
@@ -50105,7 +51057,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 560
-   }
+   },
+   "postal": "792418"
   },
   {
    "block": "180A",
@@ -50141,7 +51094,8 @@
    "walk": {
     "station": "Rumbia LRT",
     "metres": 601
-   }
+   },
+   "postal": "541180"
   },
   {
    "block": "455B",
@@ -50195,7 +51149,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 829
-   }
+   },
+   "postal": "792455"
   },
   {
    "block": "456A",
@@ -50237,7 +51192,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 861
-   }
+   },
+   "postal": "791456"
   },
   {
    "block": "448B",
@@ -50273,7 +51229,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 563
-   }
+   },
+   "postal": "792448"
   },
   {
    "block": "286C",
@@ -50309,7 +51266,8 @@
    "walk": {
     "station": "Cheng Lim LRT",
     "metres": 517
-   }
+   },
+   "postal": "543286"
   },
   {
    "block": "418A",
@@ -50369,7 +51327,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 219
-   }
+   },
+   "postal": "791418"
   },
   {
    "block": "180A",
@@ -50411,7 +51370,8 @@
    "walk": {
     "station": "Rumbia LRT",
     "metres": 601
-   }
+   },
+   "postal": "541180"
   },
   {
    "block": "281A",
@@ -50447,7 +51407,8 @@
    "walk": {
     "station": "Renjong LRT",
     "metres": 359
-   }
+   },
+   "postal": "541281"
   },
   {
    "block": "356B",
@@ -50489,7 +51450,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 649
-   }
+   },
+   "postal": "542356"
   },
   {
    "block": "204A",
@@ -50531,7 +51493,8 @@
    "walk": {
     "station": "Sengkang MRT",
     "metres": 495
-   }
+   },
+   "postal": "541204"
   },
   {
    "block": "418B",
@@ -50585,7 +51548,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 560
-   }
+   },
+   "postal": "792418"
   },
   {
    "block": "414B",
@@ -50621,7 +51585,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 443
-   }
+   },
+   "postal": "792414"
   },
   {
    "block": "416A",
@@ -50663,7 +51628,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 560
-   }
+   },
+   "postal": "791416"
   },
   {
    "block": "453D",
@@ -50705,7 +51671,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 277
-   }
+   },
+   "postal": "794453"
   },
   {
    "block": "471C",
@@ -50741,7 +51708,8 @@
    "walk": {
     "station": "Kupang LRT",
     "metres": 388
-   }
+   },
+   "postal": "793471"
   },
   {
    "block": "180C",
@@ -50807,7 +51775,8 @@
    "walk": {
     "station": "Rumbia LRT",
     "metres": 608
-   }
+   },
+   "postal": "543180"
   },
   {
    "block": "271B",
@@ -50873,7 +51842,8 @@
    "walk": {
     "station": "Buangkok MRT",
     "metres": 489
-   }
+   },
+   "postal": "542271"
   },
   {
    "block": "456A",
@@ -50909,7 +51879,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 861
-   }
+   },
+   "postal": "791456"
   },
   {
    "block": "452A",
@@ -50951,7 +51922,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 422
-   }
+   },
+   "postal": "791452"
   },
   {
    "block": "338A",
@@ -50987,7 +51959,8 @@
    "walk": {
     "station": "Farmway LRT",
     "metres": 496
-   }
+   },
+   "postal": "541338"
   },
   {
    "block": "216D",
@@ -51047,7 +52020,8 @@
    "walk": {
     "station": "Sengkang MRT",
     "metres": 410
-   }
+   },
+   "postal": "544216"
   },
   {
    "block": "416B",
@@ -51089,7 +52063,8 @@
    "walk": {
     "station": "Layar LRT",
     "metres": 560
-   }
+   },
+   "postal": "792416"
   },
   {
    "block": "458B",
@@ -51149,7 +52124,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 1067
-   }
+   },
+   "postal": "792458"
   },
   {
    "block": "1",
@@ -51191,7 +52167,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 653
-   }
+   },
+   "postal": "531001"
   },
   {
    "block": "2",
@@ -51269,7 +52246,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 708
-   }
+   },
+   "postal": "531002"
   },
   {
    "block": "5",
@@ -51305,7 +52283,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 854
-   }
+   },
+   "postal": "530005"
   },
   {
    "block": "4",
@@ -51359,7 +52338,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 832
-   }
+   },
+   "postal": "531004"
   },
   {
    "block": "302",
@@ -51395,7 +52375,8 @@
    "walk": {
     "station": "Lorong Chuan MRT",
     "metres": 376
-   }
+   },
+   "postal": "550302"
   },
   {
    "block": "303",
@@ -51431,7 +52412,8 @@
    "walk": {
     "station": "Lorong Chuan MRT",
     "metres": 408
-   }
+   },
+   "postal": "550303"
   },
   {
    "block": "306",
@@ -51467,7 +52449,8 @@
    "walk": {
     "station": "Lorong Chuan MRT",
     "metres": 482
-   }
+   },
+   "postal": "550306"
   },
   {
    "block": "215",
@@ -51503,7 +52486,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 1037
-   }
+   },
+   "postal": "550215"
   },
   {
    "block": "105",
@@ -51551,7 +52535,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2585
-   }
+   },
+   "postal": "550105"
   },
   {
    "block": "236",
@@ -51587,7 +52572,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 517
-   }
+   },
+   "postal": "550236"
   },
   {
    "block": "328",
@@ -51623,7 +52609,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 440
-   }
+   },
+   "postal": "550328"
   },
   {
    "block": "234",
@@ -51671,7 +52658,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 605
-   }
+   },
+   "postal": "550234"
   },
   {
    "block": "235",
@@ -51707,7 +52695,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 579
-   }
+   },
+   "postal": "550235"
   },
   {
    "block": "211",
@@ -51749,7 +52738,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 815
-   }
+   },
+   "postal": "550211"
   },
   {
    "block": "226",
@@ -51785,7 +52775,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 876
-   }
+   },
+   "postal": "550226"
   },
   {
    "block": "419",
@@ -51821,7 +52812,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 697
-   }
+   },
+   "postal": "550419"
   },
   {
    "block": "101",
@@ -51863,7 +52855,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2689
-   }
+   },
+   "postal": "550101"
   },
   {
    "block": "532",
@@ -51911,7 +52904,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 2539
-   }
+   },
+   "postal": "550532"
   },
   {
    "block": "529",
@@ -51947,7 +52941,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2713
-   }
+   },
+   "postal": "550529"
   },
   {
    "block": "509",
@@ -51983,7 +52978,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2221
-   }
+   },
+   "postal": "550509"
   },
   {
    "block": "234A",
@@ -52025,7 +53021,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 551
-   }
+   },
+   "postal": "551234"
   },
   {
    "block": "321",
@@ -52067,7 +53064,8 @@
    "walk": {
     "station": "Lorong Chuan MRT",
     "metres": 469
-   }
+   },
+   "postal": "550321"
   },
   {
    "block": "424",
@@ -52109,7 +53107,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 758
-   }
+   },
+   "postal": "550424"
   },
   {
    "block": "539",
@@ -52145,7 +53144,8 @@
    "walk": {
     "station": "Fernvale LRT",
     "metres": 2760
-   }
+   },
+   "postal": "550539"
   },
   {
    "block": "520",
@@ -52181,7 +53181,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2490
-   }
+   },
+   "postal": "550520"
   },
   {
    "block": "223",
@@ -52229,7 +53230,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 969
-   }
+   },
+   "postal": "550223"
   },
   {
    "block": "230",
@@ -52265,7 +53267,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 698
-   }
+   },
+   "postal": "550230"
   },
   {
    "block": "206",
@@ -52301,7 +53304,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 546
-   }
+   },
+   "postal": "550206"
   },
   {
    "block": "210",
@@ -52337,7 +53341,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 692
-   }
+   },
+   "postal": "550210"
   },
   {
    "block": "204",
@@ -52373,7 +53378,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 548
-   }
+   },
+   "postal": "550204"
   },
   {
    "block": "108",
@@ -52415,7 +53421,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2548
-   }
+   },
+   "postal": "550108"
   },
   {
    "block": "152",
@@ -52451,7 +53458,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2421
-   }
+   },
+   "postal": "550152"
   },
   {
    "block": "401",
@@ -52499,7 +53507,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 695
-   }
+   },
+   "postal": "550401"
   },
   {
    "block": "240",
@@ -52535,7 +53544,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 417
-   }
+   },
+   "postal": "550240"
   },
   {
    "block": "307",
@@ -52589,7 +53599,8 @@
    "walk": {
     "station": "Lorong Chuan MRT",
     "metres": 555
-   }
+   },
+   "postal": "550307"
   },
   {
    "block": "242",
@@ -52625,7 +53636,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 316
-   }
+   },
+   "postal": "550242"
   },
   {
    "block": "333",
@@ -52661,7 +53673,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 194
-   }
+   },
+   "postal": "550333"
   },
   {
    "block": "215",
@@ -52697,7 +53710,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 1037
-   }
+   },
+   "postal": "550215"
   },
   {
    "block": "228",
@@ -52733,7 +53747,8 @@
    "walk": {
     "station": "Serangoon MRT",
     "metres": 769
-   }
+   },
+   "postal": "550228"
   },
   {
    "block": "519",
@@ -52775,7 +53790,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2397
-   }
+   },
+   "postal": "550519"
   },
   {
    "block": "542",
@@ -52823,7 +53839,8 @@
    "walk": {
     "station": "Kovan MRT",
     "metres": 2873
-   }
+   },
+   "postal": "550542"
   },
   {
    "block": "613A",
@@ -52883,7 +53900,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1939
-   }
+   },
+   "postal": "521613"
   },
   {
    "block": "221",
@@ -52919,7 +53937,8 @@
    "walk": {
     "station": "Tampines East MRT",
     "metres": 521
-   }
+   },
+   "postal": "521221"
   },
   {
    "block": "876A",
@@ -52997,7 +54016,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1476
-   }
+   },
+   "postal": "521876"
   },
   {
    "block": "604B",
@@ -53045,7 +54065,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1511
-   }
+   },
+   "postal": "522604"
   },
   {
    "block": "604A",
@@ -53081,7 +54102,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1561
-   }
+   },
+   "postal": "521604"
   },
   {
    "block": "519C",
@@ -53135,7 +54157,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 679
-   }
+   },
+   "postal": "523519"
   },
   {
    "block": "613A",
@@ -53207,7 +54230,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1939
-   }
+   },
+   "postal": "521613"
   },
   {
    "block": "608A",
@@ -53255,7 +54279,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1735
-   }
+   },
+   "postal": "521608"
   },
   {
    "block": "608C",
@@ -53291,7 +54316,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1562
-   }
+   },
+   "postal": "523608"
   },
   {
    "block": "612A",
@@ -53339,7 +54365,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1903
-   }
+   },
+   "postal": "521612"
   },
   {
    "block": "610C",
@@ -53411,7 +54438,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1784
-   }
+   },
+   "postal": "523610"
   },
   {
    "block": "250",
@@ -53447,7 +54475,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 864
-   }
+   },
+   "postal": "520250"
   },
   {
    "block": "418",
@@ -53507,7 +54536,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 824
-   }
+   },
+   "postal": "520418"
   },
   {
    "block": "720",
@@ -53543,7 +54573,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1359
-   }
+   },
+   "postal": "520720"
   },
   {
    "block": "864",
@@ -53591,7 +54622,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1196
-   }
+   },
+   "postal": "520864"
   },
   {
    "block": "870A",
@@ -53639,7 +54671,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1636
-   }
+   },
+   "postal": "521870"
   },
   {
    "block": "921",
@@ -53699,7 +54732,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 587
-   }
+   },
+   "postal": "520921"
   },
   {
    "block": "165",
@@ -53741,7 +54775,8 @@
    "walk": {
     "station": "Upper Changi MRT",
     "metres": 777
-   }
+   },
+   "postal": "520165"
   },
   {
    "block": "876A",
@@ -53795,7 +54830,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1476
-   }
+   },
+   "postal": "521876"
   },
   {
    "block": "522B",
@@ -53861,7 +54897,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 797
-   }
+   },
+   "postal": "522522"
   },
   {
    "block": "614B",
@@ -53903,7 +54940,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1813
-   }
+   },
+   "postal": "522614"
   },
   {
    "block": "608C",
@@ -53957,7 +54995,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1562
-   }
+   },
+   "postal": "523608"
   },
   {
    "block": "612A",
@@ -53993,7 +55032,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1903
-   }
+   },
+   "postal": "521612"
   },
   {
    "block": "608A",
@@ -54041,7 +55081,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1735
-   }
+   },
+   "postal": "521608"
   },
   {
    "block": "612B",
@@ -54107,7 +55148,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1872
-   }
+   },
+   "postal": "522612"
   },
   {
    "block": "606B",
@@ -54149,7 +55191,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1367
-   }
+   },
+   "postal": "522606"
   },
   {
    "block": "875B",
@@ -54221,7 +55264,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1568
-   }
+   },
+   "postal": "522875"
   },
   {
    "block": "151",
@@ -54287,7 +55331,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 610
-   }
+   },
+   "postal": "521151"
   },
   {
    "block": "604A",
@@ -54341,7 +55386,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1561
-   }
+   },
+   "postal": "521604"
   },
   {
    "block": "519C",
@@ -54383,7 +55429,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 679
-   }
+   },
+   "postal": "523519"
   },
   {
    "block": "261",
@@ -54431,7 +55478,8 @@
    "walk": {
     "station": "Tampines East MRT",
     "metres": 751
-   }
+   },
+   "postal": "520261"
   },
   {
    "block": "250",
@@ -54473,7 +55521,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 864
-   }
+   },
+   "postal": "520250"
   },
   {
    "block": "621A",
@@ -54533,7 +55582,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1184
-   }
+   },
+   "postal": "521621"
   },
   {
    "block": "165",
@@ -54569,7 +55619,8 @@
    "walk": {
     "station": "Upper Changi MRT",
     "metres": 777
-   }
+   },
+   "postal": "520165"
   },
   {
    "block": "890A",
@@ -54689,7 +55740,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1160
-   }
+   },
+   "postal": "521622"
   },
   {
    "block": "876C",
@@ -54767,7 +55819,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1593
-   }
+   },
+   "postal": "523876"
   },
   {
    "block": "524A",
@@ -54851,7 +55904,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 639
-   }
+   },
+   "postal": "522519"
   },
   {
    "block": "614A",
@@ -54917,7 +55971,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1731
-   }
+   },
+   "postal": "521614"
   },
   {
    "block": "614B",
@@ -54965,7 +56020,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1813
-   }
+   },
+   "postal": "522614"
   },
   {
    "block": "261",
@@ -55007,7 +56063,8 @@
    "walk": {
     "station": "Tampines East MRT",
     "metres": 751
-   }
+   },
+   "postal": "520261"
   },
   {
    "block": "221",
@@ -55049,7 +56106,8 @@
    "walk": {
     "station": "Tampines East MRT",
     "metres": 521
-   }
+   },
+   "postal": "521221"
   },
   {
    "block": "619B",
@@ -55121,7 +56179,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1333
-   }
+   },
+   "postal": "522619"
   },
   {
    "block": "618B",
@@ -55229,7 +56288,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1387
-   }
+   },
+   "postal": "522618"
   },
   {
    "block": "619A",
@@ -55331,7 +56391,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1295
-   }
+   },
+   "postal": "521619"
   },
   {
    "block": "620A",
@@ -55439,7 +56500,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1251
-   }
+   },
+   "postal": "521620"
   },
   {
    "block": "618A",
@@ -55517,7 +56579,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1393
-   }
+   },
+   "postal": "521618"
   },
   {
    "block": "606B",
@@ -55553,7 +56616,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1367
-   }
+   },
+   "postal": "522606"
   },
   {
    "block": "621A",
@@ -55643,7 +56707,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1184
-   }
+   },
+   "postal": "521621"
   },
   {
    "block": "627B",
@@ -55685,7 +56750,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1488
-   }
+   },
+   "postal": "522627"
   },
   {
    "block": "874B",
@@ -55775,7 +56841,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1704
-   }
+   },
+   "postal": "522874"
   },
   {
    "block": "874C",
@@ -55841,7 +56908,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1583
-   }
+   },
+   "postal": "523874"
   },
   {
    "block": "874D",
@@ -55925,7 +56993,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1677
-   }
+   },
+   "postal": "524874"
   },
   {
    "block": "875B",
@@ -56003,7 +57072,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1568
-   }
+   },
+   "postal": "522875"
   },
   {
    "block": "622A",
@@ -56057,7 +57127,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1160
-   }
+   },
+   "postal": "521622"
   },
   {
    "block": "876C",
@@ -56171,7 +57242,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1593
-   }
+   },
+   "postal": "523876"
   },
   {
    "block": "604B",
@@ -56213,7 +57285,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1511
-   }
+   },
+   "postal": "522604"
   },
   {
    "block": "524A",
@@ -56297,7 +57370,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 639
-   }
+   },
+   "postal": "522519"
   },
   {
    "block": "610C",
@@ -56339,7 +57413,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1784
-   }
+   },
+   "postal": "523610"
   },
   {
    "block": "619A",
@@ -56423,7 +57498,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1295
-   }
+   },
+   "postal": "521619"
   },
   {
    "block": "618B",
@@ -56477,7 +57553,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1387
-   }
+   },
+   "postal": "522618"
   },
   {
    "block": "620A",
@@ -56537,7 +57614,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1251
-   }
+   },
+   "postal": "521620"
   },
   {
    "block": "618A",
@@ -56591,7 +57669,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1393
-   }
+   },
+   "postal": "521618"
   },
   {
    "block": "627B",
@@ -56639,7 +57718,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1488
-   }
+   },
+   "postal": "522627"
   },
   {
    "block": "720",
@@ -56687,7 +57767,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1359
-   }
+   },
+   "postal": "520720"
   },
   {
    "block": "864",
@@ -56729,7 +57810,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1196
-   }
+   },
+   "postal": "520864"
   },
   {
    "block": "874B",
@@ -56801,7 +57883,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1704
-   }
+   },
+   "postal": "522874"
   },
   {
    "block": "874C",
@@ -56867,7 +57950,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1583
-   }
+   },
+   "postal": "523874"
   },
   {
    "block": "874D",
@@ -56903,7 +57987,8 @@
    "walk": {
     "station": "Tampines West MRT",
     "metres": 1677
-   }
+   },
+   "postal": "524874"
   },
   {
    "block": "870A",
@@ -56939,7 +58024,8 @@
    "walk": {
     "station": "Tampines MRT",
     "metres": 1636
-   }
+   },
+   "postal": "521870"
   },
   {
    "block": "115A",
@@ -56981,7 +58067,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 611
-   }
+   },
+   "postal": "341115"
   },
   {
    "block": "118A",
@@ -57065,7 +58152,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 765
-   }
+   },
+   "postal": "341118"
   },
   {
    "block": "101A",
@@ -57173,7 +58261,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 925
-   }
+   },
+   "postal": "341101"
   },
   {
    "block": "195",
@@ -57335,7 +58424,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 889
-   }
+   },
+   "postal": "310173"
   },
   {
    "block": "116",
@@ -57395,7 +58485,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 151
-   }
+   },
+   "postal": "310116"
   },
   {
    "block": "38",
@@ -57449,7 +58540,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1139
-   }
+   },
+   "postal": "310038"
   },
   {
    "block": "51",
@@ -57491,7 +58583,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 912
-   }
+   },
+   "postal": "310051"
   },
   {
    "block": "13",
@@ -57575,7 +58668,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1693
-   }
+   },
+   "postal": "310013"
   },
   {
    "block": "17",
@@ -57629,7 +58723,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 1379
-   }
+   },
+   "postal": "310017"
   },
   {
    "block": "235",
@@ -57683,7 +58778,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 1361
-   }
+   },
+   "postal": "310235"
   },
   {
    "block": "119",
@@ -57719,7 +58815,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 1164
-   }
+   },
+   "postal": "350119"
   },
   {
    "block": "26",
@@ -57785,7 +58882,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1314
-   }
+   },
+   "postal": "310026"
   },
   {
    "block": "7",
@@ -57827,7 +58925,8 @@
    "walk": {
     "station": "Mattar MRT",
     "metres": 1304
-   }
+   },
+   "postal": "360007"
   },
   {
    "block": "118A",
@@ -57959,7 +59058,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 765
-   }
+   },
+   "postal": "341118"
   },
   {
    "block": "115C",
@@ -58013,7 +59113,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 494
-   }
+   },
+   "postal": "343115"
   },
   {
    "block": "101A",
@@ -58163,7 +59264,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 925
-   }
+   },
+   "postal": "341101"
   },
   {
    "block": "102A",
@@ -58229,7 +59331,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 347
-   }
+   },
+   "postal": "341102"
   },
   {
    "block": "102B",
@@ -58355,7 +59458,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 612
-   }
+   },
+   "postal": "342102"
   },
   {
    "block": "130B",
@@ -58457,7 +59561,8 @@
    "walk": {
     "station": "Caldecott MRT",
     "metres": 622
-   }
+   },
+   "postal": "312130"
   },
   {
    "block": "130A",
@@ -58505,7 +59610,8 @@
    "walk": {
     "station": "Caldecott MRT",
     "metres": 642
-   }
+   },
+   "postal": "311130"
   },
   {
    "block": "139A",
@@ -58541,7 +59647,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 649
-   }
+   },
+   "postal": "311139"
   },
   {
    "block": "152",
@@ -58613,7 +59720,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 319
-   }
+   },
+   "postal": "310152"
   },
   {
    "block": "119",
@@ -58649,7 +59757,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 1164
-   }
+   },
+   "postal": "350119"
   },
   {
    "block": "79A",
@@ -58733,7 +59842,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 339
-   }
+   },
+   "postal": "311079"
   },
   {
    "block": "79E",
@@ -58793,7 +59903,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 543
-   }
+   },
+   "postal": "315079"
   },
   {
    "block": "261",
@@ -58865,7 +59976,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1126
-   }
+   },
+   "postal": "310261"
   },
   {
    "block": "263",
@@ -58907,7 +60019,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1194
-   }
+   },
+   "postal": "310263"
   },
   {
    "block": "7",
@@ -58943,7 +60056,8 @@
    "walk": {
     "station": "Mattar MRT",
     "metres": 1304
-   }
+   },
+   "postal": "360007"
   },
   {
    "block": "105B",
@@ -58985,7 +60099,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 292
-   }
+   },
+   "postal": "342105"
   },
   {
    "block": "139A",
@@ -59039,7 +60154,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 649
-   }
+   },
+   "postal": "311139"
   },
   {
    "block": "139B",
@@ -59087,7 +60203,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 630
-   }
+   },
+   "postal": "312139"
   },
   {
    "block": "120",
@@ -59153,7 +60270,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 225
-   }
+   },
+   "postal": "310120"
   },
   {
    "block": "51",
@@ -59189,7 +60307,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 912
-   }
+   },
+   "postal": "310051"
   },
   {
    "block": "115C",
@@ -59231,7 +60350,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 494
-   }
+   },
+   "postal": "343115"
   },
   {
    "block": "114A",
@@ -59291,7 +60411,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 671
-   }
+   },
+   "postal": "341114"
   },
   {
    "block": "114B",
@@ -59339,7 +60460,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 686
-   }
+   },
+   "postal": "342114"
   },
   {
    "block": "103B",
@@ -59381,7 +60503,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 558
-   }
+   },
+   "postal": "342103"
   },
   {
    "block": "103A",
@@ -59441,7 +60564,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 634
-   }
+   },
+   "postal": "341103"
   },
   {
    "block": "104A",
@@ -59501,7 +60625,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 717
-   }
+   },
+   "postal": "341104"
   },
   {
    "block": "130A",
@@ -59543,7 +60668,8 @@
    "walk": {
     "station": "Caldecott MRT",
     "metres": 642
-   }
+   },
+   "postal": "311130"
   },
   {
    "block": "91",
@@ -59603,7 +60729,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 401
-   }
+   },
+   "postal": "310091"
   },
   {
    "block": "263",
@@ -59651,7 +60778,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1194
-   }
+   },
+   "postal": "310263"
   },
   {
    "block": "27",
@@ -59711,7 +60839,8 @@
    "walk": {
     "station": "Toa Payoh MRT",
     "metres": 1225
-   }
+   },
+   "postal": "310027"
   },
   {
    "block": "115A",
@@ -59753,7 +60882,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 611
-   }
+   },
+   "postal": "341115"
   },
   {
    "block": "111A",
@@ -59825,7 +60955,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 719
-   }
+   },
+   "postal": "341111"
   },
   {
    "block": "114A",
@@ -59873,7 +61004,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 671
-   }
+   },
+   "postal": "341114"
   },
   {
    "block": "114B",
@@ -59909,7 +61041,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 686
-   }
+   },
+   "postal": "342114"
   },
   {
    "block": "113A",
@@ -59969,7 +61102,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 800
-   }
+   },
+   "postal": "341113"
   },
   {
    "block": "103A",
@@ -60047,7 +61181,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 634
-   }
+   },
+   "postal": "341103"
   },
   {
    "block": "105B",
@@ -60095,7 +61230,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 292
-   }
+   },
+   "postal": "342105"
   },
   {
    "block": "103B",
@@ -60173,7 +61309,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 558
-   }
+   },
+   "postal": "342103"
   },
   {
    "block": "104A",
@@ -60293,7 +61430,8 @@
    "walk": {
     "station": "Woodleigh MRT",
     "metres": 717
-   }
+   },
+   "postal": "341104"
   },
   {
    "block": "110A",
@@ -60353,7 +61491,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 505
-   }
+   },
+   "postal": "341110"
   },
   {
    "block": "110B",
@@ -60425,7 +61564,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 623
-   }
+   },
+   "postal": "342110"
   },
   {
    "block": "139B",
@@ -60467,7 +61607,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 630
-   }
+   },
+   "postal": "312139"
   },
   {
    "block": "110B",
@@ -60509,7 +61650,8 @@
    "walk": {
     "station": "Potong Pasir MRT",
     "metres": 623
-   }
+   },
+   "postal": "342110"
   },
   {
    "block": "138C",
@@ -60569,7 +61711,8 @@
    "walk": {
     "station": "Braddell MRT",
     "metres": 525
-   }
+   },
+   "postal": "313138"
   },
   {
    "block": "780F",
@@ -60611,7 +61754,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1086
-   }
+   },
+   "postal": "736780"
   },
   {
    "block": "574A",
@@ -60653,7 +61797,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 875
-   }
+   },
+   "postal": "731574"
   },
   {
    "block": "182A",
@@ -60707,7 +61852,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 570
-   }
+   },
+   "postal": "731182"
   },
   {
    "block": "206",
@@ -60767,7 +61913,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 1835
-   }
+   },
+   "postal": "730206"
   },
   {
    "block": "202",
@@ -60803,7 +61950,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 1626
-   }
+   },
+   "postal": "730202"
   },
   {
    "block": "1",
@@ -60857,7 +62005,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 1289
-   }
+   },
+   "postal": "730001"
   },
   {
    "block": "6",
@@ -60917,7 +62066,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 1457
-   }
+   },
+   "postal": "730006"
   },
   {
    "block": "17",
@@ -60995,7 +62145,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 1469
-   }
+   },
+   "postal": "730017"
   },
   {
    "block": "12",
@@ -61067,7 +62218,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 1218
-   }
+   },
+   "postal": "730012"
   },
   {
    "block": "573C",
@@ -61109,7 +62261,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 899
-   }
+   },
+   "postal": "733573"
   },
   {
    "block": "182A",
@@ -61145,7 +62298,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 570
-   }
+   },
+   "postal": "731182"
   },
   {
    "block": "202",
@@ -61181,7 +62335,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 1626
-   }
+   },
+   "postal": "730202"
   },
   {
    "block": "33",
@@ -61235,7 +62390,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 1509
-   }
+   },
+   "postal": "730033"
   },
   {
    "block": "8",
@@ -61289,7 +62445,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 1466
-   }
+   },
+   "postal": "730008"
   },
   {
    "block": "782A",
@@ -61331,7 +62488,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1108
-   }
+   },
+   "postal": "731782"
   },
   {
    "block": "780C",
@@ -61385,7 +62543,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1237
-   }
+   },
+   "postal": "733780"
   },
   {
    "block": "573C",
@@ -61451,7 +62610,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 899
-   }
+   },
+   "postal": "733573"
   },
   {
    "block": "886C",
@@ -61553,7 +62713,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1031
-   }
+   },
+   "postal": "730899"
   },
   {
    "block": "619",
@@ -61637,7 +62798,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 1102
-   }
+   },
+   "postal": "730619"
   },
   {
    "block": "554",
@@ -61703,7 +62865,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 793
-   }
+   },
+   "postal": "730554"
   },
   {
    "block": "786C",
@@ -61739,7 +62902,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 759
-   }
+   },
+   "postal": "733786"
   },
   {
    "block": "786D",
@@ -61775,7 +62939,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 859
-   }
+   },
+   "postal": "734786"
   },
   {
    "block": "681B",
@@ -61829,7 +62994,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 437
-   }
+   },
+   "postal": "732681"
   },
   {
    "block": "691D",
@@ -61865,7 +63031,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 689
-   }
+   },
+   "postal": "734691"
   },
   {
    "block": "785C",
@@ -61901,7 +63068,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1377
-   }
+   },
+   "postal": "733785"
   },
   {
    "block": "785B",
@@ -61937,7 +63105,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1363
-   }
+   },
+   "postal": "732785"
   },
   {
    "block": "183B",
@@ -61985,7 +63154,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 717
-   }
+   },
+   "postal": "732183"
   },
   {
    "block": "182B",
@@ -62027,7 +63197,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 673
-   }
+   },
+   "postal": "732182"
   },
   {
    "block": "183A",
@@ -62075,7 +63246,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 712
-   }
+   },
+   "postal": "731183"
   },
   {
    "block": "571B",
@@ -62117,7 +63289,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 488
-   }
+   },
+   "postal": "732571"
   },
   {
    "block": "514",
@@ -62153,7 +63326,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 682
-   }
+   },
+   "postal": "730514"
   },
   {
    "block": "889C",
@@ -62195,7 +63369,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 931
-   }
+   },
+   "postal": "733889"
   },
   {
    "block": "621",
@@ -62237,7 +63412,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1070
-   }
+   },
+   "postal": "730621"
   },
   {
    "block": "555",
@@ -62297,7 +63473,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 770
-   }
+   },
+   "postal": "730555"
   },
   {
    "block": "168",
@@ -62339,7 +63516,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 359
-   }
+   },
+   "postal": "730168"
   },
   {
    "block": "183B",
@@ -62375,7 +63553,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 717
-   }
+   },
+   "postal": "732183"
   },
   {
    "block": "178",
@@ -62435,7 +63614,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 607
-   }
+   },
+   "postal": "730178"
   },
   {
    "block": "589",
@@ -62471,7 +63651,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 286
-   }
+   },
+   "postal": "730589"
   },
   {
    "block": "15",
@@ -62543,7 +63724,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 1372
-   }
+   },
+   "postal": "730015"
   },
   {
    "block": "780F",
@@ -62585,7 +63767,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1086
-   }
+   },
+   "postal": "736780"
   },
   {
    "block": "785B",
@@ -62621,7 +63804,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1363
-   }
+   },
+   "postal": "732785"
   },
   {
    "block": "571B",
@@ -62657,7 +63841,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 488
-   }
+   },
+   "postal": "732571"
   },
   {
    "block": "743",
@@ -62717,7 +63902,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 894
-   }
+   },
+   "postal": "730743"
   },
   {
    "block": "782D",
@@ -62801,7 +63987,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 682
-   }
+   },
+   "postal": "730514"
   },
   {
    "block": "543",
@@ -62843,7 +64030,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 223
-   }
+   },
+   "postal": "730543"
   },
   {
    "block": "574A",
@@ -62885,7 +64073,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 875
-   }
+   },
+   "postal": "731574"
   },
   {
    "block": "889C",
@@ -62927,7 +64116,8 @@
    "walk": {
     "station": "Woodlands MRT",
     "metres": 931
-   }
+   },
+   "postal": "733889"
   },
   {
    "block": "621",
@@ -62963,7 +64153,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1070
-   }
+   },
+   "postal": "730621"
   },
   {
    "block": "168",
@@ -62999,7 +64190,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 359
-   }
+   },
+   "postal": "730168"
   },
   {
    "block": "184A",
@@ -63041,7 +64233,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 807
-   }
+   },
+   "postal": "731184"
   },
   {
    "block": "782A",
@@ -63077,7 +64270,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1108
-   }
+   },
+   "postal": "731782"
   },
   {
    "block": "782D",
@@ -63155,7 +64349,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 286
-   }
+   },
+   "postal": "730589"
   },
   {
    "block": "543",
@@ -63191,7 +64386,8 @@
    "walk": {
     "station": "Woodlands South MRT",
     "metres": 223
-   }
+   },
+   "postal": "730543"
   },
   {
    "block": "899A",
@@ -63233,7 +64429,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1031
-   }
+   },
+   "postal": "730899"
   },
   {
    "block": "786D",
@@ -63281,7 +64478,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 859
-   }
+   },
+   "postal": "734786"
   },
   {
    "block": "786C",
@@ -63317,7 +64515,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 759
-   }
+   },
+   "postal": "733786"
   },
   {
    "block": "691D",
@@ -63353,7 +64552,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 689
-   }
+   },
+   "postal": "734691"
   },
   {
    "block": "785C",
@@ -63389,7 +64589,8 @@
    "walk": {
     "station": "Admiralty MRT",
     "metres": 1377
-   }
+   },
+   "postal": "733785"
   },
   {
    "block": "183A",
@@ -63425,7 +64626,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 712
-   }
+   },
+   "postal": "731183"
   },
   {
    "block": "182B",
@@ -63461,7 +64663,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 673
-   }
+   },
+   "postal": "732182"
   },
   {
    "block": "184A",
@@ -63503,7 +64706,8 @@
    "walk": {
     "station": "Marsiling MRT",
     "metres": 807
-   }
+   },
+   "postal": "731184"
   },
   {
    "block": "459",
@@ -63593,7 +64797,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1983
-   }
+   },
+   "postal": "760459"
   },
   {
    "block": "672A",
@@ -63641,7 +64846,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1431
-   }
+   },
+   "postal": "761672"
   },
   {
    "block": "478C",
@@ -63677,7 +64883,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2374
-   }
+   },
+   "postal": "763478"
   },
   {
    "block": "424D",
@@ -63713,7 +64920,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2185
-   }
+   },
+   "postal": "764424"
   },
   {
    "block": "424B",
@@ -63755,7 +64963,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2048
-   }
+   },
+   "postal": "762424"
   },
   {
    "block": "774",
@@ -63791,7 +65000,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 833
-   }
+   },
+   "postal": "760774"
   },
   {
    "block": "704",
@@ -63851,7 +65061,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 798
-   }
+   },
+   "postal": "760704"
   },
   {
    "block": "701",
@@ -63899,7 +65110,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 791
-   }
+   },
+   "postal": "760701"
   },
   {
    "block": "740",
@@ -63953,7 +65165,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 385
-   }
+   },
+   "postal": "760740"
   },
   {
    "block": "110",
@@ -64007,7 +65220,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1120
-   }
+   },
+   "postal": "760110"
   },
   {
    "block": "108",
@@ -64073,7 +65287,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 942
-   }
+   },
+   "postal": "760108"
   },
   {
    "block": "342B",
@@ -64121,7 +65336,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1497
-   }
+   },
+   "postal": "762342"
   },
   {
    "block": "201",
@@ -64205,7 +65421,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2400
-   }
+   },
+   "postal": "761468"
   },
   {
    "block": "347A",
@@ -64265,7 +65482,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1347
-   }
+   },
+   "postal": "761347"
   },
   {
    "block": "424D",
@@ -64307,7 +65525,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2185
-   }
+   },
+   "postal": "764424"
   },
   {
    "block": "430B",
@@ -64367,7 +65586,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 2252
-   }
+   },
+   "postal": "762430"
   },
   {
    "block": "428B",
@@ -64421,7 +65641,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2070
-   }
+   },
+   "postal": "762428"
   },
   {
    "block": "774",
@@ -64457,7 +65678,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 833
-   }
+   },
+   "postal": "760774"
   },
   {
    "block": "509B",
@@ -64499,7 +65721,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1389
-   }
+   },
+   "postal": "762509"
   },
   {
    "block": "462C",
@@ -64553,7 +65776,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2425
-   }
+   },
+   "postal": "763462"
   },
   {
    "block": "289",
@@ -64595,7 +65819,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1419
-   }
+   },
+   "postal": "760289"
   },
   {
    "block": "479B",
@@ -64661,7 +65886,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2179
-   }
+   },
+   "postal": "762479"
   },
   {
    "block": "479C",
@@ -64757,7 +65983,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2218
-   }
+   },
+   "postal": "763479"
   },
   {
    "block": "478A",
@@ -64805,7 +66032,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2422
-   }
+   },
+   "postal": "761478"
   },
   {
    "block": "478C",
@@ -64847,7 +66075,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2374
-   }
+   },
+   "postal": "763478"
   },
   {
    "block": "511B",
@@ -64901,7 +66130,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1504
-   }
+   },
+   "postal": "762511"
   },
   {
    "block": "505D",
@@ -64955,7 +66185,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1541
-   }
+   },
+   "postal": "764505"
   },
   {
    "block": "852",
@@ -65003,7 +66234,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 623
-   }
+   },
+   "postal": "760852"
   },
   {
    "block": "867",
@@ -65057,7 +66289,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 810
-   }
+   },
+   "postal": "760867"
   },
   {
    "block": "673A",
@@ -65099,7 +66332,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1284
-   }
+   },
+   "postal": "761673"
   },
   {
    "block": "509B",
@@ -65135,7 +66369,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1389
-   }
+   },
+   "postal": "762509"
   },
   {
    "block": "336C",
@@ -65171,7 +66406,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1475
-   }
+   },
+   "postal": "763336"
   },
   {
    "block": "334C",
@@ -65207,7 +66443,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1754
-   }
+   },
+   "postal": "763334"
   },
   {
    "block": "504C",
@@ -65243,7 +66480,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1450
-   }
+   },
+   "postal": "763504"
   },
   {
    "block": "502C",
@@ -65279,7 +66517,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1126
-   }
+   },
+   "postal": "763502"
   },
   {
    "block": "505D",
@@ -65321,7 +66560,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1541
-   }
+   },
+   "postal": "764505"
   },
   {
    "block": "511B",
@@ -65357,7 +66597,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1504
-   }
+   },
+   "postal": "762511"
   },
   {
    "block": "424B",
@@ -65405,7 +66646,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2048
-   }
+   },
+   "postal": "762424"
   },
   {
    "block": "478A",
@@ -65441,7 +66683,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2422
-   }
+   },
+   "postal": "761478"
   },
   {
    "block": "459",
@@ -65483,7 +66726,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1983
-   }
+   },
+   "postal": "760459"
   },
   {
    "block": "673A",
@@ -65519,7 +66763,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1284
-   }
+   },
+   "postal": "761673"
   },
   {
    "block": "462A",
@@ -65555,7 +66800,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2416
-   }
+   },
+   "postal": "761462"
   },
   {
    "block": "114",
@@ -65615,7 +66861,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1351
-   }
+   },
+   "postal": "760114"
   },
   {
    "block": "124",
@@ -65657,7 +66904,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 924
-   }
+   },
+   "postal": "760124"
   },
   {
    "block": "478C",
@@ -65699,7 +66947,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2374
-   }
+   },
+   "postal": "763478"
   },
   {
    "block": "852",
@@ -65741,7 +66990,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 623
-   }
+   },
+   "postal": "760852"
   },
   {
    "block": "462A",
@@ -65777,7 +67027,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2416
-   }
+   },
+   "postal": "761462"
   },
   {
    "block": "318C",
@@ -65819,7 +67070,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1508
-   }
+   },
+   "postal": "763318"
   },
   {
    "block": "367",
@@ -65915,7 +67167,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 924
-   }
+   },
+   "postal": "760124"
   },
   {
    "block": "132",
@@ -65969,7 +67222,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 750
-   }
+   },
+   "postal": "760132"
   },
   {
    "block": "336C",
@@ -66005,7 +67259,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1475
-   }
+   },
+   "postal": "763336"
   },
   {
    "block": "334C",
@@ -66041,7 +67296,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1754
-   }
+   },
+   "postal": "763334"
   },
   {
    "block": "468A",
@@ -66095,7 +67351,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2400
-   }
+   },
+   "postal": "761468"
   },
   {
    "block": "504C",
@@ -66131,7 +67388,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1450
-   }
+   },
+   "postal": "763504"
   },
   {
    "block": "502C",
@@ -66167,7 +67425,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1126
-   }
+   },
+   "postal": "763502"
   },
   {
    "block": "504D",
@@ -66209,7 +67468,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1442
-   }
+   },
+   "postal": "764504"
   },
   {
    "block": "754",
@@ -66263,7 +67523,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 433
-   }
+   },
+   "postal": "760754"
   },
   {
    "block": "428B",
@@ -66299,7 +67560,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 2070
-   }
+   },
+   "postal": "762428"
   },
   {
    "block": "289",
@@ -66335,7 +67597,8 @@
    "walk": {
     "station": "Canberra MRT",
     "metres": 1419
-   }
+   },
+   "postal": "760289"
   },
   {
    "block": "318C",
@@ -66395,7 +67658,8 @@
    "walk": {
     "station": "Yishun MRT",
     "metres": 1508
-   }
+   },
+   "postal": "763318"
   },
   {
    "block": "504D",
@@ -66431,7 +67695,8 @@
    "walk": {
     "station": "Khatib MRT",
     "metres": 1442
-   }
+   },
+   "postal": "764504"
   }
  ]
 }

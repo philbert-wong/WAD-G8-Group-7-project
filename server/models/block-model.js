@@ -5,6 +5,7 @@ const blockSchema = new mongoose.Schema({
   block: { type: String, required: true },
   street: { type: String, required: true },
   town: { type: String, required: true },
+  postal: String, // 6-digit postal code from OneMap, e.g. "560323" (text, so "088256" keeps its leading 0)
   flatType: { type: String, required: true }, // "3 ROOM", "4 ROOM", ...
   price: { type: Number, required: true }, // typical (median) resale price in dollars
   priceLow: Number, // cheapest recent sale
@@ -80,6 +81,7 @@ exports.toCard = function (block) {
     block: block.block,
     street: block.street,
     town: block.town,
+    postal: block.postal,
     flatType: block.flatType,
     price: block.price, // median
     priceLow: block.priceLow,

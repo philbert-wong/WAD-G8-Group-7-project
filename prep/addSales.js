@@ -61,6 +61,7 @@ for (const b of blocks) {
     block: b.block,
     street: b.street,
     town: b.town,
+    postal: b.postal, // keep the postal code from prep/addPostal.js
     flatType: b.flatType,
     price: listing.price,
     leaseCommenceYear: b.leaseCommenceYear,

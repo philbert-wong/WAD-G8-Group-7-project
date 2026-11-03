@@ -52,6 +52,20 @@ function roundCoordinate(number) {
   return Math.round(number * 1000000) / 1000000;
 }
 
+// OneMap's postal code if it is a real one ("560323"), otherwise undefined (left out of the JSON file).
+// OneMap writes "NIL" when a block has no postal code.
+function realPostal(text) {
+  if (typeof text !== 'string' || text.length !== 6) {
+    return undefined;
+  }
+  for (const character of text) {
+    if (character < '0' || character > '9') {
+      return undefined;
+    }
+  }
+  return text;
+}
+
 // ---------- 1. blocks: prices from the CSV, coordinates from OneMap ----------
 console.log('1/3 Reading the resale CSV...');
 const rows = parse(readFileSync(csvPath, 'utf8'), { columns: true, skip_empty_lines: true });
@@ -100,7 +114,7 @@ for (let i = 0; i < uniqueBlocks.length; i++) {
 }
 saveCache();
 
-// Keep the listings we found a location for, and add lat / lng to them
+// Keep the listings we found a location for, and add lat / lng and the postal code to them
 const blocks = [];
 for (const listing of listings) {
   const point = points[listing.block + '|' + listing.street];
@@ -109,6 +123,7 @@ for (const listing of listings) {
       block: listing.block,
       street: listing.street,
       town: listing.town,
+      postal: realPostal(point.postal),
       flatType: listing.flatType,
       price: listing.price,
       priceLow: listing.priceLow,
@@ -199,6 +214,7 @@ for (const block of blocks) {
     block: block.block,
     street: block.street,
     town: block.town,
+    postal: block.postal,
     flatType: block.flatType,
     price: block.price,
     priceLow: block.priceLow,

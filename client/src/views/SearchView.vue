@@ -88,20 +88,6 @@ async function loadAreas() {
 // ('' = a normal search). Shown above the results.
 const placeName = ref('')
 
-// True when the text is a 6-digit Singapore postal code, e.g. "560314".
-// Our data has no postal codes, so a postal code always goes to OneMap.
-function isPostalCode(text) {
-  if (text.length !== 6) {
-    return false
-  }
-  for (const character of text) {
-    if (character < '0' || character > '9') {
-      return false
-    }
-  }
-  return true
-}
-
 // Flats near any place in Singapore: our server asks OneMap where the place is (/api/blocks/place),
 // then finds our flats within 1 km of it that fit the filters (/api/blocks/nearby).
 // Errors are caught by search() below.
@@ -125,9 +111,9 @@ async function searchNearPlace(text) {
 }
 
 // The one search box (and the filters). Empty filters are ignored by the server, so we can send them all.
-//   1. A postal code ("560314"): straight to OneMap, flats near it
-//   2. Anything else: search our own data (town, street, block or full address, e.g. "Blk 314 Ang Mo Kio Ave 3")
-//   3. Our data has nothing, but something was typed (e.g. "Northpoint City"): ask OneMap, flats near it
+//   1. Search our own data: town, street, block, full address ("Blk 314 Ang Mo Kio Ave 3") or postal code ("560323")
+//   2. Our data has nothing, but something was typed (e.g. "Northpoint City", or a condo's postal code):
+//      ask OneMap, flats near it
 async function search() {
   loading.value = true
   errorMessage.value = ''
@@ -135,23 +121,19 @@ async function search() {
   const typed = searchText.value.trim()
 
   try {
-    if (isPostalCode(typed)) {
+    // The search text plus the shared filters
+    const params = {
+      q: searchText.value,
+      flatType: filterStore.filters.flatType,
+      maxPrice: filterStore.filters.maxPrice,
+      minLease: filterStore.filters.minLease,
+    }
+    const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
+    if (response.data.total === 0 && typed !== '') {
       await searchNearPlace(typed)
     } else {
-      // The search text plus the shared filters
-      const params = {
-        q: searchText.value,
-        flatType: filterStore.filters.flatType,
-        maxPrice: filterStore.filters.maxPrice,
-        minLease: filterStore.filters.minLease,
-      }
-      const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
-      if (response.data.total === 0 && typed !== '') {
-        await searchNearPlace(typed)
-      } else {
-        results.value = response.data.results
-        total.value = response.data.total
-      }
+      results.value = response.data.results
+      total.value = response.data.total
     }
   } catch (error) {
     // Nothing to show: empty the list, so old cards do not stay under the message
