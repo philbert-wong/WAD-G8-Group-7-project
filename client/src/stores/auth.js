@@ -89,6 +89,11 @@ export const useAuthStore = defineStore('auth', function () {
 
   async function register(email, password) {
     await sendLoginForm('register', email, password)
+    // A new account: show the Help tour again when the Search page opens (see GuideTour.vue),
+    // even if it was already seen as a guest
+    if (error.value === '') {
+      localStorage.removeItem('searchTourSeen')
+    }
   }
 
   // Asks the server for the saved profile and uses it as the starting filters.
