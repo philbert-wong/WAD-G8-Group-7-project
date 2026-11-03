@@ -38,9 +38,9 @@ export const TOUR_STEPS = {
   // Map page
   '/map': [
     {
-      title: 'Go to any place',
-      text: 'Type an address or postal code to move the map there.',
-      target: '.input-group',
+      title: 'Search anywhere',
+      text: 'The same search as the Search page: a town, street, block, postal code or any place. The map shows those flats.',
+      target: '.map-search',
     },
     {
       title: 'Click a dot',

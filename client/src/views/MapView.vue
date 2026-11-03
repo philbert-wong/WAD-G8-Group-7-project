@@ -1174,10 +1174,10 @@ onUnmounted(function () {
 
 <style scoped>
 /* The map needs a set height, otherwise it is 0 px tall.
-   100vh = the whole height of the browser window, minus room for the address search bar above the map,
+   100vh = the whole height of the browser window, minus room for the search bar and the "Showing your search" strip above the map,
    so when you scroll down to the map it fills the screen. Never shorter than 450px. */
 .map-box {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 200px);
   min-height: 450px;
   border-radius: 18px;
   overflow: hidden;
