@@ -399,7 +399,6 @@ onMounted(loadPage)
 <template>
   <section>
     <!-- Hero title, then results (left) + sidebar (right) -->
-    <span class="eyebrow">26 towns · real resale prices · last 12 months</span>
     <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
     <p class="page-sub">Search blocks, compare real sale prices, and keep a shortlist.</p>
 
