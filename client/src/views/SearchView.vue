@@ -20,6 +20,7 @@ import { useRoute, RouterLink } from 'vue-router'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
+import { distanceMetres, PHG_NEAR_METRES } from '../utils/distance.js'
 
 // get the current route
 const route = useRoute() 
@@ -67,6 +68,37 @@ const suggestions = computed(function () {
   })
 })
 
+// PHG filter: the parents' place found for the postal code in the Filters card { postal, name, lat, lng },
+// kept so it is only looked up again when the postal code changes. null = not looked up yet.
+let parentSpot = null
+// Its name, shown under the PHG switch so the user can check it is the right place ('' = none)
+const parentName = ref('')
+
+// PHG switch on, with a postal code: keep only the flats within 4 km of the parents (on top of the other filters).
+// Our server asks OneMap where the postal code is (/api/blocks/place). If it cannot be found, say so and keep every flat.
+async function keepNearParents() {
+  const postal = filterStore.filters.parentsPostal.trim()
+  if (!filterStore.filters.phg || postal === '') {
+    parentName.value = ''
+    return
+  }
+  try {
+    if (parentSpot === null || parentSpot.postal !== postal) {
+      const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: postal } })
+      parentSpot = { postal: postal, name: response.data.name, lat: response.data.lat, lng: response.data.lng }
+    }
+  } catch (error) {
+    parentName.value = ''
+    errorMessage.value = 'Could not find the parents postal code "' + postal + '", so the PHG filter is not used.'
+    return
+  }
+  parentName.value = parentSpot.name
+  results.value = results.value.filter(function (card) {
+    return distanceMetres(parentSpot.lat, parentSpot.lng, card.lat, card.lng) <= PHG_NEAR_METRES
+  })
+  total.value = results.value.length
+}
+
 // The search box says the user typed something
 function setSearchText(text) {
   searchText.value = text
@@ -83,6 +115,9 @@ function selectArea(town) {
 // The filter panel says one filter changed, e.g. ('maxPrice', '600000'): change it in the shared store
 function setFilter(name, value) {
   filterStore.setFilter(name, value)
+  if (name === 'phg') {
+    auth.savePhgToggle(value) // remembered on the presets, so it is the same next time (and on the Map)
+  }
 }
 
 // Gets the town names from the server (for the search suggestions)
@@ -174,6 +209,7 @@ async function search() {
       results.value = response.data.results
       total.value = response.data.total
     }
+    await keepNearParents()
   } catch (error) {
     // Nothing to show: empty the list, so old cards do not stay under the message
     results.value = []
@@ -582,17 +618,21 @@ onMounted(loadPage)
             <button type="button" class="btn-close" aria-label="Close filters" @click="closeFilters"></button>
           </div>
 
-          <FilterPanel
-            :filters="filterStore.filters"
-            @change-filter="setFilter"
-            @search="searchFromFilters"
-            @clear="clearFilters"
-          />
-
+          <!-- Your Priorities first: the results are sorted by priority score by default, so it should not be
+               hidden under the filters (mb-3: the gap before the filters card) -->
           <PreferencesPanel
+            class="mb-3"
             :preferences="preferences"
             @change-ticked="changeTicked"
             @change-level="changeLevel"
+          />
+
+          <FilterPanel
+            :filters="filterStore.filters"
+            :phg-place-name="parentName"
+            @change-filter="setFilter"
+            @search="searchFromFilters"
+            @clear="clearFilters"
           />
         </div>
       </div>

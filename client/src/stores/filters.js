@@ -5,9 +5,10 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 // The filters at the start and after "Clear all". maxPrice '' would mean "Any" budget.
-// phg = the "Near parents (PHG)" switch on the Map: true = only show blocks within 4 km of the parents (off by default)
+// phg = the "Near parents (PHG)" switch: true = only show blocks within 4 km of the parents (off by default),
+// parentsPostal = the parents' postal code typed under it (from the presets at the start). Both on Search and the Map.
 function makeDefaultFilters() {
-  return { q: '', flatType: '', maxPrice: '760000', minLease: '60', phg: false }
+  return { q: '', flatType: '', maxPrice: '760000', minLease: '60', phg: false, parentsPostal: '' }
 }
 
 export const useFiltersStore = defineStore('filters', function () {
@@ -23,11 +24,13 @@ export const useFiltersStore = defineStore('filters', function () {
   }
 
   // "Clear all": back to the starting filters
-  // (The PHG switch is a choice, not a filter value, so "Clear all" leaves it as it is.)
+  // (The PHG switch and the parents' postal code are choices, not filter values, so "Clear all" leaves them as they are.)
   function clearFilters() {
     const phg = filters.value.phg
+    const parentsPostal = filters.value.parentsPostal
     filters.value = makeDefaultFilters()
     filters.value.phg = phg
+    filters.value.parentsPostal = parentsPostal
   }
 
   // The account's profile answers (stores/auth.js) become the starting filters, on Search and on the Map.
@@ -38,6 +41,7 @@ export const useFiltersStore = defineStore('filters', function () {
     }
     // Only on when it was switched on (profiles saved before the switch existed have no showPhg: that counts as off)
     filters.value.phg = profile.showPhg === true
+    filters.value.parentsPostal = profile.parentsPostal || ''
     if (profile.skipped) {
       return
     }
