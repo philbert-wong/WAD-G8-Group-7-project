@@ -1,9 +1,7 @@
 <script setup>
-// The presets popup: App.vue shows it when logged out, once every time the site is opened or refreshed.
-// (Logged in it never shows: the presets entered before signing up are copied to the account.)
-// It starts with the presets saved last time (localStorage); the answers become the starting filters on Search and the Map.
-// "Save my presets" keeps them on this device and opens the login page to create an account (which then keeps them too).
-// "Continue as guest" closes it for this visit, keeps the saved presets, and opens Search.
+// The sign-up popup: shown by App.vue right after someone creates an account (and for any account that has not
+// answered yet). It asks the profile questions; the answers become the starting filters on Search and the Map.
+// "Skip for now" saves { skipped: true }, so the popup does not come back.
 import { useRouter } from 'vue-router'
 import ProfileForm from './ProfileForm.vue'
 import { useAuthStore } from '../stores/auth'
@@ -11,17 +9,18 @@ import { useAuthStore } from '../stores/auth'
 const auth = useAuthStore()
 const router = useRouter()
 
-// "Save my presets": save them on this device and use them as the filters, then open the login page on
-// "Create account" (/createaccount), so they can be kept on an account. (Once saved, App.vue stops showing this popup.)
+// "Save" in the form: save the answers, then open the map, already filtered.
+// (Once the profile is saved, App.vue stops showing this popup by itself.)
 async function onSave(answers) {
   await auth.saveProfile(answers)
-  router.push('/createaccount')
+  if (auth.profileError === '') {
+    router.push('/map')
+  }
 }
 
-// "Continue as guest": close the popup for this visit, and go to Search
+// "Skip for now": remember that we asked, and carry on where they were
 function onSkip() {
-  auth.skipPresets()
-  router.push('/')
+  auth.saveProfile({ skipped: true })
 }
 </script>
 
@@ -32,18 +31,18 @@ function onSkip() {
       <span class="eyebrow">Welcome</span>
       <h2 id="profile-title" class="serif">What are you <em>looking for?</em></h2>
       <p class="small text-muted">
-        These set your starting filters on Search and the Map, and are saved on this device for next time.
+        We use this to filter the map for you. You can change it any time from the account icon.
       </p>
 
       <ProfileForm
-        :profile="auth.profile"
+        :profile="null"
         :saving="auth.profileSaving"
         :error="auth.profileError"
-        button-text="Save my presets"
+        button-text="Save and show me the map"
         @save="onSave"
       />
 
-      <button type="button" class="skip" :disabled="auth.profileSaving" @click="onSkip">Continue as guest</button>
+      <button type="button" class="skip" :disabled="auth.profileSaving" @click="onSkip">Skip for now</button>
     </div>
   </div>
 </template>
@@ -77,7 +76,7 @@ function onSkip() {
   margin-bottom: 6px;
 }
 
-/* "Continue as guest": a plain text link under the form */
+/* "Skip for now": a plain text link under the form */
 .skip {
   display: block;
   margin: 14px auto 0;

@@ -102,10 +102,10 @@ describe('/api/auth/profile', () => {
       .send({ profile: { skipped: true } });
 
     expect(saved.status).toBe(200);
-    expect(saved.body.profile).toEqual({ skipped: true, showPhg: false });
+    expect(saved.body.profile).toEqual({ skipped: true, showPhg: true });
   });
 
-  it('keeps the PHG switch off unless it was switched on', async () => {
+  it('keeps the PHG switch on unless it was switched off', async () => {
     const token = await getToken('profile-phg@example.com');
     const answers = { town: '', parentsPostal: '560314', flatType: '', maxPrice: '', minLease: '60' };
     const res = await request(BASE_URL)
@@ -113,7 +113,7 @@ describe('/api/auth/profile', () => {
       .set('Authorization', 'Bearer ' + token)
       .send({ profile: answers });
 
-    expect(res.body.profile.showPhg).toBe(false);
+    expect(res.body.profile.showPhg).toBe(true);
   });
 
   it('rejects a postal code that is not 6 digits', async () => {

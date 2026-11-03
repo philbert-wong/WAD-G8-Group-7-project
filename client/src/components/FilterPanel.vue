@@ -126,7 +126,7 @@ function onClear() {
       @input="onChange('minLease', $event)"
     />
 
-    <!-- PHG switch (Map only): on = only blocks within 4 km of the parents' postal code. Off unless switched on. -->
+    <!-- PHG switch (Map only): on = only blocks within 4 km of the parents' postal code. On unless switched off. -->
     <div v-if="props.phgPostal !== null" class="phg-row">
       <div class="form-check form-switch">
         <input

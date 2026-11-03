@@ -49,10 +49,6 @@ body {
   line-height: 1.1;
   margin: 14px 0 6px;
 }
-/* No gap above the title when it is the first thing on the page (Search, Map: no small label above it) */
-.page-title:first-child {
-  margin-top: 0;
-}
 .page-title em {
   color: var(--terra);
 }

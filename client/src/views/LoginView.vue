@@ -2,7 +2,7 @@
 // The Login page: one form that can log in OR create an account (switch with the tabs).
 // The auth store (stores/auth.js) talks to the server and remembers the login.
 // On success we go back to the page that sent us here (?redirect=...), or to the Search page.
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
@@ -12,21 +12,8 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-// Opened as /createaccount (the presets popup's "Save my presets" comes here): open "Create account" and say why
-const fromPresets = computed(function () {
-  return route.path === '/createaccount'
-})
-
 // 'login' or 'register': which tab is open
-const mode = ref(fromPresets.value ? 'register' : 'login')
-
-// Already on this page (e.g. /login) when "Save my presets" sends us to /createaccount: Vue keeps the same page,
-// so switch to the "Create account" tab here
-watch(fromPresets, function (yes) {
-  if (yes) {
-    switchMode('register')
-  }
-})
+const mode = ref('login')
 
 // What is typed in the form (v-model keeps these in sync with the boxes)
 const email = ref('')
@@ -89,6 +76,7 @@ async function submit() {
   <section class="row justify-content-center">
     <!-- Page heading -->
     <div class="col-12 text-center mb-4">
+      <span class="eyebrow">Your account</span>
       <h1 class="page-title serif">Welcome <em>home</em></h1>
       <p class="page-sub">Log in to keep a shortlist and save your priorities.</p>
     </div>
@@ -102,9 +90,6 @@ async function submit() {
           </div>
 
           <div v-else>
-            <!-- From the presets popup: a small reminder of why to make an account -->
-            <p v-if="fromPresets" class="small text-muted mb-2">Create an account to save your presets.</p>
-
             <!-- Tabs: Log in / Create account -->
             <ul class="nav nav-tabs mb-3">
               <li class="nav-item">

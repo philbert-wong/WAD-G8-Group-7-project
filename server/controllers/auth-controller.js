@@ -203,7 +203,7 @@ exports.getProfile = async (req, res) => {
 // body: { "profile": { "town": "PUNGGOL", "parentsPostal": "560314", "flatType": "4 ROOM", "maxPrice": "700000", "minLease": "60" } }
 //   or  { "profile": { "skipped": true } }   ("Skip for now": remember they were asked, so the popup does not come back)
 // Every answer may be '' (not answered). maxPrice '' means "Any budget", the same as on the Filters panel.
-// showPhg is the "Near parents (PHG)" switch: false unless it was switched on (so older profiles count as off).
+// showPhg is the "Near parents (PHG)" switch: true unless it was switched off (so older profiles count as true).
 exports.saveProfile = async (req, res) => {
   // profile must be an object like { ... } (not missing, not text, not a list)
   if (
@@ -216,7 +216,7 @@ exports.saveProfile = async (req, res) => {
   }
   const answers = req.body.profile;
 
-  const showPhg = answers.showPhg === true;
+  const showPhg = answers.showPhg !== false;
 
   // We only keep the answers we know about, so nothing else can be stored by sending extra fields
   let cleanProfile = { skipped: true, showPhg: showPhg };
