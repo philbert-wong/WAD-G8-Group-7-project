@@ -12,8 +12,11 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
+// Coming from the presets popup's "Save my presets" (/login?presets=saved): open "Create account" and say why
+const fromPresets = route.query.presets === 'saved'
+
 // 'login' or 'register': which tab is open
-const mode = ref('login')
+const mode = ref(fromPresets ? 'register' : 'login')
 
 // What is typed in the form (v-model keeps these in sync with the boxes)
 const email = ref('')
@@ -90,6 +93,9 @@ async function submit() {
           </div>
 
           <div v-else>
+            <!-- From the presets popup: a small reminder of why to make an account -->
+            <p v-if="fromPresets" class="small text-muted mb-2">Create an account to save your presets.</p>
+
             <!-- Tabs: Log in / Create account -->
             <ul class="nav nav-tabs mb-3">
               <li class="nav-item">

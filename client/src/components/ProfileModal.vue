@@ -2,21 +2,26 @@
 // The presets popup: App.vue shows it when logged out, once every time the site is opened or refreshed.
 // (Logged in it never shows: the presets entered before signing up are copied to the account.)
 // It starts with the presets saved last time (localStorage); the answers become the starting filters on Search and the Map.
-// "Skip for now" closes it for this visit and keeps the saved presets.
+// "Save my presets" keeps them on this device and opens the login page to create an account (which then keeps them too).
+// "Continue as guest" closes it for this visit, keeps the saved presets, and opens Search.
+import { useRouter } from 'vue-router'
 import ProfileForm from './ProfileForm.vue'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
+const router = useRouter()
 
-// "Save" in the form: save the presets (localStorage, and the account when logged in) and use them as the filters.
-// You stay on the page you were on. (Once saved, App.vue stops showing this popup by itself.)
+// "Save my presets": save them on this device and use them as the filters, then open the login page on
+// "Create account" (?presets=saved), so they can be kept on an account. (Once saved, App.vue stops showing this popup.)
 async function onSave(answers) {
   await auth.saveProfile(answers)
+  router.push({ path: '/login', query: { presets: 'saved' } })
 }
 
-// "Skip for now": close the popup for this visit, and carry on where they were
+// "Continue as guest": close the popup for this visit, and go to Search
 function onSkip() {
   auth.skipPresets()
+  router.push('/')
 }
 </script>
 
@@ -38,7 +43,7 @@ function onSkip() {
         @save="onSave"
       />
 
-      <button type="button" class="skip" :disabled="auth.profileSaving" @click="onSkip">Skip for now</button>
+      <button type="button" class="skip" :disabled="auth.profileSaving" @click="onSkip">Continue as guest</button>
     </div>
   </div>
 </template>
@@ -72,7 +77,7 @@ function onSkip() {
   margin-bottom: 6px;
 }
 
-/* "Skip for now": a plain text link under the form */
+/* "Continue as guest": a plain text link under the form */
 .skip {
   display: block;
   margin: 14px auto 0;

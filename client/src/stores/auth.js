@@ -144,7 +144,7 @@ export const useAuthStore = defineStore('auth', function () {
     profileSaving.value = false
   }
 
-  // "Skip for now" in the popup: close it for this visit and keep the presets as they are
+  // "Continue as guest" in the popup: close it for this visit and keep the presets as they are
   function skipPresets() {
     presetsAsked.value = true
   }
