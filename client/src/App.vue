@@ -5,14 +5,14 @@ import NavBar from './components/NavBar.vue'
 import ProfileModal from './components/ProfileModal.vue'
 import { useAuthStore } from './stores/auth'
 
-// The presets popup: after every refresh when logged out, until answered when logged in (see needsProfile in stores/auth.js)
+// The presets popup: only when logged out, after every refresh (see needsProfile in stores/auth.js)
 const auth = useAuthStore()
 </script>
 
 <template>
   <NavBar/>
 
-  <!-- Presets popup: asks for the town, parents' postal code and starting filters (logged out: after every refresh; logged in: until answered) -->
+  <!-- Presets popup: asks for the town, parents' postal code and starting filters (logged out only, after every refresh) -->
   <ProfileModal v-if="auth.needsProfile" />
 
   <main class="container py-5">

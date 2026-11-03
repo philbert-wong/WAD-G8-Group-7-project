@@ -1,6 +1,6 @@
 <script setup>
-// The presets popup: App.vue shows it once every time the site is opened or refreshed when logged out,
-// and only until it is answered when logged in (e.g. right after signing up).
+// The presets popup: App.vue shows it when logged out, once every time the site is opened or refreshed.
+// (Logged in it never shows: the presets entered before signing up are copied to the account.)
 // It starts with the presets saved last time (localStorage); the answers become the starting filters on Search and the Map.
 // "Skip for now" closes it for this visit and keeps the saved presets.
 import ProfileForm from './ProfileForm.vue'

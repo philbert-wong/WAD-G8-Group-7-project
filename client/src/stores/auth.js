@@ -31,11 +31,9 @@ export const useAuthStore = defineStore('auth', function () {
   const profile = ref(null)
   // true once the server has told us the profile (so the popup does not flash up before we know)
   const profileLoaded = ref(false)
-  // true once the presets popup has been answered or skipped. It is NOT saved anywhere, so when logged out
-  // it is false again after every refresh and the popup asks again (filled in with the presets saved last time).
+  // true once the presets popup has been answered or skipped. It is NOT saved anywhere, so it is false again
+  // after every refresh and the popup asks again (filled in with the presets saved last time).
   const presetsAsked = ref(false)
-  // Logged in: has this account ever answered (or skipped) the popup? Then it does not ask again on refresh.
-  const accountAnswered = ref(false)
   // Goes up by 1 every time new presets are saved, so Search and the Map can watch it and reload with them
   const presetsVersion = ref(0)
   const profileSaving = ref(false)
@@ -46,17 +44,11 @@ export const useAuthStore = defineStore('auth', function () {
     return token.value !== null
   })
 
-  // Show the presets popup. Logged out: once after every refresh. Logged in: only until the account has answered it.
+  // Show the presets popup: only when logged out, once after every refresh.
+  // Logged in, it never shows: the presets were entered before signing up (and are copied to the account),
+  // or come from the account; they can be changed on the profile page.
   const needsProfile = computed(function () {
-    if (presetsAsked.value) {
-      return false
-    }
-    // Logged out: every refresh
-    if (token.value === null) {
-      return true
-    }
-    // Logged in: only once, while the account has never answered it (e.g. just signed up)
-    return profileLoaded.value && !accountAnswered.value
+    return token.value === null && !presetsAsked.value
   })
 
   // ---------- actions ----------
@@ -68,9 +60,7 @@ export const useAuthStore = defineStore('auth', function () {
     localStorage.setItem('token', newToken)
     localStorage.setItem('user', JSON.stringify(newUser))
     sendTokenWithEveryRequest(newToken)
-    // A new login: the popup may ask once more if this account has never answered it (even if it was skipped
-    // while logged out). profileLoaded = false makes the route guard load this account's profile.
-    presetsAsked.value = false
+    // profileLoaded = false makes the route guard load this account's profile before the next page opens
     profileLoaded.value = false
   }
 
@@ -107,12 +97,14 @@ export const useAuthStore = defineStore('auth', function () {
     try {
       const response = await axios.get(`${BASE_URL}/api/auth/profile`)
       profileLoaded.value = true
-      accountAnswered.value = response.data.profile !== null
       // The presets saved on this device (localStorage) are the newest, so they win.
       // The account's copy is only used on a device that has none yet.
       if (profile.value === null) {
         profile.value = response.data.profile
         useFiltersStore().applyProfile(profile.value)
+      } else if (response.data.profile === null) {
+        // Just signed up (or an account that never had presets): copy the presets entered on this device to the account
+        await axios.put(`${BASE_URL}/api/auth/profile`, { profile: profile.value })
       }
     } catch (e) {
       // The site still works without it (normal filters, no popup). We try again on the next page change.
@@ -140,7 +132,6 @@ export const useAuthStore = defineStore('auth', function () {
       // The server's cleaned-up copy, kept on this device too
       profile.value = response.data.profile
       profileLoaded.value = true
-      accountAnswered.value = true
       localStorage.setItem('presets', JSON.stringify(profile.value))
     } catch (e) {
       // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
@@ -154,18 +145,8 @@ export const useAuthStore = defineStore('auth', function () {
   }
 
   // "Skip for now" in the popup: close it for this visit and keep the presets as they are
-  // Logged in: also remember on the account that it was skipped, so it does not ask again after a refresh
-  async function skipPresets() {
+  function skipPresets() {
     presetsAsked.value = true
-    if (token.value === null) {
-      return
-    }
-    try {
-      await axios.put(`${BASE_URL}/api/auth/profile`, { profile: { skipped: true } })
-      accountAnswered.value = true
-    } catch (e) {
-      // Not saved: the popup may ask again next time, nothing else breaks
-    }
   }
 
   // The "Near parents (PHG)" switch on the map was flipped: remember it on the profile.
@@ -197,7 +178,6 @@ export const useAuthStore = defineStore('auth', function () {
     // The next person to log in on this computer starts with their own profile and the normal filters
     profile.value = null
     profileLoaded.value = false
-    accountAnswered.value = false
     useFiltersStore().clearFilters()
     localStorage.removeItem('presets')
     localStorage.removeItem('token')
