@@ -30,6 +30,12 @@ const router = createRouter({
       component: LoginView,
     },
     {
+      // The same page, opened on "Create account" (the presets popup's "Save my presets" comes here)
+      path: '/createaccount',
+      name: 'createaccount',
+      component: LoginView,
+    },
+    {
       path: '/CPFCal',
       name: 'cpfcal',
       component: CPFCalView,

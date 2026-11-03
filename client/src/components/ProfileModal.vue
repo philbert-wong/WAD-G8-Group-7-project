@@ -12,10 +12,10 @@ const auth = useAuthStore()
 const router = useRouter()
 
 // "Save my presets": save them on this device and use them as the filters, then open the login page on
-// "Create account" (?presets=saved), so they can be kept on an account. (Once saved, App.vue stops showing this popup.)
+// "Create account" (/createaccount), so they can be kept on an account. (Once saved, App.vue stops showing this popup.)
 async function onSave(answers) {
   await auth.saveProfile(answers)
-  router.push({ path: '/login', query: { presets: 'saved' } })
+  router.push('/createaccount')
 }
 
 // "Continue as guest": close the popup for this visit, and go to Search
