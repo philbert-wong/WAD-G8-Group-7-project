@@ -3,7 +3,7 @@
 // Proximity Housing Grant (PHG) checker: pick your parents' (or child's) block,
 // and see which blocks in our data are within 4 km, so they qualify for "live near".
 // Uses the existing GET /api/blocks/nearby endpoint (MongoDB $geoNear), no new route.
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { PHG_NEAR_DISTANCE_METRES } from '../utils/affordabilityRules.js'
 
@@ -24,6 +24,8 @@ const loading = ref(false)
 const errorMessage = ref('')
 
 // Sorts addresses A to Z for the dropdown
+// ⚠️ NOT IN COURSE (E): a "compare function" for list.sort(). sort() calls it with two items at a time:
+// a negative number puts a first, a positive number puts b first, 0 leaves them as they are.
 function compareByLabel(a, b) {
   if (a.label < b.label) {
     return -1
@@ -81,9 +83,10 @@ async function checkPhg() {
 
   loading.value = true
   try {
-    const response = await axios.get(`${BASE_URL}/api/blocks/nearby`, {
-      params: { lat: parent.lat, lng: parent.lng, radius: PHG_NEAR_DISTANCE_METRES, limit: NEARBY_LIMIT },
-    })
+    // The parents' location, the 4 km radius and the limit go in the URL after the "?"
+    const response = await axios.get(
+      `${BASE_URL}/api/blocks/nearby?lat=${parent.lat}&lng=${parent.lng}&radius=${PHG_NEAR_DISTANCE_METRES}&limit=${NEARBY_LIMIT}`,
+    )
     nearbyBlocks.value = response.data.results
     checked.value = true
   } catch (error) {
@@ -105,8 +108,8 @@ function formatDistance(metres) {
   return (metres / 1000).toFixed(1) + ' km'
 }
 
-// Fill the dropdown as soon as this component is created
-loadAddresses()
+// Fill the dropdown when the component appears on the page (lifecycle hook, Week 5)
+onMounted(loadAddresses)
 </script>
 
 <template>

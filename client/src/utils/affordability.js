@@ -1,22 +1,7 @@
-// AFFORDABILITY CALCULATOR + GRANT RULES (runs in the browser)
-// Combined version: Yujia's household input (co-owners, first/second-timers, joint singles)
-// + Jihao's loan maths and all three grants.
-//
+// AFFORDABILITY CALCULATOR + GRANT RULES 
+
 // Every number (grant amounts, ceilings, loan rules) comes from affordabilityRules.js.
 // This file only does the maths, so if HDB changes a number we only edit the rules file.
-//
-// "inputs" (from CPFCalView.vue) looks like:
-// {
-//   buyerType: 'single', 'couple' or 'joint',
-//   owners: [                                   // owners[0] is the main owner
-//     { status: 'first', income: 4000, cpf: 50000, cash: 20000 },
-//     { status: 'first', income: 3000, cpf: 30000, cash: 10000 },
-//   ],
-//   employed12Months: true,      // needed for the EHG
-//   flatType: '4 ROOM',
-//   phgOption: 'none', 'with' or 'near',   // living with / near parents or child
-//   loanYears: 25,
-// }
 
 import {
   HDB_LOAN_INTEREST_RATE,
@@ -27,6 +12,7 @@ import {
   HDB_LOAN_INCOME_CEILING,
   CPF_HOUSING_GRANT_INCOME_CEILING,
   CPF_HOUSING_GRANT,
+  CPF_HOUSING_GRANT_SINGLE_FLAT_TYPES,
   EHG_INCOME_CEILING,
   EHG_MONTHS_EMPLOYED,
   EHG_TIERS,
@@ -36,8 +22,20 @@ import {
 } from './affordabilityRules.js'
 
 // ---------- Loan maths ----------
+// ⚠️ NOT IN COURSE: the two functions below use the standard bank loan formula (it is finance, not IS216).
+// We wrote it with a plain for loop (Week 1) instead of Math.pow, which was not taught.
 
-// Monthly repayment for a loan (standard loan formula).
+// How much $1 grows to after this many months of interest.
+// Each month it is multiplied by (1 + monthly rate), e.g. 300 months at 0.2167% a month -> about 1.91
+function growthOverMonths(monthlyRate, months) {
+  let growth = 1
+  for (let month = 1; month <= months; month++) {
+    growth = growth * (1 + monthlyRate)
+  }
+  return growth
+}
+
+// Monthly repayment for a loan.
 // loan = 400000, ratePercent = 2.6, years = 25  ->  about 1815
 export function monthlyRepayment(loan, ratePercent, years) {
   const months = years * 12
@@ -48,7 +46,9 @@ export function monthlyRepayment(loan, ratePercent, years) {
     return loan / months
   }
 
-  return (loan * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months))
+  // Bank formula: repayment = loan × rate × growth ÷ (growth − 1)
+  const growth = growthOverMonths(monthlyRate, months)
+  return (loan * monthlyRate * growth) / (growth - 1)
 }
 
 // The opposite of monthlyRepayment: how big a loan this monthly repayment can pay off.
@@ -61,7 +61,9 @@ export function loanForRepayment(payment, ratePercent, years) {
     return payment * months
   }
 
-  return (payment * (1 - Math.pow(1 + monthlyRate, -months))) / monthlyRate
+  // The same formula, turned around: loan = payment × (growth − 1) ÷ (rate × growth)
+  const growth = growthOverMonths(monthlyRate, months)
+  return (payment * (growth - 1)) / (monthlyRate * growth)
 }
 
 // Rough monthly repayment for a flat at this price, if you borrow the most an HDB loan allows.
@@ -152,9 +154,17 @@ export function enhancedHousingGrant(inputs, totals, type) {
     return { name: name, amount: 0, status: 'no', reason: 'Needs ' + EHG_MONTHS_EMPLOYED + ' months of continuous work' }
   }
 
+  // Mixed couples (first-timer + second-timer) are assessed on HALF the household income (HDB's EHG table, page 2)
+  let income = totals.income
+  let incomeLabel = 'Household income'
+  if (type === 'mixed') {
+    income = totals.income / 2
+    incomeLabel = 'Half of the household income'
+  }
+
   const ceiling = EHG_INCOME_CEILING[type]
-  if (totals.income > ceiling) {
-    return { name: name, amount: 0, status: 'no', reason: 'Household income is above ' + money(ceiling) }
+  if (income > ceiling) {
+    return { name: name, amount: 0, status: 'no', reason: incomeLabel + ' is above ' + money(ceiling) }
   }
 
   // Couples and joint singles use the family table; one single and mixed couples use the singles table
@@ -170,8 +180,8 @@ export function enhancedHousingGrant(inputs, totals, type) {
 
   // Tiers are lowest income first: take the first band the income fits into
   for (const tier of tiers) {
-    if (totals.income <= tier.maxIncome) {
-      return { name: name, amount: tier.amount, status: 'yes', reason: 'Income band up to ' + money(tier.maxIncome) }
+    if (income <= tier.maxIncome) {
+      return { name: name, amount: tier.amount, status: 'yes', reason: incomeLabel + ' band up to ' + money(tier.maxIncome) }
     }
   }
   return { name: name, amount: 0, status: 'no', reason: 'Income is above every band' }
@@ -185,13 +195,18 @@ export function cpfHousingGrant(inputs, totals, type) {
     return { name: name, amount: 0, status: 'no', reason: 'Only for first-timers' }
   }
   // Amounts for these households are not in the rules file yet
-  if (type === 'other' || type === 'mixed' || type === 'joint') {
+  if (type === 'other' || type === 'joint') {
     return { name: name, amount: 0, status: 'unknown', reason: 'Amount for this household not filled in yet' }
   }
 
   const ceiling = CPF_HOUSING_GRANT_INCOME_CEILING[type]
   if (totals.income > ceiling) {
     return { name: name, amount: 0, status: 'no', reason: 'Household income is above ' + money(ceiling) }
+  }
+
+  // Singles only get it for flats up to 5-room (not EXECUTIVE)
+  if (type === 'single' && !CPF_HOUSING_GRANT_SINGLE_FLAT_TYPES.includes(inputs.flatType)) {
+    return { name: name, amount: 0, status: 'no', reason: 'Singles: up to 5-room flats only' }
   }
 
   // Bigger flats get a smaller grant
@@ -232,11 +247,17 @@ export function proximityHousingGrant(inputs) {
 
 // All three grants, in the order the results table shows them
 export function checkGrants(inputs, totals, type) {
-  return [
-    enhancedHousingGrant(inputs, totals, type),
-    cpfHousingGrant(inputs, totals, type),
-    proximityHousingGrant(inputs),
-  ]
+  let ehg = enhancedHousingGrant(inputs, totals, type)
+  const cpfGrant = cpfHousingGrant(inputs, totals, type)
+  const phg = proximityHousingGrant(inputs)
+
+  // HDB: for a resale flat you must first qualify for the CPF Housing Grant before you can get the EHG.
+  // So if the CPF Housing Grant is a clear "no", the EHG is "no" too.
+  if (cpfGrant.status === 'no' && ehg.status === 'yes') {
+    ehg = { name: ehg.name, amount: 0, status: 'no', reason: 'Must qualify for the CPF Housing Grant first' }
+  }
+
+  return [ehg, cpfGrant, phg]
 }
 
 // ---------- Max budget ----------

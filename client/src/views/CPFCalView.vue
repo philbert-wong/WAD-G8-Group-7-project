@@ -21,19 +21,6 @@ import { calculateBudget } from '../utils/affordability.js'
 import { MAX_LOAN_YEARS, HDB_LOAN_INTEREST_RATE, HDB_LOAN_LTV_PERCENT, MSR_PERCENT } from '../utils/affordabilityRules.js'
 import PhgChecker from '../components/PhgChecker.vue'
 
-// =====================================================================================
-// TO DECIDE: how the results update. Change this ONE line to switch.
-//
-//   true  = OPTION A (Yujia's way): results update LIVE as you type, using computed().
-//           + the Step 1 summary changes straight away
-//           - computed() is not in our course list (SearchView already uses it, though)
-//
-//   false = OPTION B (course-only way): results are worked out when you press "Next".
-//           + only ref and plain functions
-//           - no live summary on Step 1; you see the numbers on Step 2
-// =====================================================================================
-const USE_LIVE_UPDATES = true
-
 const router = useRouter()
 
 // Which step of the wizard is showing: 1, 2 or 3
@@ -146,42 +133,24 @@ function buildInputs() {
   }
 }
 
-// ---------- OPTION A: live results with computed() ----------
+// ---------- The result (computed property, Week 5) ----------
 // computed() re-runs this function by itself whenever anything it reads changes
 // (any box in the form), and remembers the answer until then.
-const liveResult = computed(function () {
+// null = the form is not valid yet, so there is nothing to show.
+const result = computed(function () {
   if (checkForm() !== '') {
     return null
   }
   return calculateBudget(buildInputs())
 })
 
-// ---------- OPTION B: results only when "Next" is pressed ----------
-// A normal ref that we fill in ourselves in calculateNow()
-const buttonResult = ref(null)
-
-function calculateNow() {
-  buttonResult.value = calculateBudget(buildInputs())
-}
-
-// The result the page shows, from whichever option is switched on (null = nothing to show yet)
-function getResult() {
-  if (USE_LIVE_UPDATES) {
-    return liveResult.value
-  }
-  return buttonResult.value
-}
-
 // ---------- Moving between steps ----------
 
-// "Next" on Step 1: check the form first; Option B also works out the result here
+// "Next" on Step 1: check the form first, then show Step 2
 function goToStep2() {
   errorMessage.value = checkForm()
   if (errorMessage.value !== '') {
     return
-  }
-  if (!USE_LIVE_UPDATES) {
-    calculateNow()
   }
   currentStep.value = 2
 }
@@ -191,6 +160,11 @@ function goToStep(step) {
 }
 
 // ---------- Showing results ----------
+
+// Shows a number as money, e.g. 682000 -> "$682,000" (toLocaleString adds the commas)
+function money(amount) {
+  return '$' + amount.toLocaleString('en-SG')
+}
 
 // A friendly name for the household type that affordability.js worked out
 function householdLabel(type) {
@@ -215,7 +189,9 @@ function householdLabel(type) {
 // CHANGED from Yujia's version: it now sends the max flat price INCLUDING the loan.
 // Before, it sent only savings + EHG, which is far below what people can actually pay.
 function applyBudget() {
-  router.push({ path: '/', query: { maxPrice: getResult().maxBudget } })
+  // ⚠️ NOT IN COURSE (D): query strings (?maxPrice=...). Week 4 taught route params, not query.
+  // Simplest course way: save the budget in the Pinia filters store (Week 11), then router.push('/').
+  router.push({ path: '/', query: { maxPrice: result.value.maxBudget } })
 }
 </script>
 
@@ -315,16 +291,16 @@ function applyBudget() {
             </div>
           </div>
 
-          <!-- OPTION A only: Yujia's live household summary -->
-          <div v-if="USE_LIVE_UPDATES && getResult()" class="mt-4 p-3 bg-light rounded">
+          <!-- Yujia's live household summary (shows once the form is valid) -->
+          <div v-if="result" class="mt-4 p-3 bg-light rounded">
             <h6 class="mb-2">Household summary</h6>
             <div class="row small">
-              <div class="col-6 col-md-3">Buyers: {{ getResult().totals.buyers }}</div>
-              <div class="col-6 col-md-3">First-timers: {{ getResult().totals.firstTimers }}</div>
-              <div class="col-6 col-md-3">Second-timers: {{ getResult().totals.secondTimers }}</div>
-              <div class="col-6 col-md-3">Income: {{ '$' + getResult().totals.income.toLocaleString('en-SG') }}</div>
-              <div class="col-6 col-md-3">CPF OA: {{ '$' + getResult().totals.cpf.toLocaleString('en-SG') }}</div>
-              <div class="col-6 col-md-3">Cash: {{ '$' + getResult().totals.cash.toLocaleString('en-SG') }}</div>
+              <div class="col-6 col-md-3">Buyers: {{ result.totals.buyers }}</div>
+              <div class="col-6 col-md-3">First-timers: {{ result.totals.firstTimers }}</div>
+              <div class="col-6 col-md-3">Second-timers: {{ result.totals.secondTimers }}</div>
+              <div class="col-6 col-md-3">Income: {{ money(result.totals.income) }}</div>
+              <div class="col-6 col-md-3">CPF OA: {{ money(result.totals.cpf) }}</div>
+              <div class="col-6 col-md-3">Cash: {{ money(result.totals.cash) }}</div>
             </div>
           </div>
 
@@ -336,38 +312,38 @@ function applyBudget() {
     </div>
 
     <!-- ===================== STEP 2: Grants (FEATURE 3 + FEATURE 6) ===================== -->
-    <div v-if="currentStep === 2 && getResult()">
+    <div v-if="currentStep === 2 && result">
       <h4 class="mb-3">Step 2: Estimated housing grants</h4>
 
       <div class="card shadow-sm">
         <div class="card-body p-4">
           <p class="mb-1">
-            Household: <strong>{{ householdLabel(getResult().type) }}</strong>
+            Household: <strong>{{ householdLabel(result.type) }}</strong>
           </p>
-          <p class="text-muted small">Household monthly income: {{ '$' + getResult().totals.income.toLocaleString('en-SG') }}</p>
+          <p class="text-muted small">Household monthly income: {{ money(result.totals.income) }}</p>
 
           <!-- FEATURE 3 (both): every grant, with the reason -->
           <table class="table align-middle">
             <tbody>
-              <tr v-for="grant in getResult().grants" :key="grant.name">
+              <tr v-for="grant in result.grants" :key="grant.name">
                 <td>
                   {{ grant.name }}
                   <div class="small text-muted">{{ grant.reason }}</div>
                 </td>
                 <td class="text-end">
-                  <span v-if="grant.status === 'yes'" class="text-success fw-semibold">{{ '$' + grant.amount.toLocaleString('en-SG') }}</span>
+                  <span v-if="grant.status === 'yes'" class="text-success fw-semibold">{{ money(grant.amount) }}</span>
                   <span v-else-if="grant.status === 'unknown'" class="text-warning">Not counted yet</span>
                   <span v-else class="text-muted">$0</span>
                 </td>
               </tr>
               <tr class="fw-bold">
                 <td>Total grants</td>
-                <td class="text-end">{{ '$' + getResult().grantsTotal.toLocaleString('en-SG') }}</td>
+                <td class="text-end">{{ money(result.grantsTotal) }}</td>
               </tr>
             </tbody>
           </table>
 
-          <div v-if="getResult().hasUnknownGrant" class="alert alert-warning small">
+          <div v-if="result.hasUnknownGrant" class="alert alert-warning small">
             Some grants are not counted because we have no rule for your case yet, so your real total may be higher.
           </div>
 
@@ -388,22 +364,22 @@ function applyBudget() {
     </div>
 
     <!-- ===================== STEP 3: Budget (FEATURE 4 + FEATURE 5 + FEATURE 7) ===================== -->
-    <div v-if="currentStep === 3 && getResult()">
+    <div v-if="currentStep === 3 && result">
       <h4 class="mb-3">Step 3: Your max flat price</h4>
 
       <div class="card shadow-sm">
         <div class="card-body p-4">
           <!-- FEATURE 4 (Jihao): max price including the HDB loan -->
           <p class="text-muted small mb-1">Estimated max flat price</p>
-          <h3 class="mb-1">{{ '$' + getResult().maxBudget.toLocaleString('en-SG') }}</h3>
+          <h3 class="mb-1">{{ money(result.maxBudget) }}</h3>
           <p class="small text-muted">
-            <span v-if="getResult().limitedBy === 'savings'">
+            <span v-if="result.limitedBy === 'savings'">
               Limited by your savings and grants: they must cover at least {{ 100 - HDB_LOAN_LTV_PERCENT }}% of the price.
             </span>
             <span v-else>Limited by your income: the loan repayment can be at most {{ MSR_PERCENT }}% of it.</span>
           </p>
 
-          <div v-if="!getResult().loanAllowed" class="alert alert-warning small">
+          <div v-if="!result.loanAllowed" class="alert alert-warning small">
             Your household income is above the HDB loan ceiling, so no HDB loan is counted.
             A bank loan is not built into this calculator yet.
           </div>
@@ -411,16 +387,17 @@ function applyBudget() {
           <h6 class="mt-3">How it is paid for</h6>
           <table class="table table-sm">
             <tbody>
-              <tr><td>HDB loan ({{ HDB_LOAN_INTEREST_RATE }}% a year)</td><td class="text-end">{{ '$' + getResult().loan.toLocaleString('en-SG') }}</td></tr>
-              <tr><td>Grants</td><td class="text-end">{{ '$' + getResult().fromGrants.toLocaleString('en-SG') }}</td></tr>
-              <tr><td>CPF OA savings</td><td class="text-end">{{ '$' + getResult().fromCpf.toLocaleString('en-SG') }}</td></tr>
-              <tr><td>Cash savings</td><td class="text-end">{{ '$' + getResult().fromCash.toLocaleString('en-SG') }}</td></tr>
-              <tr class="fw-bold"><td>Monthly loan repayment</td><td class="text-end">{{ '$' + getResult().monthlyRepayment.toLocaleString('en-SG') }}</td></tr>
+              <tr><td>HDB loan ({{ HDB_LOAN_INTEREST_RATE }}% a year)</td><td class="text-end">{{ money(result.loan) }}</td></tr>
+              <tr><td>Grants</td><td class="text-end">{{ money(result.fromGrants) }}</td></tr>
+              <tr><td>CPF OA savings</td><td class="text-end">{{ money(result.fromCpf) }}</td></tr>
+              <tr><td>Cash savings</td><td class="text-end">{{ money(result.fromCash) }}</td></tr>
+              <tr class="fw-bold"><td>Monthly loan repayment</td><td class="text-end">{{ money(result.monthlyRepayment) }}</td></tr>
             </tbody>
           </table>
 
           <p class="text-muted small">
-            Not included: stamp duty, legal fees, cash over valuation, bank loans, and the remaining-lease limit on the loan.
+            Not included: stamp duty, legal fees, cash over valuation, bank loans, and HDB's other loan period
+            limits (65 minus your age, and the flat's remaining lease minus 20 years).
           </p>
 
           <button type="button" class="btn btn-secondary" @click="goToStep(2)">Back</button>

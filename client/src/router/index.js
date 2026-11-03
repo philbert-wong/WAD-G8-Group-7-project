@@ -4,7 +4,7 @@ import SearchView from '../views/SearchView.vue'
 import ShortlistView from '../views/ShortlistView.vue'
 import LoginView from '../views/LoginView.vue'
 import CPFCalView from '../views/CPFCalView.vue'
-import CompareView from '../views/CompareView.vue' // FEATURE 7 (Jihao): compare shortlisted flats
+import CompareView from '../views/CompareView.vue' // compare shortlisted flats
 import MapView from '../views/MapView.vue' // map of every block + PHG circle
 
 import { useAuthStore } from '../stores/auth'
@@ -34,7 +34,7 @@ const router = createRouter({
       component: CPFCalView,
     },
     {
-      // FEATURE 7 (Jihao): compare 2-3 shortlisted flats side by side
+      //compare 2-3 shortlisted flats side by side
       path: '/compare',
       name: 'compare',
       component: CompareView,

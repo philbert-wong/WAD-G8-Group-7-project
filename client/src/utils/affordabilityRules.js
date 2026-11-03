@@ -1,48 +1,61 @@
-// AFFORDABILITY RULES: every grant amount, income ceiling and loan number used by my part, in ONE place.
-//
-// These numbers change (e.g. income ceilings went up in Aug 2026), so each one says where it came from
-// and when it was checked. Before the demo, open each source and tick it off.
-//
-//   ✅ = read on an official page (HDB / CPF / MAS)
-//   ⚠️ VERIFY = only found on a non-official site, or the official page did not show it clearly
-//   ❌ = not found anywhere, so it is left out; the calculator skips it
-//
-// All checked on 23 Oct 2026.
-//
-// Household types used below (same as the calculator's "Buying as"):
-//   family = couple / family, ALL first-timers
-//   single = one single buyer (Single Singapore Citizen scheme, 35 or older)
-//   joint  = 2 to 4 singles buying together (Joint Singles Scheme)
-//   mixed  = couple where one is a first-timer and the other a second-timer
+// AFFORDABILITY RULES: every grant amount, income ceiling and loan number  
+//  
+//  
+// Household types used below (same as the calculator's "Buying as"):  
+//   family = couple / family, ALL first-timers  
+//   single = one single buyer (Single Singapore Citizen scheme, 35 or older) 
+//   joint  = 2 to 4 singles buying together (Joint Singles Scheme) 
+//   mixed  = couple where one is a first-timer and the other a second-timer 
 
-// ---------- Sources ----------
-// [CPF-GUIDE]  CPF Board, "A guide to Enhanced CPF Housing Grant and Proximity Housing Grant"
-//              https://www.cpf.gov.sg/member/infohub/educational-resources/a-guide-to-enhanced-cpf-housing-and-proximity-grant
-//              (page says last updated 25 Mar 2026, i.e. BEFORE the Aug 2026 income ceiling change)
-// [HDB-2026]   HDB, "Increase in income ceilings and greater support for families with children", Annex A
-//              https://www.hdb.gov.sg/-/media/hdb-pulse/news/2026/increase-in-income-ceilings-and-greater-support-for-families-with-children/Annex-A.pdf
-//              (announced at National Day Rally 2026; news sites say it applies to HFE letters from 24 Aug 2026)
-// [MAS-LOANS]  MAS, "Rules for New Housing Loans"
-//              https://www.mas.gov.sg/regulation/explainers/new-housing-loans
-// [CPF-LOAN]   CPF Board, "3 differences between HDB loan and bank loan"
-//              https://www.cpf.gov.sg/member/infohub/educational-resources/3-differences-between-hdb-loan-and-bank-loan
-// [HDB-AR2025] HDB Annual Report 2024/2025
-//              https://www.hdb.gov.sg/-/media/hdb-pulse/reports/annual-reports-and-financial-statements/HDB_AR2025.pdf
-// [HDB-2022]   HDB press release, property measures, 29 Sep 2022
-//              https://www.hdb.gov.sg/about-us/news-and-publications/press-releases/29092022-propertymeasures2022
-// [YUJIA-EHG]  The EHG band table from Yujia's CPFCalView.vue (CPFCal branch). Matches OhMyHome's table
-//              https://ohmyhome.com/en-sg/blog/a-quick-guide-to-enhanced-cpf-housing-grant/ (NOT official),
-//              but other sites show different amounts for the middle bands.
-// [PG-2026]    PropertyGuru, "HDB resale grants in 2026: How much can you actually get?" (NOT official)
-//              https://www.propertyguru.com.sg/property-guides/hdb-resale-grants-2026-how-much-can-you-get-pjx-98578
+// --- Sources ---
+// Official sources (where a page shows no date, the date it was checked is given)
+// [CPF-GUIDE]    CPF Board, "A guide to Enhanced CPF Housing Grant and Proximity Housing Grant" (updated 2 Oct 2026)
+//                https://www.cpf.gov.sg/member/infohub/educational-resources/a-guide-to-enhanced-cpf-housing-and-proximity-grant
+// [CPF-LOAN]     CPF Board, "3 differences between HDB loan and bank loan" (checked 23 Oct 2026)
+//                https://www.cpf.gov.sg/member/infohub/educational-resources/3-differences-between-hdb-loan-and-bank-loan
+// [HDB-2026]     HDB, "Increase in income ceilings and greater support for families with children", Annex A (Aug 2026)
+//                https://www.hdb.gov.sg/-/media/hdb-pulse/news/2026/increase-in-income-ceilings-and-greater-support-for-families-with-children/Annex-A.pdf
+// [HDB-NEWS-2026] HDB, "Increase in income ceilings and greater support for families with children" (updated 31 Oct 2026)
+//                https://www.hdb.gov.sg/hdb-pulse/news/2026/increase-in-income-ceilings-and-greater-support-for-families-with-children
+// [HDB-AR2025]   HDB, "Annual Report 2024/2025" (2025)
+//                https://www.hdb.gov.sg/-/media/hdb-pulse/reports/annual-reports-and-financial-statements/HDB_AR2025.pdf
+// [HDB-CPFHG]    HDB, "CPF Housing Grants for Families Buying Resale Flats" (checked 3 Nov 2026)
+//                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/couples-and-families/cpf-housing-grants
+// [HDB-CPFHG-SIN] HDB, "CPF Housing Grant for Singles Buying Resale Flats" (to check)
+//                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/singles/cpf-housing-grants
+// [HDB-EHG-FAM]  HDB, "Enhanced CPF Housing Grant for Families" (checked 3 Nov 2026)
+//                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/couples-and-families/enhanced-cpf-housing-grant
+// [HDB-EHG-SIN]  HDB, "Enhanced CPF Housing Grant for Singles" (checked 3 Nov 2026)
+//                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/singles/enhanced-cpf-housing-grant
+// [EHG]          HDB, "Enhanced CPF Housing Grant (EHG) amount for first-timer households" (PDF, checked 3 Nov 2026)
+//                https://www.hdb.gov.sg/-/media/buying-a-flat/flat-grant-and-loan-eligibility/couples-and-families/enhanced-cpf-housing-grant/EHG-amount-Families.pdf
+// [EHG-SIN]      HDB, "EHG amount for singles" (PDF, 214 KB, linked from [HDB-EHG-SIN]) (to check)
+// [HDB-PHG-SIN]  HDB, "Proximity Housing Grant for Singles Buying Resale Flats" (to check)
+//                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/singles/proximity-housing-grant
+// [HDB-RESALE]   HDB, "Resale Terms and Conditions" (PDF, updated 1 Sep 2026)
+//                https://www.hdb.gov.sg/-/media/managing-my-home/selling-a-flat/process-for-selling-a-flat/option-to-purchase/Resale-Terms--Conditions.pdf
+// [NICE-LOANS]   MyNiceHome (HDB), "Housing Loans for HDB Flat Buyers" (updated 23 Aug 2026)
+//                https://www.mynicehome.gov.sg/get-started/hdb-loans-guide/
+// [NICE-GRANTS]  MyNiceHome (HDB), "CPF Housing Grants for HDB Flat Buyers" (updated 23 Aug 2026)
+//                https://www.mynicehome.gov.sg/get-started/hdb-grants-guide/
+// [SGW-CPFHG]    SupportGoWhere, "CPF Housing Grant" (updated 31 Oct 2026)
+//                https://supportgowhere.life.gov.sg/schemes/CPF-HG/cpf-housing-grant
+// [MFF]          Made for Families, "Housing Schemes and Grants" (updated 21 Oct 2026)
+//                https://www.madeforfamilies.gov.sg/housing/housing-schemes-and-grants/
+// [MAS-LOANS]    MAS, "Rules for New Housing Loans" (checked 23 Oct 2026)
+//                https://www.mas.gov.sg/regulation/explainers/new-housing-loans
+// [MAS-2022]     MAS, "Measures to Promote Sustainable Conditions in the Property Market" (29 Sep 2022)
+//                https://www.mas.gov.sg/news/media-releases/2022/measures-to-promote-sustainable-conditions-in-the-property-market-by-ensuring-prudent-borrowing-and-moderating-demand
+// [IRAS-BSD]     IRAS, "Buyer's Stamp Duty (BSD)" (updated 28 Oct 2026)
+//                https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/buyer's-stamp-duty-(bsd)
 
-// ---------- HDB housing loan ----------
+// --- HDB housing loan ---
 
 // ✅ [CPF-LOAN] HDB loan interest rate, % per year ("currently fixed at 2.6%", reviewed every quarter)
 export const HDB_LOAN_INTEREST_RATE = 2.6
 
-// ⚠️ VERIFY [HDB-2022] HDB works out how much you can borrow using a 3% "floor" rate,
-// even though you are charged 2.6%. (Seen in a search summary of the press release, page not opened.)
+// ✅ [MAS-2022] HDB works out how much you can borrow using a 3% "floor" rate,
+// even though you are charged 2.6% ("an interest rate floor of 3% p.a. to compute a borrower's eligible housing loan amount")
 export const HDB_LOAN_ASSESSMENT_RATE = 3.0
 
 // ✅ [HDB-AR2025] Loan-to-Value limit for HDB loans: you can borrow at most 75% of the price
@@ -52,63 +65,64 @@ export const HDB_LOAN_LTV_PERCENT = 75
 // ✅ [MAS-LOANS] Mortgage Servicing Ratio: at most 30% of gross monthly income on the monthly repayment
 export const MSR_PERCENT = 30
 
-// ⚠️ VERIFY [MAS-LOANS] says "30 years for HDB flats". That is the MAS rule for any loan on an HDB flat;
-// check whether HDB's OWN loan has a shorter maximum and change this if so.
-export const MAX_LOAN_YEARS = 30
+// ✅ [NICE-LOANS] Longest HDB loan: 25 years. (30 years is the limit for BANK loans on HDB flats.)
+// HDB also caps it at "65 years minus the average age of applicants" and "remaining lease of flat minus 20 years";
+// the calculator does not ask for age or lease, so those two are listed under "Not included" on Step 3.
+export const MAX_LOAN_YEARS = 25
 
-// ✅ [HDB-2026] Income ceiling (average gross monthly household income) to get an HDB loan, after Aug 2026
+// ✅ [HDB-NEWS-2026] Income ceiling (average gross monthly household income) to get an HDB loan
 export const HDB_LOAN_INCOME_CEILING = {
-  family: 16000,
-  mixed: 16000, // a couple, so the family ceiling
+  family: 16000, // also used for "mixed" couples (see loanGroup in affordability.js)
   single: 8000, // Single Singapore Citizen scheme
   joint: 16000, // Joint Singles Scheme
 }
 
-// ---------- Grants ----------
+// --- Grants ---
 
-// ✅ [HDB-2026] Income ceiling for the CPF Housing Grant on a resale flat, after Aug 2026
+// ✅ [HDB-CPFHG] + [SGW-CPFHG] Income ceiling for the CPF Housing Grant on a resale flat
 export const CPF_HOUSING_GRANT_INCOME_CEILING = {
   family: 16000,
+  mixed: 16000, // mixed couples get the Family Grant, so the same ceiling
   single: 8000, // Single Singapore Citizen, up to a 5-room resale flat
   joint: 16000, // Joint Singles Scheme
 }
 
-// ⚠️ VERIFY [PG-2026] CPF Housing Grant for first-timers buying a resale flat (amount depends on flat size).
-// Only found on non-official sites. Check on hdb.gov.sg or the HFE letter page.
-// ⚠️ VERIFY: can a single get this grant for an EXECUTIVE flat at all? [HDB-2026] says the singles
-// ceiling is "for the purchase of up to a 5-room resale flat". For now singles get room5OrBigger.
-// ❌ Amounts for "mixed" couples and "joint" singles were not found anywhere, so they are left out.
-// The calculator shows "not counted yet" for them instead of guessing.
+// CPF Housing Grant for first-timers buying a resale flat, by flat size
+//   family = ✅ [HDB-CPFHG] + [SGW-CPFHG] $80,000 (2- to 4-room), $50,000 (5-room or bigger)
+//   mixed  = ✅ [HDB-CPFHG] "First-timer and second-timer couples": $40,000 and $25,000
+//   single = ✅ [SGW-CPFHG] $40,000 (2- to 4-room), $25,000 (5-room only, see below)
+//   joint  = ❌ not found yet [HDB-CPFHG-SIN], so the calculator shows "not counted yet"
+// Not modelled: an SC + SPR couple gets less ($70,000 and $40,000).
 export const CPF_HOUSING_GRANT = {
   family: { upTo4Room: 80000, room5OrBigger: 50000 },
+  mixed: { upTo4Room: 40000, room5OrBigger: 25000 },
   single: { upTo4Room: 40000, room5OrBigger: 25000 },
 }
 
-// ✅ [CPF-GUIDE] Enhanced CPF Housing Grant (EHG): highest amount, and income ceiling
-// ⚠️ VERIFY the ceiling: the CPF page is from Mar 2026. News sites say the EHG ceiling stayed at $9,000
-// after the Aug 2026 change, but I could not confirm it on an official page.
-export const EHG_MAX_AMOUNT = {
-  family: 120000,
-  single: 60000,
-}
+// ✅ [NICE-GRANTS] + [SGW-CPFHG] A single gets the CPF Housing Grant only up to a 5-room flat (not EXECUTIVE)
+export const CPF_HOUSING_GRANT_SINGLE_FLAT_TYPES = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM']
+
+// ✅ [CPF-GUIDE] + [HDB-EHG-FAM] + [HDB-EHG-SIN] Enhanced CPF Housing Grant (EHG): income ceiling
 export const EHG_INCOME_CEILING = {
   family: 9000,
   single: 4500,
-  joint: 9000, // ✅ [CPF-GUIDE] "$9,000 if buying with other singles"
-  mixed: 4500, // ✅ [CPF-GUIDE] first-timer + second-timer: "the ceiling is halved ... must not exceed $4,500"
+  joint: 9000, // "$9,000 if you are buying a flat with other singles"
+  // "Half of the average gross monthly household income ... must not exceed $4,500":
+  // affordability.js halves a mixed couple's income first, then compares it with this
+  mixed: 4500,
 }
 
-// ✅ [CPF-GUIDE] EHG needs "at least one" applicant employed continuously for 12 months before applying
+// ✅ [HDB-EHG-FAM] + [HDB-EHG-SIN] For a RESALE flat, "you must first qualify for the CPF Housing Grants for
+// resale flats ... before you may be eligible for the EHG". affordability.js checks this in checkGrants().
+
+// ✅ [HDB-EHG-FAM] + [HDB-EHG-SIN] EHG needs the applicant(s) to have "worked continuously for at least 12 months"
 export const EHG_MONTHS_EMPLOYED = 12
 
-// ⚠️ VERIFY [YUJIA-EHG] EHG amount by average gross monthly household income, lowest income first.
-// The amount goes DOWN as income goes UP. The singles table is exactly half the family table.
-// Check every row on hdb.gov.sg: other non-official sites show different middle bands.
-// (If a list is emptied, the calculator shows "EHG: not counted yet" instead of guessing.)
-//   family = used for couples/families AND joint singles ([CPF-GUIDE]: 2 first-timer singles
-//            together "may be eligible for up to $120,000"; ⚠️ VERIFY for 3 or 4 singles)
-//   single = used for one single AND for mixed couples (⚠️ VERIFY: [CPF-GUIDE] only gives the mixed
-//            couple's $4,500 ceiling; using the singles table for them is Yujia's rule, not confirmed)
+// EHG amount by average gross monthly household income, lowest income first (lower income = bigger grant)
+//   family = ✅ [EHG] page 1. Also used for joint singles: [HDB-EHG-SIN] "up to 2 singles may each be eligible
+//            for an EHG (Singles), i.e., a total of up to $120,000", on the "Income of all persons"
+//   single = ✅ [EHG] page 2 for mixed couples (on HALF the household income).
+//            Also used for one single on their own income; ⚠️ check against [EHG-SIN]
 export const EHG_TIERS = {
   family: [
     { maxIncome: 1500, amount: 120000 },
@@ -148,9 +162,9 @@ export const EHG_TIERS = {
   ],
 }
 
-// ✅ [CPF-GUIDE] Proximity Housing Grant (PHG). No income ceiling. First-timers AND second-timers can get it.
+// ✅ [CPF-GUIDE] + [NICE-GRANTS] Proximity Housing Grant (PHG). No income ceiling. Second-timers can get it too.
 // Couples (including mixed) use "family"; one single uses "single".
-// ⚠️ VERIFY: joint singles also use "single" here; check whether that is right.
+// ⚠️ Joint singles also use "single"; check against [HDB-PHG-SIN]
 export const PHG_AMOUNT = {
   family: { liveWith: 30000, liveNear: 20000 },
   single: { liveWith: 15000, liveNear: 10000 },
