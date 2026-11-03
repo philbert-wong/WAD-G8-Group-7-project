@@ -7,7 +7,10 @@
 import { RouterLink } from 'vue-router'
 
 const props = defineProps({
-  filters: Object, // { flatType, maxPrice, minLease, ... }
+  filters: Object, // { flatType, maxPrice, minLease, phg, ... }
+  // The PHG switch is only for the Map. The Map passes the parents' postal code saved on the profile
+  // ('' when there is none); Search passes nothing (null), so the switch is hidden there.
+  phgPostal: { type: String, default: null },
 })
 const emit = defineEmits(['change-filter', 'search', 'clear'])
 
@@ -52,6 +55,11 @@ function onBudgetChange(event) {
 function chooseFlatType(value) {
   emit('change-filter', 'flatType', value)
   emit('search')
+}
+
+// The PHG switch was flipped: send true / false up
+function onPhgChange(event) {
+  emit('change-filter', 'phg', event.target.checked)
 }
 
 // The "Apply filters" button
@@ -118,6 +126,27 @@ function onClear() {
       @input="onChange('minLease', $event)"
     />
 
+    <!-- PHG switch (Map only): on = only blocks within 4 km of the parents' postal code. On unless switched off. -->
+    <div v-if="props.phgPostal !== null" class="phg-row">
+      <div class="form-check form-switch">
+        <input
+          id="filter-phg"
+          class="form-check-input"
+          type="checkbox"
+          role="switch"
+          :checked="props.filters.phg && props.phgPostal !== ''"
+          :disabled="props.phgPostal === ''"
+          @change="onPhgChange"
+        />
+        <label for="filter-phg" class="form-check-label">Near parents (PHG, within 4 km)</label>
+      </div>
+      <div v-if="props.phgPostal === ''" class="hint">
+        Add your parents' postal code on your <RouterLink to="/profile">profile</RouterLink>, or type it in the PHG box below.
+      </div>
+      <div v-else-if="props.filters.phg" class="hint">Only blocks within 4 km of {{ props.phgPostal }}.</div>
+      <div v-else class="hint">Showing blocks anywhere.</div>
+    </div>
+
     <button type="submit" class="apply">Apply Filters</button>
     <button type="button" class="clear" @click="onClear">Clear all</button>
   </form>
@@ -154,6 +183,15 @@ function onClear() {
 }
 .big-val {
   font-size: 19px;
+}
+
+/* The PHG switch row, under the lease slider */
+.phg-row {
+  margin-top: 16px;
+}
+.phg-row .form-check-label {
+  font-size: 13px;
+  font-weight: 600;
 }
 
 /* Chips: a row of equal buttons (Flexbox + flex-wrap); the chosen one is dark */

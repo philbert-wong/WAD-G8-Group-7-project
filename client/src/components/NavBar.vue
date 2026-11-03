@@ -56,6 +56,13 @@ onMounted(function () {
       <!-- Logged in: email + Logout. Logged out: a Login button. -->
       <div v-if="auth.isLoggedIn" class="d-flex align-items-center gap-2">
         <span class="small text-muted d-none d-sm-inline">{{ auth.user.email }}</span>
+        <!-- Account icon: opens the profile settings page -->
+        <RouterLink to="/profile" class="account" :class="{ act: route.path === '/profile' }" title="Your profile" aria-label="Your profile">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+          </svg>
+        </RouterLink>
         <button class="btn-short" @click="onLogout">Logout</button>
       </div>
       <RouterLink v-else to="/login" class="btn-short">Login</RouterLink>
@@ -137,6 +144,17 @@ onMounted(function () {
   border-color: var(--terra);
 }
 .tabs a:hover {
+  color: var(--terra);
+}
+
+/* Account icon: dark, terracotta when hovered or when we are on the profile page */
+.account {
+  color: var(--char);
+  display: inline-flex;
+  padding: 4px;
+}
+.account:hover,
+.account.act {
   color: var(--terra);
 }
 

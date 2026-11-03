@@ -11,6 +11,9 @@ router.post('/login', authController.login);
 // requireAuth runs first: only a logged-in user gets to their preferences
 router.get('/preferences', requireAuth, authController.getPreferences);
 router.put('/preferences', requireAuth, authController.savePreferences);
+// The profile (town, parents' postal code, starting filters) is a separate field from the preferences above
+router.get('/profile', requireAuth, authController.getProfile);
+router.put('/profile', requireAuth, authController.saveProfile);
 
 // EXPORT
 module.exports = router;

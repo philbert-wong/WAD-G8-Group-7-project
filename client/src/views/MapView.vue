@@ -469,25 +469,8 @@ async function loadBlocks() {
       }
     }
 
-    // Remove the old dots first, or the new ones pile up on top of them
-    blockLayer.clearLayers()
-
-    for (const place of shown) {
-      // One dot per block, coloured by its cheapest flat type
-      L.circleMarker([place.lat, place.lng], {
-        radius: 7,
-        color: '#fff',
-        weight: 1.5,
-        fillColor: dotColour(place),
-        fillOpacity: 1,
-      })
-        .bindPopup(popupText(place))
-        // Leaflet's own click event (Vue's @click cannot be used on map dots): show this block in the sidebar
-        .on('click', function () {
-          selectPlace(place)
-        })
-        .addTo(blockLayer)
-    }
+    // Draw them: a dot per block, or a bubble per town when zoomed out (see drawBlocks below)
+    drawBlocks()
 
     // If we came from Search's "Show on map", zoom to that block (first load only)
     focusOnRequestedBlock(shown)
@@ -498,6 +481,104 @@ async function loadBlocks() {
     } else {
       errorMessage.value = error.message
     }
+  }
+}
+
+// Zoomed out further than this, the map shows one bubble per town instead of 400+ dots (too busy to read).
+// 14 = a few streets across; the map starts at 12 (the whole island).
+const TOWN_ZOOM = 14
+
+// Draws the blocks in shownPlaces. Runs after every load, and again whenever you zoom in or out.
+function drawBlocks() {
+  // Remove the old dots / bubbles first, or the new ones pile up on top of them
+  blockLayer.clearLayers()
+
+  // Town bubbles only for the full map: the shortlist and the PHG circle have few blocks,
+  // and you need to see exactly which ones (e.g. which are inside the 4 km circle)
+  const useTowns = showWhich.value === 'all' && parentPlace.value === null && map.getZoom() < TOWN_ZOOM
+  if (useTowns) {
+    drawTownBubbles()
+    return
+  }
+
+  for (const place of shownPlaces) {
+    // One dot per block, coloured by its cheapest flat type
+    L.circleMarker([place.lat, place.lng], {
+      radius: 7,
+      color: '#fff',
+      weight: 1.5,
+      fillColor: dotColour(place),
+      fillOpacity: 1,
+    })
+      .bindPopup(popupText(place))
+      // Leaflet's own click event (Vue's @click cannot be used on map dots): show this block in the sidebar
+      .on('click', function () {
+        selectPlace(place)
+      })
+      .addTo(blockLayer)
+  }
+}
+
+// Zoomed out: one round bubble per town with the number of flats there that fit your filters.
+// It sits in the middle of the town's blocks; click it to zoom into the town and see its dots.
+function drawTownBubbles() {
+  // Group the blocks by town: towns = [{ name, places: [place, ...], flats }, ...]
+  const towns = []
+  for (const place of shownPlaces) {
+    const name = place.cards[0].town
+    let town = null
+    for (const existing of towns) {
+      if (existing.name === name) {
+        town = existing
+      }
+    }
+    if (town === null) {
+      town = { name: name, places: [], flats: 0 }
+      towns.push(town)
+    }
+    town.places.push(place)
+    town.flats = town.flats + place.cards.length
+  }
+
+  for (const town of towns) {
+    // The middle of the town = the average position of its blocks
+    let latSum = 0
+    let lngSum = 0
+    const points = []
+    for (const place of town.places) {
+      latSum = latSum + place.lat
+      lngSum = lngSum + place.lng
+      points.push([place.lat, place.lng])
+    }
+    const middle = [latSum / town.places.length, lngSum / town.places.length]
+
+    // Bigger bubble for more flats: 30 px for a few, up to 50 px for the busiest towns
+    const size = Math.min(50, 30 + Math.round(town.flats / 4))
+
+    // L.divIcon = a marker drawn with our own HTML (like the amenity squares): the circle with the number,
+    // and the town name underneath. iconAnchor puts the middle of the circle on the town's middle.
+    const icon = L.divIcon({
+      className: '',
+      html:
+        '<div style="width: ' + size + 'px; height: ' + size + 'px; line-height: ' + size + 'px; ' +
+        'border-radius: 50%; background: var(--terra); opacity: 0.88; color: #fff; text-align: center; ' +
+        'font-weight: 700; font-size: 13px; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.3); cursor: pointer;">' +
+        town.flats + '</div>' +
+        '<div style="width: 120px; margin-left: ' + (size / 2 - 60) + 'px; text-align: center; font-size: 10px; ' +
+        'font-weight: 700; color: #333; text-shadow: 0 0 3px #fff, 0 0 3px #fff;">' + town.name + '</div>',
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    })
+
+    L.marker(middle, { icon: icon, title: town.name + ': ' + town.flats + ' flats' })
+      .on('click', function () {
+        // Zoom to fit the whole town, but at least to TOWN_ZOOM so its dots show (not the bubble again)
+        map.fitBounds(points, { padding: [30, 30], animate: false })
+        if (map.getZoom() < TOWN_ZOOM) {
+          map.setView(map.getCenter(), TOWN_ZOOM)
+        }
+      })
+      .addTo(blockLayer)
   }
 }
 
@@ -551,6 +632,23 @@ function findShownPlaceAt(lat, lng) {
 // The filter panel says one filter changed, e.g. ('maxPrice', '600000'): change it in the shared store. Same as on Search.
 function setFilter(name, value) {
   filterStore.setFilter(name, value)
+  if (name === 'phg') {
+    changePhg(value)
+  }
+}
+
+// The "Near parents (PHG)" switch was flipped. On: draw the 4 km circle around the parents' postal code saved on
+// the profile and keep only the blocks inside. Off: remove the circle and show every block again.
+// Either way the choice is saved on the account, so it is the same next time.
+async function changePhg(on) {
+  if (on) {
+    if (savedParentsPostal !== '') {
+      await searchParent(savedParentsPostal)
+    }
+  } else {
+    clearParent()
+  }
+  auth.savePhgToggle(on)
 }
 
 // "Clear all": back to the starting filters (also on Search, since they are shared), then reload the dots
@@ -892,8 +990,33 @@ function selectedMatchText() {
   return ''
 }
 
+// The parents' postal code saved on the profile page. '' when there is none.
+// It fills the PHG box, and while the "Near parents (PHG)" switch is on (the default) the map draws its 4 km circle.
+let savedParentsPostal = ''
+if (auth.profile !== null && auth.profile.parentsPostal) {
+  savedParentsPostal = auth.profile.parentsPostal
+}
+
+// The town chosen on the profile page: zoom the map to that town's blocks (the blocks themselves are not filtered).
+// Does nothing when no town was chosen, or no block of that town fits the filters.
+function zoomToProfileTown() {
+  if (auth.profile === null || !auth.profile.town) {
+    return
+  }
+  const spots = []
+  for (const place of shownPlaces) {
+    // Every card of a place has the same town, so the first one is enough
+    if (place.cards[0].town === auth.profile.town) {
+      spots.push([place.lat, place.lng])
+    }
+  }
+  if (spots.length > 0) {
+    map.fitBounds(spots)
+  }
+}
+
 // When the page opens: make the map inside <div id="mapBox"> (centred on Singapore), then add the blocks
-onMounted(function () {
+onMounted(async function () {
   map = L.map('mapBox').setView([1.36, 103.84], 12)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
@@ -906,7 +1029,25 @@ onMounted(function () {
   // A second bag for the amenity dots, so ticking / unticking only clears and redraws those
   amenityLayer = L.layerGroup().addTo(map)
 
+  // Leaflet's zoomend event: after every zoom in / out, redraw as dots or town bubbles (see drawBlocks)
+  map.on('zoomend', drawBlocks)
+
+  // Leaflet's zoomend event: after every zoom in / out, redraw as dots or town bubbles (see drawBlocks)
+  map.on('zoomend', drawBlocks)
   loadBlocks()
+
+  // Coming from Search's "Show on map" button, the map zooms to that block instead of the profile's town
+  const comingFromSearch = mapFocus.blockId !== null
+
+  if (filterStore.filters.phg && savedParentsPostal !== '') {
+    // PHG switch is on (the default) and the parents' postal code is known: draw the circle and keep the blocks inside it
+    await searchParent(savedParentsPostal)
+  } else {
+    await loadBlocks()
+    if (!comingFromSearch) {
+      zoomToProfileTown()
+    }
+  }
 })
 
 // When you leave the Map page: remove the Leaflet map, so its listeners and layers do not stay in memory
@@ -931,6 +1072,7 @@ onUnmounted(function () {
       <span v-if="colourBy === 'match'">coloured by its priority score (from Your Priorities).</span>
       <span v-else>coloured by the median price of its cheapest flat type.</span>
       Click a dot to see every flat type there.
+      <span v-if="showWhich === 'all'">Zoomed out, the blocks are grouped into one bubble per town: click a bubble to zoom in.</span>
     </p>
 
     <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
@@ -980,6 +1122,7 @@ onUnmounted(function () {
           <CollapsiblePanel title="Filters" :start-open="isWideScreen">
             <FilterPanel
               :filters="filterStore.filters"
+              :phg-postal="savedParentsPostal"
               @change-filter="setFilter"
               @search="loadBlocks"
               @clear="clearFilters"
@@ -1001,6 +1144,7 @@ onUnmounted(function () {
             :parent-place="parentPlace"
             :nearby-count="nearbyCount"
             :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
+            :initial-text="savedParentsPostal"
             @search="searchParent"
             @clear="clearParent"
           />
