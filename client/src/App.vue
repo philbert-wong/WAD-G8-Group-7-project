@@ -35,9 +35,9 @@ const route = useRoute()
 </template>
 
 <style>
-/* The Map page: wider than Bootstrap's container (at most 1320px), so big screens do not have wide empty sides.
+/* The Map page: a little wider than Bootstrap's container (at most 1320px), so big screens do not have wide empty sides.
    Only takes effect on screens wider than 1320px; smaller screens look the same as before. */
 .wide-page {
-  max-width: 1600px;
+  max-width: 1480px;
 }
 </style>
