@@ -6,14 +6,14 @@ import ProfileModal from './components/ProfileModal.vue'
 import GuideTour from './components/GuideTour.vue'
 import { useAuthStore } from './stores/auth'
 
-// The presets popup: only when logged out, after every refresh (see needsProfile in stores/auth.js)
+// The presets popup: only for a logged-out visitor with no saved presets who has not skipped it (see needsProfile in stores/auth.js)
 const auth = useAuthStore()
 </script>
 
 <template>
   <NavBar/>
 
-  <!-- Presets popup: asks for the town, parents' postal code and starting filters (logged out only, after every refresh) -->
+  <!-- Presets popup: asks for the town, parents' postal code and starting filters (first visit only: logged out, no saved presets, not skipped before) -->
   <ProfileModal v-if="auth.needsProfile" />
 
   <main class="container pt-4 pb-5">

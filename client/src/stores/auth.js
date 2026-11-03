@@ -31,9 +31,11 @@ export const useAuthStore = defineStore('auth', function () {
   const profile = ref(null)
   // true once the server has told us the profile (so the popup does not flash up before we know)
   const profileLoaded = ref(false)
-  // true once the presets popup has been answered or skipped. It is NOT saved anywhere, so it is false again
-  // after every refresh and the popup asks again (filled in with the presets saved last time).
+  // true once the presets popup has been answered or skipped during this visit
   const presetsAsked = ref(false)
+  // true when "Skip for now" was pressed on this device before. It is saved in localStorage, so the popup
+  // does not come back after a refresh (logging out forgets it, so the next person is asked)
+  const presetsSkipped = ref(localStorage.getItem('presetsSkipped') === 'yes')
   // Goes up by 1 every time new presets are saved, so Search and the Map can watch it and reload with them
   const presetsVersion = ref(0)
   const profileSaving = ref(false)
@@ -44,11 +46,12 @@ export const useAuthStore = defineStore('auth', function () {
     return token.value !== null
   })
 
-  // Show the presets popup: only when logged out, once after every refresh.
+  // Show the presets popup: only to a logged-out visitor who has no presets saved on this device and has not
+  // skipped it before. A returning guest keeps their presets (localStorage) and changes them with the filters.
   // Logged in, it never shows: the presets were entered before signing up (and are copied to the account),
   // or come from the account; they can be changed on the profile page.
   const needsProfile = computed(function () {
-    return token.value === null && !presetsAsked.value
+    return token.value === null && !presetsAsked.value && profile.value === null && !presetsSkipped.value
   })
 
   // ---------- actions ----------
@@ -149,9 +152,12 @@ export const useAuthStore = defineStore('auth', function () {
     profileSaving.value = false
   }
 
-  // "Continue as guest" in the popup: close it for this visit and keep the presets as they are
+  // "Skip for now" in the popup: close it and keep the presets as they are. Remembered on this device,
+  // so the popup does not come back after a refresh.
   function skipPresets() {
     presetsAsked.value = true
+    presetsSkipped.value = true
+    localStorage.setItem('presetsSkipped', 'yes')
   }
 
   // The "Near parents (PHG)" switch on the map was flipped: remember it on the profile.
@@ -184,6 +190,10 @@ export const useAuthStore = defineStore('auth', function () {
     profile.value = null
     profileLoaded.value = false
     useFiltersStore().clearFilters()
+    // ...and is asked the presets popup again straight away (not only after a refresh)
+    presetsAsked.value = false
+    presetsSkipped.value = false
+    localStorage.removeItem('presetsSkipped')
     localStorage.removeItem('presets')
     localStorage.removeItem('token')
     localStorage.removeItem('user')

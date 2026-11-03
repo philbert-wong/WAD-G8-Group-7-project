@@ -47,6 +47,53 @@ function makeToken(user) {
 
 }
 
+// ---------------------------------------------------------------------
+// Stricter register checks (used by register() below; tested in tests/auth.test.js, "register input checks")
+// ---------------------------------------------------------------------
+
+// The longest password bcrypt really uses, counted in BYTES (not characters)
+const MAX_PASSWORD_BYTES = 72;
+
+// Very common passwords, all lowercase: register refuses them.
+// 'password123' is left out on purpose: the other tests and tests/helpers.js use it.
+const COMMON_PASSWORDS = [
+  'password',
+  '12345678',
+  '123456789',
+  'qwerty123',
+  'iloveyou',
+  'letmein1',
+  'admin123',
+  'welcome1'
+];
+
+// True when the text looks like an email: no spaces, exactly one "@", something before it,
+// and a "." in the part after the "@" with something before and after the dot.
+function isValidEmail(text) {
+  if (typeof text !== 'string') return false;
+
+  // no spaces
+  if (text.indexOf(' ') !== -1) return false;
+
+  // exactly one "@"
+  const parts = text.split('@');
+  if (parts.length !== 2) return false;
+
+  const local = parts[0];
+  const domain = parts[1];
+
+  // something before the "@"
+  if (local.length === 0) return false;
+
+  // a "." after the "@", with something after it
+  const dot = domain.lastIndexOf('.');
+  if (dot === 0) return false;
+  if (dot === -1) return false;
+  if (dot === domain.length - 1) return false;
+
+  return true;
+}
+
 // =====================================================================
 // Controller functions (one per address, see routes/auth-routes.js)
 // =====================================================================
@@ -63,8 +110,36 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: "Password must be at least 8 characters"})
   }
 
+  const password = req.body.password;
+
+  // A password of only spaces is rejected
+  if (password.trim() === '') {
+    return res.status(400).json({ message: 'Password cannot be only spaces' });
+  }
+
+  // bcrypt only uses the first 72 BYTES ("é" is 1 character but 2 bytes), so a longer password is rejected
+  if (Buffer.byteLength(password, 'utf8') > MAX_PASSWORD_BYTES) {
+    return res.status(400).json({ message: 'Password must be at most 72 bytes' });
+  }
+
   // Lowercase and without spaces, so "A@B.com " and "a@b.com" are the same account
   const email = req.body.email.trim().toLowerCase();
+
+  // The email must look like an email
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Please enter a valid email address' });
+  }
+
+  // The password must not be the same as the email
+  if (password.toLowerCase() === email) {
+    return res.status(400).json({ message: 'Password cannot be the same as your email' });
+  }
+
+  // Very common passwords are rejected
+  if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
+    return res.status(400).json({ message: 'That password is too common' });
+  }
+
   try {
     // An account with this email already exists: 409
     const existing = await User.findOne({ email: email})

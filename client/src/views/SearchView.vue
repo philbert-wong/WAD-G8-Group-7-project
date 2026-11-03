@@ -1,6 +1,6 @@
 <script setup>
 // The Search page: search box, filters, "What matters to you?" panel and the flat cards
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
 import SearchBar from '../components/SearchBar.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import BlockCard from '../components/BlockCard.vue'
@@ -16,7 +16,7 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
-import { useRoute } from 'vue-router'
+import { useRoute, RouterLink } from 'vue-router'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -33,6 +33,19 @@ const filterStore = useFiltersStore()
 // Messages for the top alert: "please log in" and problems saving your choices
 // (problems with the shortlist itself are in shortlist.error)
 const shortlistErrorMessage = ref('')
+
+// The "create an account" strip for a guest who has saved presets. Closing it is remembered on this device.
+const accountBannerClosed = ref(localStorage.getItem('accountBannerClosed') === 'yes')
+
+// Only for someone who is not logged in and has presets saved on this device
+const showAccountBanner = computed(function () {
+  return !auth.isLoggedIn && auth.profile !== null && !accountBannerClosed.value
+})
+
+function closeAccountBanner() {
+  accountBannerClosed.value = true
+  localStorage.setItem('accountBannerClosed', 'yes')
+}
 
 // The search box text ('' = not used). Only the Search page has a search box, so it is not in the filters store.
 const searchText = ref('')
@@ -110,12 +123,21 @@ async function searchNearPlace(text) {
   placeName.value = place.name
 }
 
-// New presets were saved in the popup (it opens after every refresh): search again with the new filters
+
+// The town preset becomes the search text, so Search focuses on it like the Map does
+function applyTownPreset() {
+  if (auth.profile !== null && auth.profile.town) {
+    searchText.value = auth.profile.town
+  }
+}
+
+// New presets were saved in the popup: search again with the new filters
 watch(
   function () {
     return auth.presetsVersion
   },
   function () {
+    applyTownPreset()
     search()
   },
 )
@@ -320,20 +342,47 @@ const scoredResults = computed(function () {
   return list
 })
 
-// Pages: show PAGE_SIZE cards at a time
-const PAGE_SIZE = 12
+// Pages: show pageSize cards at a time.
+// Phones and tablets stack each card (map on top), so they get fewer per page than a computer.
+// 991px is the same break as the "☰ Filters" button and the stacked card.
+const isSmallScreen = ref(window.innerWidth <= 991)
+
+// the window was resized (e.g. the DevTools device toolbar): work out the screen size again
+function onResize() {
+  isSmallScreen.value = window.innerWidth <= 991
+}
+onMounted(function () {
+  window.addEventListener('resize', onResize)
+})
+onUnmounted(function () {
+  window.removeEventListener('resize', onResize)
+})
+
+const pageSize = computed(function () {
+  if (isSmallScreen.value) {
+    return 6
+  }
+  return 12
+})
 const page = ref(1)
 
 // how many pages the whole list needs (at least 1)
 const totalPages = computed(function () {
-  return Math.max(1, Math.ceil(scoredResults.value.length / PAGE_SIZE))
+  return Math.max(1, Math.ceil(scoredResults.value.length / pageSize.value))
 })
 
 // the cards for the current page
 const visibleResults = computed(function () {
-  const start = (page.value - 1) * PAGE_SIZE
-  const end = start + PAGE_SIZE
+  const start = (page.value - 1) * pageSize.value
+  const end = start + pageSize.value
   return scoredResults.value.slice(start, end)
+})
+
+// a bigger window means fewer pages: if we were past the new last page, go to the last one
+watch(totalPages, function () {
+  if (page.value > totalPages.value) {
+    page.value = totalPages.value
+  }
 })
 
 // a new search gives new results: go back to page 1
@@ -359,7 +408,7 @@ function goToPage(number) {
 function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
   if (!auth.isLoggedIn) {
-    shortlistErrorMessage.value = 'Please log in to save flats'
+    shortlistErrorMessage.value = 'Saving flats needs an account.'
     return
   }
 
@@ -385,6 +434,7 @@ function loadPage() {
   if (budget !== undefined) {
     filterStore.setFilter('maxPrice', String(budget))
   }
+  applyTownPreset()
   search()
   loadAreas()
   if (auth.isLoggedIn) {
@@ -404,6 +454,11 @@ onMounted(loadPage)
 
     <div v-if="shortlistErrorMessage" class="alert alert-warning">
       {{ shortlistErrorMessage }}
+      <!-- A guest who tried to save a flat: the best moment to offer an account -->
+      <span v-if="!auth.isLoggedIn">
+        <RouterLink to="/login">Log in</RouterLink> or
+        <RouterLink to="/createaccount"><strong>create a free account</strong></RouterLink>.
+      </span>
     </div>
     <div v-if="shortlist.error" class="alert alert-warning">
       {{ shortlist.error }}
@@ -425,6 +480,20 @@ onMounted(loadPage)
     <p v-if="placeName" class="text-muted mb-3">
       Showing flats within 1 km of <strong>{{ placeName }}</strong> (place found by OneMap)
     </p>
+
+    <!-- A guest who saved presets: offer an account, so the presets (and the shortlist) follow them to any device -->
+    <div
+      v-if="showAccountBanner"
+      class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2"
+      role="status"
+    >
+      <span>
+        Presets saved on this device.
+        <RouterLink to="/createaccount"><strong>Create a free account</strong></RouterLink>
+        to keep them on any device and save flats.
+      </span>
+      <button type="button" class="btn-close" aria-label="Close" @click="closeAccountBanner"></button>
+    </div>
 
     <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->
     <div class="row g-4 mt-1">

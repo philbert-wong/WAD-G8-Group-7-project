@@ -58,6 +58,75 @@ describe('/api/auth', () => {
     expect(res.status).toBe(401);
     expect(res.body.message).toBe('Wrong email or password');
 });
+
+  it('gives an unknown email the same message as a wrong password', async () => {
+    const res = await request(BASE_URL)
+      .post('/api/auth/login')
+      .send({ email: 'nobody@example.com', password: 'not-the-password' });
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Wrong email or password');
+  });
+});
+
+// Stricter register checks. Written FIRST (TDD red step): the "rejects" tests fail until register() checks them.
+describe('/api/auth/register input checks', () => {
+  function register(email, password) {
+    return request(BASE_URL).post('/api/auth/register').send({ email: email, password: password });
+  }
+
+  it('rejects an email without @', async () => {
+    const res = await register('abc', 'goodpass123');
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects an email with no dot in the domain', async () => {
+    const res = await register('a@b', 'goodpass123');
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects an email whose domain starts with a dot', async () => {
+    const res = await register('a@.com', 'goodpass123');
+    expect(res.status).toBe(400);
+  });
+
+  it('still accepts a normal email with dots and a + tag', async () => {
+    const res = await register('first.last+tag@mail.example.com', 'goodpass123');
+    expect(res.status).toBe(201);
+  });
+
+  it('rejects a password of only spaces', async () => {
+    const res = await register('spaces@example.com', '        ');
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects a very common password', async () => {
+    const res = await register('common1@example.com', 'password');
+    expect(res.status).toBe(400);
+    const res2 = await register('common2@example.com', '12345678');
+    expect(res2.status).toBe(400);
+  });
+
+  it('rejects a password that is the same as the email', async () => {
+    const res = await register('same@example.com', 'same@example.com');
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects a password longer than 72 bytes (bcrypt ignores the rest)', async () => {
+    const res = await register('long73@example.com', 'x'.repeat(73));
+    expect(res.status).toBe(400);
+  });
+
+  it('accepts a password of exactly 72 bytes', async () => {
+    const res = await register('long72@example.com', 'x'.repeat(72));
+    expect(res.status).toBe(201);
+  });
+
+  it('counts bytes, not characters, for the 72 limit', async () => {
+    // 40 letters "é" are 40 characters but 80 bytes
+    const res = await register('bytes@example.com', 'é'.repeat(40));
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('/api/auth/profile', () => {

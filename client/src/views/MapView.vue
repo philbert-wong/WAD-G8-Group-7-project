@@ -50,7 +50,6 @@ const searchedPlace = ref(null)
 // (the typed text itself lives in PhgCard)
 const parentPlace = ref(null)
 const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circle (null = no circle)
-
 // The 4 kinds of amenity that can be shown on the map. key = the category the server uses.
 // The colours are chosen to look nothing like the 4 price colours (green, yellow, orange, red).
 // one = the name for a single one (used in the "nearest amenities" list)
@@ -1165,15 +1164,18 @@ onUnmounted(function () {
             />
           </CollapsiblePanel>
 
-          <!-- PHG layer: the parents' postal code, the 4 km circle and the count -->
-          <PhgCard
-            :parent-place="parentPlace"
-            :nearby-count="nearbyCount"
-            :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
-            :initial-text="savedParentsPostal()"
-            @search="searchParent"
-            @clear="clearParent"
-          />
+          <!-- PHG layer: the parents' postal code, the 4 km circle and the count.
+               Open at the start on a wide screen, closed on a phone -->
+          <CollapsiblePanel title="Proximity Grant (PHG)" :start-open="isWideScreen">
+            <PhgCard
+              :parent-place="parentPlace"
+              :nearby-count="nearbyCount"
+              :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
+              :initial-text="savedParentsPostal()"
+              @search="searchParent"
+              @clear="clearParent"
+            />
+          </CollapsiblePanel>
         </div>
       </div>
     </div>
