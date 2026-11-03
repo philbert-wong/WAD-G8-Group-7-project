@@ -14,8 +14,8 @@ export const TOUR_STEPS = {
       target: '.search-box',
     },
     {
-      title: 'Set your filters and priorities',
-      text: 'Pick a flat type, budget and lease, then tick what matters to you: MRT, schools, food or parks.',
+      title: 'Set your priorities and filters',
+      text: 'Tick what matters to you (MRT, schools, food or parks) for the priority score on each flat, then pick a flat type, budget and lease.',
       target: '[aria-controls="filter-drawer"], #filter-drawer',
     },
     {
@@ -38,9 +38,9 @@ export const TOUR_STEPS = {
   // Map page
   '/map': [
     {
-      title: 'Go to any place',
-      text: 'Type an address or postal code to move the map there.',
-      target: '.input-group',
+      title: 'Search anywhere',
+      text: 'The same search as the Search page: a town, street, block, postal code or any place. The map shows those flats.',
+      target: '.map-search',
     },
     {
       title: 'Click a dot',

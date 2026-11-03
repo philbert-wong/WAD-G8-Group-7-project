@@ -1,7 +1,7 @@
 <script setup>
 // The Help tour: a round "?" button in the bottom-right corner of every page. Pressing it lights up the parts of
 // the current page one at a time, with a dark card explaining each one (the steps are in utils/tourSteps.js).
-// On the Search page it also starts by itself on a first visit, once the presets popup has been closed.
+// It also starts by itself the first time you open each page (once per page), once the presets popup has been closed.
 // Same idea as the old guide pet tour (guide-pet-backup/GuidePet.vue), without the pet.
 //
 // ⚠️ NOT IN OUR COURSE:
@@ -19,8 +19,14 @@ import { TOUR_STEPS, FALLBACK_STEPS } from '../utils/tourSteps.js'
 const route = useRoute()
 const auth = useAuthStore()
 
-// Saved in the browser once the Search tour has been seen (finished or skipped), so it only starts by itself once
-const SEEN_KEY = 'searchTourSeen'
+// Saved in the browser once a page's tour has been seen (finished or skipped), so it only starts by itself once per page.
+// One key per page, e.g. 'tourSeen:/map'. (The Search page keeps its older key, so people who saw it are not asked again.)
+function seenKey(page) {
+  if (page === '/') {
+    return 'searchTourSeen'
+  }
+  return 'tourSeen:' + page
+}
 // Space between the lit-up part and the edge of the light, and between the light and the card (pixels)
 const PADDING = 6
 const GAP = 14
@@ -306,7 +312,7 @@ function glide(fromSpot, toSpot, fromCard, toCard, startX, startY, endX, endY) {
   glideFrame = requestAnimationFrame(frame)
 }
 
-// The "?" button (or the first visit to Search): the tour of the page you are on
+// The "?" button (or the first visit to a page): the tour of the page you are on
 function startTour() {
   tourPage = route.path
   if (TOUR_STEPS[tourPage] !== undefined) {
@@ -326,10 +332,8 @@ function closeTour() {
   cancelAnimationFrame(glideFrame)
   spot.value = null
   currentTarget = null
-  // The Search tour has been seen, so it does not start by itself again
-  if (tourPage === '/') {
-    localStorage.setItem(SEEN_KEY, 'yes')
-  }
+  // This page's tour has been seen, so it does not start by itself again
+  localStorage.setItem(seenKey(tourPage), 'yes')
 }
 
 function nextStep() {
@@ -348,30 +352,31 @@ function backStep() {
   }
 }
 
-// ---------- Starting by itself on Search ----------
+// ---------- Starting by itself on a first visit ----------
 
 let autoStartTimer = null
 
-// First visit to Search, and the presets popup is closed: start the tour.
-// It waits a moment first, so the page and its result cards have loaded.
+// First visit to a page that has a tour, and the presets popup is closed: start that page's tour.
+// It waits a moment first, so the page and its cards (or map dots) have loaded.
 function autoStartIfNew() {
   clearTimeout(autoStartTimer)
-  if (route.path !== '/' || auth.needsProfile || open.value) {
+  const page = route.path
+  if (TOUR_STEPS[page] === undefined || auth.needsProfile || open.value) {
     return
   }
-  if (localStorage.getItem(SEEN_KEY) === 'yes') {
+  if (localStorage.getItem(seenKey(page)) === 'yes') {
     return
   }
   autoStartTimer = setTimeout(function () {
     // Check again: the user may have moved to another page in the meantime
-    if (route.path === '/' && !auth.needsProfile && !open.value) {
+    if (route.path === page && !auth.needsProfile && !open.value) {
       startTour()
     }
   }, 1200)
 }
 
 // A tour belongs to one page, so it closes when you go to another page.
-// Arriving on Search, or closing the presets popup there, may start the first-visit tour.
+// Arriving on a page, or closing the presets popup, may start that page's first-visit tour.
 watch(
   function () {
     return route.path

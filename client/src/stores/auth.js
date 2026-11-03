@@ -13,6 +13,7 @@ import { defineStore } from 'pinia'
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
 import { useFiltersStore } from './filters'
+import { mergeWithDefaults, readSavedPriorities, saveSavedPriorities } from '../utils/priorities.js'
 
 // Tells axios to add the token to every request from now on
 function sendTokenWithEveryRequest(token) {
@@ -36,6 +37,8 @@ export const useAuthStore = defineStore('auth', function () {
   // true when "Skip for now" was pressed on this device before. It is saved in localStorage, so the popup
   // does not come back after a refresh (logging out forgets it, so the next person is asked)
   const presetsSkipped = ref(localStorage.getItem('presetsSkipped') === 'yes')
+  // true while a guest has the popup open from the "Presets" button in the top bar (to change their presets later)
+  const presetsOpen = ref(false)
   // Goes up by 1 every time new presets are saved, so Search and the Map can watch it and reload with them
   const presetsVersion = ref(0)
   const profileSaving = ref(false)
@@ -47,11 +50,14 @@ export const useAuthStore = defineStore('auth', function () {
   })
 
   // Show the presets popup: only to a logged-out visitor who has no presets saved on this device and has not
-  // skipped it before. A returning guest keeps their presets (localStorage) and changes them with the filters.
+  // skipped it before. A returning guest opens it again with the "Presets" button in the top bar (presetsOpen).
   // Logged in, it never shows: the presets were entered before signing up (and are copied to the account),
-  // or come from the account; they can be changed on the profile page.
+  // or come from the account; they can be changed on the profile page (the "Profile" button in the same place).
   const needsProfile = computed(function () {
-    return token.value === null && !presetsAsked.value && profile.value === null && !presetsSkipped.value
+    if (token.value !== null) {
+      return false
+    }
+    return presetsOpen.value || (!presetsAsked.value && profile.value === null && !presetsSkipped.value)
   })
 
   // ---------- actions ----------
@@ -123,11 +129,20 @@ export const useAuthStore = defineStore('auth', function () {
   // They go in localStorage (so they work without an account, and come back after a refresh),
   // and when logged in, on the account too (so they follow you to another computer).
   // On a problem, profileError holds the message to show.
-  async function saveProfile(answers) {
+  async function saveProfile(allAnswers) {
+    // The form also sends Your Priorities. They are not part of the profile, so they are taken out and saved apart
+    const answers = Object.assign({}, allAnswers)
+    const priorities = answers.priorities
+    delete answers.priorities
+
     profileError.value = ''
     presetsAsked.value = true
+    presetsOpen.value = false
     profile.value = answers
     localStorage.setItem('presets', JSON.stringify(answers))
+    if (priorities) {
+      saveSavedPriorities(priorities) // on this device: Search, the Map, Compare and the Shortlist read them from here
+    }
     useFiltersStore().applyProfile(answers)
     presetsVersion.value = presetsVersion.value + 1
     if (token.value === null) {
@@ -141,6 +156,14 @@ export const useAuthStore = defineStore('auth', function () {
       profile.value = response.data.profile
       profileLoaded.value = true
       localStorage.setItem('presets', JSON.stringify(profile.value))
+      if (priorities) {
+        // ...and on the account, so they follow you to another computer (the sort is kept as it was)
+        let sortBy = localStorage.getItem('sortBy')
+        if (sortBy === null) {
+          sortBy = 'match'
+        }
+        await axios.put(`${BASE_URL}/api/auth/preferences`, { preferences: { panel: priorities, sortBy: sortBy } })
+      }
     } catch (e) {
       // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
       if (e.response && e.response.data && e.response.data.message) {
@@ -152,12 +175,35 @@ export const useAuthStore = defineStore('auth', function () {
     profileSaving.value = false
   }
 
+  // Your Priorities for the profile page. Logged in, the account's copy is asked for and kept on this device too
+  // (the same thing Search does when it opens); otherwise, or if the server cannot be reached, the copy on this device.
+  async function loadPriorities() {
+    if (token.value !== null) {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/auth/preferences`)
+        const saved = response.data.preferences
+        if (saved && saved.panel) {
+          saveSavedPriorities(mergeWithDefaults(saved.panel))
+        }
+      } catch (e) {
+        // The copy on this device is used instead
+      }
+    }
+    return readSavedPriorities()
+  }
+
   // "Skip for now" in the popup: close it and keep the presets as they are. Remembered on this device,
   // so the popup does not come back after a refresh.
   function skipPresets() {
     presetsAsked.value = true
     presetsSkipped.value = true
+    presetsOpen.value = false
     localStorage.setItem('presetsSkipped', 'yes')
+  }
+
+  // The "Presets" button in the top bar (guests): open the popup again, filled in with the saved presets
+  function openPresets() {
+    presetsOpen.value = true
   }
 
   // The "Near parents (PHG)" switch on the map was flipped: remember it on the profile.
@@ -233,12 +279,15 @@ export const useAuthStore = defineStore('auth', function () {
     profileSaving,
     profileError,
     needsProfile,
+    presetsOpen,
     presetsVersion,
     login,
     register,
     loadProfile,
     saveProfile,
+    loadPriorities,
     skipPresets,
+    openPresets,
     savePhgToggle,
     logout,
   }

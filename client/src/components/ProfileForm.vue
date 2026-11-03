@@ -1,16 +1,20 @@
 <script setup>
-// The profile questions: town to focus on, parents' postal code (for the PHG), and the starting filters.
-// Used twice: in the sign-up popup (ProfileModal.vue) and on the profile settings page (ProfileView.vue).
+// The presets questions: town to focus on, parents' postal code (for the PHG), the starting filters,
+// and Your Priorities (what matters about a flat: schools, MRT, hawker centres, parks).
+// Used twice: in the first-visit popup (ProfileModal.vue) and on the profile settings page (ProfileView.vue).
 // It only collects the answers and sends them up with emit; the page decides what to do with them.
 import { ref } from 'vue'
 import axios from 'axios'
 import { useFiltersStore } from '../stores/filters'
+import PreferencesPanel from './PreferencesPanel.vue'
+import { readSavedPriorities } from '../utils/priorities.js'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
 
 const props = defineProps({
   profile: { type: Object, default: null }, // the saved answers to start from, or null
+  priorities: { type: Object, default: null }, // Your Priorities to start from, or null = the ones saved on this device
   saving: { type: Boolean, default: false }, // true while the server is saving (disables the button)
   error: { type: String, default: '' }, // a problem from the server, shown under the form
   buttonText: { type: String, default: 'Save' },
@@ -51,6 +55,22 @@ const minLease = ref(start.minLease)
 // The "Near parents (PHG)" switch: off unless it was switched on
 const showPhg = ref(start.showPhg === true)
 
+// Your Priorities: the same panel and the same choices as on Search. A copy, so ticking a box here changes nothing
+// anywhere until the form is saved.
+let startPriorities = readSavedPriorities()
+if (props.priorities !== null) {
+  startPriorities = props.priorities
+}
+const choices = ref(JSON.parse(JSON.stringify(startPriorities)))
+
+// The panel says a tick box or a level changed
+function onTick(key, ticked) {
+  choices.value[key].ticked = ticked
+}
+function onLevel(key, level) {
+  choices.value[key].level = level
+}
+
 // Town names for the dropdown, from the same server address Search uses for its suggestions
 const towns = ref([])
 const errorMessage = ref('')
@@ -87,6 +107,8 @@ function onSubmit() {
     maxPrice: String(maxPrice.value),
     minLease: String(minLease.value),
     showPhg: showPhg.value,
+    // Not part of the profile: the page saves it apart (see saveProfile in stores/auth.js)
+    priorities: JSON.parse(JSON.stringify(choices.value)),
   })
 }
 
@@ -151,6 +173,18 @@ loadTowns()
         <label for="profile-lease" class="form-label">Min lease (yrs)</label>
         <input id="profile-lease" v-model="minLease" type="number" min="20" max="99" class="form-control" />
       </div>
+    </div>
+
+    <!-- Your Priorities: what matters about a flat. They rank the flats on Search and colour the dots on the Map.
+         This panel gets its own ids, because the Search page has one too. -->
+    <div class="mb-3">
+      <PreferencesPanel
+        :preferences="choices"
+        panel-id="presets-priorities"
+        id-prefix="presets-matters-"
+        @change-ticked="onTick"
+        @change-level="onLevel"
+      />
     </div>
 
     <div v-if="errorMessage" class="alert alert-danger py-2">{{ errorMessage }}</div>

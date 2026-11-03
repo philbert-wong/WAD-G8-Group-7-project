@@ -7,10 +7,10 @@
 import { RouterLink } from 'vue-router'
 
 const props = defineProps({
-  filters: Object, // { flatType, maxPrice, minLease, phg, ... }
-  // The PHG switch is only for the Map. The Map passes the parents' postal code saved on the profile
-  // ('' when there is none); Search passes nothing (null), so the switch is hidden there.
-  phgPostal: { type: String, default: null },
+  filters: Object, // { flatType, maxPrice, minLease, phg, parentsPostal, ... }
+  // The place found for the parents' postal code, e.g. "BLK 314 ANG MO KIO AVENUE 3" ('' = not found yet),
+  // so the user can check it is the right one
+  phgPlaceName: { type: String, default: '' },
 })
 const emit = defineEmits(['change-filter', 'search', 'clear'])
 
@@ -57,9 +57,10 @@ function chooseFlatType(value) {
   emit('search')
 }
 
-// The PHG switch was flipped: send true / false up
+// The PHG switch was flipped: send true / false up, and apply it straight away (like the flat type chips)
 function onPhgChange(event) {
   emit('change-filter', 'phg', event.target.checked)
+  emit('search')
 }
 
 // The "Apply filters" button
@@ -126,25 +127,40 @@ function onClear() {
       @input="onChange('minLease', $event)"
     />
 
-    <!-- PHG switch (Map only): on = only blocks within 4 km of the parents' postal code. Off unless switched on. -->
-    <div v-if="props.phgPostal !== null" class="phg-row">
+    <!-- PHG (Proximity Housing Grant): the parents' postal code, then the switch that uses it. On both Search and the Map.
+         On = only flats within 4 km of the parents. Enter in the box (or Apply Filters) uses a new postal code. -->
+    <div class="phg-row">
+      <!-- Short placeholder so it fits the narrow sidebar; the label says what the box is for -->
+      <label for="filter-parents" class="flab parents-label">Parents' postal code</label>
+      <input
+        id="filter-parents"
+        :value="props.filters.parentsPostal"
+        type="text"
+        inputmode="numeric"
+        class="form-control cosy-input mb-2"
+        placeholder="e.g. 560314"
+        @input="onChange('parentsPostal', $event)"
+      />
       <div class="form-check form-switch">
         <input
           id="filter-phg"
           class="form-check-input"
           type="checkbox"
           role="switch"
-          :checked="props.filters.phg && props.phgPostal !== ''"
-          :disabled="props.phgPostal === ''"
+          :checked="props.filters.phg"
           @change="onPhgChange"
         />
-        <label for="filter-phg" class="form-check-label">Near parents (PHG, within 4 km)</label>
+        <label for="filter-phg" class="form-check-label">Only show flats within 4 km of my parents</label>
       </div>
-      <div v-if="props.phgPostal === ''" class="hint">
-        Add your parents' postal code on your <RouterLink to="/profile">profile</RouterLink>, or type it in the PHG box below.
+      <!-- Off: why it matters. On: what it is using (or what is missing) -->
+      <div v-if="!props.filters.phg" class="hint">Living this close can get you the Proximity Housing Grant (PHG).</div>
+      <div v-else-if="props.filters.parentsPostal.trim() === ''" class="hint">
+        Type your parents' postal code above, then press Enter.
       </div>
-      <div v-else-if="props.filters.phg" class="hint">Only blocks within 4 km of {{ props.phgPostal }}.</div>
-      <div v-else class="hint">Showing blocks anywhere.</div>
+      <div v-else-if="props.phgPlaceName !== ''" class="hint">
+        Only flats within 4 km of <strong>{{ props.phgPlaceName }}</strong>.
+      </div>
+      <div v-else class="hint">Only flats within 4 km of {{ props.filters.parentsPostal }}.</div>
     </div>
 
     <button type="submit" class="apply">Apply Filters</button>
@@ -191,7 +207,11 @@ function onClear() {
 }
 .phg-row .form-check-label {
   font-size: 13px;
-  font-weight: 600;
+}
+/* "Parents' postal code": dark like the other filter labels (not grey); the row already has a gap above */
+.parents-label {
+  color: var(--char);
+  margin-top: 0;
 }
 
 /* Chips: a row of equal buttons (Flexbox + flex-wrap); the chosen one is dark */

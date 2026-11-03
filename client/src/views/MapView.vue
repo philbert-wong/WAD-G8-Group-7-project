@@ -13,8 +13,8 @@ import PreferencesPanel from '../components/PreferencesPanel.vue'
 import MapSearchBar from '../components/map/MapSearchBar.vue'
 import SelectedBlockCard from '../components/map/SelectedBlockCard.vue'
 import MapLegend from '../components/map/MapLegend.vue'
+import MapKey from '../components/map/MapKey.vue'
 import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
-import PhgCard from '../components/map/PhgCard.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMapFocusStore } from '../stores/mapFocus'
 import { useFiltersStore } from '../stores/filters'
@@ -42,12 +42,16 @@ const blockCount = ref(0)
 const flatCount = ref(0) // the flats in those blocks (one block can hold several flat types)
 
 
-// The place found by the address search above the map: { name, lat, lng }, or null
-// (the typed text itself lives in MapSearchBar)
-const searchedPlace = ref(null)
+// The search from the Search page is shared in the filters store (filterStore.filters.q, '' = none): the map shows
+// the same flats. When it was a place rather than one of our blocks (e.g. "Northpoint City"), this is the place's
+// name from OneMap and the map shows our flats within 1 km of it, like Search does ('' = a normal search)
+const searchNearName = ref('')
+// true after "Show all of Singapore": the search stays in the box, but the map shows every block that fits the
+// filters, until Search is pressed again (only on the Map; Search always shows its search)
+const showAllFlats = ref(false)
 
 // The parents' place found by the PHG search: { name, lat, lng }, or null = no circle
-// (the typed text itself lives in PhgCard)
+// (the parents' postal code itself is in the filters store: filterStore.filters.parentsPostal)
 const parentPlace = ref(null)
 const nearbyCount = ref(null) // how many blocks are shown inside the 4 km circle (null = no circle)
 // The 4 kinds of amenity that can be shown on the map. key = the category the server uses.
@@ -78,18 +82,30 @@ let blockLayer = null
 let amenityLayer = null
 let phgCircle = null
 let parentMarker = null
-let searchMarker = null
+let searchMarker = null // the searched place's white dot, or a hidden block's grey dot (one at a time)
 
 // The blocks (places) currently drawn on the map, kept so the address search can check
 // whether the place it found is one of them
 let shownPlaces = []
 
-// "Colour dots by": 'price' (the price bands) or 'match' (the match score gradient)
-const colourBy = ref('price')
+// "Colour dots by": 'match' (the priority score gradient) or 'price' (the price bands).
+// The SAME choice as Search's sort ("Sort: Priority score" / "Cheapest first"), saved as 'sortBy' in localStorage
+// (and on the account), so the two pages always match. Search's default is 'match', so it is the map's too.
+function loadSavedSort() {
+  const saved = localStorage.getItem('sortBy')
+  if (saved === 'price') {
+    return 'price'
+  }
+  return 'match'
+}
+const colourBy = ref(loadSavedSort())
 
-// The legend's "Colour dots by" changed: remember it and redraw the dots in the new colours
+// The legend's "Colour dots by" changed: save it as the shared sort (so Search sorts the same way),
+// then redraw the dots in the new colours
 function changeColourBy(value) {
   colourBy.value = value
+  localStorage.setItem('sortBy', value)
+  saveChoices() // also on the account when logged in (saveChoices sends the sort saved just above)
   loadBlocks()
 }
 
@@ -381,9 +397,10 @@ async function loadBlocks() {
   // New filters / a new load: remove any old error message first (a new problem below sets it again)
   errorMessage.value = ''
   try {
-    // Same request as Search, with the shared filters: the server only sends blocks that match them.
-    // (No search text: the map always shows the whole island; you zoom in to a place instead.)
+    // Same request as Search, with the shared filters AND the shared search text: the map shows the same flats
+    // as the Search page (all of Singapore when nothing was searched).
     let cards = []
+    searchNearName.value = ''
     if (showWhich.value === 'shortlist') {
       // Only your saved flats (already loaded by changeShowWhich). They are the same cards as /api/blocks sends.
       if (shortlist.error !== '') {
@@ -393,13 +410,23 @@ async function loadBlocks() {
         cards.push(item.block)
       }
     } else {
+      // "Show all of Singapore" pressed: no search text, so every block that fits the filters
+      let searched = filterStore.filters.q
+      if (showAllFlats.value) {
+        searched = ''
+      }
       const params = {
+        q: searched,
         flatType: filterStore.filters.flatType,
         maxPrice: filterStore.filters.maxPrice,
         minLease: filterStore.filters.minLease,
       }
       const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
       cards = response.data.results
+      // None of our blocks match, but something was searched (e.g. "Northpoint City"): our flats near that place
+      if (cards.length === 0 && searched !== '') {
+        cards = await loadNearSearchedPlace(searched)
+      }
     }
 
     // The server sends one card per block + flat type. Group them by address, so each block
@@ -481,6 +508,89 @@ async function loadBlocks() {
       errorMessage.value = error.message
     }
   }
+}
+
+// The Search page searched a place that is not one of our blocks: ask OneMap where it is, then get our flats
+// within 1 km of it that fit the filters (the same two requests as Search's searchNearPlace). Returns the cards.
+// (A place OneMap cannot find either is caught by loadBlocks and shown as its error message.)
+async function loadNearSearchedPlace(text) {
+  const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
+  const place = placeResponse.data
+  const nearbyResponse = await axios.get(`${BASE_URL}/api/blocks/nearby`, {
+    params: {
+      lat: place.lat,
+      lng: place.lng,
+      flatType: filterStore.filters.flatType,
+      maxPrice: filterStore.filters.maxPrice,
+      minLease: filterStore.filters.minLease,
+    },
+  })
+  searchNearName.value = place.name
+  // A white dot with a thick dark ring where the place is, so it does not look like a block, an amenity or the parents' dot
+  // (a circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite)
+  removeSearchMarker()
+  searchMarker = L.circleMarker([place.lat, place.lng], { radius: 9, color: '#111', weight: 4, fillColor: '#fff', fillOpacity: 1 })
+    .bindPopup('<b>' + place.name + '</b><br>Our flats within 1 km are shown')
+    .addTo(map)
+  return nearbyResponse.data.results
+}
+
+// Zoom to the flats from the Search page's search. One block: open it like a clicked dot.
+// All in one town: zoom in at least to TOWN_ZOOM, so its dots show (not just its town bubble).
+// Several towns (e.g. a long street): just fit them all.
+function zoomToSearch() {
+  if (shownPlaces.length === 0) {
+    return
+  }
+  if (shownPlaces.length === 1) {
+    focusPlace(shownPlaces[0])
+    return
+  }
+  const spots = []
+  const towns = []
+  for (const place of shownPlaces) {
+    spots.push([place.lat, place.lng])
+    if (!towns.includes(place.cards[0].town)) {
+      towns.push(place.cards[0].town)
+    }
+  }
+  map.fitBounds(spots, { padding: [30, 30], maxZoom: 17, animate: false })
+  if (towns.length === 1 && map.getZoom() < TOWN_ZOOM) {
+    map.setView(map.getCenter(), TOWN_ZOOM)
+  }
+}
+
+// Takes the searched place's dot (or a hidden block's grey dot) off the map, if there is one
+function removeSearchMarker() {
+  if (searchMarker !== null) {
+    map.removeLayer(searchMarker)
+    searchMarker = null
+  }
+}
+
+// Search (or Enter, or a suggestion) in the map's search bar: the same search as the Search page's box (shared, so Search shows it too).
+// Show those flats and zoom to them; an empty box shows every block that fits the filters, on the whole island.
+async function searchFromMap(text) {
+  filterStore.setFilter('q', text.trim())
+  showAllFlats.value = false
+  closePlace()
+  removeSearchMarker()
+  await loadBlocks()
+  if (filterStore.filters.q === '') {
+    map.setView([1.36, 103.84], 12)
+  } else {
+    zoomToSearch()
+  }
+}
+
+// "Show all of Singapore": every block that fits the filters, zoomed out to the whole island.
+// The search stays in the box (and on Search): Search shows it again.
+async function showAllOfSingapore() {
+  showAllFlats.value = true
+  closePlace()
+  removeSearchMarker()
+  await loadBlocks()
+  map.setView([1.36, 103.84], 12)
 }
 
 // Zoomed out further than this, the map shows one bubble per town instead of 400+ dots (too busy to read).
@@ -569,7 +679,9 @@ function drawTownBubbles() {
       iconAnchor: [size / 2, size / 2],
     })
 
-    L.marker(middle, { icon: icon, title: town.name + ': ' + town.flats + ' flats' })
+    // zIndexOffset: drawn on top of the amenity squares (also markers), which would otherwise cover the bubbles
+    // further north. 2000 = above even the big "nearest amenity" squares (1000).
+    L.marker(middle, { icon: icon, title: town.name + ': ' + town.flats + ' flats', zIndexOffset: 2000 })
       .on('click', function () {
         // Zoom to fit the whole town, but at least to TOWN_ZOOM so its dots show (not the bubble again)
         map.fitBounds(points, { padding: [30, 30], animate: false })
@@ -615,45 +727,31 @@ function focusOnRequestedBlock(places) {
   focusPlace(found)
 }
 
-// Is this spot one of the blocks on the map? Returns that place, or null.
-// Our blocks were located with OneMap too, so the same building comes back within a few metres;
-// 40 m allows for small differences without matching the block next door.
-function findShownPlaceAt(lat, lng) {
-  let found = null
-  for (const place of shownPlaces) {
-    if (map.distance([lat, lng], [place.lat, place.lng]) <= 40) {
-      found = place
-    }
-  }
-  return found
-}
-
 // The filter panel says one filter changed, e.g. ('maxPrice', '600000'): change it in the shared store. Same as on Search.
 function setFilter(name, value) {
   filterStore.setFilter(name, value)
   if (name === 'phg') {
-    changePhg(value)
+    auth.savePhgToggle(value) // remembered on the presets, so it is the same next time
   }
-}
-
-// The "Near parents (PHG)" switch was flipped. On: draw the 4 km circle around the parents' postal code saved on
-// the profile and keep only the blocks inside. Off: remove the circle and show every block again.
-// Either way the choice is saved on the account, so it is the same next time.
-async function changePhg(on) {
-  if (on) {
-    if (savedParentsPostal() !== '') {
-      await searchParent(savedParentsPostal())
-    }
-  } else {
-    clearParent()
-  }
-  auth.savePhgToggle(on)
 }
 
 // "Clear all": back to the starting filters (also on Search, since they are shared), then reload the dots
 function clearFilters() {
   filterStore.clearFilters()
-  loadBlocks()
+  applyFilters()
+}
+
+// "Apply Filters" (or the PHG switch, a flat type chip, Enter in a box): load the dots with the shared filters.
+// PHG on with a postal code: draw the 4 km circle around the parents and keep only the blocks inside
+// (searchParent loads the blocks). Otherwise: no circle, every block that fits the filters.
+async function applyFilters() {
+  if (filterStore.filters.phg && filterStore.filters.parentsPostal.trim() !== '') {
+    await searchParent(filterStore.filters.parentsPostal)
+  } else {
+    removeParentDrawings()
+    parentPlace.value = null
+    await loadBlocks()
+  }
 }
 
 // A tick box changed: draw the amenity dots for every ticked type (and none for the unticked ones)
@@ -745,90 +843,10 @@ async function findPlaceFor(text) {
   return placeResponse.data
 }
 
-// Address search above the map (MapSearchBar sends the typed text): find where the place is,
-// put a marker there and move the map to it. Unlike the PHG search, it does not filter the blocks.
-async function searchPlace(text) {
-  errorMessage.value = ''
-  if (text.trim() === '') {
-    errorMessage.value = 'Type an address or postal code'
-    return
-  }
-
-  let place = null
-  try {
-    place = await findPlaceFor(text)
-  } catch (error) {
-    if (error.response && error.response.status === 500) {
-      // The server could not log in to OneMap (or something else broke there)
-      errorMessage.value = 'Place search failed. Check the OneMap login in server/config.env'
-    } else if (error.response && error.response.data && error.response.data.message) {
-      // e.g. "Place not found" (404)
-      errorMessage.value = error.response.data.message
-    } else {
-      errorMessage.value = error.message
-    }
-    return
-  }
-  searchedPlace.value = place
-
-  // A new search closes the selected-block card (comparing blocks is the Compare page's job)
-  closePlace()
-
-  // Remove the previous search marker, if there is one
-  if (searchMarker !== null) {
-    map.removeLayer(searchMarker)
-    searchMarker = null
-  }
-
-  // Is the place one of our blocks on the map? Then show it like a clicked block dot
-  // (its own colour, popup and "Selected block" card) instead of a white search dot.
-  const block = findShownPlaceAt(place.lat, place.lng)
-  if (block !== null) {
-    focusPlace(block)
-    return
-  }
-
-  // Is it one of our blocks that the filters hide? (If asking fails, just show the normal search dot.)
-  let hiddenBlock = null
-  try {
-    hiddenBlock = await findAnyBlockAt(place.lat, place.lng)
-  } catch (error) {
-    hiddenBlock = null
-  }
-
-  if (hiddenBlock !== null) {
-    // One of our blocks, but not on the map because of the filters: the grey dot
-    showHiddenBlock(hiddenBlock)
-  } else {
-    // Not one of our blocks: a white dot with a thick dark ring, so it does not look like a block, an amenity or the parents' dot.
-    // (A circleMarker, not L.marker: Leaflet's default pin picture often fails to load with Vite.)
-    // If the user typed an address (a block number or postal code), say that this block is not in our data;
-    // for a place like "Bishan MRT" or a mall, the name alone is enough.
-    let popup = '<b>' + place.name + '</b>'
-    if (looksLikeAddress(text)) {
-      popup = popup +
-        '<br><span class="text-danger">This block is not in our data</span>' +
-        '<br><span class="small text-muted">(we have the 40 busiest blocks in each town)</span>'
-    }
-    searchMarker = L.circleMarker([place.lat, place.lng], {
-      radius: 9,
-      color: '#111',
-      weight: 4,
-      fillColor: '#fff',
-      fillOpacity: 1,
-    })
-      .bindPopup(popup)
-      .addTo(map)
-    map.setView([place.lat, place.lng], 16) // 16 = street level
-    // Open the marker's popup so the name shows straight away
-    searchMarker.openPopup()
-  }
-}
-
 // One of our blocks that the filters hide: a grey dot the size of a block dot, with a dashed dark ring
 // (so it does not look like the light grey "no score" dots when coloured by Your Priorities), and its usual popup plus why it is
 // not shown. Used by the address search and by "Show on map" (e.g. a shortlisted flat that does not fit the filters).
-// It is kept in searchMarker, so the address bar's "Clear" removes it.
+// It is kept in searchMarker, so the next search removes it.
 function showHiddenBlock(hiddenBlock) {
   if (searchMarker !== null) {
     map.removeLayer(searchMarker)
@@ -852,62 +870,17 @@ function showHiddenBlock(hiddenBlock) {
 }
 
 // "Show on map" for a block that does not fit the filters: get that one card from our server (GET /api/blocks/<id>)
-// and show it as the grey dot, with its address in the address bar (so its "Clear" button can remove it)
+// and show it as the grey dot
 async function showRequestedHiddenBlock(blockId) {
   try {
     const response = await axios.get(`${BASE_URL}/api/blocks/${blockId}`)
     const card = response.data
     const label = 'Blk ' + card.block + ' ' + card.street
-    searchedPlace.value = { name: label, lat: card.lat, lng: card.lng }
     showHiddenBlock({ label: label, lat: card.lat, lng: card.lng, cards: [card] })
   } catch (error) {
     // e.g. the block was removed when the data was seeded again
     errorMessage.value = 'That block could not be found'
   }
-}
-
-// Does the typed text look like an address, i.e. start with a block number or postal code (after any "Blk")?
-// "Blk 405B Northshore Dr" and "560314" yes; "Bishan MRT" and "Northpoint City" no.
-function looksLikeAddress(text) {
-  let rest = text.trim().toUpperCase()
-  if (rest.startsWith('BLK ')) {
-    rest = rest.slice(4).trim()
-  } else if (rest.startsWith('BLOCK ')) {
-    rest = rest.slice(6).trim()
-  }
-  const firstLetter = rest.charAt(0)
-  return firstLetter >= '0' && firstLetter <= '9'
-}
-
-// Is one of our blocks at this spot, even if the filters hide it? Asks our server's /nearby route with NO filters,
-// within 40 m (the same distance as findShownPlaceAt). Returns that block as a place { label, lat, lng, cards }
-// (one card per flat type, like the dots), or null when there is none.
-async function findAnyBlockAt(lat, lng) {
-  const response = await axios.get(`${BASE_URL}/api/blocks/nearby`, { params: { lat: lat, lng: lng, radius: 40 } })
-  const cards = response.data.results
-  if (cards.length === 0) {
-    return null
-  }
-
-  // The closest card is the block; keep every flat type at that same address
-  const first = cards[0]
-  const label = 'Blk ' + first.block + ' ' + first.street
-  const place = { label: label, lat: first.lat, lng: first.lng, cards: [] }
-  for (const card of cards) {
-    if ('Blk ' + card.block + ' ' + card.street === label) {
-      place.cards.push(card)
-    }
-  }
-  return place
-}
-
-// "Clear" next to the searched place: remove the marker (MapSearchBar empties its own box)
-function clearSearch() {
-  if (searchMarker !== null) {
-    map.removeLayer(searchMarker)
-    searchMarker = null
-  }
-  searchedPlace.value = null
 }
 
 // Takes the old PHG circle and parents' marker off the map (if there are any)
@@ -922,7 +895,7 @@ function removeParentDrawings() {
   }
 }
 
-// PHG search (PhgCard sends the typed text): find where the parents live (any address or postal code),
+// PHG search (the parents' postal code from the Filters card): find where the parents live (any address or postal code),
 // draw a marker and the 4 km circle there, then reload the dots so only the blocks inside are shown
 async function searchParent(text) {
   errorMessage.value = ''
@@ -974,28 +947,10 @@ async function searchParent(text) {
   await loadBlocks()
 }
 
-// PhgCard's "Clear": remove the circle and marker, and show every block that fits the filters again
-// (PhgCard empties its own box)
-function clearParent() {
-  removeParentDrawings()
-  parentPlace.value = null
-  loadBlocks()
-}
-
 // The match score text for the Selected block card: "62/100 · Good" when the dots are coloured by Your Priorities, '' otherwise (not shown)
 function selectedMatchText() {
   if (colourBy.value === 'match') {
     return scoreText(selectedPlace.value)
-  }
-  return ''
-}
-
-// The parents' postal code saved in the presets (popup / profile page). '' when there is none.
-// It fills the PHG box, and while the "Near parents (PHG)" switch is on (off by default) the map draws its 4 km circle.
-// A function, so it always reads the latest presets (they can be saved while the map is open).
-function savedParentsPostal() {
-  if (auth.profile !== null && auth.profile.parentsPostal) {
-    return auth.profile.parentsPostal
   }
   return ''
 }
@@ -1006,13 +961,14 @@ watch(
     return auth.presetsVersion
   },
   async function () {
-    if (filterStore.filters.phg && savedParentsPostal() !== '') {
-      await searchParent(savedParentsPostal())
-    } else {
-      removeParentDrawings()
-      parentPlace.value = null
-      await loadBlocks()
+    // Your Priorities may have changed in the form too: start from the saved ones again
+    preferences.value = loadSavedPreferences()
+    // Like Search: the new town becomes the search (so both pages show that town)
+    if (auth.profile !== null && auth.profile.town) {
+      filterStore.setFilter('q', auth.profile.town)
+      showAllFlats.value = false
     }
+    await applyFilters()
     zoomToProfileTown()
   },
 )
@@ -1061,16 +1017,16 @@ onMounted(async function () {
 
   // Load the blocks once: with the PHG circle if the switch is on and the parents' postal code is known
   // (searchParent draws the circle, then loads the blocks inside it), otherwise every block that fits the filters
-  if (filterStore.filters.phg && savedParentsPostal() !== '') {
-    await searchParent(savedParentsPostal())
-  } else {
-    await loadBlocks()
-  }
+  await applyFilters()
 
-  // The profile's town comes first: zoom to it even when the PHG circle is drawn
-  // (if none of its blocks are shown, e.g. outside the circle, the map stays as it is)
+  // Zoom to what was searched on the Search page; nothing searched: to the profile's town.
+  // Both even when the PHG circle is drawn (if none of the blocks are shown, e.g. outside the circle, the map stays as it is)
   if (!comingFromSearch) {
-    zoomToProfileTown()
+    if (filterStore.filters.q !== '') {
+      zoomToSearch()
+    } else {
+      zoomToProfileTown()
+    }
   }
 })
 
@@ -1091,6 +1047,7 @@ onUnmounted(function () {
       Each dot is a block
       <span v-if="showWhich === 'shortlist'">from your shortlist (your filters are not used here)</span>
       <span v-else-if="parentPlace !== null">within 4 km of your parents (PHG) that fits your filters</span>
+      <span v-else-if="filterStore.filters.q !== '' && !showAllFlats">from your search that fits your filters</span>
       <span v-else>that fits your filters</span>,
       <span v-if="colourBy === 'match'">coloured by its priority score (from Your Priorities).</span>
       <span v-else>coloured by the median price of its cheapest flat type.</span>
@@ -1105,9 +1062,31 @@ onUnmounted(function () {
     <div class="row g-4">
       <div class="col-lg-8 col-xl-9">
         <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
-        <MapSearchBar :searched-place="searchedPlace" @search="searchPlace" @clear="clearSearch" />
+        <MapSearchBar :searched="filterStore.filters.q" @search="searchFromMap" />
 
-        <div id="mapBox" class="map-box"></div>
+        <!-- The search from the Search page: the map shows the same flats. One click to see the whole island again. -->
+        <div v-if="showWhich === 'all' && filterStore.filters.q !== ''" class="search-strip small mb-2">
+          <span v-if="showAllFlats">
+            Showing all of Singapore. Press <strong>Search</strong> to show your search
+            <strong>"{{ filterStore.filters.q }}"</strong> again.
+          </span>
+          <template v-else>
+            <span>
+              Showing your search <strong>"{{ filterStore.filters.q }}"</strong>
+              <span v-if="searchNearName !== ''"> (flats within 1 km of {{ searchNearName }})</span>:
+              {{ blockCount }} block(s).
+            </span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" @click="showAllOfSingapore">
+              Show all of Singapore
+            </button>
+          </template>
+        </div>
+
+        <!-- position: relative, so the colour key can float in the map's bottom-left corner -->
+        <div class="position-relative">
+          <div id="mapBox" class="map-box"></div>
+          <MapKey :colour-by="colourBy" :price-bands="priceBands" :no-score-colour="NO_SCORE_COLOUR" />
+        </div>
       </div>
 
       <div class="col-lg-4 col-xl-3">
@@ -1124,14 +1103,38 @@ onUnmounted(function () {
             @hide-nearest="hideNearest"
           />
 
-          <!-- Legend: colour dots by price / match, and the amenity tick boxes
-               (2nd card, so on a phone it is right under the map, before the filters) -->
+
+
+
+          <!-- Your Priorities FIRST, like Search: the dots are coloured by priority score by default, so it should
+               not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen. -->
+          <CollapsiblePanel title="Your Priorities" :start-open="isWideScreen">
+            <PreferencesPanel
+              :preferences="preferences"
+              on-map
+              @change-ticked="changeTicked"
+              @change-level="changeLevel"
+            />
+          </CollapsiblePanel>
+
+          <!-- Filters: the same panel as Search, near the top so it is easy to find. Closed at the start
+               (its title is in view: one click opens it), so the map options below are not pushed far down -->
+          <CollapsiblePanel title="Filters" :start-open="false">
+            <FilterPanel
+              :filters="filterStore.filters"
+              :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
+              @change-filter="setFilter"
+              @search="applyFilters"
+              @clear="clearFilters"
+            />
+          </CollapsiblePanel>
+
+          <!-- Map options: show all flats / my shortlist, colour dots by price / priority score, and the amenity tick boxes
+               (the colour key itself floats on the map: MapKey) -->
           <MapLegend
             :colour-by="colourBy"
-            :price-bands="priceBands"
             :amenity-types="amenityTypes"
             :shown-types="shownTypes"
-            :no-score-colour="NO_SCORE_COLOUR"
             :show-which="showWhich"
             :logged-in="auth.isLoggedIn"
             :shortlist-count="shortlist.count"
@@ -1142,40 +1145,6 @@ onUnmounted(function () {
             @toggle-amenity="toggleAmenity"
           />
 
-          <!-- Filters: the same panel as Search, inside a panel that opens / closes
-               (open at the start on a wide screen, closed on a phone so the PHG card is not far down) -->
-          <CollapsiblePanel title="Filters" :start-open="isWideScreen">
-            <FilterPanel
-              :filters="filterStore.filters"
-              :phg-postal="savedParentsPostal()"
-              @change-filter="setFilter"
-              @search="loadBlocks"
-              @clear="clearFilters"
-            />
-          </CollapsiblePanel>
-
-          <!-- Your Priorities: the same panel as Search (they share the saved choices), closed at the start -->
-          <CollapsiblePanel title="Your Priorities" :start-open="false">
-            <PreferencesPanel
-              :preferences="preferences"
-              on-map
-              @change-ticked="changeTicked"
-              @change-level="changeLevel"
-            />
-          </CollapsiblePanel>
-
-          <!-- PHG layer: the parents' postal code, the 4 km circle and the count.
-               Open at the start on a wide screen, closed on a phone -->
-          <CollapsiblePanel title="Proximity Grant (PHG)" :start-open="isWideScreen">
-            <PhgCard
-              :parent-place="parentPlace"
-              :nearby-count="nearbyCount"
-              :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
-              :initial-text="savedParentsPostal()"
-              @search="searchParent"
-              @clear="clearParent"
-            />
-          </CollapsiblePanel>
         </div>
       </div>
     </div>
@@ -1184,14 +1153,26 @@ onUnmounted(function () {
 
 <style scoped>
 /* The map needs a set height, otherwise it is 0 px tall.
-   100vh = the whole height of the browser window, minus room for the address search bar above the map,
+   100vh = the whole height of the browser window, minus room for the search bar and the "Showing your search" strip above the map,
    so when you scroll down to the map it fills the screen. Never shorter than 450px. */
 .map-box {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 200px);
   min-height: 450px;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--line);
+}
+
+/* "Showing your search ..." above the map: the text and its button side by side, wrapping onto two lines on a phone */
+.search-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--beige);
+  border-radius: 12px;
+  padding: 8px 12px;
 }
 
 /* Phones and tablets (narrower than Bootstrap's lg, 992px): a shorter map, so the cards under it are easy to reach */

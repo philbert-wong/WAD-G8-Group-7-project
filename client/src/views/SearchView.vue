@@ -20,6 +20,7 @@ import { useRoute, RouterLink } from 'vue-router'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
+import { distanceMetres, PHG_NEAR_METRES } from '../utils/distance.js'
 
 // get the current route
 const route = useRoute() 
@@ -37,9 +38,10 @@ const shortlistErrorMessage = ref('')
 // The "create an account" strip for a guest who has saved presets. Closing it is remembered on this device.
 const accountBannerClosed = ref(localStorage.getItem('accountBannerClosed') === 'yes')
 
-// Only for someone who is not logged in and has presets saved on this device
+// Only for someone who is not logged in and has presets saved on this device.
+// Hidden while the "Saving flats needs an account" alert is showing: both say "create an account", and one message is enough.
 const showAccountBanner = computed(function () {
-  return !auth.isLoggedIn && auth.profile !== null && !accountBannerClosed.value
+  return !auth.isLoggedIn && auth.profile !== null && !accountBannerClosed.value && shortlistErrorMessage.value === ''
 })
 
 function closeAccountBanner() {
@@ -47,7 +49,8 @@ function closeAccountBanner() {
   localStorage.setItem('accountBannerClosed', 'yes')
 }
 
-// The search box text ('' = not used). Only the Search page has a search box, so it is not in the filters store.
+// The search box text ('' = not used). It changes on every key; the text actually SEARCHED goes in the filters store
+// (filters.q, see search() below), so the Map shows the same flats and the box is filled in again when you come back.
 const searchText = ref('')
 const results = ref([])
 const total = ref(0)
@@ -65,6 +68,37 @@ const suggestions = computed(function () {
   })
 })
 
+// PHG filter: the parents' place found for the postal code in the Filters card { postal, name, lat, lng },
+// kept so it is only looked up again when the postal code changes. null = not looked up yet.
+let parentSpot = null
+// Its name, shown under the PHG switch so the user can check it is the right place ('' = none)
+const parentName = ref('')
+
+// PHG switch on, with a postal code: keep only the flats within 4 km of the parents (on top of the other filters).
+// Our server asks OneMap where the postal code is (/api/blocks/place). If it cannot be found, say so and keep every flat.
+async function keepNearParents() {
+  const postal = filterStore.filters.parentsPostal.trim()
+  if (!filterStore.filters.phg || postal === '') {
+    parentName.value = ''
+    return
+  }
+  try {
+    if (parentSpot === null || parentSpot.postal !== postal) {
+      const response = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: postal } })
+      parentSpot = { postal: postal, name: response.data.name, lat: response.data.lat, lng: response.data.lng }
+    }
+  } catch (error) {
+    parentName.value = ''
+    errorMessage.value = 'Could not find the parents postal code "' + postal + '", so the PHG filter is not used.'
+    return
+  }
+  parentName.value = parentSpot.name
+  results.value = results.value.filter(function (card) {
+    return distanceMetres(parentSpot.lat, parentSpot.lng, card.lat, card.lng) <= PHG_NEAR_METRES
+  })
+  total.value = results.value.length
+}
+
 // The search box says the user typed something
 function setSearchText(text) {
   searchText.value = text
@@ -81,6 +115,9 @@ function selectArea(town) {
 // The filter panel says one filter changed, e.g. ('maxPrice', '600000'): change it in the shared store
 function setFilter(name, value) {
   filterStore.setFilter(name, value)
+  if (name === 'phg') {
+    auth.savePhgToggle(value) // remembered on the presets, so it is the same next time (and on the Map)
+  }
 }
 
 // Gets the town names from the server (for the search suggestions)
@@ -139,6 +176,7 @@ watch(
   },
   function () {
     applyTownPreset()
+    loadChoices() // Your Priorities may have changed in the form too
     search()
   },
 )
@@ -153,6 +191,8 @@ async function search() {
   placeName.value = ''
   showSuggestions.value = false // searching (Enter, the button, a filter) closes the suggestions
   const typed = searchText.value.trim()
+  // Share what was searched: the Map shows these same flats (MapView reads filters.q)
+  filterStore.setFilter('q', typed)
 
   try {
     // The search text plus the shared filters
@@ -169,6 +209,7 @@ async function search() {
       results.value = response.data.results
       total.value = response.data.total
     }
+    await keepNearParents()
   } catch (error) {
     // Nothing to show: empty the list, so old cards do not stay under the message
     results.value = []
@@ -411,6 +452,8 @@ function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
   if (!auth.isLoggedIn) {
     shortlistErrorMessage.value = 'Saving flats needs an account.'
+    // The message is at the top of the page, and the card that was clicked may be far down: scroll up to it
+    window.scrollTo({ top: 0, behavior: 'smooth' })
     return
   }
 
@@ -436,7 +479,12 @@ function loadPage() {
   if (budget !== undefined) {
     filterStore.setFilter('maxPrice', String(budget))
   }
-  applyTownPreset()
+  // Back from the Map (or another page): keep the last search. Nothing searched yet: start with the preset town.
+  if (filterStore.filters.q !== '') {
+    searchText.value = filterStore.filters.q
+  } else {
+    applyTownPreset()
+  }
   search()
   loadAreas()
   if (auth.isLoggedIn) {
@@ -570,17 +618,21 @@ onMounted(loadPage)
             <button type="button" class="btn-close" aria-label="Close filters" @click="closeFilters"></button>
           </div>
 
-          <FilterPanel
-            :filters="filterStore.filters"
-            @change-filter="setFilter"
-            @search="searchFromFilters"
-            @clear="clearFilters"
-          />
-
+          <!-- Your Priorities first: the results are sorted by priority score by default, so it should not be
+               hidden under the filters (mb-3: the gap before the filters card) -->
           <PreferencesPanel
+            class="mb-3"
             :preferences="preferences"
             @change-ticked="changeTicked"
             @change-level="changeLevel"
+          />
+
+          <FilterPanel
+            :filters="filterStore.filters"
+            :phg-place-name="parentName"
+            @change-filter="setFilter"
+            @search="searchFromFilters"
+            @clear="clearFilters"
           />
         </div>
       </div>
