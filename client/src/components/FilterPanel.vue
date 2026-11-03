@@ -51,7 +51,7 @@ function onBudgetChange(event) {
   }
 }
 
-// A flat type chip was clicked: set it and search straight away
+// A flat type chip was clicked: set it and search straight away.
 function chooseFlatType(value) {
   emit('change-filter', 'flatType', value)
   emit('search')
