@@ -1,26 +1,22 @@
 <script setup>
-// The sign-up popup: shown by App.vue right after someone creates an account (and for any account that has not
-// answered yet). It asks the profile questions; the answers become the starting filters on Search and the Map.
-// "Skip for now" saves { skipped: true }, so the popup does not come back.
-import { useRouter } from 'vue-router'
+// The presets popup: App.vue shows it once every time the site is opened or refreshed when logged out,
+// and only until it is answered when logged in (e.g. right after signing up).
+// It starts with the presets saved last time (localStorage); the answers become the starting filters on Search and the Map.
+// "Skip for now" closes it for this visit and keeps the saved presets.
 import ProfileForm from './ProfileForm.vue'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
-const router = useRouter()
 
-// "Save" in the form: save the answers, then open the map, already filtered.
-// (Once the profile is saved, App.vue stops showing this popup by itself.)
+// "Save" in the form: save the presets (localStorage, and the account when logged in) and use them as the filters.
+// You stay on the page you were on. (Once saved, App.vue stops showing this popup by itself.)
 async function onSave(answers) {
   await auth.saveProfile(answers)
-  if (auth.profileError === '') {
-    router.push('/map')
-  }
 }
 
-// "Skip for now": remember that we asked, and carry on where they were
+// "Skip for now": close the popup for this visit, and carry on where they were
 function onSkip() {
-  auth.saveProfile({ skipped: true })
+  auth.skipPresets()
 }
 </script>
 
@@ -31,14 +27,14 @@ function onSkip() {
       <span class="eyebrow">Welcome</span>
       <h2 id="profile-title" class="serif">What are you <em>looking for?</em></h2>
       <p class="small text-muted">
-        We use this to filter the map for you. You can change it any time from the account icon.
+        These set your starting filters on Search and the Map, and are saved on this device for next time.
       </p>
 
       <ProfileForm
-        :profile="null"
+        :profile="auth.profile"
         :saving="auth.profileSaving"
         :error="auth.profileError"
-        button-text="Save and show me the map"
+        button-text="Save my presets"
         @save="onSave"
       />
 

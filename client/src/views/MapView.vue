@@ -2,7 +2,7 @@
 // The Map page: every block as a dot (coloured by price or by match score), with the same filters and
 // Your Priorities as Search, amenity layers, an address search, and the PHG (Proximity Housing Grant) layer:
 // type your parents' postal code to see the blocks within 4 km. Click a dot for the "Selected block" card.
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -642,8 +642,8 @@ function setFilter(name, value) {
 // Either way the choice is saved on the account, so it is the same next time.
 async function changePhg(on) {
   if (on) {
-    if (savedParentsPostal !== '') {
-      await searchParent(savedParentsPostal)
+    if (savedParentsPostal() !== '') {
+      await searchParent(savedParentsPostal())
     }
   } else {
     clearParent()
@@ -971,7 +971,8 @@ async function searchParent(text) {
   }).addTo(map)
   map.fitBounds(phgCircle.getBounds())
 
-  loadBlocks()
+  // awaited, so the page opening can zoom to the profile's town once these blocks are in
+  await loadBlocks()
 }
 
 // PhgCard's "Clear": remove the circle and marker, and show every block that fits the filters again
@@ -990,12 +991,32 @@ function selectedMatchText() {
   return ''
 }
 
-// The parents' postal code saved on the profile page. '' when there is none.
-// It fills the PHG box, and while the "Near parents (PHG)" switch is on (the default) the map draws its 4 km circle.
-let savedParentsPostal = ''
-if (auth.profile !== null && auth.profile.parentsPostal) {
-  savedParentsPostal = auth.profile.parentsPostal
+// The parents' postal code saved in the presets (popup / profile page). '' when there is none.
+// It fills the PHG box, and while the "Near parents (PHG)" switch is on (off by default) the map draws its 4 km circle.
+// A function, so it always reads the latest presets (they can be saved while the map is open).
+function savedParentsPostal() {
+  if (auth.profile !== null && auth.profile.parentsPostal) {
+    return auth.profile.parentsPostal
+  }
+  return ''
 }
+
+// New presets were saved in the popup while the map is open: redraw with them (PHG circle or not), then zoom to the town
+watch(
+  function () {
+    return auth.presetsVersion
+  },
+  async function () {
+    if (filterStore.filters.phg && savedParentsPostal() !== '') {
+      await searchParent(savedParentsPostal())
+    } else {
+      removeParentDrawings()
+      parentPlace.value = null
+      await loadBlocks()
+    }
+    zoomToProfileTown()
+  },
+)
 
 // The town chosen on the profile page: zoom the map to that town's blocks (the blocks themselves are not filtered).
 // Does nothing when no town was chosen, or no block of that town fits the filters.
@@ -1011,7 +1032,11 @@ function zoomToProfileTown() {
     }
   }
   if (spots.length > 0) {
-    map.fitBounds(spots)
+    // Zoom in at least to TOWN_ZOOM, so the town's own dots show (not just its town bubble)
+    map.fitBounds(spots, { padding: [30, 30], animate: false })
+    if (map.getZoom() < TOWN_ZOOM) {
+      map.setView(map.getCenter(), TOWN_ZOOM)
+    }
   }
 }
 
@@ -1032,21 +1057,21 @@ onMounted(async function () {
   // Leaflet's zoomend event: after every zoom in / out, redraw as dots or town bubbles (see drawBlocks)
   map.on('zoomend', drawBlocks)
 
-  // Leaflet's zoomend event: after every zoom in / out, redraw as dots or town bubbles (see drawBlocks)
-  map.on('zoomend', drawBlocks)
-  loadBlocks()
-
   // Coming from Search's "Show on map" button, the map zooms to that block instead of the profile's town
   const comingFromSearch = mapFocus.blockId !== null
 
-  if (filterStore.filters.phg && savedParentsPostal !== '') {
-    // PHG switch is on (the default) and the parents' postal code is known: draw the circle and keep the blocks inside it
-    await searchParent(savedParentsPostal)
+  // Load the blocks once: with the PHG circle if the switch is on and the parents' postal code is known
+  // (searchParent draws the circle, then loads the blocks inside it), otherwise every block that fits the filters
+  if (filterStore.filters.phg && savedParentsPostal() !== '') {
+    await searchParent(savedParentsPostal())
   } else {
     await loadBlocks()
-    if (!comingFromSearch) {
-      zoomToProfileTown()
-    }
+  }
+
+  // The profile's town comes first: zoom to it even when the PHG circle is drawn
+  // (if none of its blocks are shown, e.g. outside the circle, the map stays as it is)
+  if (!comingFromSearch) {
+    zoomToProfileTown()
   }
 })
 
@@ -1068,11 +1093,12 @@ onUnmounted(function () {
       <!-- Says which dots are shown ("Show") and what their colours mean ("Colour dots by"), both on the right -->
       Each dot is a block
       <span v-if="showWhich === 'shortlist'">from your shortlist (your filters are not used here)</span>
+      <span v-else-if="parentPlace !== null">within 4 km of your parents (PHG) that fits your filters</span>
       <span v-else>that fits your filters</span>,
       <span v-if="colourBy === 'match'">coloured by its priority score (from Your Priorities).</span>
       <span v-else>coloured by the median price of its cheapest flat type.</span>
       Click a dot to see every flat type there.
-      <span v-if="showWhich === 'all'">Zoomed out, the blocks are grouped into one bubble per town: click a bubble to zoom in.</span>
+      <span v-if="showWhich === 'all' && parentPlace === null">Zoomed out, the blocks are grouped into one bubble per town: click a bubble to zoom in.</span>
     </p>
 
     <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
@@ -1122,7 +1148,7 @@ onUnmounted(function () {
           <CollapsiblePanel title="Filters" :start-open="isWideScreen">
             <FilterPanel
               :filters="filterStore.filters"
-              :phg-postal="savedParentsPostal"
+              :phg-postal="savedParentsPostal()"
               @change-filter="setFilter"
               @search="loadBlocks"
               @clear="clearFilters"
@@ -1144,7 +1170,7 @@ onUnmounted(function () {
             :parent-place="parentPlace"
             :nearby-count="nearbyCount"
             :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
-            :initial-text="savedParentsPostal"
+            :initial-text="savedParentsPostal()"
             @search="searchParent"
             @clear="clearParent"
           />

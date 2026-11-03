@@ -110,6 +110,16 @@ async function searchNearPlace(text) {
   placeName.value = place.name
 }
 
+// New presets were saved in the popup (it opens after every refresh): search again with the new filters
+watch(
+  function () {
+    return auth.presetsVersion
+  },
+  function () {
+    search()
+  },
+)
+
 // The one search box (and the filters). Empty filters are ignored by the server, so we can send them all.
 //   1. Search our own data: town, street, block, full address ("Blk 314 Ang Mo Kio Ave 3") or postal code ("560323")
 //   2. Our data has nothing, but something was typed (e.g. "Northpoint City", or a condo's postal code):
