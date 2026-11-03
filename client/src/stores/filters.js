@@ -5,9 +5,9 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 // The filters at the start and after "Clear all". maxPrice '' would mean "Any" budget.
-// phg = the "Near parents (PHG)" switch on the Map: true = only show blocks within 4 km of the parents (yes by default)
+// phg = the "Near parents (PHG)" switch on the Map: true = only show blocks within 4 km of the parents (off by default)
 function makeDefaultFilters() {
-  return { q: '', flatType: '', maxPrice: '760000', minLease: '60', phg: true }
+  return { q: '', flatType: '', maxPrice: '760000', minLease: '60', phg: false }
 }
 
 export const useFiltersStore = defineStore('filters', function () {
@@ -36,8 +36,8 @@ export const useFiltersStore = defineStore('filters', function () {
     if (profile === null) {
       return
     }
-    // Profiles saved before the switch existed have no showPhg: that counts as yes
-    filters.value.phg = profile.showPhg !== false
+    // Only on when it was switched on (profiles saved before the switch existed have no showPhg: that counts as off)
+    filters.value.phg = profile.showPhg === true
     if (profile.skipped) {
       return
     }
