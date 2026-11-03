@@ -160,6 +160,26 @@ function clearFilters() {
   search()
 }
 
+// Phones and tablets: the filters live in a drawer that slides in from the left (on a computer they are always
+// shown on the right). true = drawer open
+const filtersOpen = ref(false)
+
+// The "☰ Filters" button opens the drawer
+function openFilters() {
+  filtersOpen.value = true
+}
+
+// The ✕ button and the dark backdrop close it
+function closeFilters() {
+  filtersOpen.value = false
+}
+
+// "Search" in the filter panel: close the drawer, so the new results are in view, then search
+function searchFromFilters() {
+  filtersOpen.value = false
+  search()
+}
+
 // "What matters to you?" panel: all ticked, Important (3) to start with
 const preferences = ref(makeDefaultPreferences())
 
@@ -400,21 +420,42 @@ onMounted(loadPage)
     <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->
     <div class="row g-4 mt-1">
       <div class="col-lg-8 order-2 order-lg-1">
+        <!-- Results bar. Computers: count on the left, Sort on the right.
+             Phones and tablets: "☰ Filters" and Sort side by side on top, the count on the line below.
+             (order-1 / order-2 swap their places on small screens.) Always shown, so the filters can
+             still be opened when a search found nothing. -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
+          <span v-if="!loading && !errorMessage" class="results-count order-2 order-lg-1">
+            <b>{{ total }} flat(s)</b> match your filters
+          </span>
+
+          <div class="results-controls d-flex justify-content-between align-items-center gap-2 ms-auto order-1 order-lg-2">
+            <!-- Phones and tablets only (d-lg-none): opens the filter drawer -->
+            <button
+              type="button"
+              class="act-btn d-lg-none"
+              aria-controls="filter-drawer"
+              :aria-expanded="filtersOpen"
+              @click="openFilters"
+            >
+              ☰ Filters
+            </button>
+
+            <select
+              id="sort-by"
+              v-model="sortBy"
+              class="form-select form-select-sm cosy-input w-auto"
+              aria-label="Sort"
+              @change="saveChoices"
+            >
+              <option value="match">Sort: Priority score</option>
+              <option value="price">Sort: Cheapest first</option>
+            </select>
+          </div>
+        </div>
+
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
-        <div v-else class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
-          <span><b>{{ total }} flat(s)</b> match your filters</span>
-          <select
-            id="sort-by"
-            v-model="sortBy"
-            class="form-select form-select-sm cosy-input w-auto"
-            aria-label="Sort"
-            @change="saveChoices"
-          >
-            <option value="match">Sort: Priority score</option>
-            <option value="price">Sort: Cheapest first</option>
-          </select>
-        </div>
 
         <BlockCard
           v-for="item in visibleResults"
@@ -439,11 +480,20 @@ onMounted(loadPage)
       </div>
 
       <div class="col-lg-4 order-1 order-lg-2">
-        <div class="sidebar">
+        <!-- Dark backdrop behind the open drawer; tapping it closes the drawer -->
+        <div v-if="filtersOpen" class="drawer-backdrop d-lg-none" @click="closeFilters"></div>
+
+        <!-- On a computer: the normal sidebar. On phones and tablets: a drawer from the left (see the CSS below) -->
+        <div id="filter-drawer" class="sidebar filter-drawer" :class="{ open: filtersOpen }">
+          <div class="d-flex justify-content-between align-items-center mb-3 d-lg-none">
+            <strong>Filters</strong>
+            <button type="button" class="btn-close" aria-label="Close filters" @click="closeFilters"></button>
+          </div>
+
           <FilterPanel
             :filters="filterStore.filters"
             @change-filter="setFilter"
-            @search="search"
+            @search="searchFromFilters"
             @clear="clearFilters"
           />
 
@@ -479,6 +529,44 @@ onMounted(loadPage)
     top: 20px;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
+  }
+}
+
+/* Phones and tablets (narrower than Bootstrap's lg, 992px): the sidebar becomes a drawer on the left.
+   It waits just off the screen (translateX(-100%)) and slides in when it has the "open" class. */
+@media (max-width: 991.98px) {
+  /* Results bar: Filters + Sort fill the first line (Filters left, Sort right), the count gets its own line */
+  .results-controls,
+  .results-count {
+    width: 100%;
+  }
+
+  .filter-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(85vw, 360px);
+    padding: 16px;
+    overflow-y: auto;
+    background: var(--cream);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: 1045; /* above the page and the navbar */
+    transform: translateX(-100%);
+    visibility: hidden; /* while closed, its buttons cannot be reached with the Tab key */
+    transition: transform 0.25s ease, visibility 0.25s;
+  }
+  .filter-drawer.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  /* The dark see-through layer over the page, just under the drawer */
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1040;
   }
 }
 
