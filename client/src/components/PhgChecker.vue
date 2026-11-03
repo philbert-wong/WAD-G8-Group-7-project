@@ -1,11 +1,8 @@
 <script setup>
-// FEATURE 6 (Jihao), shown on Step 2 of CPFCalView.vue. Delete this file + its 3 lines there to remove it.
-// Proximity Housing Grant (PHG) checker: pick your parents' (or child's) block,
-// and see which blocks in our data are within 4 km, so they qualify for "live near".
-// Uses the existing GET /api/blocks/nearby endpoint (MongoDB $geoNear), no new route.
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { PHG_NEAR_DISTANCE_METRES } from '../utils/affordabilityRules.js'
+import { money } from '../utils/affordability.js'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
@@ -24,7 +21,7 @@ const loading = ref(false)
 const errorMessage = ref('')
 
 // Sorts addresses A to Z for the dropdown
-// ⚠️ NOT IN COURSE (E): a "compare function" for list.sort(). sort() calls it with two items at a time:
+// a "compare function" for list.sort(). sort() calls it with two items at a time:
 // a negative number puts a first, a positive number puts b first, 0 leaves them as they are.
 function compareByLabel(a, b) {
   if (a.label < b.label) {
@@ -53,7 +50,6 @@ async function loadAddresses() {
     list.sort(compareByLabel)
     addresses.value = list
   } catch (error) {
-    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
     if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
     } else {
@@ -90,7 +86,6 @@ async function checkPhg() {
     nearbyBlocks.value = response.data.results
     checked.value = true
   } catch (error) {
-    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
     if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
     } else {
@@ -108,7 +103,7 @@ function formatDistance(metres) {
   return (metres / 1000).toFixed(1) + ' km'
 }
 
-// Fill the dropdown when the component appears on the page (lifecycle hook, Week 5)
+// Fill the dropdown when the component appears on the page 
 onMounted(loadAddresses)
 </script>
 
@@ -165,7 +160,7 @@ onMounted(loadAddresses)
                   <div class="small text-muted">{{ block.town }}</div>
                 </td>
                 <td>{{ block.flatType }}</td>
-                <td class="text-end">{{ '$' + block.price.toLocaleString('en-SG') }}</td>
+                <td class="text-end">{{ money(block.price) }}</td>
                 <td class="text-end">{{ formatDistance(block.distance) }}</td>
               </tr>
             </tbody>

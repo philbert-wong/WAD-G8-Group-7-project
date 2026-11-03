@@ -54,7 +54,8 @@ describe('TestSuite2: loanForRepayment', () => {
 
 describe('TestSuite3: estimateMonthlyCost', () => {
   it('Test1: estimates the repayment for a flat price', () => {
-    expect(Math.round(estimateMonthlyCost(500000))).toBe(1501)
+    // 75% loan of $500,000 = $375,000, at 2.6% over 25 years (the HDB loan limit)
+    expect(Math.round(estimateMonthlyCost(500000))).toBe(1701)
   })
 
   it('Test2: gives 0 for a price of 0', () => {

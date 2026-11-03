@@ -19,11 +19,10 @@ import {
   PHG_AMOUNT,
   PHG_SINGLE_NEAR_FLAT_TYPES,
   UP_TO_4_ROOM_FLAT_TYPES,
+  BSD_TIERS,
 } from './affordabilityRules.js'
 
-// ---------- Loan maths ----------
-// ⚠️ NOT IN COURSE: the two functions below use the standard bank loan formula (it is finance, not IS216).
-// We wrote it with a plain for loop (Week 1) instead of Math.pow, which was not taught.
+// --- Loan maths ---
 
 // How much $1 grows to after this many months of interest.
 // Each month it is multiplied by (1 + monthly rate), e.g. 300 months at 0.2167% a month -> about 1.91
@@ -73,10 +72,9 @@ export function estimateMonthlyCost(price) {
   return monthlyRepayment(loan, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS)
 }
 
-// ---------- The household ----------
+// --- The household ---
 
 // Adds up everyone's income, CPF and cash, and counts first- and second-timers.
-// (Yujia's totalIncome / totalOA / totalCashSaving / firstTimers / secondTimers, as one function)
 export function householdTotals(owners) {
   const totals = { buyers: 0, income: 0, cpf: 0, cash: 0, firstTimers: 0, secondTimers: 0 }
 
@@ -135,9 +133,20 @@ export function householdType(buyerType, totals) {
 //   status 'no'      = not eligible (reason says why), amount 0
 //   status 'unknown' = no rule for this case yet (see affordabilityRules.js), amount 0
 
-// Shows a number as money in a reason, e.g. 9000 -> "$9,000"
-function money(amount) {
-  return '$' + amount.toLocaleString('en-SG')
+// Shows a number as money, e.g. 682000 -> "$682,000" (also used by CPFCalView and PhgChecker)
+// Goes through the digits from the right and puts a comma before every group of 3
+export function money(amount) {
+  const digits = String(Math.round(amount)) // 682000 -> "682000" (whole dollars only)
+  let result = ''
+  let count = 0
+  for (let i = digits.length - 1; i >= 0; i--) {
+    result = digits[i] + result // add one digit to the front
+    count = count + 1
+    if (count % 3 === 0 && i > 0) {
+      result = ',' + result // every 3 digits, but not at the very front
+    }
+  }
+  return '$' + result
 }
 
 // Enhanced CPF Housing Grant (EHG): first-timers, 12 months' work, amount depends on income band
@@ -194,9 +203,9 @@ export function cpfHousingGrant(inputs, totals, type) {
   if (type === 'second') {
     return { name: name, amount: 0, status: 'no', reason: 'Only for first-timers' }
   }
-  // Amounts for these households are not in the rules file yet
-  if (type === 'other' || type === 'joint') {
-    return { name: name, amount: 0, status: 'unknown', reason: 'Amount for this household not filled in yet' }
+  // No rule for this mix of buyers
+  if (type === 'other') {
+    return { name: name, amount: 0, status: 'unknown', reason: 'No rule for this mix of buyers yet' }
   }
 
   const ceiling = CPF_HOUSING_GRANT_INCOME_CEILING[type]
@@ -260,7 +269,54 @@ export function checkGrants(inputs, totals, type) {
   return [ehg, cpfGrant, phg]
 }
 
-// ---------- Max budget ----------
+// --- Buyer's stamp duty ---
+
+// Stamp duty for a home at this price, one slice at a time (tiers in affordabilityRules.js).
+// price = 682000 -> 1% of 180,000 + 2% of 180,000 + 3% of 322,000 = 15,060
+export function buyersStampDuty(price) {
+  let duty = 0
+  let left = price
+
+  for (const tier of BSD_TIERS) {
+    if (left <= 0) {
+      break
+    }
+    // This tier taxes its slice, or whatever is left if that is smaller (null = no limit)
+    let part = left
+    if (tier.slice !== null && tier.slice < left) {
+      part = tier.slice
+    }
+    duty = duty + (part * tier.ratePercent) / 100
+    left = left - part
+  }
+  return duty
+}
+
+// --- Max budget --
+
+// Share of the price you must pay yourself: 100% - 75% loan = 25%
+const OWN_SHARE = (100 - HDB_LOAN_LTV_PERCENT) / 100
+
+// Can the household buy a flat at this price, once the stamp duty is paid?
+//   ownMoney = savings + grants, savings = CPF + cash.
+//   Stamp duty must come from savings: HDB says grants can only "Offset the purchase price of the flat"
+//   or "Reduce the housing loan".
+function priceFits(price, ownMoney, savings, maxLoanByIncome) {
+  const stampDuty = buyersStampDuty(price)
+  if (stampDuty > savings) {
+    return false
+  }
+  const moneyForFlat = ownMoney - stampDuty
+  // Loan-to-Value: your own money must cover 25% of the price
+  if (price * OWN_SHARE > moneyForFlat) {
+    return false
+  }
+  // Income: the loan you need must not be bigger than your income allows
+  if (price - moneyForFlat > maxLoanByIncome) {
+    return false
+  }
+  return true
+}
 
 // Works out the most the household can pay for a resale flat with an HDB loan.
 // Returns everything the wizard shows:
@@ -304,29 +360,34 @@ export function calculateBudget(inputs) {
     maxLoanByIncome = loanForRepayment(maxPayment, HDB_LOAN_ASSESSMENT_RATE, inputs.loanYears)
   }
 
-  // Step 4: two limits on the price. The budget is whichever is lower.
+  // Step 4: two limits on the price.
   //  (a) Loan-to-Value: the loan is at most 75% of the price, so your own money must cover 25%.
   //      price x 25% <= ownMoney   ->   price <= ownMoney / 25%
   //  (b) Income: price <= ownMoney + the biggest loan your income allows
-  const ownShare = (100 - HDB_LOAN_LTV_PERCENT) / 100
-  const limitByLtv = ownMoney / ownShare
-  const limitByIncome = ownMoney + maxLoanByIncome
-
-  let maxBudget = 0
-  let limitedBy = ''
-  if (limitByLtv < limitByIncome) {
-    maxBudget = limitByLtv
-    limitedBy = 'savings'
-  } else {
-    maxBudget = limitByIncome
-    limitedBy = 'income'
+  // Start from the lower of the two, rounded down to the nearest $1,000.
+  let maxBudget = ownMoney / OWN_SHARE
+  if (ownMoney + maxLoanByIncome < maxBudget) {
+    maxBudget = ownMoney + maxLoanByIncome
   }
-
-  // Round down to the nearest $1,000 so we never promise more than you can afford
   maxBudget = Math.floor(maxBudget / 1000) * 1000
 
+  // Stamp duty is paid from your own money too, so that price may not fit any more.
+  // Lower it $1,000 at a time until price + stamp duty fits.
+  while (maxBudget > 0 && !priceFits(maxBudget, ownMoney, totals.cpf + totals.cash, maxLoanByIncome)) {
+    maxBudget = maxBudget - 1000
+  }
+
+  // What is left for the flat after the stamp duty, and which limit stopped the price
+  const stampDuty = buyersStampDuty(maxBudget)
+  const moneyForFlat = ownMoney - stampDuty
+  let limitedBy = 'income'
+  if (moneyForFlat / OWN_SHARE < moneyForFlat + maxLoanByIncome) {
+    limitedBy = 'savings'
+  }
+
   // Step 5: how the budget is paid for. Loan first, then grants, then CPF, then cash.
-  let loan = maxBudget - ownMoney
+  // (The stamp duty comes on top, from your CPF / cash.)
+  let loan = maxBudget - moneyForFlat
   if (loan < 0) {
     loan = 0
   }
@@ -355,6 +416,7 @@ export function calculateBudget(inputs) {
     fromGrants: Math.round(fromGrants),
     fromCpf: Math.round(fromCpf),
     fromCash: Math.round(fromCash),
+    stampDuty: Math.round(stampDuty),
     maxLoanByIncome: Math.round(maxLoanByIncome),
     loanAllowed: loanAllowed,
     limitedBy: limitedBy,

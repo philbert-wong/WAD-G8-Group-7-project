@@ -1,29 +1,20 @@
 <script setup>
-// HDB AFFORDABILITY CALCULATOR (combined version: Yujia's wizard + Jihao's loan and grant maths)
-//
-// FEATURES (each one is marked in the code below, so we can remove any we decide not to keep)
-//   FEATURE 1 (Yujia)  3-step wizard and household input: single / couple / joint singles,
-//                      co-owners, each with first- or second-timer status, income, CPF and cash
-//   FEATURE 2 (Jihao)  Extra questions the grants and loan need: flat type, 12 months' work,
-//                      living with / near parents, loan period
-//   FEATURE 3 (both)   Grants: EHG (Yujia's income bands) + CPF Housing Grant + PHG (Jihao),
-//                      each with the reason you do or do not get it
-//   FEATURE 4 (Jihao)  Max flat price INCLUDING the HDB loan, how it is paid
-//                      (loan / grants / CPF / cash) and the monthly repayment
-//   FEATURE 5 (Yujia)  "Apply Budget to Search" (now sends the max flat price, see applyBudget)
-//   FEATURE 6 (Jihao)  PHG checker: which blocks are within 4 km of your parents (Step 2)
-//   FEATURE 7 (Jihao)  Link to the Compare page (CompareView.vue, route /compare)
-//
+// HDB AFFORDABILITY CALCULATOR 
 // All the maths is in utils/affordability.js and every number in utils/affordabilityRules.js.
+
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
-import { calculateBudget } from '../utils/affordability.js'
+import { calculateBudget, money } from '../utils/affordability.js'
 import { MAX_LOAN_YEARS, HDB_LOAN_INTEREST_RATE, HDB_LOAN_LTV_PERCENT, MSR_PERCENT } from '../utils/affordabilityRules.js'
 import PhgChecker from '../components/PhgChecker.vue'
 import axios from 'axios'
 import { BASE_URL } from '../config.js'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+
+// Pinia store (Week 11): saving the inputs needs an account, so we check if someone is logged in
+const auth = useAuthStore()
 
 // Which step of the wizard is showing: 1, 2 or 3
 const currentStep = ref(1)
@@ -31,14 +22,10 @@ const errorMessage = ref('')
 
 const flatTypes = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM', 'EXECUTIVE']
 
-// ---------- FEATURE 1 (Yujia): household input ----------
-
 // 'single', 'couple' (couple / family) or 'joint' (joint singles)
 const buyerType = ref('couple')
 
 // How many co-owners besides the main owner (0 to 3).
-// Starts at 1, so the default "couple" has 2 people (Yujia's version started at 0,
-// which made the grant "unavailable" until you changed it).
 const coOwnerCount = ref(1)
 
 // One owner's details. income, cpf and cash start empty ('') until typed.
@@ -47,7 +34,6 @@ function makeOwner() {
 }
 
 // Room for the main owner + up to 3 co-owners. We only SHOW the ones in use (activeOwners),
-// so if you lower the count and raise it again, what you typed is still there.
 const owners = ref([makeOwner(), makeOwner(), makeOwner(), makeOwner()])
 
 // The owners in use: just the main owner for a single buyer, otherwise main + co-owners
@@ -64,14 +50,25 @@ function activeOwners() {
   return list
 }
 
-// ---------- FEATURE 2 (Jihao): extra questions ----------
 const flatType = ref('4 ROOM')
 const employed12Months = ref(true)
 const phgOption = ref('none') // 'none', 'with' or 'near'
 const loanYears = ref(MAX_LOAN_YEARS)
 
+// A saved amount, or '' (an empty box) if nothing was saved for it
+function savedValueOrEmpty(value) {
+  if (value === null || value === undefined) {
+    return ''
+  }
+  return value
+}
+
 //load the users saved inputs (yujia)
 async function loadDetails() {
+  // Guests have nothing saved, so do not ask the server
+  if (!auth.isLoggedIn) {
+    return
+  }
   try {
     const response = await axios.get(`${BASE_URL}/api/affordability`)
     const data = response.data
@@ -83,9 +80,9 @@ async function loadDetails() {
       for (let i = 0; i < data.owners.length; i++) {
         owners.value[i] = {
           status: data.owners[i].status,
-          income: data.owners[i].income ?? '',
-          cpf: data.owners[i].cpf ?? '',
-          cash: data.owners[i].cash ?? ''
+          income: savedValueOrEmpty(data.owners[i].income),
+          cpf: savedValueOrEmpty(data.owners[i].cpf),
+          cash: savedValueOrEmpty(data.owners[i].cash)
         }
       }
 
@@ -93,6 +90,10 @@ async function loadDetails() {
       employed12Months.value = data.employed12Months
       phgOption.value = data.phgOption
       loanYears.value = data.loanYears
+
+      if (loanYears.value > MAX_LOAN_YEARS) {
+        loanYears.value = MAX_LOAN_YEARS
+      }
     }
   } catch (error) {
     console.log('Cannot load affordability details')
@@ -100,8 +101,10 @@ async function loadDetails() {
 }
 
 onMounted(loadDetails)
-// auto save users input to mongo (yujia)
 async function saveDetails() {
+  if (!auth.isLoggedIn) {
+    return
+  }
   try {
     await axios.put(`${BASE_URL}/api/affordability`, {
       buyerType: buyerType.value,
@@ -118,9 +121,7 @@ async function saveDetails() {
 }
 
 
-// ---------- Turning the form into numbers ----------
-
-// Turns a box's value into a number. An empty box counts as 0.
+// Turns a box's value into a number
 function toNumber(value) {
   if (value === '' || value === null || value === undefined) {
     return 0
@@ -128,7 +129,7 @@ function toNumber(value) {
   return Number(value)
 }
 
-// Checks the form. Returns an error message, or '' when everything is fine.
+// checks the form
 function checkForm() {
   const list = activeOwners()
 
@@ -183,7 +184,7 @@ function buildInputs() {
   }
 }
 
-// ---------- The result (computed property, Week 5) ----------
+// --- The result ---
 // computed() re-runs this function by itself whenever anything it reads changes
 // (any box in the form), and remembers the answer until then.
 // null = the form is not valid yet, so there is nothing to show.
@@ -194,9 +195,7 @@ const result = computed(function () {
   return calculateBudget(buildInputs())
 })
 
-// ---------- Moving between steps ----------
-
-// "Next" on Step 1: check the form first, then show Step 2
+// Step 1: check the form first
 function goToStep2() {
   errorMessage.value = checkForm()
   if (errorMessage.value !== '') {
@@ -209,14 +208,8 @@ function goToStep(step) {
   currentStep.value = step
 }
 
-// ---------- Showing results ----------
 
-// Shows a number as money, e.g. 682000 -> "$682,000" (toLocaleString adds the commas)
-function money(amount) {
-  return '$' + amount.toLocaleString('en-SG')
-}
 
-// A friendly name for the household type that affordability.js worked out
 function householdLabel(type) {
   if (type === 'family') {
     return 'Couple / family, all first-timers'
@@ -233,7 +226,7 @@ function householdLabel(type) {
   }
 }
 
-// ---------- FEATURE 5 (Yujia): Apply Budget to Search ----------
+// --- Apply Budget to Search ----
 // Opens the Search page with the budget in the address, e.g. /?maxPrice=550000.
 // SearchView reads it and sets the budget filter.
 // CHANGED from Yujia's version: it now sends the max flat price INCLUDING the loan.
@@ -431,7 +424,11 @@ function applyBudget() {
 
           <div v-if="!result.loanAllowed" class="alert alert-warning small">
             Your household income is above the HDB loan ceiling, so no HDB loan is counted.
-            A bank loan is not built into this calculator yet.
+          </div>
+
+          <!-- Grants can only pay for the flat, so the stamp duty needs some CPF or cash -->
+          <div v-if="result.maxBudget === 0" class="alert alert-warning small">
+            You need some CPF or cash savings to pay the buyer's stamp duty. Grants can only be used for the flat itself.
           </div>
 
           <h6 class="mt-3">How it is paid for</h6>
@@ -445,10 +442,13 @@ function applyBudget() {
             </tbody>
           </table>
 
-          <p class="text-muted small">
-            Not included: stamp duty, legal fees, cash over valuation, bank loans, and HDB's other loan period
-            limits (65 minus your age, and the flat's remaining lease minus 20 years).
-          </p>
+          <!-- Buyer's stamp duty: paid on top of the price, from CPF / cash -->
+          <h6 class="mt-3">On top of the price</h6>
+          <table class="table table-sm">
+            <tbody>
+              <tr><td>Buyer's stamp duty (from your CPF / cash)</td><td class="text-end">{{ money(result.stampDuty) }}</td></tr>
+            </tbody>
+          </table>
 
           <button type="button" class="btn btn-secondary" @click="goToStep(2)">Back</button>
           <!-- FEATURE 5 (Yujia): send the budget to the Search page -->

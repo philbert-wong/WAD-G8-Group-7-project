@@ -8,46 +8,41 @@
 //   mixed  = couple where one is a first-timer and the other a second-timer 
 
 // --- Sources ---
-// Official sources (where a page shows no date, the date it was checked is given)
-// [CPF-GUIDE]    CPF Board, "A guide to Enhanced CPF Housing Grant and Proximity Housing Grant" (updated 2 Oct 2026)
+// Official sources
+// [CPF-GUIDE]    CPF Board, "A guide to Enhanced CPF Housing Grant and Proximity Housing Grant"
 //                https://www.cpf.gov.sg/member/infohub/educational-resources/a-guide-to-enhanced-cpf-housing-and-proximity-grant
-// [CPF-LOAN]     CPF Board, "3 differences between HDB loan and bank loan" (checked 23 Oct 2026)
+// [CPF-LOAN]     CPF Board, "3 differences between HDB loan and bank loan"
 //                https://www.cpf.gov.sg/member/infohub/educational-resources/3-differences-between-hdb-loan-and-bank-loan
-// [HDB-2026]     HDB, "Increase in income ceilings and greater support for families with children", Annex A (Aug 2026)
-//                https://www.hdb.gov.sg/-/media/hdb-pulse/news/2026/increase-in-income-ceilings-and-greater-support-for-families-with-children/Annex-A.pdf
-// [HDB-NEWS-2026] HDB, "Increase in income ceilings and greater support for families with children" (updated 31 Oct 2026)
+// [HDB-NEWS-2026] HDB, "Increase in income ceilings and greater support for families with children"
 //                https://www.hdb.gov.sg/hdb-pulse/news/2026/increase-in-income-ceilings-and-greater-support-for-families-with-children
-// [HDB-AR2025]   HDB, "Annual Report 2024/2025" (2025)
+// [HDB-AR2025]   HDB, "Annual Report 2024/2025"
 //                https://www.hdb.gov.sg/-/media/hdb-pulse/reports/annual-reports-and-financial-statements/HDB_AR2025.pdf
-// [HDB-CPFHG]    HDB, "CPF Housing Grants for Families Buying Resale Flats" (checked 3 Nov 2026)
+// [HDB-CPFHG]    HDB, "CPF Housing Grants for Families Buying Resale Flats"
 //                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/couples-and-families/cpf-housing-grants
-// [HDB-CPFHG-SIN] HDB, "CPF Housing Grant for Singles Buying Resale Flats" (to check)
-//                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/singles/cpf-housing-grants
-// [HDB-EHG-FAM]  HDB, "Enhanced CPF Housing Grant for Families" (checked 3 Nov 2026)
+// [HDB-CPFHG-SIN] HDB, "CPF Housing Grant for Singles Buying Resale Flats"
+//                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/singles/cpf-housing-grant
+// [HDB-EHG-FAM]  HDB, "Enhanced CPF Housing Grant for Families"
 //                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/couples-and-families/enhanced-cpf-housing-grant
-// [HDB-EHG-SIN]  HDB, "Enhanced CPF Housing Grant for Singles" (checked 3 Nov 2026)
+// [HDB-EHG-SIN]  HDB, "Enhanced CPF Housing Grant for Singles"
 //                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/singles/enhanced-cpf-housing-grant
-// [EHG]          HDB, "Enhanced CPF Housing Grant (EHG) amount for first-timer households" (PDF, checked 3 Nov 2026)
+// [EHG]          HDB, "Enhanced CPF Housing Grant (EHG) amount for first-timer households" (PDF)
 //                https://www.hdb.gov.sg/-/media/buying-a-flat/flat-grant-and-loan-eligibility/couples-and-families/enhanced-cpf-housing-grant/EHG-amount-Families.pdf
-// [EHG-SIN]      HDB, "EHG amount for singles" (PDF, 214 KB, linked from [HDB-EHG-SIN]) (to check)
-// [HDB-PHG-SIN]  HDB, "Proximity Housing Grant for Singles Buying Resale Flats" (to check)
+// [EHG-SIN]      HDB, "Grant amount for single applicant / two or more first-timer singles" (PDF)
+//                https://www.hdb.gov.sg/-/media/buying-a-flat/flat-grant-and-loan-eligibility/singles/enhanced-cpf-housing-grant/EHG-amount-Singles-Aug-2024.pdf
+// [HDB-PHG-SIN]  HDB, "Proximity Housing Grant for Singles Buying Resale Flats"
 //                https://www.hdb.gov.sg/buying-a-flat/flat-grant-and-loan-eligibility/singles/proximity-housing-grant
-// [HDB-RESALE]   HDB, "Resale Terms and Conditions" (PDF, updated 1 Sep 2026)
-//                https://www.hdb.gov.sg/-/media/managing-my-home/selling-a-flat/process-for-selling-a-flat/option-to-purchase/Resale-Terms--Conditions.pdf
-// [NICE-LOANS]   MyNiceHome (HDB), "Housing Loans for HDB Flat Buyers" (updated 23 Aug 2026)
+// [NICE-LOANS]   MyNiceHome (HDB), "Housing Loans for HDB Flat Buyers"
 //                https://www.mynicehome.gov.sg/get-started/hdb-loans-guide/
-// [NICE-GRANTS]  MyNiceHome (HDB), "CPF Housing Grants for HDB Flat Buyers" (updated 23 Aug 2026)
+// [NICE-GRANTS]  MyNiceHome (HDB), "CPF Housing Grants for HDB Flat Buyers"
 //                https://www.mynicehome.gov.sg/get-started/hdb-grants-guide/
-// [SGW-CPFHG]    SupportGoWhere, "CPF Housing Grant" (updated 31 Oct 2026)
+// [SGW-CPFHG]    SupportGoWhere, "CPF Housing Grant"
 //                https://supportgowhere.life.gov.sg/schemes/CPF-HG/cpf-housing-grant
-// [MFF]          Made for Families, "Housing Schemes and Grants" (updated 21 Oct 2026)
-//                https://www.madeforfamilies.gov.sg/housing/housing-schemes-and-grants/
-// [MAS-LOANS]    MAS, "Rules for New Housing Loans" (checked 23 Oct 2026)
+// [MAS-LOANS]    MAS, "Rules for New Housing Loans"
 //                https://www.mas.gov.sg/regulation/explainers/new-housing-loans
-// [MAS-2022]     MAS, "Measures to Promote Sustainable Conditions in the Property Market" (29 Sep 2022)
+// [MAS-2022]     MAS, "Measures to Promote Sustainable Conditions in the Property Market"
 //                https://www.mas.gov.sg/news/media-releases/2022/measures-to-promote-sustainable-conditions-in-the-property-market-by-ensuring-prudent-borrowing-and-moderating-demand
-// [IRAS-BSD]     IRAS, "Buyer's Stamp Duty (BSD)" (updated 28 Oct 2026)
-//                https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/buyer's-stamp-duty-(bsd)
+// [IRAS-BSD]     IRAS, "Buyer's Stamp Duty (BSD)"
+//                https://www.iras.gov.sg/taxes/stamp-duty/for-property/buying-or-acquiring-property/buyer%27s-stamp-duty-%28bsd%29
 
 // --- HDB housing loan ---
 
@@ -59,15 +54,12 @@ export const HDB_LOAN_INTEREST_RATE = 2.6
 export const HDB_LOAN_ASSESSMENT_RATE = 3.0
 
 // ✅ [HDB-AR2025] Loan-to-Value limit for HDB loans: you can borrow at most 75% of the price
-// ("lowered ... by 5 percentage points from 80% to 75%")
 export const HDB_LOAN_LTV_PERCENT = 75
 
 // ✅ [MAS-LOANS] Mortgage Servicing Ratio: at most 30% of gross monthly income on the monthly repayment
 export const MSR_PERCENT = 30
 
-// ✅ [NICE-LOANS] Longest HDB loan: 25 years. (30 years is the limit for BANK loans on HDB flats.)
-// HDB also caps it at "65 years minus the average age of applicants" and "remaining lease of flat minus 20 years";
-// the calculator does not ask for age or lease, so those two are listed under "Not included" on Step 3.
+// ✅ [NICE-LOANS] Longest HDB loan: 25 years
 export const MAX_LOAN_YEARS = 25
 
 // ✅ [HDB-NEWS-2026] Income ceiling (average gross monthly household income) to get an HDB loan
@@ -91,12 +83,13 @@ export const CPF_HOUSING_GRANT_INCOME_CEILING = {
 //   family = ✅ [HDB-CPFHG] + [SGW-CPFHG] $80,000 (2- to 4-room), $50,000 (5-room or bigger)
 //   mixed  = ✅ [HDB-CPFHG] "First-timer and second-timer couples": $40,000 and $25,000
 //   single = ✅ [SGW-CPFHG] $40,000 (2- to 4-room), $25,000 (5-room only, see below)
-//   joint  = ❌ not found yet [HDB-CPFHG-SIN], so the calculator shows "not counted yet"
-// Not modelled: an SC + SPR couple gets less ($70,000 and $40,000).
+//   joint  = ✅ [HDB-CPFHG-SIN] "up to 2 Singles Grant applicants": $40,000 each for 2- to 4-room ("a total of
+//            $80,000 for 2 singles"), $25,000 each for 5-room or bigger ("a total of $50,000"). Any flat type.
 export const CPF_HOUSING_GRANT = {
   family: { upTo4Room: 80000, room5OrBigger: 50000 },
   mixed: { upTo4Room: 40000, room5OrBigger: 25000 },
   single: { upTo4Room: 40000, room5OrBigger: 25000 },
+  joint: { upTo4Room: 80000, room5OrBigger: 50000 },
 }
 
 // ✅ [NICE-GRANTS] + [SGW-CPFHG] A single gets the CPF Housing Grant only up to a 5-room flat (not EXECUTIVE)
@@ -121,8 +114,9 @@ export const EHG_MONTHS_EMPLOYED = 12
 // EHG amount by average gross monthly household income, lowest income first (lower income = bigger grant)
 //   family = ✅ [EHG] page 1. Also used for joint singles: [HDB-EHG-SIN] "up to 2 singles may each be eligible
 //            for an EHG (Singles), i.e., a total of up to $120,000", on the "Income of all persons"
-//   single = ✅ [EHG] page 2 for mixed couples (on HALF the household income).
-//            Also used for one single on their own income; ⚠️ check against [EHG-SIN]
+//   single = ✅ [EHG] page 2 for mixed couples (on HALF the household income), and
+//            ✅ [EHG-SIN] page 1 for one single on their own income. ([EHG-SIN] page 3, "two or more
+//            first-timer singles", is the same as the family table.)
 export const EHG_TIERS = {
   family: [
     { maxIncome: 1500, amount: 120000 },
@@ -164,7 +158,7 @@ export const EHG_TIERS = {
 
 // ✅ [CPF-GUIDE] + [NICE-GRANTS] Proximity Housing Grant (PHG). No income ceiling. Second-timers can get it too.
 // Couples (including mixed) use "family"; one single uses "single".
-// ⚠️ Joint singles also use "single"; check against [HDB-PHG-SIN]
+// ✅ [HDB-PHG-SIN] Joint singles also use "single" (singles "on their own or with other single citizens").
 export const PHG_AMOUNT = {
   family: { liveWith: 30000, liveNear: 20000 },
   single: { liveWith: 15000, liveNear: 10000 },
@@ -178,3 +172,17 @@ export const PHG_SINGLE_NEAR_FLAT_TYPES = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM
 
 // Flat types that count as "up to 4-room" for the CPF Housing Grant (5 ROOM and EXECUTIVE are bigger)
 export const UP_TO_4_ROOM_FLAT_TYPES = ['2 ROOM', '3 ROOM', '4 ROOM']
+
+// ---------- Buyer's stamp duty ----------
+
+// ✅ [IRAS-BSD] Buyer's stamp duty on a home, one slice of the price at a time:
+// "First $180,000: 1%", "Next $180,000: 2%", "Next $640,000: 3%", "Next $500,000: 4%",
+// "Next $1,500,000: 5%", "Remaining amount: 6%". slice = null means "everything that is left".
+export const BSD_TIERS = [
+  { slice: 180000, ratePercent: 1 },
+  { slice: 180000, ratePercent: 2 },
+  { slice: 640000, ratePercent: 3 },
+  { slice: 500000, ratePercent: 4 },
+  { slice: 1500000, ratePercent: 5 },
+  { slice: null, ratePercent: 6 },
+]
