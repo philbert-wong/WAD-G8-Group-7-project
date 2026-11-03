@@ -3,15 +3,16 @@
 // and keeps only the blocks inside it. This component only collects the text and shows the result.
 import { ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   parentPlace: { type: Object, default: null }, // the parents' place found: { name, lat, lng }, or null
   nearbyCount: { type: Number, default: null }, // blocks inside the circle (null = no circle)
   distanceKm: { type: Number, default: 4 }, // the PHG "live near" distance in km
+  initialText: { type: String, default: '' }, // what the box starts with, e.g. the postal code saved on the profile page
 })
 const emit = defineEmits(['search', 'clear'])
 
 // What is typed in the box (only this component needs it)
-const text = ref('')
+const text = ref(props.initialText)
 
 // Search button / Enter: send the typed text up to MapView
 function onSearch() {

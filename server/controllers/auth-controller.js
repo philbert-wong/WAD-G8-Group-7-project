@@ -1,5 +1,5 @@
 // The /api/auth controller: register and login (both answer with a token the frontend sends back later),
-// and the logged-in user's saved preferences.
+// the logged-in user's saved preferences, and their profile (the sign-up popup / profile page answers).
 // routes/auth-routes.js decides which address runs which function below.
 // bcrypt hashes passwords; jsonwebtoken makes and checks login tokens
 const bcrypt = require('bcrypt');
@@ -160,6 +160,105 @@ exports.savePreferences = async (req, res) => {
     await user.save();
 
     res.json({ preferences: user.preferences });
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
+// =====================================================================
+// Profile: the answers from the sign-up popup and the profile page
+// =====================================================================
+
+// An answer as trimmed text: "  PUNGGOL " -> "PUNGGOL", a number 600000 -> "600000", anything else -> ''
+function asText(value) {
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+  return '';
+}
+
+// A Singapore postal code is exactly 6 digits
+function isPostalCode(text) {
+  return /^[0-9]{6}$/.test(text);
+}
+
+// READ   GET /api/auth/profile   (needs a token)
+// { profile: { town, parentsPostal, flatType, maxPrice, minLease } }, or { profile: null } if never answered
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ profile: user.profile });
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
+// UPDATE PUT /api/auth/profile   (needs a token)
+// body: { "profile": { "town": "PUNGGOL", "parentsPostal": "560314", "flatType": "4 ROOM", "maxPrice": "700000", "minLease": "60" } }
+//   or  { "profile": { "skipped": true } }   ("Skip for now": remember they were asked, so the popup does not come back)
+// Every answer may be '' (not answered). maxPrice '' means "Any budget", the same as on the Filters panel.
+// showPhg is the "Near parents (PHG)" switch: true unless it was switched off (so older profiles count as true).
+exports.saveProfile = async (req, res) => {
+  // profile must be an object like { ... } (not missing, not text, not a list)
+  if (
+    req.body === undefined ||
+    typeof req.body.profile !== 'object' ||
+    req.body.profile === null ||
+    Array.isArray(req.body.profile)
+  ) {
+    return res.status(400).json({ message: 'profile must be an object' });
+  }
+  const answers = req.body.profile;
+
+  const showPhg = answers.showPhg !== false;
+
+  // We only keep the answers we know about, so nothing else can be stored by sending extra fields
+  let cleanProfile = { skipped: true, showPhg: showPhg };
+
+  if (answers.skipped !== true) {
+    const parentsPostal = asText(answers.parentsPostal);
+    if (parentsPostal !== '' && !isPostalCode(parentsPostal)) {
+      return res.status(400).json({ message: 'Postal code must be 6 digits' });
+    }
+
+    const maxPrice = asText(answers.maxPrice);
+    if (maxPrice !== '' && !(Number(maxPrice) > 0)) {
+      return res.status(400).json({ message: 'Budget must be a number' });
+    }
+
+    const minLease = asText(answers.minLease);
+    if (minLease !== '' && !(Number(minLease) >= 20 && Number(minLease) <= 99)) {
+      return res.status(400).json({ message: 'Remaining lease must be between 20 and 99 years' });
+    }
+
+    cleanProfile = {
+      town: asText(answers.town),
+      parentsPostal: parentsPostal,
+      flatType: asText(answers.flatType),
+      maxPrice: maxPrice,
+      minLease: minLease,
+      showPhg: showPhg,
+    };
+  }
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.profile = cleanProfile;
+    // "profile" can hold anything, so tell Mongoose it changed before saving (same as preferences)
+    user.markModified('profile');
+    await user.save();
+
+    res.json({ profile: user.profile });
   } catch (error) {
     sendError(res, error);
   }

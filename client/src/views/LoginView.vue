@@ -124,7 +124,7 @@ async function submit() {
 
               <!-- Only when creating an account -->
               <div v-if="mode === 'register'" class="mb-3">
-                <label for="login-confirm" class="form-label">Type the password again</label>
+                <label for="login-confirm" class="form-label">Confirm your password</label>
                 <input
                   id="login-confirm"
                   v-model="confirmPassword"

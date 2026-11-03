@@ -632,6 +632,23 @@ function findShownPlaceAt(lat, lng) {
 // The filter panel says one filter changed, e.g. ('maxPrice', '600000'): change it in the shared store. Same as on Search.
 function setFilter(name, value) {
   filterStore.setFilter(name, value)
+  if (name === 'phg') {
+    changePhg(value)
+  }
+}
+
+// The "Near parents (PHG)" switch was flipped. On: draw the 4 km circle around the parents' postal code saved on
+// the profile and keep only the blocks inside. Off: remove the circle and show every block again.
+// Either way the choice is saved on the account, so it is the same next time.
+async function changePhg(on) {
+  if (on) {
+    if (savedParentsPostal !== '') {
+      await searchParent(savedParentsPostal)
+    }
+  } else {
+    clearParent()
+  }
+  auth.savePhgToggle(on)
 }
 
 // "Clear all": back to the starting filters (also on Search, since they are shared), then reload the dots
@@ -973,8 +990,33 @@ function selectedMatchText() {
   return ''
 }
 
+// The parents' postal code saved on the profile page. '' when there is none.
+// It fills the PHG box, and while the "Near parents (PHG)" switch is on (the default) the map draws its 4 km circle.
+let savedParentsPostal = ''
+if (auth.profile !== null && auth.profile.parentsPostal) {
+  savedParentsPostal = auth.profile.parentsPostal
+}
+
+// The town chosen on the profile page: zoom the map to that town's blocks (the blocks themselves are not filtered).
+// Does nothing when no town was chosen, or no block of that town fits the filters.
+function zoomToProfileTown() {
+  if (auth.profile === null || !auth.profile.town) {
+    return
+  }
+  const spots = []
+  for (const place of shownPlaces) {
+    // Every card of a place has the same town, so the first one is enough
+    if (place.cards[0].town === auth.profile.town) {
+      spots.push([place.lat, place.lng])
+    }
+  }
+  if (spots.length > 0) {
+    map.fitBounds(spots)
+  }
+}
+
 // When the page opens: make the map inside <div id="mapBox"> (centred on Singapore), then add the blocks
-onMounted(function () {
+onMounted(async function () {
   map = L.map('mapBox').setView([1.36, 103.84], 12)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
@@ -990,7 +1032,22 @@ onMounted(function () {
   // Leaflet's zoomend event: after every zoom in / out, redraw as dots or town bubbles (see drawBlocks)
   map.on('zoomend', drawBlocks)
 
+  // Leaflet's zoomend event: after every zoom in / out, redraw as dots or town bubbles (see drawBlocks)
+  map.on('zoomend', drawBlocks)
   loadBlocks()
+
+  // Coming from Search's "Show on map" button, the map zooms to that block instead of the profile's town
+  const comingFromSearch = mapFocus.blockId !== null
+
+  if (filterStore.filters.phg && savedParentsPostal !== '') {
+    // PHG switch is on (the default) and the parents' postal code is known: draw the circle and keep the blocks inside it
+    await searchParent(savedParentsPostal)
+  } else {
+    await loadBlocks()
+    if (!comingFromSearch) {
+      zoomToProfileTown()
+    }
+  }
 })
 
 // When you leave the Map page: remove the Leaflet map, so its listeners and layers do not stay in memory
@@ -1065,6 +1122,7 @@ onUnmounted(function () {
           <CollapsiblePanel title="Filters" :start-open="isWideScreen">
             <FilterPanel
               :filters="filterStore.filters"
+              :phg-postal="savedParentsPostal"
               @change-filter="setFilter"
               @search="loadBlocks"
               @clear="clearFilters"
@@ -1086,6 +1144,7 @@ onUnmounted(function () {
             :parent-place="parentPlace"
             :nearby-count="nearbyCount"
             :distance-km="PHG_NEAR_DISTANCE_METRES / 1000"
+            :initial-text="savedParentsPostal"
             @search="searchParent"
             @clear="clearParent"
           />
