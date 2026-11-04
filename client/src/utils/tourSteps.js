@@ -57,7 +57,7 @@ export const TOUR_STEPS = {
     {
       title: 'Same filters as Search',
       text: 'Changing them here changes them on Search too.',
-      target: '.map-sidebar > div:has(#filters-panel)',
+      target: '#filters-panel',
     },
     {
       title: 'Living near your parents?',

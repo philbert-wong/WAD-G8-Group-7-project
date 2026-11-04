@@ -14,7 +14,6 @@ import MapSearchBar from '../components/map/MapSearchBar.vue'
 import SelectedBlockCard from '../components/map/SelectedBlockCard.vue'
 import MapLegend from '../components/map/MapLegend.vue'
 import MapKey from '../components/map/MapKey.vue'
-import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMapFocusStore } from '../stores/mapFocus'
 import { useFiltersStore } from '../stores/filters'
@@ -1107,27 +1106,29 @@ onUnmounted(function () {
 
 
           <!-- Your Priorities FIRST, like Search: the dots are coloured by priority score by default, so it should
-               not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen. -->
-          <CollapsiblePanel title="Your Priorities" :start-open="isWideScreen">
-            <PreferencesPanel
-              :preferences="preferences"
-              on-map
-              @change-ticked="changeTicked"
-              @change-level="changeLevel"
-            />
-          </CollapsiblePanel>
+               not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen.
+               collapsible: "Hide / Show" sits in its own title row, so it folds down to one line (no extra header box) -->
+          <PreferencesPanel
+            class="mb-3"
+            :preferences="preferences"
+            on-map
+            collapsible
+            :start-open="isWideScreen"
+            @change-ticked="changeTicked"
+            @change-level="changeLevel"
+          />
 
           <!-- Filters: the same panel as Search, near the top so it is easy to find. Closed at the start
-               (its title is in view: one click opens it), so the map options below are not pushed far down -->
-          <CollapsiblePanel title="Filters" :start-open="false">
-            <FilterPanel
-              :filters="filterStore.filters"
-              :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
-              @change-filter="setFilter"
-              @search="applyFilters"
-              @clear="clearFilters"
-            />
-          </CollapsiblePanel>
+               (its title row is in view: one click opens it), so the map options below are not pushed far down -->
+          <FilterPanel
+            :filters="filterStore.filters"
+            :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
+            collapsible
+            :start-open="false"
+            @change-filter="setFilter"
+            @search="applyFilters"
+            @clear="clearFilters"
+          />
 
           <!-- Map options: show all flats / my shortlist, colour dots by price / priority score, and the amenity tick boxes
                (the colour key itself floats on the map: MapKey) -->
