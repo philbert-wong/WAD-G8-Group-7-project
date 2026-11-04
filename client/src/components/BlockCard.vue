@@ -99,18 +99,18 @@ function formatRange(low, high) {
 }
 
 const categoryNames = {
-  mrt: 'MRT',
+  mrt: 'MRT/LRT',
   hawker: 'Hawker centre',
   park: 'Park',
   school: 'Primary school',
 }
 
-// The little "✓ Near MRT" tags. Worked out from the block's own data.
+// The little "✓ Near MRT/LRT" tags. Worked out from the block's own data.
 // The limits (10 min, 70 years, 1 km, 500 m) are our own choice, not an HDB rule.
 function makeTags(block) {
   const tags = []
   if (block.mrtWalkMinutes <= 10) {
-    tags.push('Near MRT')
+    tags.push('Near MRT/LRT')
   }
   if (block.remainingLease >= 70) {
     tags.push('Long lease')

@@ -8,21 +8,16 @@
 // "Your presets", saves with "Save presets", closes with "Cancel", and stays on the page they are on.
 import { ref, onMounted, onUnmounted } from 'vue'
 import { keepFocusInside } from '../utils/focusTrap.js'
-import { useRouter } from 'vue-router'
 import ProfileForm from './ProfileForm.vue'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
-const router = useRouter()
 
 // Opened from the "Presets" button (true), or the first-visit welcome (false)..
 // Read once: App.vue makes a new popup each time it opens.
 const reopened = auth.presetsOpen
 
-// Keyboard users: when the popup opens, move the focus into it (so Tab starts inside it, not behind it).
-// While it is open, Tab stays inside it and Esc closes it (wherever the focus is). When it closes, the focus goes
-// back to the button that opened it.
-// ⚠️ NOT IN COURSE: onUnmounted and document.addEventListener('keydown') (only onMounted and @click were taught).
+// Keyboard: focus moves into the popup, Tab stays inside, Esc closes it
 const box = ref(null)
 let openedFrom = null
 
@@ -51,18 +46,14 @@ onUnmounted(function () {
 // auth.presetsVersion and reload with them). Creating an account later copies them to the account.
 async function onSave(answers) {
   await auth.saveProfile(answers)
-  if (!reopened) {
-    router.push('/')
-  }
+  // Stay on the page the visitor opened
 }
 
-// "Skip for now": close the popup (the form's answers are not used) and go to Search.
+// "Skip for now": close the popup (the form's answers are not used) and stay on this page.
 // "Cancel" (opened from the button): just close it, on the same page.
 function onSkip() {
   auth.skipPresets()
-  if (!reopened) {
-    router.push('/')
-  }
+  // Stay on the page the visitor opened
 }
 </script>
 

@@ -41,7 +41,7 @@ describe('TestSuite1: ProfileForm shows its questions', () => {
 
     expect(wrapper.text()).toContain('Your Priorities')
     expect(wrapper.text()).toContain('Education (primary schools)')
-    expect(wrapper.text()).toContain('Transport (MRT stations)')
+    expect(wrapper.text()).toContain('Transport (MRT/LRT stations)')
     expect(wrapper.text()).toContain('Food (hawker centres)')
     expect(wrapper.text()).toContain('Greenery (parks)')
   })

@@ -17,5 +17,8 @@ router.put('/preferences', requireAuth, authController.savePreferences);
 router.get('/profile', requireAuth, authController.getProfile);
 router.put('/profile', requireAuth, authController.saveProfile);
 
+router.get('/security-questions', requireAuth, authController.getSecurityQuestions);
+router.put('/security-questions', requireAuth, authController.saveSecurityQuestions);
+
 // EXPORT
 module.exports = router;

@@ -32,8 +32,10 @@ function removeItem() {
     <!-- Note box in the cosy card style, sitting under the flat card -->
     <div class="cosy-card note-card">
       <div>
-        <label class="form-label d-block small mb-1">My note</label>
-        <textarea v-model="draft" class="form-control cosy-input mb-2" rows="2" maxlength="500"
+        <!-- for / id link the label to its box -->
+        <label :for="'note-' + item.id" class="form-label d-block small mb-1">My note</label>
+        <textarea :id="'note-' + item.id" v-model="draft" class="form-control cosy-input mb-2" rows="2" maxlength="500"
+          :aria-label="'My note for Blk ' + item.block.block + ' ' + item.block.street"
           placeholder="e.g. near my parents, viewing on Sunday"></textarea>
 
         <div class="d-flex gap-2">

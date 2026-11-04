@@ -15,7 +15,7 @@ describe('TestSuite1: PreferencesPanel', () => {
     const wrapper = mount(PreferencesPanel, { props: { preferences: makeDefaultPreferences() } })
 
     expect(wrapper.text()).toContain('Education (primary schools)')
-    expect(wrapper.text()).toContain('Transport (MRT stations)')
+    expect(wrapper.text()).toContain('Transport (MRT/LRT stations)')
     expect(wrapper.text()).toContain('Food (hawker centres)')
     expect(wrapper.text()).toContain('Greenery (parks)')
   })
@@ -49,7 +49,7 @@ describe('TestSuite1: PreferencesPanel', () => {
     preferences.mrt.ticked = false
     const wrapper = mount(PreferencesPanel, { props: { preferences: preferences } })
 
-    const mrtLevel = wrapper.find('[aria-label="How important is Transport (MRT stations)"]')
+    const mrtLevel = wrapper.find('[aria-label="How important is Transport (MRT/LRT stations)"]')
     const parkLevel = wrapper.find('[aria-label="How important is Greenery (parks)"]')
 
     expect(mrtLevel.element.disabled).toBe(true)
@@ -80,7 +80,7 @@ describe('TestSuite1: PreferencesPanel', () => {
 
   it('Test7: tells its parent when a new level is picked, as a number', async () => {
     const wrapper = mount(PreferencesPanel, { props: { preferences: makeDefaultPreferences() } })
-    const level = wrapper.find('[aria-label="How important is Transport (MRT stations)"]')
+    const level = wrapper.find('[aria-label="How important is Transport (MRT/LRT stations)"]')
 
     level.element.value = '5'
     await level.trigger('change')

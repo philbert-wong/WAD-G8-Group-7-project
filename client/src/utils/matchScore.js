@@ -25,7 +25,7 @@ export const MAX_DISTANCES = {
 // To add Healthcare later: add a line here, a max distance above, and the clinic data.
 export const CATEGORIES = [
   { key: 'school', label: 'Education (primary schools)' },
-  { key: 'mrt', label: 'Transport (MRT stations)' },
+  { key: 'mrt', label: 'Transport (MRT/LRT stations)' },
   { key: 'hawker', label: 'Food (hawker centres)' },
   { key: 'park', label: 'Greenery (parks)' },
 ]
@@ -161,7 +161,7 @@ export function scoreWord(score) {
 // share = this category's part of the score (its weight / all the weights), so the shares add up to 1
 // and the score is each row's score x its share, added up.
 // weighted = score x share: these add up to the match score.
-// Gives [{ label: 'Transport (MRT stations)', key: 'mrt', distance: 741, maxDistance: 1300, score: 43, level: 'Important', share: 0.25, weighted: 10.75 }, ...]
+// Gives [{ label: 'Transport (MRT/LRT stations)', key: 'mrt', distance: 741, maxDistance: 1300, score: 43, level: 'Important', share: 0.25, weighted: 10.75 }, ...]
 export function scoreBreakdown(distances, weights, maxDistances) {
   const rows = []
   if (distances === undefined || distances === null) {

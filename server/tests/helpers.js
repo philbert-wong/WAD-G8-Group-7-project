@@ -21,10 +21,13 @@ export const BASE_URL = 'http://localhost:8001';
 //   B  Punggol     4 ROOM  $680,000  new lease (2018)  3 min walk   <- has an MRT and hawker centre next to it
 //   C  Bedok       3 ROOM  $360,000  old lease (1979)  15 min walk
 
+// Answers to the 3 security questions, used by every test account (every account must answer them)
+export const ANSWERS = ['Alex', 'Mrs Tan', 'KK Hospital'];
+
 export async function getToken(email = 'test@example.com') {
   const res = await request(BASE_URL)
     .post('/api/auth/register')
-    .send({ email: email, password: 'password123' });
+    .send({ email: email, password: 'password123', securityAnswers: ANSWERS });
   return res.body.token;
 }
 

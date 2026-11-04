@@ -137,13 +137,14 @@ loadTowns()
 
     <div class="row">
       <div class="col-12 mb-3">
+        <!-- step 1000: matches the calculator's $1,000 rounding -->
         <label for="profile-budget" class="form-label">Max budget ($)</label>
         <input
           id="profile-budget"
           v-model="maxPrice"
           type="number"
           min="100000"
-          step="10000"
+          step="1000"
           placeholder="Any"
           class="form-control"
         />

@@ -73,13 +73,13 @@ export const useAuthStore = defineStore('auth', function () {
     profileLoaded.value = false
   }
 
-  // Sends the email and password to /api/auth/login or /api/auth/register.
+  // Sends the form to /api/auth/login or /api/auth/register
   // Both answer { token, user: { id, email } }. On a problem, error holds the message to show.
-  async function sendLoginForm(path, email, password) {
+  async function sendLoginForm(path, body) {
     loading.value = true
     error.value = ''
     try {
-      const response = await axios.post(`${BASE_URL}/api/auth/${path}`, { email: email, password: password })
+      const response = await axios.post(`${BASE_URL}/api/auth/${path}`, body)
       saveLogin(response.data.token, response.data.user)
     } catch (e) {
       // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
@@ -93,17 +93,16 @@ export const useAuthStore = defineStore('auth', function () {
   }
 
   async function login(email, password) {
-    await sendLoginForm('login', email, password)
+    await sendLoginForm('login', { email: email, password: password })
   }
 
-  // "Forgot password" page: sets a new password for this email (no email or link is sent).
-  // Returns true when it worked; on a problem returns false and error holds the message.
-  async function resetPassword(email, password) {
+  // "Forgot password": new password if all 3 answers are right; returns true when it worked
+  async function resetPassword(email, securityAnswers, password) {
     loading.value = true
     error.value = ''
     let worked = false
     try {
-      await axios.post(`${BASE_URL}/api/auth/reset-password`, { email: email, password: password })
+      await axios.post(`${BASE_URL}/api/auth/reset-password`, { email: email, securityAnswers: securityAnswers, password: password })
       worked = true
     } catch (e) {
       // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
@@ -117,8 +116,9 @@ export const useAuthStore = defineStore('auth', function () {
     return worked
   }
 
-  async function register(email, password) {
-    await sendLoginForm('register', email, password)
+  // securityAnswers: the answers to the 3 security questions
+  async function register(email, password, securityAnswers) {
+    await sendLoginForm('register', { email: email, password: password, securityAnswers: securityAnswers })
     // A new account: show the Help tour again when the Search page opens (see GuideTour.vue),
     // even if it was already seen as a guest
     if (error.value === '') {
@@ -136,7 +136,7 @@ export const useAuthStore = defineStore('auth', function () {
       // The account's copy is only used on a device that has none yet.
       if (profile.value === null) {
         profile.value = response.data.profile
-        useFiltersStore().applyProfile(profile.value)
+        useFiltersStore().applyProfile(profile.value, true)
       } else if (response.data.profile === null) {
         // Just signed up (or an account that never had presets): copy the presets entered on this device to the account
         await axios.put(`${BASE_URL}/api/auth/profile`, { profile: profile.value })
@@ -256,7 +256,7 @@ export const useAuthStore = defineStore('auth', function () {
     // The next person to log in on this computer starts with their own profile and the normal filters
     profile.value = null
     profileLoaded.value = false
-    useFiltersStore().clearFilters()
+    useFiltersStore().resetToDefaults()
     // ...and is asked the presets popup again straight away (not only after a refresh)
     presetsAsked.value = false
     presetsSkipped.value = false
@@ -282,7 +282,7 @@ export const useAuthStore = defineStore('auth', function () {
   if (savedPresets !== null) {
     try {
       profile.value = JSON.parse(savedPresets)
-      useFiltersStore().applyProfile(profile.value)
+      useFiltersStore().applyProfile(profile.value, true)
     } catch (e) {
       localStorage.removeItem('presets') // not valid JSON: forget it
     }

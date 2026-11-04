@@ -4,6 +4,7 @@ import { RouterView, useRoute } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import ProfileModal from './components/ProfileModal.vue'
 import GuideTour from './components/GuideTour.vue'
+import BackToTop from './components/BackToTop.vue'
 import { useAuthStore } from './stores/auth'
 
 // The presets popup: only for a logged-out visitor with no saved presets who has not skipped it (see needsProfile in stores/auth.js)
@@ -25,6 +26,9 @@ const route = useRoute()
     <GuideTour />
     <RouterView/>
   </main>
+
+  <!-- "Back to top": appears above the "?" button once you have scrolled down a long page -->
+  <BackToTop />
 
 
   <footer class="cosy-footer">

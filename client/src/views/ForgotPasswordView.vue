@@ -1,15 +1,17 @@
 <script setup>
 // "Forgot password?" page (the link under the password box on the Login page).
-// No email is sent: they type their email and create a new password right here.
+// They type their email, their 3 security answers and a new password (no email is sent)
 // On success we go to the Login page, which says the password was updated.
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { SECURITY_QUESTIONS, allAnswered } from '../utils/securityQuestions.js'
 
 const auth = useAuthStore()
 const router = useRouter()
 
 const email = ref('')
+const securityAnswers = ref(['', '', '']) // same order as SECURITY_QUESTIONS
 const password = ref('')
 const confirmPassword = ref('')
 const errorMessage = ref('') // problems found by this page; problems from the server are in auth.error
@@ -19,6 +21,9 @@ const errorMessage = ref('') // problems found by this page; problems from the s
 function checkForm() {
   if (email.value.trim() === '' || password.value === '') {
     return 'Please enter your email and a new password'
+  }
+  if (!allAnswered(securityAnswers.value)) {
+    return 'Please answer all 3 security questions'
   }
   if (password.value.length < 8) {
     return 'Password must be at least 8 characters'
@@ -37,7 +42,7 @@ async function submit() {
     return
   }
 
-  const worked = await auth.resetPassword(email.value, password.value)
+  const worked = await auth.resetPassword(email.value, securityAnswers.value, password.value)
   if (worked) {
     router.push({ path: '/login', query: { reset: '1' } })
   }
@@ -49,7 +54,7 @@ async function submit() {
     <!-- Page heading -->
     <div class="col-12 text-center mb-4">
       <h1 class="page-title serif">Forgot your <em>password?</em></h1>
-      <p class="page-sub">Enter your email and create a new password.</p>
+      <p class="page-sub">Enter your email, answer your 3 security questions, and choose a new password.</p>
     </div>
 
     <div class="col-12 col-md-8 col-lg-5">
@@ -60,6 +65,16 @@ async function submit() {
               <label for="forgot-email" class="form-label">Email</label>
               <input id="forgot-email" v-model="email" type="email" class="form-control" autocomplete="email" />
             </div>
+
+            <!-- The same 3 questions as when the account was made -->
+            <fieldset class="mb-3">
+              <legend class="form-label fs-6 mb-1">Security questions</legend>
+              <div v-for="(question, index) in SECURITY_QUESTIONS" :key="question" class="mb-2">
+                <label :for="'forgot-q' + (index + 1)" class="form-label small mb-1">{{ question }}</label>
+                <input :id="'forgot-q' + (index + 1)" v-model="securityAnswers[index]" type="text" class="form-control"
+                  autocomplete="off" />
+              </div>
+            </fieldset>
 
             <div class="mb-3">
               <label for="forgot-password" class="form-label">New password</label>

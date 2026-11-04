@@ -19,6 +19,10 @@ test('should create an account and be logged in with a valid email and password'
   await page.locator('#login-email').fill('e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com');
   await page.locator('#login-password').fill('goodpass123');
   await page.locator('#login-confirm').fill('goodpass123');
+  // every new account answers the 3 security questions (for Forgot password)
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
   await page.locator('#login-confirm').press('Enter');
 
   // assert
@@ -37,6 +41,10 @@ test('should refuse a very common password when creating an account', async ({ p
   await page.locator('#login-email').fill('e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com');
   await page.locator('#login-password').fill('password');
   await page.locator('#login-confirm').fill('password');
+  // every new account answers the 3 security questions (for Forgot password)
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
   await page.locator('#login-confirm').press('Enter');
 
   // assert: the server's message is shown, and nobody is logged in
@@ -56,6 +64,10 @@ test('should warn when the two passwords do not match', async ({ page }) => {
   await page.locator('#login-email').fill('e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com');
   await page.locator('#login-password').fill('goodpass123');
   await page.locator('#login-confirm').fill('differentpass456');
+  // every new account answers the 3 security questions (for Forgot password)
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
   await page.locator('#login-confirm').press('Enter');
 
   // assert
@@ -89,6 +101,10 @@ test('should ask the next visitor what they are looking for after a logout', asy
   await page.locator('#login-email').fill('e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com');
   await page.locator('#login-password').fill('goodpass123');
   await page.locator('#login-confirm').fill('goodpass123');
+  // every new account answers the 3 security questions (for Forgot password)
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
   await page.locator('#login-confirm').press('Enter');
   await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
   // creating an account makes the Search tour start again about a second later: close it now, so it cannot open
@@ -100,4 +116,45 @@ test('should ask the next visitor what they are looking for after a logout', asy
 
   // assert
   await expect(page.getByRole('button', { name: 'Skip for now' })).toBeVisible();
+});
+
+test('should only reset a forgotten password with the right security answers', async ({ page }) => {
+  // setup: create an account (its security answers are Alex, Mrs Tan, KK Hospital), then log out
+  const email = 'e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com';
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await page.getByRole('button', { name: 'Skip tour' }).click();
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('button', { name: 'Create account' }).click();
+  await page.locator('#login-email').fill(email);
+  await page.locator('#login-password').fill('goodpass123');
+  await page.locator('#login-confirm').fill('goodpass123');
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
+  await page.locator('#login-confirm').press('Enter');
+  await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
+  await page.getByRole('button', { name: 'Logout' }).click();
+
+  // actions: one wrong answer first, then all 3 right (capitals do not matter)
+  // (after a logout the first-visit popup is shown again: close it)
+  await page.goto('/forgot-password');
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await page.locator('#forgot-email').fill(email);
+  await page.locator('#forgot-q1').fill('alex');
+  await page.locator('#forgot-q2').fill('mrs tan');
+  await page.locator('#forgot-q3').fill('Wrong Hospital');
+  await page.locator('#forgot-password').fill('newpass12345');
+  await page.locator('#forgot-confirm').fill('newpass12345');
+  await page.getByRole('button', { name: 'Create new password' }).click();
+  await expect(page.getByText('The email or one of the answers is not right')).toBeVisible();
+  await page.locator('#forgot-q3').fill('kk hospital');
+  await page.getByRole('button', { name: 'Create new password' }).click();
+
+  // assert: the Login page says the password was updated, and the new password works
+  await expect(page.getByText('Your password was updated')).toBeVisible();
+  await page.locator('#login-email').fill(email);
+  await page.locator('#login-password').fill('newpass12345');
+  await page.locator('#login-password').press('Enter');
+  await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
 });

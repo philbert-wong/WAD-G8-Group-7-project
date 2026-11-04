@@ -23,6 +23,40 @@ if (!jwtSecret) {
 // =====================================================================
 
 // Used in the catch block of every route: sends the right error answer to the frontend.
+// The 3 security questions for "Forgot password" (the website shows the same 3, in client/src/utils/securityQuestions.js)
+const SECURITY_QUESTIONS = [
+  'What was the name of your best childhood friend?',
+  'Who was your favorite childhood teacher?',
+  'What was the name of the hospital where you were born?',
+];
+
+// Answers are compared lowercase and without spaces at the ends, so "KK Hospital " = "kk hospital"
+function cleanAnswer(answer) {
+  return answer.trim().toLowerCase();
+}
+
+// Checks the answers sent: a list with one text answer per question, none empty. Returns a message, or '' if fine.
+function securityAnswersProblem(answers) {
+  if (!Array.isArray(answers) || answers.length !== SECURITY_QUESTIONS.length) {
+    return 'Please answer all 3 security questions';
+  }
+  for (const answer of answers) {
+    if (typeof answer !== 'string' || answer.trim() === '') {
+      return 'Please answer all 3 security questions';
+    }
+  }
+  return '';
+}
+
+// Hashes each answer (like the password), so the answers themselves are never stored
+async function hashAnswers(answers) {
+  const hashes = [];
+  for (const answer of answers) {
+    hashes.push(await bcrypt.hash(cleanAnswer(answer), 10));
+  }
+  return hashes;
+}
+
 function sendError(res, error) {
   // MongoDB could not understand an id
   if (error.name === 'CastError') {
@@ -140,6 +174,12 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: 'That password is too common' });
   }
 
+  // Every new account answers the 3 security questions, so it can always reset a forgotten password
+  const answersProblem = securityAnswersProblem(req.body.securityAnswers);
+  if (answersProblem !== '') {
+    return res.status(400).json({ message: answersProblem });
+  }
+
   try {
     // An account with this email already exists: 409
     const existing = await User.findOne({ email: email})
@@ -150,8 +190,11 @@ exports.register = async (req, res) => {
     // Never store the password itself, only its hash (10 = how much work the hashing does)
     const passwordHash = await bcrypt.hash(req.body.password, 10);
 
+    // The 3 security answers (for "Forgot password"): only their hashes are kept
+    const securityAnswerHashes = await hashAnswers(req.body.securityAnswers);
+
     // Save the new user
-    const user = await User.create({ email: email, passwordHash: passwordHash});
+    const user = await User.create({ email: email, passwordHash: passwordHash, securityAnswerHashes: securityAnswerHashes});
 
     // 201 = created. Send the token and the user, but never the passwordHash
     res.status(201).json({
@@ -363,12 +406,14 @@ function newPasswordProblem(password, email) {
   return '';
 }
 
-// RESET PASSWORD  POST /api/auth/reset-password   body: { "email": "a@b.com", "password": "newpassword123" }
-// "Forgot password?" on the Login page: no email is sent and there is no link. Whoever knows the account's email
-// can choose a new password straight away. (This means anyone who knows an email can change that account's password.)
+// RESET PASSWORD  POST /api/auth/reset-password   body: { email, securityAnswers: [3 answers], password }
 exports.resetPassword = async (req, res) => {
   if (req.body === undefined || typeof req.body.email !== 'string' || typeof req.body.password !== 'string') {
     return res.status(400).json({ message: 'Email and new password are required' });
+  }
+  const answersProblem = securityAnswersProblem(req.body.securityAnswers);
+  if (answersProblem !== '') {
+    return res.status(400).json({ message: answersProblem });
   }
 
   const email = req.body.email.trim().toLowerCase();
@@ -382,9 +427,23 @@ exports.resetPassword = async (req, res) => {
   }
 
   try {
+    // Every answer must match (same message for any problem, so emails cannot be guessed)
     const user = await User.findOne({ email: email });
-    if (user === null) {
-      return res.status(404).json({ message: 'No account found with that email' });
+    let answersOk = false;
+    if (user !== null && user.securityAnswerHashes.length === SECURITY_QUESTIONS.length) {
+      answersOk = true;
+      for (let i = 0; i < SECURITY_QUESTIONS.length; i++) {
+        const same = await bcrypt.compare(cleanAnswer(req.body.securityAnswers[i]), user.securityAnswerHashes[i]);
+        if (!same) {
+          answersOk = false;
+        }
+      }
+    }
+    if (!answersOk) {
+      return res.status(401).json({
+        message: 'The email or one of the answers is not right. (Accounts without saved security questions ' +
+          'cannot be reset here: log in and add them on the Profile page.)',
+      });
     }
 
     // Never store the password itself, only its hash (same as register)
@@ -392,6 +451,41 @@ exports.resetPassword = async (req, res) => {
     await user.save();
 
     res.json({ message: 'Password updated. You can log in now.' });
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
+// READ   GET /api/auth/security-questions   (needs a token): { hasAnswers: true / false }
+exports.getSecurityQuestions = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ hasAnswers: user.securityAnswerHashes.length === SECURITY_QUESTIONS.length });
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
+// UPDATE PUT /api/auth/security-questions   (needs a token)   body: { securityAnswers: [3 answers] }
+exports.saveSecurityQuestions = async (req, res) => {
+  if (req.body === undefined) {
+    return res.status(400).json({ message: 'Please answer all 3 security questions' });
+  }
+  const answersProblem = securityAnswersProblem(req.body.securityAnswers);
+  if (answersProblem !== '') {
+    return res.status(400).json({ message: answersProblem });
+  }
+  try {
+    const user = await User.findById(req.user.id);
+    if (user === null) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    user.securityAnswerHashes = await hashAnswers(req.body.securityAnswers);
+    await user.save();
+    res.json({ message: 'Security questions saved' });
   } catch (error) {
     sendError(res, error);
   }

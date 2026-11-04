@@ -90,7 +90,7 @@ describe('TestSuite1: BlockCard shows the block', () => {
     const wrapper = mountCard()
 
     expect(wrapper.text()).toContain('Hawker centre')
-    expect(wrapper.text()).not.toContain('Near MRT')
+    expect(wrapper.text()).not.toContain('Near MRT/LRT')
   })
 
   it('Test5: shows a single price, not a range, when the low and high are the same', () => {

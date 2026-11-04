@@ -15,6 +15,7 @@ import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { TOUR_STEPS, FALLBACK_STEPS } from '../utils/tourSteps.js'
+import { keepFocusInside } from '../utils/focusTrap.js'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -333,8 +334,26 @@ function startTour() {
 }
 
 // "Skip tour", "Done", Esc, or going to another page
+// true when the tour was opened with the "?" button
+let openedByButton = false
+const helpButton = ref(null)
+
+function startTourFromButton() {
+  openedByButton = true
+  startTour()
+}
+
 function closeTour() {
   open.value = false
+  if (openedByButton) {
+    openedByButton = false
+    // Put the focus back on "?" once it is shown again
+    nextTick(function () {
+      if (helpButton.value !== null) {
+        helpButton.value.focus()
+      }
+    })
+  }
   cancelAnimationFrame(glideFrame)
   spot.value = null
   currentTarget = null
@@ -425,10 +444,13 @@ function onScroll(event) {
   measure()
 }
 
-// Esc closes the tour
+// Esc closes the tour; Tab / Shift+Tab stay inside the tour card (not on the page dimmed behind it)
 function onKeyDown(event) {
   if (open.value && event.key === 'Escape') {
     closeTour()
+  }
+  if (open.value) {
+    keepFocusInside(card.value, event)
   }
 }
 
@@ -456,7 +478,8 @@ onUnmounted(function () {
     class="help-btn"
     aria-label="Help: a quick tour of this page"
     title="Help"
-    @click="startTour"
+    ref="helpButton"
+    @click="startTourFromButton"
   >
     ?
   </button>

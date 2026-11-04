@@ -285,9 +285,7 @@ function clearFilters() {
 // shown on the right). true = drawer open
 const filtersOpen = ref(false)
 
-// The "☰ Filters" button opens the drawer
-// ⚠️ NOT IN COURSE: document.addEventListener('keydown') and moving the keyboard focus (see utils/focusTrap.js).
-// While the drawer is open, Tab stays inside it and Esc closes it; closing puts the focus back on "☰ Filters".
+// The "☰ Filters" button opens the drawer (Tab stays inside it, Esc closes it)
 let filtersOpener = null
 
 function onDrawerKeyDown(event) {

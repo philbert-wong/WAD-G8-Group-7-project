@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { BASE_URL, getToken, startTestDb, stopTestDb } from './helpers.js';
+import { ANSWERS, BASE_URL, getToken, startTestDb, stopTestDb } from './helpers.js';
 
 beforeAll(async () => {
   await startTestDb();
@@ -13,7 +13,7 @@ describe('/api/auth', () => {
   it('registers a user and returns a token', async () => {
     const res = await request(BASE_URL)
       .post('/api/auth/register')
-      .send({ email: 'new@example.com', password: 'password123' });
+      .send({ email: 'new@example.com', password: 'password123', securityAnswers: ANSWERS });
 
     expect(res.status).toBe(201);
     expect(typeof res.body.token).toBe('string');
@@ -23,7 +23,7 @@ describe('/api/auth', () => {
 
 
  it('rejects a duplicate email', async () => {
-    const body = { email: 'dup@example.com', password: 'password123' };
+    const body = { email: 'dup@example.com', password: 'password123', securityAnswers: ANSWERS };
     await request(BASE_URL).post('/api/auth/register').send(body);
     const res = await request(BASE_URL).post('/api/auth/register').send(body);
 
@@ -39,7 +39,7 @@ describe('/api/auth', () => {
   });
 
   it('logs in with the right password', async () => {
-    const body = { email: 'login@example.com', password: 'password123' };
+    const body = { email: 'login@example.com', password: 'password123', securityAnswers: ANSWERS };
     await request(BASE_URL).post('/api/auth/register').send(body);
     const res = await request(BASE_URL).post('/api/auth/login').send(body);
 
@@ -50,7 +50,7 @@ describe('/api/auth', () => {
   it('rejects a wrong password', async () => {
     await request(BASE_URL)
       .post('/api/auth/register')
-      .send({ email: 'wrong@example.com', password: 'password123' });
+      .send({ email: 'wrong@example.com', password: 'password123', securityAnswers: ANSWERS });
     const res = await request(BASE_URL)
       .post('/api/auth/login')
       .send({ email: 'wrong@example.com', password: 'not-the-password' });
@@ -72,7 +72,7 @@ describe('/api/auth', () => {
 // Stricter register checks. Written FIRST (TDD red step): the "rejects" tests fail until register() checks them.
 describe('/api/auth/register input checks', () => {
   function register(email, password) {
-    return request(BASE_URL).post('/api/auth/register').send({ email: email, password: password });
+    return request(BASE_URL).post('/api/auth/register').send({ email: email, password: password, securityAnswers: ANSWERS });
   }
 
   it('rejects an email without @', async () => {
@@ -214,12 +214,13 @@ describe('/api/auth/profile', () => {
 });
 
 describe('/api/auth/reset-password (forgot password)', () => {
-  it('chooses a new password from just the email', async () => {
-    await getToken('forgot@example.com'); // registers with password123
+  it('chooses a new password with the email and all 3 right answers', async () => {
+    await getToken('forgot@example.com'); // registers with password123 and ANSWERS
 
+    // Capitals and spaces at the ends do not matter
     const reset = await request(BASE_URL)
       .post('/api/auth/reset-password')
-      .send({ email: 'forgot@example.com', password: 'brandnewpass1' });
+      .send({ email: 'forgot@example.com', securityAnswers: [' alex ', 'MRS TAN', 'kk hospital'], password: 'brandnewpass1' });
     expect(reset.status).toBe(200);
 
     const oldLogin = await request(BASE_URL)
@@ -233,18 +234,46 @@ describe('/api/auth/reset-password (forgot password)', () => {
     expect(newLogin.status).toBe(200);
   });
 
-  it('says so when no account has that email', async () => {
+  it('does not change the password with only the email', async () => {
+    await getToken('forgot-noanswers@example.com');
+
     const res = await request(BASE_URL)
       .post('/api/auth/reset-password')
-      .send({ email: 'nobody@example.com', password: 'brandnewpass1' });
+      .send({ email: 'forgot-noanswers@example.com', password: 'brandnewpass1' });
+    expect(res.status).toBe(400);
 
-    expect(res.status).toBe(404);
+    const login = await request(BASE_URL)
+      .post('/api/auth/login')
+      .send({ email: 'forgot-noanswers@example.com', password: 'password123' });
+    expect(login.status).toBe(200);
+  });
+
+  it('does not change the password when one answer is wrong', async () => {
+    await getToken('forgot-wrong@example.com');
+
+    const res = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'forgot-wrong@example.com', securityAnswers: ['Alex', 'Mrs Tan', 'Wrong Hospital'], password: 'brandnewpass1' });
+    expect(res.status).toBe(401);
+
+    const login = await request(BASE_URL)
+      .post('/api/auth/login')
+      .send({ email: 'forgot-wrong@example.com', password: 'password123' });
+    expect(login.status).toBe(200);
+  });
+
+  it('gives the same answer when no account has that email', async () => {
+    const res = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'nobody@example.com', securityAnswers: ANSWERS, password: 'brandnewpass1' });
+
+    expect(res.status).toBe(401);
   });
 
   it('rejects something that is not an email', async () => {
     const res = await request(BASE_URL)
       .post('/api/auth/reset-password')
-      .send({ email: 'not-an-email', password: 'brandnewpass1' });
+      .send({ email: 'not-an-email', securityAnswers: ANSWERS, password: 'brandnewpass1' });
 
     expect(res.status).toBe(400);
   });
@@ -254,13 +283,63 @@ describe('/api/auth/reset-password (forgot password)', () => {
 
     const tooShort = await request(BASE_URL)
       .post('/api/auth/reset-password')
-      .send({ email: 'forgot-weak@example.com', password: 'short' });
+      .send({ email: 'forgot-weak@example.com', securityAnswers: ANSWERS, password: 'short' });
     expect(tooShort.status).toBe(400);
 
     const tooCommon = await request(BASE_URL)
       .post('/api/auth/reset-password')
-      .send({ email: 'forgot-weak@example.com', password: 'password' });
+      .send({ email: 'forgot-weak@example.com', securityAnswers: ANSWERS, password: 'password' });
     expect(tooCommon.status).toBe(400);
   });
 });
 
+describe('/api/auth/security-questions', () => {
+  it('will not create an account without all 3 answers', async () => {
+    const none = await request(BASE_URL)
+      .post('/api/auth/register')
+      .send({ email: 'no-answers@example.com', password: 'password123' });
+    expect(none.status).toBe(400);
+
+    const oneEmpty = await request(BASE_URL)
+      .post('/api/auth/register')
+      .send({ email: 'no-answers@example.com', password: 'password123', securityAnswers: ['Alex', ' ', 'KK Hospital'] });
+    expect(oneEmpty.status).toBe(400);
+  });
+
+  it('says whether the answers are saved, without sending them back', async () => {
+    const token = await getToken('questions-read@example.com');
+    const res = await request(BASE_URL)
+      .get('/api/auth/security-questions')
+      .set('Authorization', 'Bearer ' + token);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ hasAnswers: true });
+  });
+
+  it('changes the answers from the Profile page, and the new ones reset the password', async () => {
+    const token = await getToken('questions-change@example.com');
+    const save = await request(BASE_URL)
+      .put('/api/auth/security-questions')
+      .set('Authorization', 'Bearer ' + token)
+      .send({ securityAnswers: ['Ben', 'Mr Lim', 'SGH'] });
+    expect(save.status).toBe(200);
+
+    const oldAnswers = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'questions-change@example.com', securityAnswers: ANSWERS, password: 'brandnewpass1' });
+    expect(oldAnswers.status).toBe(401);
+
+    const newAnswers = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'questions-change@example.com', securityAnswers: ['Ben', 'Mr Lim', 'SGH'], password: 'brandnewpass1' });
+    expect(newAnswers.status).toBe(200);
+  });
+
+  it('needs a login token', async () => {
+    const res = await request(BASE_URL)
+      .put('/api/auth/security-questions')
+      .send({ securityAnswers: ANSWERS });
+
+    expect(res.status).toBe(401);
+  });
+});

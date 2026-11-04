@@ -17,7 +17,7 @@ and affordability, and see every block on a map.
 | Prices | Real transacted prices from the last 12 months (data.gov.sg), plus a live data.gov.sg lookup per block |
 | Price model | Multiple linear regression on log(price), trained on **156,183 sales** (Jan 2021 to Oct 2026) |
 | Model accuracy | **R² 0.904** on unseen sales · average miss **$46,311** (7.8%) · **3.2x better** than guessing the median |
-| Automated tests | **204 tests** in 3 layers: 70 server API + 103 client component/unit + 31 browser end-to-end |
+| Automated tests | **211 tests** in 3 layers: 76 server API + 103 client component/unit + 32 browser end-to-end |
 
 ---
 
@@ -304,19 +304,26 @@ class node_buyer,node_hdb_data,node_onemap,node_data_gov,node_map_tiles toneIndi
 ## 3. Key Features
 
 - **Search** (`/`): one box for a town, street, block address, postal code or any place (our data first, then
-  OneMap for flats within 1 km). Filters for budget, flat type and remaining lease. Block cards with price
-  range, median, lease left and walk to MRT.
-- **Your Priorities and the priority score:** tick and weight school, MRT, hawker centre and park; every card
+  OneMap for flats within 1 km). Filters for budget, flat type and remaining lease; they stay after a page
+  refresh, and "Clear all" removes every filter. Block cards with price range, median, lease left and walk to
+  MRT / LRT.
+- **Your Priorities and the priority score:** tick and weight school, MRT / LRT, hawker centre and park; every card
   is scored in the browser, so changing a weight re-sorts instantly.
 - **Price details:** the block's recent sales, median price and price per m², a chart, the model's estimate,
   and which factors (floor, lease, size, town) push the price up or down.
-- **Map** (`/map`): one dot per block, coloured by price band or priority score; amenity layers (MRT/LRT,
+- **Map** (`/map`): one dot per block, coloured by price band (with the band number 1-4 inside each dot) or
+  priority score; amenity layers (MRT/LRT,
   hawker, park, school); address search; a **PHG layer** that keeps only blocks within 4 km of the parents.
 - **Affordability** (`/CPFCal`): maximum budget from income and loan, grants (including mixed couples and
-  joint singles), stamp duty, PHG checker, and "use this budget" to search with it.
-- **Accounts:** register / login (JWT + bcrypt), forgot password, saved priorities and household details.
-- **Shortlist and Compare:** save flats with notes; compare 2 or 3 side by side.
+  joint singles), stamp duty, PHG checker, and "use this budget" to search with it. A refresh keeps the step
+  you were on, and a failed save to the account is shown on the page.
+- **Accounts:** register / login (JWT + bcrypt), forgot password (needs the answers to 3 security questions set at
+  sign-up, which can be changed on the Profile page), saved priorities and household details.
+- **Shortlist and Compare:** save flats with notes; compare 2 or 3 side by side (the ticked flats stay after
+  a refresh).
 - **Phone layout:** bottom tab bar, filter drawer, stacked Compare cards; a guided tour on first visit.
+  "Skip for now" on the first-visit popup keeps you on the page you opened. The popup, the filter drawer and
+  the tour keep the keyboard (Tab) inside them while open. A "Back to top" button appears on long pages.
 
 ## 4. Price Model
 
@@ -446,17 +453,17 @@ Three layers, from fastest to closest to a real user:
 
 | Layer | Where | Tools | Tests | Needs | Run |
 |---|---|---|---|---|---|
-| **Server API** | `server/tests/` | Vitest + Supertest, in-memory MongoDB | **70** | nothing (downloads a MongoDB binary on first run) | `cd server && pnpm test` |
+| **Server API** | `server/tests/` | Vitest + Supertest, in-memory MongoDB | **76** | nothing (downloads a MongoDB binary on first run) | `cd server && pnpm test` |
 | **Client components and utils** | `client/src/**/__tests__/` | Vitest + Vue Test Utils + jsdom | **103** | nothing | `cd client && pnpm test` |
-| **End-to-end** | `e2e/tests/` | Playwright (Chromium) | **31** (26 desktop + 5 phone) | API and website running, seeded DB, OneMap login | `cd e2e && pnpm exec playwright test` |
+| **End-to-end** | `e2e/tests/` | Playwright (Chromium) | **32** (27 desktop + 5 phone) | API and website running, seeded DB, OneMap login | `cd e2e && pnpm exec playwright test` |
 
 Last local run (4 Nov 2026): server **70/70 passed**, client **103/103 passed**.
 
 **Server API.** The test setup (`server/tests/start-test-server.js`) starts a throwaway MongoDB in memory
 and our real `server.js` on port 8001 pointed at it, so the tests never touch the database in `DB` and can
 run alongside `pnpm dev`. Covers auth (register, login, email and password rules, preferences, forgot
-password), search and every filter, geospatial nearby search, sales summaries, amenities, the shortlist
-CRUD with its error codes, and the priority score maths.
+password with the 3 security questions), search and every filter, geospatial nearby search, sales summaries,
+amenities, the shortlist CRUD with its error codes, and the priority score maths.
 
 **Client components and utils.** jsdom gives Vitest a pretend browser, so Vue components are mounted
 without opening one. Unit tests check one function (affordability maths, score words, saved priorities);
@@ -476,8 +483,8 @@ Before running them:
 
 ```bash
 cd e2e
-pnpm exec playwright test                       # all 31 tests, both screen sizes
-pnpm exec playwright test --project=desktop     # 26 desktop tests (1280 x 720)
+pnpm exec playwright test                       # all 32 tests, both screen sizes
+pnpm exec playwright test --project=desktop     # 27 desktop tests (1280 x 720)
 pnpm exec playwright test --project=iphone-6    # 5 phone tests in tests/mobile/ (375 x 667)
 pnpm exec playwright test tests/search.spec.js  # one file
 pnpm exec playwright show-report                # open the HTML report of the last run

@@ -4,6 +4,7 @@
 // On success we go back to the page that sent us here (?redirect=...), or to the Search page.
 import { ref, computed, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { SECURITY_QUESTIONS, allAnswered } from '../utils/securityQuestions.js'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
@@ -37,6 +38,8 @@ watch(fromPresets, function (yes) {
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+// Only when creating an account: the answers to the 3 security questions (same order as SECURITY_QUESTIONS)
+const securityAnswers = ref(['', '', ''])
 
 // Sent here by the Reset password page after the password was changed (/login?reset=1): say so above the form
 const justReset = computed(function () {
@@ -66,6 +69,9 @@ function checkForm() {
     if (password.value !== confirmPassword.value) {
       return 'The two passwords do not match'
     }
+    if (!allAnswered(securityAnswers.value)) {
+      return 'Please answer all 3 security questions'
+    }
   }
   return ''
 }
@@ -79,7 +85,7 @@ async function submit() {
   }
 
   if (mode.value === 'register') {
-    await auth.register(email.value, password.value)
+    await auth.register(email.value, password.value, securityAnswers.value)
   } else {
     await auth.login(email.value, password.value)
   }
@@ -174,6 +180,19 @@ async function submit() {
                   autocomplete="new-password"
                 />
               </div>
+
+              <!-- Only when creating an account: the 3 security questions, needed for "Forgot password?" -->
+              <fieldset v-if="mode === 'register'" class="mb-3">
+                <legend class="form-label fs-6 mb-1">Security questions</legend>
+                <div class="form-text mt-0 mb-2">
+                  These help you reset your password if you forget it. Capital letters do not matter.
+                </div>
+                <div v-for="(question, index) in SECURITY_QUESTIONS" :key="question" class="mb-2">
+                  <label :for="'login-q' + (index + 1)" class="form-label small mb-1">{{ question }}</label>
+                  <input :id="'login-q' + (index + 1)" v-model="securityAnswers[index]" type="text" class="form-control"
+                    autocomplete="off" />
+                </div>
+              </fieldset>
 
               <div v-if="errorMessage" class="alert alert-danger py-2" role="alert">{{ errorMessage }}</div>
               <div v-else-if="auth.error" class="alert alert-danger py-2" role="alert">{{ auth.error }}</div>

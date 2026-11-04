@@ -21,6 +21,8 @@ const auth = useAuthStore()
 // Which step of the wizard is showing: 1, 2 or 3
 const currentStep = ref(1)
 const errorMessage = ref('')
+// Shown when saving the inputs to the account fails ('' = nothing to show)
+const saveMessage = ref('')
 
 const flatTypes = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM', 'EXECUTIVE']
 
@@ -102,7 +104,16 @@ async function loadDetails() {
   }
 }
 
-onMounted(loadDetails)
+// On open: load the saved inputs, then reopen the step from before a refresh (if the inputs are complete)
+async function openPage() {
+  await loadDetails()
+  const savedStep = Number(localStorage.getItem('calcStep'))
+  if (savedStep > 1 && checkForm() === '') {
+    currentStep.value = savedStep
+  }
+}
+
+onMounted(openPage)
 async function saveDetails() {
   if (!auth.isLoggedIn) {
     return
@@ -119,7 +130,10 @@ async function saveDetails() {
     })
   } catch (error) {
     console.log('Cannot save affordability details')
+    saveMessage.value = 'Could not save your details to your account. Your numbers are still on this page; please try again later.'
+    return
   }
+  saveMessage.value = ''
 }
 
 
@@ -204,10 +218,12 @@ function goToStep2() {
     return
   }
   currentStep.value = 2
+  localStorage.setItem('calcStep', '2')
 }
 
 function goToStep(step) {
   currentStep.value = step
+  localStorage.setItem('calcStep', String(step))
 }
 
 
@@ -234,8 +250,6 @@ function householdLabel(type) {
 // CHANGED from Yujia's version: it now sends the max flat price INCLUDING the loan.
 // Before, it sent only savings + EHG, which is far below what people can actually pay.
 function applyBudget() {
-  // ⚠️ NOT IN COURSE (D): query strings (?maxPrice=...). Week 4 taught route params, not query.
-  // Simplest course way: save the budget in the Pinia filters store (Week 11), then router.push('/').
   router.push({ path: '/', query: { maxPrice: result.value.maxBudget } })
 }
 </script>
@@ -246,6 +260,7 @@ function applyBudget() {
     <span class="eyebrow">Affordability</span>
     <h1 class="page-title serif">How much can I <em>afford?</em></h1>
     <p class="text-muted small mb-4">Step {{ currentStep }} of 3 · an estimate for a resale flat with an HDB loan</p>
+    <div v-if="saveMessage !== ''" class="alert alert-warning" role="alert">{{ saveMessage }}</div>
 
     <!-- ===================== STEP 1: Household (FEATURE 1 + FEATURE 2) ===================== -->
     <div v-if="currentStep === 1">

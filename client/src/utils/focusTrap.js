@@ -1,7 +1,4 @@
-// Keeps the keyboard inside an open popup or drawer, so Tab never moves to the page hidden behind it.
-// ⚠️ NOT IN COURSE: reading which element has the keyboard focus (document.activeElement) and moving it with
-// .focus() is plain JavaScript DOM work (Week 1 DOM + events), but focus handling itself was not taught.
-// Used by ProfileModal.vue (the welcome / preferences popup) and SearchView.vue (the phone filter drawer).
+// Keeps the Tab key inside an open popup or drawer
 
 // Everything inside the box that can be reached with the Tab key (and is not hidden or disabled)
 function focusableParts(box) {

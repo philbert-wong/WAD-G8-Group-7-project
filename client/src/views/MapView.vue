@@ -261,11 +261,21 @@ function matchColour(score) {
 
 // The price colours, cheapest first. Used by the dots and by the legend.
 const priceBands = [
-  { max: 400000, colour: '#2e9e4f', label: 'Under $400k' },
+  { max: 400000, colour: '#2e9e4f', label: 'Up to $400k' },
   { max: 550000, colour: '#f2c230', label: '$400k - $550k' },
   { max: 700000, colour: '#ef7b22', label: '$550k - $700k' },
   { max: Infinity, colour: '#d6312b', label: 'Over $700k' },
 ]
+
+// The price band number (1 = cheapest ... 4), printed inside each dot
+function priceBandNumber(price) {
+  for (let i = 0; i < priceBands.length; i++) {
+    if (price <= priceBands[i].max) {
+      return i + 1
+    }
+  }
+  return priceBands.length
+}
 
 // Picks the colour for a price (the first band it fits in)
 function priceColour(price) {
@@ -611,14 +621,26 @@ function drawBlocks() {
   }
 
   for (const place of shownPlaces) {
-    // One dot per block, coloured by its cheapest flat type
-    L.circleMarker([place.lat, place.lng], {
-      radius: 7,
-      color: '#fff',
-      weight: 1.5,
-      fillColor: dotColour(place),
-      fillOpacity: 1,
-    })
+    // One dot per block; in price mode the dot shows its band number
+    let dot = null
+    if (colourBy.value === 'price') {
+      const html =
+        '<span style="display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; ' +
+        'border: 1.5px solid #fff; background: ' + dotColour(place) + '; color: #111; ' +
+        'font: 700 11px/1 sans-serif;">' + priceBandNumber(cheapestPrice(place)) + '</span>'
+      dot = L.marker([place.lat, place.lng], {
+        icon: L.divIcon({ html: html, className: '', iconSize: [18, 18], iconAnchor: [9, 9] }),
+      })
+    } else {
+      dot = L.circleMarker([place.lat, place.lng], {
+        radius: 7,
+        color: '#fff',
+        weight: 1.5,
+        fillColor: dotColour(place),
+        fillOpacity: 1,
+      })
+    }
+    dot
       .bindPopup(popupText(place))
       // Leaflet's own click event (Vue's @click cannot be used on map dots): show this block in the sidebar
       .on('click', function () {
@@ -1154,12 +1176,7 @@ onUnmounted(function () {
 </template>
 
 <style scoped>
-/* Phones and tablets (below Bootstrap's lg, 992px): Your Priorities and Filter Results go ABOVE the map
-   (closed, one line each), so you change them right above the dots they change. The selected block and
-   "Show amenities" stay under the map. Laptops keep the sidebar on the right.
-   ⚠️ NOT IN COURSE: display: contents. It makes the two Bootstrap columns (and the sidebar box) "disappear" for
-   layout, so their parts become items of ONE flex row, and the Flexbox order property (Week 2) can then put the
-   parts of both columns in any order. */
+/* Phones and tablets: Your Priorities and Filter Results go above the map */
 @media (max-width: 991.98px) {
   .map-row {
     margin: 0;

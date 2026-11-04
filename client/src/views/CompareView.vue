@@ -3,7 +3,7 @@
 // and the "Compare my shortlisted flats" link on Step 3 of CPFCalView.vue.
 // The Compare page: tick 2 or 3 flats from your shortlist and see them side by side
 // (price range, lease, MRT, match score and an estimated monthly repayment).
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import axios from 'axios'
 import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
@@ -24,6 +24,36 @@ const loading = ref(true)
 
 // The ids of the ticked items. v-model on the tick boxes adds / removes ids for us.
 const selectedIds = ref([])
+
+// The ticks are saved in localStorage, so a refresh keeps them
+const TICKS_KEY = 'compareSelected'
+watch(
+  selectedIds,
+  function () {
+    localStorage.setItem(TICKS_KEY, JSON.stringify(selectedIds.value))
+  },
+  { deep: true },
+)
+
+// Puts back the saved ticks, keeping only flats that are still in the shortlist
+function restoreTicks() {
+  const saved = localStorage.getItem(TICKS_KEY)
+  if (saved === null) {
+    return
+  }
+  try {
+    const ids = JSON.parse(saved)
+    const kept = []
+    for (const item of shortlist.items) {
+      if (ids.includes(item.id) && kept.length < MAX_COMPARE) {
+        kept.push(item.id)
+      }
+    }
+    selectedIds.value = kept
+  } catch (e) {
+    localStorage.removeItem(TICKS_KEY)
+  }
+}
 
 const estimates = ref({})
 
@@ -86,6 +116,7 @@ function estimateText(block) {
 // Gets the latest shortlist from the server (you must be logged in), then each flat's price estimate
 async function loadShortlist() {
   await shortlist.fetchShortlist()
+  restoreTicks()
   loading.value = false
   for (const item of shortlist.items) {
     loadEstimate(item.block.id) // not awaited: the estimates load at the same time, each fills in when it arrives
@@ -221,7 +252,7 @@ loadShortlist()
               </td>
             </tr>
             <tr>
-              <th>Nearest MRT</th>
+              <th>Nearest MRT/LRT</th>
               <td v-for="item in selectedItems()" :key="item.id">
                 <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
                 }}</span>

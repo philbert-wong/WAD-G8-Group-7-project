@@ -43,8 +43,9 @@ function toggle() {
     <div class="mt-1">
       <!-- Price: one coloured dot per price band -->
       <div v-if="colourBy === 'price'" class="d-flex flex-wrap column-gap-3 row-gap-1">
-        <span v-for="band in priceBands" :key="band.label" class="d-inline-flex align-items-center gap-1">
-          <span class="dot" :style="{ background: band.colour }"></span>
+        <!-- The number in each dot is the same number shown inside the map's dots -->
+        <span v-for="(band, index) in priceBands" :key="band.label" class="d-inline-flex align-items-center gap-1">
+          <span class="dot num-dot" :style="{ background: band.colour }">{{ index + 1 }}</span>
           {{ band.label }}
         </span>
       </div>
@@ -113,6 +114,15 @@ function toggle() {
   height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+/* Price key dots carry the band number, like the dots on the map */
+.dot.num-dot {
+  width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  font: 700 10px/1 sans-serif;
+  color: #111;
 }
 /* The priority score gradient: the same colours AND positions as MATCH_STOPS in MapView
    (linear-gradient is not in our course) */

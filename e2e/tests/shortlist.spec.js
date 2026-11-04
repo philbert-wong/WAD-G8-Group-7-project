@@ -15,6 +15,10 @@ test('should save a flat to the shortlist when logged in', async ({ page }) => {
   await page.locator('#login-email').fill('e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com');
   await page.locator('#login-password').fill('goodpass123');
   await page.locator('#login-confirm').fill('goodpass123');
+  // every new account answers the 3 security questions (for Forgot password)
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
   await page.locator('#login-confirm').press('Enter');
   await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
   // creating an account makes the Search tour start again about a second later: close it now, so it cannot open
@@ -44,6 +48,10 @@ test('should keep a note on a saved flat', async ({ page }) => {
   await page.locator('#login-email').fill('e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com');
   await page.locator('#login-password').fill('goodpass123');
   await page.locator('#login-confirm').fill('goodpass123');
+  // every new account answers the 3 security questions (for Forgot password)
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
   await page.locator('#login-confirm').press('Enter');
   await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
   // creating an account makes the Search tour start again about a second later: close it now, so it cannot open
@@ -81,6 +89,10 @@ test('should remove a flat from the shortlist', async ({ page }) => {
   await page.locator('#login-email').fill('e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com');
   await page.locator('#login-password').fill('goodpass123');
   await page.locator('#login-confirm').fill('goodpass123');
+  // every new account answers the 3 security questions (for Forgot password)
+  await page.locator('#login-q1').fill('Alex');
+  await page.locator('#login-q2').fill('Mrs Tan');
+  await page.locator('#login-q3').fill('KK Hospital');
   await page.locator('#login-confirm').press('Enter');
   await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
   // creating an account makes the Search tour start again about a second later: close it now, so it cannot open
