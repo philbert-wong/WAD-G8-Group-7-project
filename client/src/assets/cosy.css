@@ -1,0 +1,327 @@
+/* =====================================================================================
+   "COSY PROFESSIONAL" DESIGN: shared styles for the whole site
+
+   Based on Jihao's mockup hdb_cosy_professional.html.
+   ===================================================================================== */
+
+/* Design tokens: CSS custom properties ("variables") so every colour is defined once.
+   Not taught: var(--name). The course way would be to repeat the hex colour everywhere. */
+:root {
+  --cream: #fbfcff;
+  --terra: #4a5ac0; /* terracotta, the main accent */
+  --terra-d: #354091; /* darker terracotta for hover */
+  --sage: #4a7a4c; /* green for "good" things (dark enough for white text: 5:1) */
+  --char: #2d2d2d; /* charcoal text */
+  --beige: #e9eaf8;
+  --line: #cbcce7; /* light border colour */
+  --muted: #3d404d; /* grey-brown secondary text */
+}
+
+/* Page background, font and text colour.
+   The fonts (DM Sans, DM Serif Display) come from Google Fonts, linked in index.html. */
+body {
+  background: var(--cream);
+  font-family: "Cactus Classical Serif", serif;
+  color: var(--char);
+}
+
+/* A short page (Compare with nothing ticked, Login, an empty Shortlist): the footer rests at the bottom of the screen,
+   not halfway up with blank space under it. #app is the whole page (top bar, <main>, footer): it is at least as tall as
+   the screen, and <main> grows to fill what the top bar and the footer leave. (100vh first, then 100dvh, which
+   is the same without the phone browser's address bar getting in the way, for browsers that know it.) */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+#app > main {
+  flex: 1 0 auto;
+}
+
+/* The serif headline font, used with class="serif" */
+.serif {
+  font-family: "Cactus Classical Serif", serif;
+  font-weight: 400;
+}
+
+/* Small rounded label above a page title, e.g. "4 towns · real sales" */
+.eyebrow {
+  display: inline-block;
+  border: 1px solid #e3c3b5;
+  color: var(--terra);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 14px;
+  background: #fff;
+}
+
+/* Big page title, with the <em> part in terracotta */
+.page-title {
+  font-size: 46px;
+  line-height: 1.1;
+  margin: 14px 0 6px;
+}
+/* No gap above the title when it is the first thing on the page (Search, Map: no small label above it) */
+.page-title:first-child {
+  margin-top: 0;
+}
+.page-title em {
+  color: var(--terra);
+}
+.page-sub {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* White rounded card used for panels (filters, shortlist notes, calculator...) */
+.cosy-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+/* Soft brown shadow under cards (box-shadow with a negative spread) */
+.cosy-shadow {
+  box-shadow: 0 14px 34px -18px rgba(80, 50, 30, 0.25);
+}
+
+/* Action buttons: rounded, dark outline */
+.act-btn {
+  border-radius: 11px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 9px 16px;
+  border: 1.5px solid var(--char);
+  background: #fff;
+  color: var(--char);
+}
+.act-btn:hover {
+  background: var(--char);
+  color: #fff;
+}
+/* Main (terracotta) button, "saved" (sage) button and plain "ghost" button */
+.act-btn.primary {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: #fff;
+}
+.act-btn.primary:hover {
+  background: var(--terra-d);
+}
+.act-btn.saved {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #fff;
+}
+.act-btn.ghost {
+  border-color: transparent;
+  color: var(--muted);
+}
+.act-btn.ghost:hover {
+  background: var(--beige);
+  color: var(--char);
+}
+/* Smooth colour change on hover + glow under the main button */
+.act-btn {
+  transition: 0.2s;
+}
+.act-btn.primary {
+  box-shadow: 0 8px 18px -8px rgba(192, 97, 74, 0.8);
+}
+
+/* Pills (small rounded labels) and tags */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+.pill.green {
+  background: var(--sage);
+  color: #fff;
+}
+.pill.dark {
+  background: var(--char);
+  color: #fff;
+}
+.tag {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  padding: 3px 11px;
+  color: #5c5449;
+  background: #fffdf9;
+}
+.tag b {
+  color: var(--sage);
+}
+
+/* Form boxes in the cosy style (used on top of Bootstrap's form-select / form-control) */
+.cosy-input {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  padding: 9px 12px;
+  background-color: #fffdf9;
+}
+/* The padding above removes the room Bootstrap keeps for the dropdown arrow, so put it back on selects */
+.form-select.cosy-input {
+  padding-right: 2.25rem;
+}
+/* Terracotta glow ring when a box is clicked into (box-shadow on :focus) */
+.cosy-input:focus {
+  border-color: var(--terra);
+  box-shadow: 0 0 0 3px rgba(192, 97, 74, 0.15);
+}
+
+/* Spotlight for the guide pet's tour: pulsing outline (keyframe animation) */
+.tour-hl {
+  position: relative;
+  z-index: 40;
+  outline: 3px solid var(--terra);
+  outline-offset: 6px;
+  border-radius: 14px;
+  animation: tour-pulse 1.6s ease-in-out infinite;
+}
+@keyframes tour-pulse {
+  50% {
+    outline-color: rgba(192, 97, 74, 0.35);
+    outline-offset: 10px;
+  }
+}
+
+/* Footer */
+.cosy-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+  padding: 26px 0 120px;
+  margin-top: 30px;
+}
+
+/* Smaller title on phones (media query) */
+@media (max-width: 560px) {
+  .page-title {
+    font-size: 34px;
+  }
+}
+
+/* Bootstrap's blue buttons, tabs and tick boxes in terracotta, so the calculator,
+   Compare and Login pages match the cosy design.
+   Overriding Bootstrap classes with our own CSS (loaded after Bootstrap) */
+.btn-primary,
+.btn-primary:disabled {
+  background: var(--terra);
+  border-color: var(--terra);
+}
+.btn-primary:hover,
+.btn-primary:active {
+  background: var(--terra-d) !important;
+  border-color: var(--terra-d) !important;
+}
+/* The outline version (Compare on the calculator, Check PHG): the same colour, filled in when hovered or pressed.
+   Bootstrap 5.3 colours its buttons through these --bs-btn-... variables, so we set the variables. */
+.btn-outline-primary {
+  --bs-btn-color: var(--terra);
+  --bs-btn-border-color: var(--terra);
+  --bs-btn-hover-bg: var(--terra);
+  --bs-btn-hover-border-color: var(--terra);
+  --bs-btn-active-bg: var(--terra-d);
+  --bs-btn-active-border-color: var(--terra-d);
+  --bs-btn-disabled-color: var(--terra);
+  --bs-btn-disabled-border-color: var(--terra);
+}
+.btn-link,
+.nav-tabs .nav-link {
+  color: var(--terra);
+}
+.nav-tabs .nav-link.active {
+  color: var(--char);
+}
+.form-check-input:checked {
+  background-color: var(--sage);
+  border-color: var(--sage);
+}
+.card {
+  border-color: var(--line);
+  border-radius: 18px;
+}
+
+/* Phones and tablets: the page tabs are a bar fixed to the bottom (NavBar.vue), so leave room under the
+   page for it (60px bar + the iPhone home bar), or the footer would hide behind it */
+@media (max-width: 991.98px) {
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+  /* ...so the page is that much shorter than the screen, or it would always scroll by the bar's height */
+  #app {
+    min-height: calc(100vh - 64px - env(safe-area-inset-bottom, 0px));
+    min-height: calc(100dvh - 64px - env(safe-area-inset-bottom, 0px));
+  }
+  /* The footer then only needs a little room of its own (the 120px under it on a computer keeps it clear of the round
+     help button; here the bar's room above does that). The right padding keeps its text from running under that button. */
+  .cosy-footer {
+    padding: 18px 0 12px;
+    margin-top: 12px;
+  }
+  .cosy-footer .container {
+    padding-right: 76px;
+  }
+}
+
+/* Inside a collapsible panel (map sidebar), the panel's title bar already names the section:
+   hide the component's own heading and its own card border, so it is one clean card */
+.cpanel-body > * > h4:first-child {
+  display: none;
+}
+.cpanel-body > * {
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+
+/* Form boxes: a border dark enough to see where to type (3:1 against white) */
+.form-control,
+.form-select,
+.cosy-input {
+  border-color: #8a8fb0;
+}
+
+/* Keyboard users: a clear outline on whatever has focus */
+:focus-visible {
+  outline: 3px solid #1d4ed8 !important;
+  outline-offset: 2px;
+}
+/* A box that only receives focus so the keyboard starts inside it (tabindex="-1": popup, drawer) needs no outline */
+[tabindex='-1']:focus,
+[tabindex='-1']:focus-visible {
+  outline: none !important;
+}
+
+/* Phones: smaller page titles, so the page's content starts higher up */
+@media (max-width: 575.98px) {
+  .page-title {
+    font-size: 34px;
+  }
+}
+
+/* The PHG switch (Filters panel and Profile page; add class="phg-switch" next to form-switch).
+   Bootstrap draws an OFF switch nearly white with a pale knob, so it hardly shows. Here it has a beige track,
+   a dark outline and a dark knob. :not(:checked) leaves the ON look (the green one above) as it was. */
+.form-switch.phg-switch .form-check-input:not(:checked) {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%232d2d2d'/%3e%3c/svg%3e");
+  background-color: var(--beige);
+  border: 2px solid var(--char);
+}
+.form-switch.phg-switch .form-check-input {
+  cursor: pointer;
+}
