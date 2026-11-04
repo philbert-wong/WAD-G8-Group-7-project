@@ -14,7 +14,7 @@ import MapSearchBar from '../components/map/MapSearchBar.vue'
 import SelectedBlockCard from '../components/map/SelectedBlockCard.vue'
 import MapLegend from '../components/map/MapLegend.vue'
 import MapKey from '../components/map/MapKey.vue'
-import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
+import MapToolbar from '../components/map/MapToolbar.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMapFocusStore } from '../stores/mapFocus'
 import { useFiltersStore } from '../stores/filters'
@@ -1065,6 +1065,18 @@ function toggleAmenity(key, ticked) {
         <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
         <MapSearchBar :searched="filterStore.filters.q" @search="searchFromMap" />
 
+        <!-- What the dots show and how they are coloured: right under the search, so it is easy to see and change -->
+        <MapToolbar
+          :show-which="showWhich"
+          :colour-by="colourBy"
+          :logged-in="auth.isLoggedIn"
+          :shortlist-count="shortlist.count"
+          :shown-flats="flatCount"
+          :shown-blocks="blockCount"
+          @change-show-which="changeShowWhich"
+          @change-colour-by="changeColourBy"
+        />
+
         <!-- The search from the Search page: the map shows the same flats. One click to see the whole island again. -->
         <div v-if="showWhich === 'all' && filterStore.filters.q !== ''" class="search-strip small mb-2">
           <span v-if="showAllFlats">
@@ -1106,20 +1118,32 @@ function toggleAmenity(key, ticked) {
             <PreferencesPanel :preferences="preferences" on-map @change-ticked="changeTicked"
               @change-level="changeLevel" />
           </CollapsiblePanel>
+               not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen.
+               collapsible: "Hide / Show" sits in its own title row, so it folds down to one line (no extra header box) -->
+          <PreferencesPanel
+            class="mb-3"
+            :preferences="preferences"
+            on-map
+            collapsible
+            :start-open="isWideScreen"
+            @change-ticked="changeTicked"
+            @change-level="changeLevel"
+          />
 
           <!-- Filters: the same panel as Search, near the top so it is easy to find. Closed at the start
-               (its title is in view: one click opens it), so the map options below are not pushed far down -->
-          <CollapsiblePanel title="Filters" :start-open="false">
-            <FilterPanel :filters="filterStore.filters" :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
-              @change-filter="setFilter" @search="applyFilters" @clear="clearFilters" />
-          </CollapsiblePanel>
+               (its title row is in view: one click opens it), so the map options below are not pushed far down -->
+          <FilterPanel
+            :filters="filterStore.filters"
+            :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
+            collapsible
+            :start-open="false"
+            @change-filter="setFilter"
+            @search="applyFilters"
+            @clear="clearFilters"
+          />
 
-          <!-- Map options: show all flats / my shortlist, colour dots by price / priority score, and the amenity tick boxes
-               (the colour key itself floats on the map: MapKey) -->
-          <MapLegend :colour-by="colourBy" :amenity-types="amenityTypes" :shown-types="shownTypes"
-            :show-which="showWhich" :logged-in="auth.isLoggedIn" :shortlist-count="shortlist.count"
-            :shown-flats="flatCount" :shown-blocks="blockCount" @change-show-which="changeShowWhich"
-            @change-colour-by="changeColourBy" @toggle-amenity="toggleAmenity" />
+          <!-- Show amenities: the tick boxes (Show / Colour dots by are in the bar above the map) -->
+          <MapLegend :amenity-types="amenityTypes" :shown-types="shownTypes" @toggle-amenity="toggleAmenity" />
 
         </div>
       </div>
@@ -1129,10 +1153,10 @@ function toggleAmenity(key, ticked) {
 
 <style scoped>
 /* The map needs a set height, otherwise it is 0 px tall.
-   100vh = the whole height of the browser window, minus room for the search bar and the "Showing your search" strip above the map,
+   100vh = the whole height of the browser window, minus room for the search bar, the Show / Colour bar and the "Showing your search" strip above the map,
    so when you scroll down to the map it fills the screen. Never shorter than 450px. */
 .map-box {
-  height: calc(100vh - 200px);
+  height: calc(100vh - 240px);
   min-height: 450px;
   border-radius: 18px;
   overflow: hidden;

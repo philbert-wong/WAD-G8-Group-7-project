@@ -4,6 +4,7 @@
 // The page (SearchView) owns the filter values and passes them in as a prop.
 // When the user changes a box, we send the change up with emit.
 // The "Not sure? Calculate my budget" link under the budget slider opens the Affordability page.
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const props = defineProps({
@@ -11,8 +12,15 @@ const props = defineProps({
   // The place found for the parents' postal code, e.g. "BLK 314 ANG MO KIO AVENUE 3" ('' = not found yet),
   // so the user can check it is the right one
   phgPlaceName: { type: String, default: '' },
+  // The Map makes the card foldable: "Hide ▴ / Show ▾" next to the title folds it down to just the title row
+  // (Search leaves it always open)
+  collapsible: { type: Boolean, default: false },
+  startOpen: { type: Boolean, default: true }, // open or closed at the start, when collapsible
 })
 const emit = defineEmits(['change-filter', 'search', 'clear'])
+
+// Open or folded (only used when collapsible). Only this card needs it, so it lives here.
+const open = ref(props.startOpen)
 
 // '' = any flat type
 const flatTypes = [
@@ -75,8 +83,17 @@ function onClear() {
 </script>
 
 <template>
-  <form id="filters-panel" class="filters" @submit.prevent="onSubmit">
-    <h4 class="serif">Filter Results</h4>
+  <form id="filters-panel" class="filters" :class="{ folded: collapsible && !open }" @submit.prevent="onSubmit">
+    <!-- Title row; on the Map also the Hide / Show button -->
+    <div class="d-flex justify-content-between align-items-center">
+      <h4 class="serif">Filter Results</h4>
+      <button v-if="collapsible" type="button" class="fold-toggle" :aria-expanded="open" @click="open = !open">
+        {{ open ? 'Hide ▴' : 'Show ▾' }}
+      </button>
+    </div>
+
+    <!-- Everything under the title: folded away on the Map when closed -->
+    <div v-show="!collapsible || open">
     <div class="hint">Only flats that fit these are shown, on both Search and the Map.</div>
 
     <!-- Flat type chips -->
@@ -165,6 +182,7 @@ function onClear() {
 
     <button type="submit" class="apply">Apply Filters</button>
     <button type="button" class="clear" @click="onClear">Clear all</button>
+    </div>
   </form>
 </template>
 
@@ -175,7 +193,6 @@ function onClear() {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 22px;
-  border-top: 4px solid var(--terra);
   margin-bottom: 18px;
 
   /* Shadow under the sidebar */
@@ -291,5 +308,28 @@ function onClear() {
   font-size: 13px;
   margin-top: 10px;
   text-decoration: underline;
+}
+
+/* Hide / Show next to the title (only when the page makes the card foldable, e.g. on the Map) */
+.fold-toggle {
+  border: none;
+  background: none;
+  padding: 4px 0 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--terra);
+  white-space: nowrap;
+}
+.fold-toggle:hover {
+  text-decoration: underline;
+}
+
+/* Folded (Map): a thin bar, just the title row with less padding and a smaller title */
+.filters.folded {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.filters.folded h4 {
+  font-size: 19px;
 }
 </style>
