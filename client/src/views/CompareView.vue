@@ -1,10 +1,9 @@
 <script setup>
-import { RouterLink } from 'vue-router'
 // FEATURE 7 (Jihao). To remove it: delete this file, its route in router/index.js
 // and the "Compare my shortlisted flats" link on Step 3 of CPFCalView.vue.
 // The Compare page: tick 2 or 3 flats from your shortlist and see them side by side
 // (price range, lease, MRT, match score and an estimated monthly repayment).
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import axios from 'axios'
 import { estimateMonthlyCost } from '../utils/affordability.js'
 import { HDB_LOAN_LTV_PERCENT, HDB_LOAN_INTEREST_RATE, MAX_LOAN_YEARS } from '../utils/affordabilityRules.js'
@@ -16,9 +15,8 @@ import MatchScore from '../components/MatchScore.vue'
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
 
-// You can compare at most this many flats at once
-const MAX_COMPARE = 3
 
+const MAX_COMPARE = 3
 // The shortlist lives in the shortlist store (stores/shortlist.js), shared with Search, Shortlist and the NavBar.
 // The route guard (router/index.js) only lets logged-in users open this page.
 const shortlist = useShortlistStore()
@@ -32,13 +30,13 @@ const estimates = ref({})
 // Your budget: the "Max budget" filter, shared with Search and the Map (stores/filters.js).
 // Prices over it are shown in red. null = "Any" budget, so nothing is red.
 const filterStore = useFiltersStore()
-function budget() {
+const budget = computed(() => {
   return filterStore.filters.maxPrice === '' ? null : Number(filterStore.filters.maxPrice)
-}
+})
 
 // Is this price over your budget?
 function isOverBudget(price) {
-  return budget() !== null && price > budget()
+  return budget.value !== null && price > budget.value
 }
 
 // Is the model's estimate for this flat over your budget? (false while it is loading or when there is none)
@@ -78,12 +76,12 @@ async function loadEstimate(blockId) {
 
 // The estimate as text for the table: "$598,000", or "–" when there is none
 function estimateText(block) {
-  if (estimates.value[block.id] !== undefined) {
-    return '$' + estimates.value[block.id].toLocaleString('en-SG')
+  const estimate = estimates.value[block.id]
+  if (estimate !== undefined) {
+    return '$' + estimate.toLocaleString('en-SG')
   }
   return '–'
 }
-
 
 // Gets the latest shortlist from the server (you must be logged in), then each flat's price estimate
 async function loadShortlist() {
@@ -112,10 +110,10 @@ function isDisabled(itemId) {
 
 // "$600,000 – $720,000", or one price when every sale was the same
 function formatRange(low, high) {
-  if (low === high) {
-    return '$' + low.toLocaleString('en-SG')
-  }
-  return '$' + low.toLocaleString('en-SG') + ' – ' + '$' + high.toLocaleString('en-SG')
+  const lowPrice = '$' + low.toLocaleString('en-SG')
+  const highPrice = '$' + high.toLocaleString('en-SG')
+
+  return low === high ? lowPrice : lowPrice + ' – ' + highPrice
 }
 
 // Match score for one block (0 to 100), or null when it cannot be scored (MatchScore then shows "–")
@@ -143,7 +141,7 @@ loadShortlist()
     <p v-else-if="loading" class="text-muted">Loading...</p>
 
     <p v-else-if="shortlist.count < 2" class="text-muted">
-      Save at least 2 flats to your shortlist first (<RouterLink to="/">go to Search</RouterLink>), then come back to compare them.
+      Save at least 2 flats to your shortlist first, then come back to compare them.
     </p>
 
     <div v-else>
@@ -152,14 +150,8 @@ loadShortlist()
         <div class="card-body">
           <h6 class="card-title">Choose 2 or 3 flats ({{ selectedIds.length }} / {{ MAX_COMPARE }})</h6>
           <div v-for="item in shortlist.items" :key="item.id" class="form-check">
-            <input
-              :id="'compare-' + item.id"
-              v-model="selectedIds"
-              :value="item.id"
-              :disabled="isDisabled(item.id)"
-              type="checkbox"
-              class="form-check-input"
-            />
+            <input :id="'compare-' + item.id" v-model="selectedIds" :value="item.id" :disabled="isDisabled(item.id)"
+              type="checkbox" class="form-check-input" />
             <label :for="'compare-' + item.id" class="form-check-label">
               Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }} · {{ item.block.town }}
             </label>
@@ -173,8 +165,9 @@ loadShortlist()
       <div v-else class="table-responsive">
         <!-- Which budget the red prices are compared with -->
         <p v-if="budget() !== null" class="small mb-2">
-          Your budget: <b>{{ '$' + budget().toLocaleString('en-SG') }}</b> (the Max budget filter on Search and the Map).
-          Prices <span class="over-word fw-semibold">in red</span> are over it.
+          Your budget: <b>{{ '$' + budget.toLocaleString('en-SG') }}</b> (the Max budget filter on Search and the
+          Map).
+          Prices <span class="text-danger fw-semibold">in red</span> are over it.
         </p>
         <table class="table table-bordered align-middle bg-white compare-table">
           <thead class="table-light">
@@ -190,81 +183,74 @@ loadShortlist()
             <tr>
               <th>Price range</th>
               <!-- Red when the median price is over your budget (text-danger = Bootstrap's red) -->
-              <td
-                v-for="item in selectedItems()"
-                :key="item.id"
-                :class="{ 'text-danger': isOverBudget(item.block.price) }"
-              >
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+              <td v-for="item in selectedItems()" :key="item.id"
+                :class="{ 'text-danger': isOverBudget(item.block.price) }">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
                 <div class="cell-value">{{ formatRange(item.block.priceLow, item.block.priceHigh) }}</div>
               </td>
             </tr>
             <tr>
               <th>Median price</th>
-              <td
-                v-for="item in selectedItems()"
-                :key="item.id"
-                :class="{ 'text-danger fw-semibold': isOverBudget(item.block.price) }"
-              >
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+              <td v-for="item in selectedItems()" :key="item.id"
+                :class="{ 'text-danger fw-semibold': isOverBudget(item.block.price) }">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
                 <div class="cell-value">{{ '$' + item.block.price.toLocaleString('en-SG') }}
-                <div v-if="isOverBudget(item.block.price)" class="small">Over budget</div></div>
+                  <div v-if="isOverBudget(item.block.price)" class="small">Over budget</div>
+                </div>
               </td>
             </tr>
             <tr>
-              <th>
-                Estimated price (model)
-                <!-- The short explanation right next to the number it explains -->
-                <div class="row-note">A model estimate, not an asking price. Typical error: about $46,000.</div>
-              </th>
-              <td
-                v-for="item in selectedItems()"
-                :key="item.id"
-                :class="{ 'text-danger fw-semibold': isEstimateOverBudget(item.block) }"
-              >
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+              <th>Estimated price (model)</th>
+              <td v-for="item in selectedItems()" :key="item.id"
+                :class="{ 'text-danger fw-semibold': isEstimateOverBudget(item.block) }">
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
                 <div class="cell-value">{{ estimateText(item.block) }}
-                <div v-if="isEstimateOverBudget(item.block)" class="small">Over budget</div></div>
+                  <div v-if="isEstimateOverBudget(item.block)" class="small">Over budget</div>
+                </div>
               </td>
             </tr>
             <tr>
               <th>Remaining lease</th>
               <td v-for="item in selectedItems()" :key="item.id">
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
                 <div class="cell-value">{{ item.block.remainingLease }} years</div>
               </td>
             </tr>
             <tr>
               <th>Nearest MRT</th>
               <td v-for="item in selectedItems()" :key="item.id">
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
                 <div class="cell-value">{{ item.block.mrtName }} ({{ item.block.mrtWalkMinutes }} min walk)</div>
               </td>
             </tr>
             <tr>
               <th>Priority score</th>
               <td v-for="item in selectedItems()" :key="item.id" class="score-cell">
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
-                <div class="cell-value"><MatchScore :score="scoreFor(item.block)" :distances="item.block.distances" :weights="weights" /></div>
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
+                <div class="cell-value">
+                  <MatchScore :score="scoreFor(item.block)" :distances="item.block.distances" :weights="weights" />
+                </div>
               </td>
             </tr>
             <tr>
-              <th>
-                Est. monthly repayment
-                <div class="row-note">
-                  Assumes an HDB loan of {{ HDB_LOAN_LTV_PERCENT }}% of the median price, {{ HDB_LOAN_INTEREST_RATE }}% a year,
-                  {{ MAX_LOAN_YEARS }} years.
-                </div>
-              </th>
+              <th>Est. monthly repayment</th>
               <td v-for="item in selectedItems()" :key="item.id">
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
                 <div class="cell-value">{{ monthlyText(item.block) }}</div>
               </td>
             </tr>
             <tr>
               <th>My note</th>
               <td v-for="item in selectedItems()" :key="item.id" class="small">
-                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType }}</span>
+                <span class="flat-label">Blk {{ item.block.block }} {{ item.block.street }} · {{ item.block.flatType
+                }}</span>
                 <div class="cell-value">{{ item.note }}</div>
               </td>
             </tr>
@@ -272,7 +258,8 @@ loadShortlist()
         </table>
         <p class="small text-muted">
           Monthly repayment assumes an HDB loan of {{ HDB_LOAN_LTV_PERCENT }}% of the median price at
-          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Priority score uses Your Priorities (set on the Search page). 
+          {{ HDB_LOAN_INTEREST_RATE }}% over {{ MAX_LOAN_YEARS }} years. Priority score uses Your Priorities (set on the
+          Search page).
           <br>
           Estimated price comes from our regression model (typical error about $46k).
 
@@ -293,6 +280,7 @@ loadShortlist()
    name as its heading and one line per flat under it (the flat's name on the left, its value on the right).
    From 768px up the normal table is used. */
 @media (max-width: 767px) {
+
   .compare-table,
   .compare-table tbody,
   .compare-table tr,
@@ -322,7 +310,7 @@ loadShortlist()
     padding: 0.5rem 0.75rem;
     background: #f8f9fa;
     border-bottom: 1px solid var(--line);
-    font-size: 0.85rem;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--muted);
@@ -336,17 +324,18 @@ loadShortlist()
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
   }
-  .compare-table td + td {
+
+  .compare-table td+td {
     border-top: 1px solid var(--line);
   }
+
   .compare-table .flat-label {
-    /* bigger with the user's text size (rem), so similar blocks are easy to tell apart */
     display: block;
-    flex: 0 0 46%;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--char);
+    flex: 0 0 42%;
+    font-size: 13px;
+    color: var(--muted);
   }
+
   .compare-table .cell-value {
     flex: 1 1 0;
     text-align: right;
@@ -357,29 +346,15 @@ loadShortlist()
     flex-direction: column;
     gap: 0.25rem;
   }
+
   .compare-table .score-cell .flat-label {
     flex: 0 0 auto;
   }
+
   .compare-table .score-cell .cell-value {
     flex: 0 0 auto;
     width: 100%;
     text-align: left;
   }
-}
-
-/* A one-line explanation under a row heading (model estimate, repayment assumptions) */
-.row-note {
-  font-weight: 400;
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-top: 2px;
-  /* normal sentence case and comfortable lines, even inside the phone's capitalised headings */
-  text-transform: none;
-  letter-spacing: normal;
-  line-height: 1.5;
-}
-/* "in red" caption: a darker red, so the small text is easy to read (5.9:1 on the page) */
-.over-word {
-  color: #b42332;
 }
 </style>

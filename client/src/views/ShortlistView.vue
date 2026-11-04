@@ -47,7 +47,7 @@ function removeItem(item) {
 }
 
 // When the page opens, get the latest shortlist from the server (only when logged in)
-onMounted(function () {
+onMounted(()=>{
   if (auth.isLoggedIn) {
     shortlist.fetchShortlist()
   }
@@ -71,7 +71,7 @@ onMounted(function () {
     </div>
 
     <p v-if="auth.isLoggedIn && shortlist.count === 0" class="text-muted">
-      Nothing saved yet. <RouterLink to="/">Go to Search</RouterLink> and press "Save" on a flat.
+      Nothing saved yet. Go to Search and press "Save" on a flat.
     </p>
 
     <div class="row row-cols-1 g-3">

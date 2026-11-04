@@ -338,3 +338,61 @@ exports.saveProfile = async (req, res) => {
     sendError(res, error);
   }
 };
+
+// =====================================================================
+// Forgot password: create a new password from just the email
+// =====================================================================
+
+// The same rules register() applies to a password. Returns the message to show, or '' when the password is fine.
+function newPasswordProblem(password, email) {
+  if (password.length < 8) {
+    return 'Password must be at least 8 characters';
+  }
+  if (password.trim() === '') {
+    return 'Password cannot be only spaces';
+  }
+  if (Buffer.byteLength(password, 'utf8') > MAX_PASSWORD_BYTES) {
+    return 'Password must be at most 72 bytes';
+  }
+  if (password.toLowerCase() === email) {
+    return 'Password cannot be the same as your email';
+  }
+  if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
+    return 'That password is too common';
+  }
+  return '';
+}
+
+// RESET PASSWORD  POST /api/auth/reset-password   body: { "email": "a@b.com", "password": "newpassword123" }
+// "Forgot password?" on the Login page: no email is sent and there is no link. Whoever knows the account's email
+// can choose a new password straight away. (This means anyone who knows an email can change that account's password.)
+exports.resetPassword = async (req, res) => {
+  if (req.body === undefined || typeof req.body.email !== 'string' || typeof req.body.password !== 'string') {
+    return res.status(400).json({ message: 'Email and new password are required' });
+  }
+
+  const email = req.body.email.trim().toLowerCase();
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Please enter a valid email address' });
+  }
+
+  const problem = newPasswordProblem(req.body.password, email);
+  if (problem !== '') {
+    return res.status(400).json({ message: problem });
+  }
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (user === null) {
+      return res.status(404).json({ message: 'No account found with that email' });
+    }
+
+    // Never store the password itself, only its hash (same as register)
+    user.passwordHash = await bcrypt.hash(req.body.password, 10);
+    await user.save();
+
+    res.json({ message: 'Password updated. You can log in now.' });
+  } catch (error) {
+    sendError(res, error);
+  }
+};

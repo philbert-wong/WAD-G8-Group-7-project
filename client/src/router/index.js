@@ -7,6 +7,7 @@ import CPFCalView from '../views/CPFCalView.vue'
 import CompareView from '../views/CompareView.vue' // compare shortlisted flats
 import MapView from '../views/MapView.vue' // map of every block + PHG circle
 import ProfileView from '../views/ProfileView.vue' // the account icon: profile settings
+import ForgotPasswordView from '../views/ForgotPasswordView.vue' // "Forgot password?": create a new password
 
 import { useAuthStore } from '../stores/auth'
 
@@ -34,6 +35,12 @@ const router = createRouter({
       path: '/createaccount',
       name: 'createaccount',
       component: LoginView,
+    },
+    {
+      // Anyone can open this (someone who forgot their password cannot be logged in)
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: ForgotPasswordView,
     },
     {
       path: '/CPFCal',

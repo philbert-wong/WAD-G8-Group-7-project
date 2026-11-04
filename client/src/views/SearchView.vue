@@ -69,6 +69,9 @@ const results = ref([])
 const total = ref(0)
 const loading = ref(false)
 const errorMessage = ref('')
+// Counts the searches. A slow answer to an older search must not replace the answer to a newer one
+// (e.g. the first search when the page opens, still running when the user searches something else).
+let latestSearch = 0
 // true when the page was opened by the calculator's "Apply Budget to Search": a summary is shown at the top
 const budgetJustApplied = ref(false)
 const area = ref([]) // town names, for the suggestions under the search box
@@ -91,7 +94,8 @@ const parentName = ref('')
 
 // PHG switch on, with a postal code: keep only the flats within 4 km of the parents (on top of the other filters).
 // Our server asks OneMap where the postal code is (/api/blocks/place). If it cannot be found, say so and keep every flat.
-async function keepNearParents() {
+// thisSearch is the number of the search that called it: if a newer search has started, the results are not touched.
+async function keepNearParents(thisSearch) {
   const postal = filterStore.filters.parentsPostal.trim()
   if (!filterStore.filters.phg || postal === '') {
     parentName.value = ''
@@ -103,9 +107,15 @@ async function keepNearParents() {
       parentSpot = { postal: postal, name: response.data.name, lat: response.data.lat, lng: response.data.lng }
     }
   } catch (error) {
+    if (thisSearch !== latestSearch) {
+      return // a newer search has started: its own answer decides what is shown
+    }
     parentName.value = ''
     errorMessage.value = 'Could not find the parents postal code "' + postal + '", so the PHG filter is not used.'
     return
+  }
+  if (thisSearch !== latestSearch) {
+    return // a newer search has replaced the results: do not filter them
   }
   parentName.value = parentSpot.name
   results.value = results.value.filter(function (card) {
@@ -156,8 +166,8 @@ const placeName = ref('')
 
 // Flats near any place in Singapore: our server asks OneMap where the place is (/api/blocks/place),
 // then finds our flats within 1 km of it that fit the filters (/api/blocks/nearby).
-// Errors are caught by search() below.
-async function searchNearPlace(text) {
+// Errors are caught by search() below. thisSearch is the number of the search that called it.
+async function searchNearPlace(text, thisSearch) {
   const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
   const place = placeResponse.data
 
@@ -171,6 +181,9 @@ async function searchNearPlace(text) {
     },
   })
 
+  if (thisSearch !== latestSearch) {
+    return // a newer search has started: do not show this one's flats
+  }
   results.value = nearbyResponse.data.results
   total.value = nearbyResponse.data.total
   placeName.value = place.name
@@ -201,6 +214,8 @@ watch(
 //   2. Our data has nothing, but something was typed (e.g. "Northpoint City", or a condo's postal code):
 //      ask OneMap, flats near it
 async function search() {
+  latestSearch = latestSearch + 1
+  const thisSearch = latestSearch // this search's own number: only the newest search may change what is shown
   loading.value = true
   errorMessage.value = ''
   placeName.value = ''
@@ -218,16 +233,25 @@ async function search() {
       minLease: filterStore.filters.minLease,
     }
     const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
+    if (thisSearch !== latestSearch) {
+      return // a newer search has started: this answer is out of date
+    }
     if (response.data.total === 0 && typed !== '' && !area.value.includes(typed.toUpperCase())) {
       // Not one of our towns: look for flats near that place instead (a town of ours with no flats in budget
       // just shows the "No flats match these filters" box, with Edit filters / Clear all)
-      await searchNearPlace(typed)
+      await searchNearPlace(typed, thisSearch)
     } else {
       results.value = response.data.results
       total.value = response.data.total
     }
-    await keepNearParents()
+    if (thisSearch !== latestSearch) {
+      return // the place search may have been left behind too
+    }
+    await keepNearParents(thisSearch)
   } catch (error) {
+    if (thisSearch !== latestSearch) {
+      return // an old search that fails must not empty the newer search's results
+    }
     // Nothing to show: empty the list, so old cards do not stay under the message
     results.value = []
     total.value = 0
@@ -245,7 +269,9 @@ async function search() {
       errorMessage.value = error.message
     }
   }
-  loading.value = false
+  if (thisSearch === latestSearch) {
+    loading.value = false // only the newest search turns "loading" off
+  }
 }
 
 // "Clear all": empty the search box and every filter (also on the Map, since they are shared), then search again
@@ -592,10 +618,10 @@ onMounted(loadPage)
     >
       <span>
         <!-- After a guest pressed Save: name the flat, so the jump up to this message makes sense -->
-        <template v-if="triedToSave">To save <strong>{{ triedToSave }}</strong>, you need an account. </template>
-        <RouterLink to="/createaccount"><strong>Create a free account</strong></RouterLink>
-        to save flats and keep your presets on any device.
-        Already have one? <RouterLink to="/login">Log in</RouterLink><template v-if="triedToSave">, then press Save on it again</template>.
+        <!-- Short on purpose (team feedback: the longer message was too wordy) -->
+        <RouterLink to="/login"><strong>Log in</strong></RouterLink> or
+        <RouterLink to="/createaccount"><strong>create a free account</strong></RouterLink>
+        to save<template v-if="triedToSave"> {{ triedToSave }}</template><template v-else> flats</template>.
       </span>
       <button type="button" class="btn-close" aria-label="Close" @click="closeAccountPrompt"></button>
     </div>
@@ -710,7 +736,7 @@ onMounted(loadPage)
           id="filter-drawer"
           tabindex="-1"
           class="sidebar filter-drawer"
-          :class="{ open: filtersOpen }"
+          :class="{ open: filtersOpen, 'budget-first': sortBy === 'price' }"
           :aria-label="filtersOpen ? 'Filters' : null"
         >
           <div class="d-flex justify-content-between align-items-center mb-3 d-lg-none">
@@ -867,17 +893,24 @@ onMounted(loadPage)
     height: 0;
   }
 }
-/* Phones and tablets: in the filter drawer, the budget and flat type come first, then Your Priorities */
+/* Phones and tablets: in the filter drawer, Your Priorities comes first (it sets the default sort, "Priority score").
+   When the list is sorted "Cheapest first" (class budget-first), the budget and flat type come first instead. */
 @media (max-width: 991.98px) {
   .filter-drawer {
     display: flex;
     flex-direction: column;
   }
-  .drawer-filters {
+  .drawer-prio {
     order: 1;
+  }
+  .drawer-filters {
+    order: 2;
     margin-bottom: 16px;
   }
-  .drawer-prio {
+  .filter-drawer.budget-first .drawer-filters {
+    order: 1;
+  }
+  .filter-drawer.budget-first .drawer-prio {
     order: 2;
   }
 }
