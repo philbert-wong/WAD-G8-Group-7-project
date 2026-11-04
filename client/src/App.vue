@@ -19,7 +19,7 @@ const route = useRoute()
   <!-- Presets popup: asks for the town, parents' postal code and starting filters (first visit only: logged out, no saved presets, not skipped before) -->
   <ProfileModal v-if="auth.needsProfile" />
 
-  <main class="container pt-4 pb-5" :class="{ 'wide-page': route.path === '/map' }">
+  <main class="container pt-4 pb-4 pb-lg-5" :class="{ 'wide-page': route.path === '/map' }">
     <!-- Help: the round "?" button bottom-right on every page, the tour of the page, and (first visit to a page)
          a one-line "Take the tour?" invitation at the top of the page, in the page itself so it never covers it -->
     <GuideTour />

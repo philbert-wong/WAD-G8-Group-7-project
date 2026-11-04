@@ -92,4 +92,6 @@ test('should tell a visitor without an account that saving a flat needs one', as
   // assert: the account message appears, with a way to create an account
   await expect(page.getByRole('link', { name: 'create a free account' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Create a free account' })).toBeVisible();
+  // ...and it names the flat with a space after "save" (it once read "saveBlk 672A ...")
+  await expect(page.getByText('to save Blk 672A YISHUN AVE 4.')).toBeVisible();
 });

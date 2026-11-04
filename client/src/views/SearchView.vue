@@ -621,7 +621,8 @@ onMounted(loadPage)
         <!-- Short on purpose (team feedback: the longer message was too wordy) -->
         <RouterLink to="/login"><strong>Log in</strong></RouterLink> or
         <RouterLink to="/createaccount"><strong>create a free account</strong></RouterLink>
-        to save<template v-if="triedToSave"> {{ triedToSave }}</template><template v-else> flats</template>.
+        <!-- One text with the space inside it: Vue trims a space at the start of a <template v-if>, which glued "save" to the flat's name -->
+        to save {{ triedToSave !== '' ? triedToSave : 'flats' }}.
       </span>
       <button type="button" class="btn-close" aria-label="Close" @click="closeAccountPrompt"></button>
     </div>

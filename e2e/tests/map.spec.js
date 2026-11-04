@@ -37,3 +37,21 @@ test('should open a flat on the map from its Show on map button', async ({ page 
   await expect(page.getByText('See it on')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Blk 672A YISHUN AVE 4' })).toBeVisible();
 });
+
+test('should offer to log in when a visitor without an account points at My shortlist', async ({ page }) => {
+  // setup: open the map as a visitor (not logged in)
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await page.getByRole('button', { name: 'Skip tour' }).click();
+  await page.getByRole('link', { name: 'Map' }).click();
+  await page.getByRole('button', { name: 'Skip tour' }).click();
+  await expect(page.getByText('Log in to show only your shortlist.')).not.toBeVisible();
+
+  // actions: point at the locked button
+  await page.getByText('My shortlist').hover();
+
+  // assert: the popup shows with a link that opens the Login page
+  await expect(page.getByText('Log in to show only your shortlist.')).toBeVisible();
+  await page.getByRole('link', { name: 'Log in', exact: true }).click();
+  await expect(page).toHaveURL(/\/login/);
+});

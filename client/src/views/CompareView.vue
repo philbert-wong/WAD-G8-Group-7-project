@@ -164,7 +164,7 @@ loadShortlist()
 
       <div v-else class="table-responsive">
         <!-- Which budget the red prices are compared with -->
-        <p v-if="budget() !== null" class="small mb-2">
+        <p v-if="budget !== null" class="small mb-2">
           Your budget: <b>{{ '$' + budget.toLocaleString('en-SG') }}</b> (the Max budget filter on Search and the
           Map).
           Prices <span class="text-danger fw-semibold">in red</span> are over it.

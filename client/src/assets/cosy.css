@@ -25,6 +25,20 @@ body {
   color: var(--char);
 }
 
+/* A short page (Compare with nothing ticked, Login, an empty Shortlist): the footer rests at the bottom of the screen,
+   not halfway up with blank space under it. #app is the whole page (top bar, <main>, footer): it is at least as tall as
+   the screen, and <main> grows to fill what the top bar and the footer leave. (100vh first, then 100dvh, which
+   is the same without the phone browser's address bar getting in the way, for browsers that know it.) */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+#app > main {
+  flex: 1 0 auto;
+}
+
 /* The serif headline font, used with class="serif" */
 .serif {
   font-family: "Cactus Classical Serif", serif;
@@ -211,6 +225,18 @@ body {
   background: var(--terra-d) !important;
   border-color: var(--terra-d) !important;
 }
+/* The outline version (Compare on the calculator, Check PHG): the same colour, filled in when hovered or pressed.
+   Bootstrap 5.3 colours its buttons through these --bs-btn-... variables, so we set the variables. */
+.btn-outline-primary {
+  --bs-btn-color: var(--terra);
+  --bs-btn-border-color: var(--terra);
+  --bs-btn-hover-bg: var(--terra);
+  --bs-btn-hover-border-color: var(--terra);
+  --bs-btn-active-bg: var(--terra-d);
+  --bs-btn-active-border-color: var(--terra-d);
+  --bs-btn-disabled-color: var(--terra);
+  --bs-btn-disabled-border-color: var(--terra);
+}
 .btn-link,
 .nav-tabs .nav-link {
   color: var(--terra);
@@ -232,6 +258,20 @@ body {
 @media (max-width: 991.98px) {
   body {
     padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+  /* ...so the page is that much shorter than the screen, or it would always scroll by the bar's height */
+  #app {
+    min-height: calc(100vh - 64px - env(safe-area-inset-bottom, 0px));
+    min-height: calc(100dvh - 64px - env(safe-area-inset-bottom, 0px));
+  }
+  /* The footer then only needs a little room of its own (the 120px under it on a computer keeps it clear of the round
+     help button; here the bar's room above does that). The right padding keeps its text from running under that button. */
+  .cosy-footer {
+    padding: 18px 0 12px;
+    margin-top: 12px;
+  }
+  .cosy-footer .container {
+    padding-right: 76px;
   }
 }
 

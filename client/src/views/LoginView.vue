@@ -17,6 +17,11 @@ const fromPresets = computed(function () {
   return route.path === '/createaccount'
 })
 
+// Sent here by a page that needs an account: the grey "Log in to ..." reason box shows under the heading
+const hasReason = computed(function () {
+  return ['/compare', '/shortlist', '/profile'].includes(route.query.redirect)
+})
+
 // 'login' or 'register': which tab is open
 const mode = ref(fromPresets.value ? 'register' : 'login')
 
@@ -99,7 +104,8 @@ async function submit() {
       <p v-if="route.query.redirect === '/compare'" class="login-reason">Log in to compare your shortlisted flats.</p>
       <p v-else-if="route.query.redirect === '/shortlist'" class="login-reason">Log in to open your shortlist.</p>
       <p v-else-if="route.query.redirect === '/profile'" class="login-reason">Log in to see your profile.</p>
-      <p class="page-sub">Log in to keep a shortlist and save your priorities. After logging in, you go straight back.</p>
+      <!-- On a phone, with the reason box above, this line would only repeat it and push the form down: hidden there -->
+      <p class="page-sub" :class="{ 'd-none d-md-block': hasReason }">Log in to keep a shortlist and save your priorities. After logging in, you go straight back.</p>
     </div>
     <div class="col-12 col-md-8 col-lg-5">
       <div class="card shadow-sm">

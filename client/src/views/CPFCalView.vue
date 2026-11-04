@@ -253,8 +253,10 @@ function applyBudget() {
 
       <div class="card shadow-sm">
         <div class="card-body p-3 p-md-4" @change="saveDetails">
-          <!-- FEATURE 1 (Yujia): who is buying -->
-          <div class="row g-2 g-md-3">
+          <!-- FEATURE 1 (Yujia): who is buying.
+               align-items-end (here and on the other rows below): if a label still wraps onto two lines on a very narrow
+               phone (e.g. "Monthly gross income ($)" at 320px), the boxes still line up at the bottom, each label just above its own box -->
+          <div class="row g-2 g-md-3 align-items-end">
             <div class="col-md-6" :class="buyerType === 'single' ? 'col-12' : 'col-7'">
               <label for="cal-buyer-type" class="form-label mb-1">Buying as</label>
               <select id="cal-buyer-type" v-model="buyerType" class="form-select">
@@ -265,7 +267,11 @@ function applyBudget() {
             </div>
 
             <div v-if="buyerType !== 'single'" class="col-5 col-md-6">
-              <label for="cal-co-owners" class="form-label mb-1">Number of co-owners</label>
+              <!-- Short on a phone ("Number of co-owners" wrapped onto two lines there, leaving a gap above "Buying as");
+                   d-none / d-md-inline show only one of the two texts, so a screen reader reads just one -->
+              <label for="cal-co-owners" class="form-label mb-1">
+                <span class="d-md-none">Co-owners</span><span class="d-none d-md-inline">Number of co-owners</span>
+              </label>
               <select id="cal-co-owners" v-model="coOwnerCount" class="form-select">
                 <option :value="0">0</option>
                 <option :value="1">1</option>
@@ -283,7 +289,7 @@ function applyBudget() {
               <span v-else>Co-owner {{ index }}</span>
             </h5>
 
-            <div class="row g-2 g-md-3">
+            <div class="row g-2 g-md-3 align-items-end">
               <div class="col-5 col-md-6 col-lg-3">
                 <label :for="'cal-status-' + index" class="form-label mb-1">Buyer status</label>
                 <select :id="'cal-status-' + index" v-model="owner.status" class="form-select">
@@ -309,7 +315,7 @@ function applyBudget() {
           <!-- FEATURE 2 (Jihao): extra questions for the grants and the loan -->
           <hr class="my-2 my-md-3" />
           <h5 class="mb-2 mb-md-3">About the flat</h5>
-          <div class="row g-2 g-md-3">
+          <div class="row g-2 g-md-3 align-items-end">
             <div class="col-6 col-md-6 col-lg-3 order-1 order-md-0">
               <label for="cal-flat-type" class="form-label mb-1">Flat type</label>
               <select id="cal-flat-type" v-model="flatType" class="form-select">
@@ -452,11 +458,15 @@ function applyBudget() {
             </tbody>
           </table>
 
-          <button type="button" class="btn btn-secondary" @click="goToStep(2)">Back</button>
-          <!-- FEATURE 5 (Yujia): send the budget to the Search page -->
-          <button type="button" class="btn btn-primary ms-2" @click="applyBudget">Apply Budget to Search</button>
-          <!-- FEATURE 7 (Jihao): Compare page -->
-          <RouterLink to="/compare" class="btn btn-link ms-2">Compare my shortlisted flats</RouterLink>
+          <!-- d-flex flex-wrap gap-2: the three buttons sit in a row, and on a phone the last one drops to a line of its
+               own, still lined up with the others (a link with ms-2 sat indented from them) -->
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-secondary" @click="goToStep(2)">Back</button>
+            <!-- FEATURE 5 (Yujia): send the budget to the Search page -->
+            <button type="button" class="btn btn-primary" @click="applyBudget">Apply Budget to Search</button>
+            <!-- FEATURE 7 (Jihao): Compare page. An outline button: it leaves this page, but is not the main action -->
+            <RouterLink to="/compare" class="btn btn-outline-primary">Compare my shortlisted flats</RouterLink>
+          </div>
         </div>
       </div>
     </div>

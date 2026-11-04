@@ -1019,14 +1019,13 @@ onMounted(async function () {
   // (searchParent draws the circle, then loads the blocks inside it), otherwise every block that fits the filters
   await applyFilters()
 
-  // Zoom to what was searched on the Search page; nothing searched: to the profile's town.
-  // Both even when the PHG circle is drawn (if none of the blocks are shown, e.g. outside the circle, the map stays as it is)
+  // The map opens on the whole island (the setView above). A search left over from the Search page does not zoom it in
+  // (the strip above the map says "Showing your search ..." with a "Show all of Singapore" button); the map zooms in
+  // to a search only when it is searched here (searchFromMap) or from a flat's "Show on map" button.
+  // The one thing that zooms on opening is the town in the saved presets, as its form says ("The map opens zoomed in
+  // on this town"). If none of its blocks are shown (e.g. a different search, or outside the PHG circle), the map stays as it is.
   if (!comingFromSearch) {
-    if (filterStore.filters.q !== '') {
-      zoomToSearch()
-    } else {
-      zoomToProfileTown()
-    }
+    zoomToProfileTown()
   }
 })
 
@@ -1196,8 +1195,8 @@ onUnmounted(function () {
    100vh = the whole height of the browser window, minus room for the search bar, the Show / Colour bar and the "Showing your search" strip above the map,
    so when you scroll down to the map it fills the screen. Never shorter than 450px. */
 .map-box {
-  height: calc(100vh - 240px);
-  min-height: 450px;
+  height: calc(100vh - 190px);
+  min-height: 520px;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1215,11 +1214,14 @@ onUnmounted(function () {
   padding: 8px 12px;
 }
 
-/* Phones and tablets (narrower than Bootstrap's lg, 992px): a shorter map, so the cards under it are easy to reach */
+/* Phones and tablets (narrower than Bootstrap's lg, 992px): the map still fills most of the screen (minus the top bar of
+   this page, the tab bar at the bottom and the controls above the map), but never taller than 760px on a tall tablet,
+   so the cards under it are still easy to reach */
 @media (max-width: 991px) {
   .map-box {
-    height: 60vh;
-    min-height: 320px;
+    height: calc(100vh - 220px);
+    min-height: 380px;
+    max-height: 760px;
   }
 }
 
