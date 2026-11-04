@@ -143,9 +143,13 @@ loadTowns()
       </div>
     </div>
 
-    <div class="form-check form-switch mb-3">
-      <input id="profile-phg" v-model="showPhg" class="form-check-input" type="checkbox" role="switch" />
-      <label for="profile-phg" class="form-check-label">Only show flats near my parents (PHG) on the map</label>
+    <!-- PHG switch: the same one as in the Filters panel (same look). Off = all flats; on = only flats within 4 km of the postal code above. -->
+    <div class="mb-3">
+      <div class="form-check form-switch phg-switch">
+        <input id="profile-phg" v-model="showPhg" class="form-check-input" type="checkbox" role="switch" />
+        <label for="profile-phg" class="form-check-label">Only show flats within 4 km of my parents (PHG)</label>
+      </div>
+      <div class="form-text">Off: flats anywhere. On: only flats near the postal code above. You can also switch it in the Filters.</div>
     </div>
 
     <div class="mb-3">

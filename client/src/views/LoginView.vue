@@ -33,6 +33,11 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
+// Sent here by the Reset password page after the password was changed (/login?reset=1): say so above the form
+const justReset = computed(function () {
+  return route.query.reset === '1'
+})
+
 // Problems found by checkForm() below. Problems from the server are in auth.error.
 const errorMessage = ref('')
 
@@ -107,6 +112,11 @@ async function submit() {
               Create an account to keep your presets and shortlist on any device.
             </p>
 
+            <!-- After choosing a new password -->
+            <div v-if="justReset && mode === 'login'" class="alert alert-success py-2">
+              Your password was updated. Log in with the new one.
+            </div>
+
             <!-- Tabs: Log in / Create account -->
             <ul class="nav nav-tabs mb-3">
               <li class="nav-item">
@@ -137,6 +147,10 @@ async function submit() {
                   autocomplete="current-password"
                 />
                 <div v-if="mode === 'register'" class="form-text">At least 8 characters.</div>
+                <!-- Only when logging in: for someone who cannot remember the password -->
+                <div v-else class="form-text">
+                  <RouterLink to="/forgot-password">Forgot password?</RouterLink>
+                </div>
               </div>
 
               <!-- Only when creating an account -->

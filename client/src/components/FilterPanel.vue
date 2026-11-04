@@ -141,7 +141,7 @@ function onClear() {
         placeholder="e.g. 560314"
         @input="onChange('parentsPostal', $event)"
       />
-      <div class="form-check form-switch">
+      <div class="form-check form-switch phg-switch">
         <input
           id="filter-phg"
           class="form-check-input"
@@ -208,6 +208,8 @@ function onClear() {
 .phg-row .form-check-label {
   font-size: 13px;
 }
+
+
 /* "Parents' postal code": dark like the other filter labels (not grey); the row already has a gap above */
 .parents-label {
   color: var(--char);
