@@ -7,7 +7,7 @@ instead of asking prices. You search blocks (not listings), filter them, compare
 personal priority score, look at each block's recent sales and nearby amenities, keep a shortlist
 with notes, work out an affordable budget, and see every block on a map.
 
-Data store:     MongoDB (with Mongoose). Local MongoDB or MongoDB Atlas.
+Data store:     MongoDB Atlas (cloud), with Mongoose. A local MongoDB also works for development.
 External APIs:  OneMap (Singapore Land Authority): place search and walking routes to the nearest MRT.
                 data.gov.sg: live HDB resale prices for a block's price details.
                 OpenStreetMap: the map tiles on the Map page.
@@ -31,7 +31,7 @@ Video:          [TODO: add the YouTube link]
 You need:
   - Node.js 22 or newer
   - pnpm  (install it once with:  npm install -g pnpm)
-  - MongoDB, either running on your own computer, or a free MongoDB Atlas database
+  - a MongoDB Atlas database (the team's cluster, or your own free one), or MongoDB running on your own computer
 
 The project has two parts, each in its own folder with its own package.json:
   server/   the Express API      (http://localhost:8000)
@@ -42,26 +42,36 @@ Step 1. Install the server
     pnpm install
 
 Step 2. Settings for the server
-    In the server folder, copy config.env.example to a new file called config.env, then edit it.
-    Every line is optional:
-      DB=...              MongoDB Atlas connection string. Leave it out to use MongoDB on this computer
+    In the server folder, copy config.env.example to a new file called config.env, then edit it:
+      DB=...              MongoDB Atlas connection string (the team's cluster, or your own free one),
+                          with the database name (check-in) before the "?", e.g.
+                          mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/check-in?retryWrites=true
+                          Only if you leave DB out does the server use MongoDB on this computer
                           (mongodb://127.0.0.1:27017/check-in).
       JWT_SECRET=...      any long random text (used to sign login tokens)
       PORT=8000           port for the API (default 8000)
       ONEMAP_EMAIL=...    a OneMap account (free at onemap.gov.sg). Needed for places and postal codes
       ONEMAP_PASSWORD=... in the search box and the map's address and PHG search. Without it, those place
                           searches show an error. (The walking routes are already saved in the data.)
-    config.env is never committed to git (it is in .gitignore).
+    The other lines are optional. config.env is never committed to git (it is in .gitignore).
 
 Step 3. Load the data into MongoDB
     (still in the server folder)
     pnpm seed
-    This loads server/data/blocks.json and amenities.json: 1,306 block + flat type cards (974 blocks)
-    in all 26 HDB towns, and 930 amenities.
+    This loads server/data/blocks.json and amenities.json into the database in DB (MongoDB Atlas):
+    1,306 block + flat type cards (974 blocks) in all 26 HDB towns, and 930 amenities.
+    It replaces the blocks and amenities already there, and gives the blocks new ids, so saved
+    shortlist items stop matching their blocks. On the team's shared cluster the data is already
+    loaded: only run it after the data files change, and tell the team first.
 
 Step 4. Install the website
     cd ../client
     pnpm install
+
+Step 5. Install the end-to-end tests (only needed to run them, see section 5)
+    cd ../e2e
+    pnpm install
+    pnpm exec playwright install chromium     (downloads the Chromium browser Playwright drives)
 
 
 ------------------------------------------------------------------------------------------
@@ -114,27 +124,116 @@ OneMap: place search and walking routes need a OneMap login in server/config.env
 5. TEST
 ------------------------------------------------------------------------------------------
 
-Automated tests (server API):
+There are 3 layers of automated tests, 204 tests in all, from fastest to closest to a real user:
+
+    Layer                         Folder                        Tests   Command
+    1. Server API                 server/tests/                   70    cd server  then  pnpm test
+    2. Client components + utils  client/src/**/__tests__/       103    cd client  then  pnpm test
+    3. End-to-end (browser)       e2e/tests/                      31    cd e2e     then  pnpm exec playwright test
+
+Layers 1 and 2 need nothing running. Layer 3 needs both terminals of section 3 running.
+
+1. Server API tests (Vitest + Supertest)
     cd server
     pnpm test
 
-    46 tests in server/tests/, run with Vitest and Supertest. Before the tests, the test setup
-    (server/tests/start-test-server.js) starts a throwaway MongoDB in memory and starts our real
-    server.js on port 8001 pointed at it, so the tests never touch your own database and can run
-    while pnpm dev is running. (The first run may take a while: it downloads a MongoDB program for
-    the in-memory database.)
+    Before the tests, the test setup (server/tests/start-test-server.js) starts a throwaway MongoDB
+    in memory and starts our real server.js on port 8001 pointed at it, so the tests never touch the
+    database in DB and can run while pnpm dev is running. (The first run may take a while: it
+    downloads a MongoDB program for the in-memory database.)
 
     What they cover:
-      blocks.test.js     (19)  search and every filter, wrong input (400), nearby search (geospatial),
-                               one block, 404s, sales summary and price per m2, nearest amenities
-      auth.test.js       (5)   register, duplicate email (409), short password (400),
-                               login, wrong password (401)
+      auth.test.js       (27)  register, login, duplicate email (409), wrong password (401), unknown
+                               email gets the same message, email rules, password rules (8+ characters,
+                               not only spaces, not a very common password, not the email, 72-byte
+                               bcrypt limit), saved preferences, forgot password
+      blocks.test.js     (21)  search by text and postal code, every filter, wrong input (400), nearby
+                               search (geospatial), one block, 404s, sales summary and price per m2,
+                               nearest amenities
       shortlist.test.js  (11)  no token (401), create, read, update note, delete, no duplicates (409),
                                missing blockId (400), unknown ids (404), note too long (400)
       score.test.js      (11)  match score maths, preference weights, remaining lease, distance
 
-End-to-end tests:
-    [TODO: Playwright end-to-end tests of the main user journeys, with the command to run them.]
+2. Client tests: components and utils (Vitest + Vue Test Utils + jsdom)
+    cd client
+    pnpm test
+
+    jsdom gives Vitest a pretend browser, so Vue components are mounted without opening one.
+    Unit tests check one function; component tests mount one component, give it props and check
+    what it shows and which events it sends to its page; the integration test mounts two together.
+    Each test file sits in a __tests__ folder next to the code it tests (settings: client/vitest.config.js).
+
+    What they cover (in client/src/):
+      components/__tests__/BlockCard.spec.js            (11)  what the card shows, saved / not saved,
+                                                              events for Save and Show on map
+      components/__tests__/BlockCardIntegration.spec.js  (7)  BlockCard and MatchScore together
+                                                              (Excellent / Fair / no score)
+      components/__tests__/FilterPanel.spec.js          (15)  budget, lease and flat type chips, the
+                                                              parents (PHG) section, events to the page
+      components/__tests__/ProfileForm.spec.js          (13)  its questions, where Your Priorities start,
+                                                              what is sent on save, postal code check
+      components/__tests__/PreferencesPanel.spec.js      (8)  categories, tick boxes, importance levels
+      components/__tests__/SearchBar.spec.js             (5)  typing and submitting
+      components/map/__tests__/CollapsiblePanel.spec.js  (6)  open / close, content kept while closed
+      components/map/__tests__/PhgCard.spec.js           (8)  radius text, place found, block count,
+                                                              search and clear
+      utils/__tests__/affordability.spec.js             (18)  monthly repayment, loan for a repayment,
+                                                              monthly cost, household totals and type
+      utils/__tests__/priorities.spec.js                 (7)  reading saved priorities, broken or
+                                                              partly saved data
+      utils/__tests__/scoreWord.spec.js                  (5)  Excellent / Good / Fair / Weak cut-offs
+
+3. End-to-end tests (Playwright, in Chromium)
+    Real user journeys in a real browser: Playwright opens the website, clicks and types like a user,
+    and checks what appears on the page.
+
+    Before running them:
+      - Install them once (section 2, Step 5).
+      - Start the API and the website (section 3, both terminals). Playwright does not start them.
+      - The data must be loaded (pnpm seed, section 2). Some tests use the seed data, e.g. postal
+        code 761672 is Blk 672A Yishun Ave 4.
+      - calculator.spec.js and the phone PHG test look up postal codes on OneMap, so they need the
+        OneMap login in server/config.env.
+      - The tests use the database in DB (not an in-memory one). Each test that needs an account
+        creates a new one (e2e-<time>-<random number>@example.com), so the tests can be run again
+        and again, and these test accounts are left in the database.
+
+    Run them:
+      cd e2e
+      pnpm exec playwright test                       all 31 tests (both screen sizes)
+      pnpm exec playwright test --project=desktop     only the 26 desktop tests (1280 x 720)
+      pnpm exec playwright test --project=iphone-6    only the 5 phone tests in tests/mobile/ (375 x 667)
+      pnpm exec playwright test tests/search.spec.js  one file
+      pnpm exec playwright show-report                open the report of the last run in the browser
+
+    By default they test http://localhost:5173. To test the deployed app instead:
+      BASE_URL=https://<deployed app> pnpm exec playwright test
+
+    Both screen sizes run in Chromium, because the app is marked in Chrome (brief FAQ 5). The phone
+    size is the iPhone 6, the smallest screen in the responsive check (brief FAQ 17).
+
+    How each test is written: 3 stages, (1) setup: open the page, (2) actions: what the user does,
+    (3) assert: what the user sees. Every test starts in a fresh browser, so its setup first closes
+    the first-visit popup and the page tour. The tests find things the way a user does (by role and
+    visible name, e.g. the "Logout" button) or by a fixed id (e.g. #login-email), not by layout or CSS.
+
+    What they cover (in e2e/tests/):
+      auth.spec.js           (5)  create an account, a very common password is refused, the two
+                                  passwords do not match, unknown account, logout
+      search.spec.js         (5)  search a town, the 4-Rm filter, clear message when nothing matches,
+                                  saving a flat needs an account (one message, not two)
+      shortlist.spec.js      (3)  save a flat when logged in, keep a note on it, remove it
+      compare.spec.js        (2)  compare two saved flats; asks for at least 2 saved flats
+      price-details.spec.js  (2)  open a flat's price details, and hide them again
+      map.spec.js            (3)  open the map from the menu, Show on map, log in offer for My shortlist
+      calculator.spec.js     (6)  PHG blocks near the parents a page at a time, postal code not found,
+                                  empty box, max flat price sent to Search, income needed first,
+                                  household details remembered for a logged-in user
+      mobile/compare-mobile.spec.js  (2)  compare on a phone; the Compare tour step does not cover
+                                          the first card
+      mobile/phg-mobile.spec.js      (1)  PHG blocks near the parents 5 at a time on a phone
+      mobile/search-mobile.spec.js   (2)  filter from the filter drawer; map and street view buttons
+                                          on a flat card
 
 Manual check of the main user journeys (with both terminals running):
     1. Search: type "Bishan", change the budget slider and flat type, press Search: cards update.
@@ -175,8 +274,10 @@ client/                     the website (made with pnpm create vue@latest, like 
   src/utils/                matchScore.js (match score), affordability.js (calculator maths),
                             affordabilityRules.js (every grant / loan number, with its source)
   src/assets/cosy.css       the site's design
+  src/**/__tests__/         client tests (pnpm test), next to the code they test
+  vitest.config.js          settings for the client tests
 
-server/                     the API (same layout as the class's blog-with-mongodb server)
+server/                    the API (same layout as the class's blog-with-mongodb server)
   server.js                 starts everything: config.env, Express, cors, routes, MongoDB, listen
   routes/                   which address runs which function (blocks-, shortlist-, auth-, amenities-routes.js)
   controllers/              the functions behind each address (blocks-, shortlist-, auth-, amenities-controller.js)
@@ -186,6 +287,10 @@ server/                     the API (same layout as the class's blog-with-mongod
   seed.js                   loads data/ into MongoDB (pnpm seed)
   tests/                    automated tests (pnpm test)
   config.env.example        settings template (copy to config.env)
+
+e2e/                        end-to-end tests (Playwright; its own small project, see section 5)
+  playwright.config.js      website address, the desktop and iphone-6 screen sizes, the HTML report
+  tests/                    one file per user journey; tests/mobile/ runs at phone size
 
 prep/                       one-time scripts that BUILT server/data/*.json from data.gov.sg + OneMap
                             (its own small project; the app does not run these, see section 9)
