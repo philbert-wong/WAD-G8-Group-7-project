@@ -144,7 +144,7 @@ sequenceDiagram
     C-->>U: chart of sales + model trend, and what pushes this price up or down
 ```
 
-### Code map
+### Code Map
 
 Every box is a file or folder in this repo; colours group them by job (blue = website, amber = API,
 green = data, rose = offline preparation, teal = tests, indigo = outside services). Generated with
