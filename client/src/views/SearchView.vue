@@ -20,6 +20,7 @@ import { useRoute, RouterLink } from 'vue-router'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
+import { keepFocusInside } from '../utils/focusTrap.js'
 import { distanceMetres, PHG_NEAR_METRES } from '../utils/distance.js'
 
 // get the current route
@@ -68,6 +69,8 @@ const results = ref([])
 const total = ref(0)
 const loading = ref(false)
 const errorMessage = ref('')
+// true when the page was opened by the calculator's "Apply Budget to Search": a summary is shown at the top
+const budgetJustApplied = ref(false)
 const area = ref([]) // town names, for the suggestions under the search box
 // Only after the user types: the preset town filled in on page load should not open the list
 const showSuggestions = ref(false)
@@ -215,7 +218,9 @@ async function search() {
       minLease: filterStore.filters.minLease,
     }
     const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
-    if (response.data.total === 0 && typed !== '') {
+    if (response.data.total === 0 && typed !== '' && !area.value.includes(typed.toUpperCase())) {
+      // Not one of our towns: look for flats near that place instead (a town of ours with no flats in budget
+      // just shows the "No flats match these filters" box, with Edit filters / Clear all)
       await searchNearPlace(typed)
     } else {
       results.value = response.data.results
@@ -229,6 +234,9 @@ async function search() {
     if (error.response && error.response.status === 404) {
       // OneMap could not find the place either
       errorMessage.value = 'Nothing found for "' + typed + '". Try a town, a street, a block address or a postal code.'
+    } else if (error.response && error.response.status >= 500 && typed !== '') {
+      // The place lookup (OneMap) is not working right now: say so in plain words, and what still works
+      errorMessage.value = 'We could not look up "' + typed + '" right now. Try a town, a street, a block address or a postal code instead.'
     } else if (error.response && error.response.data && error.response.data.message) {
       // Show our server's message if it sent one
       errorMessage.value = error.response.data.message
@@ -252,7 +260,21 @@ function clearFilters() {
 const filtersOpen = ref(false)
 
 // The "☰ Filters" button opens the drawer
+// ⚠️ NOT IN COURSE: document.addEventListener('keydown') and moving the keyboard focus (see utils/focusTrap.js).
+// While the drawer is open, Tab stays inside it and Esc closes it; closing puts the focus back on "☰ Filters".
+let filtersOpener = null
+
+function onDrawerKeyDown(event) {
+  if (event.key === 'Escape') {
+    closeFilters()
+    return
+  }
+  keepFocusInside(document.getElementById('filter-drawer'), event)
+}
+
 function openFilters() {
+  filtersOpener = document.activeElement
+  document.addEventListener('keydown', onDrawerKeyDown)
   filtersOpen.value = true
   // Move the keyboard focus into the drawer, so Tab starts there and Esc can close it
   setTimeout(function () {
@@ -266,11 +288,16 @@ function openFilters() {
 // The ✕ button and the dark backdrop close it
 function closeFilters() {
   filtersOpen.value = false
+  document.removeEventListener('keydown', onDrawerKeyDown)
+  if (filtersOpener !== null && document.body.contains(filtersOpener)) {
+    filtersOpener.focus()
+  }
 }
 
 // "Search" in the filter panel: close the drawer, so the new results are in view, then search
 function searchFromFilters() {
   filtersOpen.value = false
+  document.removeEventListener('keydown', onDrawerKeyDown)
   search()
 }
 
@@ -417,6 +444,7 @@ onMounted(function () {
   window.addEventListener('resize', onResize)
 })
 onUnmounted(function () {
+  document.removeEventListener('keydown', onDrawerKeyDown) // leaving the page with the drawer open
   window.removeEventListener('resize', onResize)
 })
 
@@ -498,6 +526,7 @@ function loadPage() {
 
   if (budget !== undefined) {
     filterStore.setFilter('maxPrice', String(budget))
+    budgetJustApplied.value = true
   }
   // Back from the Map (or another page): keep the last search. Nothing searched yet: start with the preset town.
   if (filterStore.filters.q !== '') {
@@ -519,6 +548,14 @@ onMounted(loadPage)
 <template>
   <section>
     <!-- Hero title, then results (left) + sidebar (right) -->
+    <!-- Back from the calculator: say straight away that the budget was used, and how many flats fit -->
+    <div v-if="budgetJustApplied" class="budget-applied" role="status">
+      <span v-if="filterStore.filters.maxPrice !== ''">
+        <b>Budget applied: {{ '$' + Number(filterStore.filters.maxPrice).toLocaleString('en-SG') }}</b>
+      </span>
+      <span v-if="!loading"> · {{ total }} flat(s) match</span>
+      <a href="#results-top" class="ms-1">See them ↓</a>
+    </div>
     <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
     <p class="page-sub">Explore HDB blocks using past resale prices, compare them, and keep a shortlist.</p>
 
@@ -570,7 +607,7 @@ onMounted(loadPage)
              Phones and tablets: "☰ Filters" and Sort side by side on top, the count on the line below.
              (order-1 / order-2 swap their places on small screens.) Always shown, so the filters can
              still be opened when a search found nothing. -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
+        <div id="results-top" class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
           <span v-if="!loading && !errorMessage" class="results-count order-2 order-lg-1">
             <b>{{ total }} flat(s)</b> match your filters
           </span>
@@ -617,7 +654,15 @@ onMounted(loadPage)
           <button type="button" class="af-edit d-lg-none" @click="openFilters">Edit filters</button>
         </div>
 
-        <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <div v-if="errorMessage" class="alert alert-danger" role="alert">
+          {{ errorMessage }}
+          <!-- The same two ways out as the "No flats match" box -->
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <!-- Edit filters only on phones / tablets: on a laptop the filters are always shown beside the results -->
+            <button type="button" class="act-btn d-lg-none" @click="openFilters">Edit filters</button>
+            <button type="button" class="act-btn" @click="clearFilters">Clear search and filters</button>
+          </div>
+        </div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
 
         <!-- Nothing matched: say so plainly and offer the two ways out -->
@@ -667,7 +712,6 @@ onMounted(loadPage)
           class="sidebar filter-drawer"
           :class="{ open: filtersOpen }"
           :aria-label="filtersOpen ? 'Filters' : null"
-          @keydown.esc="closeFilters"
         >
           <div class="d-flex justify-content-between align-items-center mb-3 d-lg-none">
             <strong>Filters</strong>
@@ -676,12 +720,6 @@ onMounted(loadPage)
 
           <!-- Your Priorities first: the results are sorted by priority score by default, so it should not be
                hidden under the filters (mb-3: the gap before the filters card) -->
-          <PreferencesPanel
-            class="mb-3 drawer-prio"
-            :preferences="preferences"
-            @change-ticked="changeTicked"
-            @change-level="changeLevel"
-          />
 
           <FilterPanel
             class="drawer-filters"
@@ -690,6 +728,13 @@ onMounted(loadPage)
             @change-filter="setFilter"
             @search="searchFromFilters"
             @clear="clearFilters"
+          />
+
+          <PreferencesPanel
+            class="mb-3 drawer-prio"
+            :preferences="preferences"
+            @change-ticked="changeTicked"
+            @change-level="changeLevel"
           />
         </div>
       </div>
@@ -800,6 +845,28 @@ onMounted(loadPage)
   margin-bottom: 18px;
 }
 
+/* The filters come first in the page (so phones read budget first, in the same order the keyboard moves).
+   Laptops show Your Priorities above the filters (team decision): CSS order moves it up there. */
+@media (min-width: 992px) {
+  .filter-drawer {
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer-prio {
+    order: 1;
+  }
+  .drawer-filters {
+    order: 2;
+  }
+}
+/* Phones and tablets: the sidebar column only holds the (fixed) drawer, so it should take no space at all */
+@media (max-width: 991.98px) {
+  .side-col {
+    margin-top: 0 !important;
+    padding-top: 0;
+    height: 0;
+  }
+}
 /* Phones and tablets: in the filter drawer, the budget and flat type come first, then Your Priorities */
 @media (max-width: 991.98px) {
   .filter-drawer {
@@ -813,5 +880,15 @@ onMounted(loadPage)
   .drawer-prio {
     order: 2;
   }
+}
+
+/* "Budget applied: $609,000 · 19 flat(s) match" at the top of the page */
+.budget-applied {
+  background: #e7f4ea;
+  border: 1px solid #a9d3b3;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 16px;
 }
 </style>

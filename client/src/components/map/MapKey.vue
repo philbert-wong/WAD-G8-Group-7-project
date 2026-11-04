@@ -43,8 +43,9 @@ function toggle() {
     <div class="mt-1">
       <!-- Price: one coloured dot per price band -->
       <div v-if="colourBy === 'price'" class="d-flex flex-wrap column-gap-3 row-gap-1">
-        <span v-for="band in priceBands" :key="band.label" class="d-inline-flex align-items-center gap-1">
-          <span class="dot" :style="{ background: band.colour }"></span>
+        <!-- The same number is printed in each dot on the map, so the bands can be told apart without colour -->
+        <span v-for="(band, index) in priceBands" :key="band.label" class="d-inline-flex align-items-center gap-1">
+          <span class="dot num-dot" :style="{ background: band.colour }">{{ index + 1 }}</span>
           {{ band.label }}
         </span>
       </div>
@@ -104,8 +105,26 @@ function toggle() {
   line-height: 1;
   color: #6b6f80; /* a soft dark grey arrow */
 }
+/* A 44px-wide invisible tap area around the thin handle (the handle itself stays 15px) */
+.arrow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -29px;
+  right: 0;
+}
 .arrow:active {
   background: rgba(120, 125, 145, 0.18); /* a little darker while pressed */
+}
+/* Price key: the dot shows its band number, like the dots on the map */
+.num-dot {
+  width: 18px !important;
+  height: 18px !important;
+  display: inline-grid !important;
+  place-items: center;
+  font: 700 11px/1 system-ui, sans-serif;
+  color: #111;
 }
 /* Round colour dots, like the dots on the map */
 .dot {

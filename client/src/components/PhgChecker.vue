@@ -116,6 +116,11 @@ async function checkPhg() {
     if (error.response && error.response.status === 404) {
       // The server could not find the place
       errorMessage.value = 'We could not find "' + typed + '". Try a 6-digit postal code, or a block address.'
+    } else if (error.response && error.response.status >= 500) {
+      // The address lookup (OneMap) is not working right now: say what still works
+      errorMessage.value =
+        'We could not check this address right now. Please try again later, or try another postal code. ' +
+        'You can still go on: your grant estimate above does not depend on this check.'
     } else if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
     } else {

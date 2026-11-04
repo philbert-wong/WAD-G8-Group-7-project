@@ -243,6 +243,21 @@ onMounted(function () {
   color: var(--terra);
 }
 
+/* Phones held sideways: a slimmer tab bar (icon beside the word), so more of the short screen is left for the page */
+@media (max-height: 500px) {
+  .bottom-tab {
+    flex-direction: row;
+    justify-content: center;
+    gap: 6px;
+    min-height: 46px;
+    padding: 4px 2px;
+  }
+  /* and a slimmer top bar (the buttons stay 40px tall) */
+  .logo {
+    padding: 6px 0;
+  }
+}
+
 /* The word "Preferences" next to the sliders icon: hidden only on the narrowest phones, where it does not fit */
 @media (max-width: 399.98px) {
   .pref-word {

@@ -216,7 +216,13 @@ function placeCard() {
 // Shows this step: the light glides in a straight line from the last part to this one, while the page scrolls
 // smoothly to it at the same time (both move together, so the light never wanders).
 async function showStep() {
-  currentTarget = findTarget(step.value.target)
+  // A step may give a smaller thing to light up on phones (targetSmall): a part that is taller than the screen
+  // cannot be lit up as a whole, and the card would have no room next to it (see tourSteps.js)
+  let selector = step.value.target
+  if (step.value.targetSmall !== undefined && window.innerWidth < 768) {
+    selector = step.value.targetSmall
+  }
+  currentTarget = findTarget(selector)
 
   // Wait for Vue to put the new text in the card, so its height is right before it is placed
   await nextTick()
@@ -380,6 +386,10 @@ function autoStartIfNew() {
   if (TOUR_STEPS[page] === undefined || auth.needsProfile || open.value) {
     return
   }
+  // Arriving from the calculator's "Apply Budget to Search": the user is in the middle of a task, so no invitation
+  if (route.query.maxPrice !== undefined) {
+    return
+  }
   if (localStorage.getItem(seenKey(page)) === 'yes') {
     return
   }
@@ -454,9 +464,9 @@ onUnmounted(function () {
 <template>
   <!-- The round Help button, bottom-right on every page -->
   <!-- First visit to a page: a small invitation above the "?" button (it does not cover the page) -->
-  <div v-if="inviting && !open" class="tour-invite" role="dialog" aria-label="Tour of this page">
-    <p class="mb-2"><strong>New here?</strong> A 30-second tour shows you around this page.</p>
-    <div class="d-flex gap-2">
+  <div v-if="inviting && !open" class="tour-invite" role="region" aria-label="Tour of this page">
+    <p><strong>New here?</strong><span class="invite-long"> A 30-second tour shows you around this page.</span></p>
+    <div class="d-flex gap-2 flex-shrink-0">
       <button type="button" class="invite-yes" @click="acceptInvite">Take the tour</button>
       <button type="button" class="invite-no" @click="declineInvite">Skip tour</button>
     </div>
@@ -530,19 +540,23 @@ onUnmounted(function () {
 .help-btn:hover {
   background: var(--terra-d);
 }
-/* The first-visit invitation: a small card above the "?" button */
+/* The first-visit invitation: one compact line at the top of the page (in the page, so it never covers
+   the map, the cards or the comparison) */
 .tour-invite {
-  position: fixed;
-  right: 20px;
-  bottom: 84px;
-  z-index: 1031;
-  width: min(320px, calc(100vw - 40px));
-  background: #0f172a;
-  color: #fff;
-  border-radius: 16px;
-  padding: 16px 18px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  background: var(--beige);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
   font-size: 15px;
+}
+.tour-invite p {
+  margin: 0 !important;
+  flex: 1 1 220px;
 }
 .invite-yes,
 .invite-no {
@@ -554,17 +568,43 @@ onUnmounted(function () {
 }
 .invite-yes {
   border: 0;
-  background: #fff;
-  color: #0f172a;
-}
-.invite-no {
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  background: transparent;
+  background: var(--terra);
   color: #fff;
 }
-@media (max-width: 991.98px) {
+.invite-no {
+  border: 1.5px solid var(--line);
+  background: #fff;
+  color: var(--char);
+}
+
+/* Small phones and phones held sideways: the invitation is one short line
+   ("New here? [Take the tour] [Skip tour]") to save space */
+@media (max-width: 575.98px), (max-height: 500px) {
   .tour-invite {
-    bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+    flex-wrap: nowrap;
+    padding: 6px 8px 6px 12px;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tour-invite p {
+    flex: 1 1 auto;
+  }
+  .invite-long {
+    display: none;
+  }
+  .invite-yes,
+  .invite-no {
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+
+/* Phones held sideways: no invitation at all (the screen is too short; the "?" button still starts the tour) */
+@media (max-width: 991.98px) and (max-height: 500px) {
+  .tour-invite {
+    display: none;
   }
 }
 

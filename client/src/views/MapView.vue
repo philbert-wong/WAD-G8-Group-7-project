@@ -213,9 +213,8 @@ function changeLevel(key, level) {
   }
 }
 
-// The match score gradient: a rainbow from 0 (poor) to 100 (great). Each stop = a score and its colour
+// The match score colours from 0 (weak) to 100 (excellent). Each stop = a score and its colour
 // as [red, green, blue] numbers. A score between two stops gets a colour partway between them.
-// Red, orange and yellow are squeezed to the left, so the usual scores (mostly below 75) spread over more colours.
 // The SAME colours as the priority score bar on the flat cards (SCORE_STOPS in utils/matchScore.js),
 // so a block looks the same colour on the map as its score bar on Search
 const MATCH_STOPS = [
@@ -267,6 +266,17 @@ const priceBands = [
   { max: 700000, colour: '#ef7b22', label: '$550k - $700k' },
   { max: Infinity, colour: '#d6312b', label: 'Over $700k' },
 ]
+
+// The band number for a price: 1 = cheapest band ... 4 = most expensive. It is printed inside the dot, so the
+// price can be read without telling the colours apart (for colour-blind users); the key shows the same numbers.
+function priceBandNumber(price) {
+  for (let i = 0; i < priceBands.length; i++) {
+    if (price <= priceBands[i].max) {
+      return i + 1
+    }
+  }
+  return priceBands.length
+}
 
 // Picks the colour for a price (the first band it fits in)
 function priceColour(price) {
@@ -612,7 +622,27 @@ function drawBlocks() {
   }
 
   for (const place of shownPlaces) {
-    // One dot per block, coloured by its cheapest flat type
+    // Coloured by price: a slightly bigger dot with its band number inside (1 to 4, the same as the key).
+    // L.divIcon = a marker drawn with our own HTML, like the town bubbles below.
+    if (colourBy.value === 'price') {
+      const number = priceBandNumber(cheapestPrice(place))
+      const numberIcon = L.divIcon({
+        className: '',
+        iconSize: [20, 20],
+        html:
+          '<span style="display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; ' +
+          'border: 1.5px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.35); font: 700 11px/1 system-ui, sans-serif; ' +
+          'color: #111; background: ' + dotColour(place) + ';">' + number + '</span>',
+      })
+      L.marker([place.lat, place.lng], { icon: numberIcon, keyboard: false })
+        .bindPopup(popupText(place))
+        .on('click', function () {
+          selectPlace(place)
+        })
+        .addTo(blockLayer)
+      continue
+    }
+    // Coloured by priority score: one dot per block
     L.circleMarker([place.lat, place.lng], {
       radius: 7,
       color: '#fff',
@@ -1043,8 +1073,10 @@ onUnmounted(function () {
 <template>
   <section>
     <h1 class="page-title serif">See it on <em>the map</em></h1>
-    <!-- Phones and tablets: two short instructions instead of the long sentence -->
-    <p class="page-sub d-lg-none">Tap a town bubble to zoom in. Tap a block to see its prices.</p>
+    <!-- Phones and tablets: two short instructions instead of the long sentence.
+         Hidden once you have searched (v-if), because the "Showing your search" strip then says what the map shows
+         and the map needs the room. -->
+    <p class="page-sub d-lg-none" v-if="filterStore.filters.q === ''">Tap a town bubble to zoom in. Tap a block to see its prices.</p>
     <p class="page-sub d-none d-lg-block">
       <!-- Says which dots are shown ("Show") and what their colours mean ("Colour dots by"), both on the right -->
       Each dot is a block
@@ -1200,6 +1232,109 @@ onUnmounted(function () {
   .map-box {
     height: 60vh;
     min-height: 320px;
+  }
+}
+
+/* Phones and tablets: the three closed panels (Your Priorities, Filters, Map options) sit side by side as ONE
+   compact row of buttons above the map, so most of the screen is left for the map. A panel that is opened takes
+   the whole width under that row. (:deep reaches into CollapsiblePanel's own styles.) */
+@media (max-width: 991.98px) {
+  .map-sidebar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .map-sidebar :deep(.cpanel) {
+    margin-bottom: 0 !important;
+    border-radius: 12px;
+  }
+  .map-sidebar :deep(.cpanel.is-open) {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+  .map-sidebar :deep(.panel-toggle) {
+    min-height: 48px;
+    padding: 8px 10px;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+  }
+  .map-sidebar :deep(.panel-title) {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  .map-sidebar :deep(.state-word) {
+    display: none;
+  }
+  /* A shorter heading and tighter lines, so more of the map shows on arrival */
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  /* "Showing your search ...: 25 block(s). Show all of Singapore" in ONE dense strip: the button is a link */
+  .search-strip {
+    display: block;
+    padding: 6px 10px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .search-strip > span {
+    display: inline;
+  }
+  .search-strip .btn {
+    display: inline;
+    padding: 0 0 0 4px;
+    border: 0;
+    background: none;
+    color: var(--terra);
+    text-decoration: underline;
+    font-size: 14px;
+    vertical-align: baseline;
+  }
+  /* Smaller gaps between the option row, the search box and the map:
+     Bootstrap's g-4 puts 24px between the two columns when they stack; 10px is enough here */
+  .row.g-4 {
+    --bs-gutter-y: 10px;
+  }
+  :deep(.search-box) {
+    margin-bottom: 8px !important;
+  }
+  /* The examples under the map's search box are hidden on phones (the box itself says what to type) */
+  :deep(.search-hint) {
+    display: none;
+  }
+  /* The map takes most of what is left of the screen */
+  .map-box {
+    height: 62vh;
+  }
+}
+
+/* Phones held sideways (short screens): the title is hidden from view (screen readers still read it; the Map tab
+   below is highlighted), no instruction line, slimmer option buttons, and a map that fills the screen */
+@media (max-width: 991.98px) and (max-height: 500px) {
+  .page-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .map-sidebar :deep(.panel-toggle) {
+    min-height: 44px;
+    padding: 4px 10px;
+  }
+  .page-sub {
+    display: none;
+  }
+  .map-box {
+    height: 85vh;
+    min-height: 240px;
   }
 }
 

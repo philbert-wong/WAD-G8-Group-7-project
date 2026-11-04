@@ -6,7 +6,8 @@
 // "Skip for now" closes it without using what is typed above, keeps the saved presets, and opens Search.
 // A guest can open it again any time with the "Presets" button in the top bar (NavBar.vue): then it says
 // "Your presets", saves with "Save presets", closes with "Cancel", and stays on the page they are on.
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { keepFocusInside } from '../utils/focusTrap.js'
 import { useRouter } from 'vue-router'
 import ProfileForm from './ProfileForm.vue'
 import { useAuthStore } from '../stores/auth'
@@ -18,10 +19,31 @@ const router = useRouter()
 // Read once: App.vue makes a new popup each time it opens.
 const reopened = auth.presetsOpen
 
-// Keyboard users: when the popup opens, move the focus into it (so Tab starts inside it, not behind it)
+// Keyboard users: when the popup opens, move the focus into it (so Tab starts inside it, not behind it).
+// While it is open, Tab stays inside it and Esc closes it (wherever the focus is). When it closes, the focus goes
+// back to the button that opened it.
+// ⚠️ NOT IN COURSE: onUnmounted and document.addEventListener('keydown') (only onMounted and @click were taught).
 const box = ref(null)
+let openedFrom = null
+
+function onKeyDown(event) {
+  if (event.key === 'Escape') {
+    onSkip()
+    return
+  }
+  keepFocusInside(box.value, event)
+}
+
 onMounted(function () {
+  openedFrom = document.activeElement
   box.value.focus()
+  document.addEventListener('keydown', onKeyDown)
+})
+onUnmounted(function () {
+  document.removeEventListener('keydown', onKeyDown)
+  if (openedFrom !== null && document.body.contains(openedFrom)) {
+    openedFrom.focus()
+  }
 })
 
 // "Show me flats" / "Save presets": save the presets on this device and use them as the filters.
@@ -46,8 +68,8 @@ function onSkip() {
 
 <template>
   <!-- The dark layer over the page, with the white box in the middle -->
-  <!-- Esc closes it, the same as "Skip for now" / "Cancel" -->
-  <div class="overlay" @keydown.esc="onSkip">
+  <!-- Esc closes it, the same as "Skip for now" / "Cancel" (see onKeyDown above) -->
+  <div class="overlay">
     <div ref="box" tabindex="-1" class="box cosy-card cosy-shadow" role="dialog" aria-modal="true" aria-labelledby="profile-title">
       <!-- Skip / Cancel at the top, always in view, so nobody has to fill in the form to see the flats -->
       <div class="d-flex justify-content-between align-items-center mb-2">

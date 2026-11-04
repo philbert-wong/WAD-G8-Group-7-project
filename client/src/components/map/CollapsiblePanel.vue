@@ -15,13 +15,13 @@ const open = ref(props.startOpen)
 
 <template>
   <!-- One card: the title bar on top, the content underneath (no second box inside) -->
-  <div class="cpanel mb-3">
+  <div class="cpanel mb-3" :class="{ 'is-open': open }">
     <!-- open = !open flips true/false, like "showModules = !showModules" in the Week 4 vue-example -->
     <button type="button" class="panel-toggle" :aria-expanded="open" @click="open = !open">
       <span class="panel-title">{{ title }}</span>
       <span class="panel-state">
-        <span v-if="open">Hide ▴</span>
-        <span v-else>Show ▾</span>
+        <span v-if="open"><span class="state-word">Hide </span>▴</span>
+        <span v-else><span class="state-word">Show </span>▾</span>
       </span>
     </button>
 

@@ -20,11 +20,12 @@ const route = useRoute()
   <ProfileModal v-if="auth.needsProfile" />
 
   <main class="container pt-4 pb-5" :class="{ 'wide-page': route.path === '/map' }">
+    <!-- Help: the round "?" button bottom-right on every page, the tour of the page, and (first visit to a page)
+         a one-line "Take the tour?" invitation at the top of the page, in the page itself so it never covers it -->
+    <GuideTour />
     <RouterView/>
   </main>
 
-  <!-- Help: the round "?" button bottom-right on every page, and the tour of the page (see GuideTour.vue) -->
-  <GuideTour />
 
   <footer class="cosy-footer">
     <div class="container d-flex justify-content-between flex-wrap gap-2">
@@ -39,5 +40,18 @@ const route = useRoute()
    Only takes effect on screens wider than 1320px; smaller screens look the same as before. */
 .wide-page {
   max-width: 1480px;
+}
+/* Phones and tablets: the Map page starts closer to the top bar (12px instead of pt-4's 24px), so more map shows.
+   !important is needed because Bootstrap's pt-4 class uses !important too. */
+@media (max-width: 991.98px) {
+  .wide-page {
+    padding-top: 12px !important;
+  }
+}
+/* Phones held sideways: even closer (4px) */
+@media (max-width: 991.98px) and (max-height: 500px) {
+  .wide-page {
+    padding-top: 4px !important;
+  }
 }
 </style>

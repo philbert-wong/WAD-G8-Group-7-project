@@ -266,3 +266,10 @@ body {
 [tabindex='-1']:focus-visible {
   outline: none !important;
 }
+
+/* Phones: smaller page titles, so the page's content starts higher up */
+@media (max-width: 575.98px) {
+  .page-title {
+    font-size: 34px;
+  }
+}
