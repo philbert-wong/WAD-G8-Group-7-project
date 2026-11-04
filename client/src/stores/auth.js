@@ -96,6 +96,27 @@ export const useAuthStore = defineStore('auth', function () {
     await sendLoginForm('login', email, password)
   }
 
+  // "Forgot password" page: sets a new password for this email (no email or link is sent).
+  // Returns true when it worked; on a problem returns false and error holds the message.
+  async function resetPassword(email, password) {
+    loading.value = true
+    error.value = ''
+    let worked = false
+    try {
+      await axios.post(`${BASE_URL}/api/auth/reset-password`, { email: email, password: password })
+      worked = true
+    } catch (e) {
+      // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
+      if (e.response && e.response.data && e.response.data.message) {
+        error.value = e.response.data.message
+      } else {
+        error.value = e.message
+      }
+    }
+    loading.value = false
+    return worked
+  }
+
   async function register(email, password) {
     await sendLoginForm('register', email, password)
     // A new account: show the Help tour again when the Search page opens (see GuideTour.vue),
@@ -282,6 +303,7 @@ export const useAuthStore = defineStore('auth', function () {
     presetsOpen,
     presetsVersion,
     login,
+    resetPassword,
     register,
     loadProfile,
     saveProfile,

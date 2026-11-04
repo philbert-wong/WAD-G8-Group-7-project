@@ -213,3 +213,54 @@ describe('/api/auth/profile', () => {
   });
 });
 
+describe('/api/auth/reset-password (forgot password)', () => {
+  it('chooses a new password from just the email', async () => {
+    await getToken('forgot@example.com'); // registers with password123
+
+    const reset = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'forgot@example.com', password: 'brandnewpass1' });
+    expect(reset.status).toBe(200);
+
+    const oldLogin = await request(BASE_URL)
+      .post('/api/auth/login')
+      .send({ email: 'forgot@example.com', password: 'password123' });
+    expect(oldLogin.status).toBe(401);
+
+    const newLogin = await request(BASE_URL)
+      .post('/api/auth/login')
+      .send({ email: 'forgot@example.com', password: 'brandnewpass1' });
+    expect(newLogin.status).toBe(200);
+  });
+
+  it('says so when no account has that email', async () => {
+    const res = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'nobody@example.com', password: 'brandnewpass1' });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('rejects something that is not an email', async () => {
+    const res = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'not-an-email', password: 'brandnewpass1' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('applies the same password rules as register', async () => {
+    await getToken('forgot-weak@example.com');
+
+    const tooShort = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'forgot-weak@example.com', password: 'short' });
+    expect(tooShort.status).toBe(400);
+
+    const tooCommon = await request(BASE_URL)
+      .post('/api/auth/reset-password')
+      .send({ email: 'forgot-weak@example.com', password: 'password' });
+    expect(tooCommon.status).toBe(400);
+  });
+});
+

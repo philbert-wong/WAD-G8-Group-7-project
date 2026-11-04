@@ -10,7 +10,7 @@
   --cream: #fbfcff;
   --terra: #4a5ac0; /* terracotta, the main accent */
   --terra-d: #354091; /* darker terracotta for hover */
-  --sage: #6b8c6b; /* green for "good" things */
+  --sage: #4a7a4c; /* green for "good" things (dark enough for white text: 5:1) */
   --char: #2d2d2d; /* charcoal text */
   --beige: #e9eaf8;
   --line: #cbcce7; /* light border colour */
@@ -124,7 +124,7 @@ body {
   align-items: center;
   gap: 5px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   padding: 4px 12px;
 }
@@ -139,7 +139,7 @@ body {
 .tag {
   border: 1px solid var(--line);
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
   padding: 3px 11px;
   color: #5c5449;
   background: #fffdf9;
@@ -186,7 +186,7 @@ body {
 .cosy-footer {
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   padding: 26px 0 120px;
   margin-top: 30px;
 }
@@ -225,4 +225,63 @@ body {
 .card {
   border-color: var(--line);
   border-radius: 18px;
+}
+
+/* Phones and tablets: the page tabs are a bar fixed to the bottom (NavBar.vue), so leave room under the
+   page for it (60px bar + the iPhone home bar), or the footer would hide behind it */
+@media (max-width: 991.98px) {
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Inside a collapsible panel (map sidebar), the panel's title bar already names the section:
+   hide the component's own heading and its own card border, so it is one clean card */
+.cpanel-body > * > h4:first-child {
+  display: none;
+}
+.cpanel-body > * {
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+
+/* Form boxes: a border dark enough to see where to type (3:1 against white) */
+.form-control,
+.form-select,
+.cosy-input {
+  border-color: #8a8fb0;
+}
+
+/* Keyboard users: a clear outline on whatever has focus */
+:focus-visible {
+  outline: 3px solid #1d4ed8 !important;
+  outline-offset: 2px;
+}
+/* A box that only receives focus so the keyboard starts inside it (tabindex="-1": popup, drawer) needs no outline */
+[tabindex='-1']:focus,
+[tabindex='-1']:focus-visible {
+  outline: none !important;
+}
+
+/* Phones: smaller page titles, so the page's content starts higher up */
+@media (max-width: 575.98px) {
+  .page-title {
+    font-size: 34px;
+  }
+}
+
+/* The PHG switch (Filters panel and Profile page; add class="phg-switch" next to form-switch).
+   Bootstrap draws an OFF switch nearly white with a pale knob, so it hardly shows. Here it has a beige track,
+   a dark outline and a dark knob. :not(:checked) leaves the ON look (the green one above) as it was. */
+.form-switch.phg-switch .form-check-input:not(:checked) {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%232d2d2d'/%3e%3c/svg%3e");
+  background-color: var(--beige);
+  border: 2px solid var(--char);
+}
+.form-switch.phg-switch .form-check-input {
+  cursor: pointer;
 }

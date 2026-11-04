@@ -14,7 +14,7 @@ import MapSearchBar from '../components/map/MapSearchBar.vue'
 import SelectedBlockCard from '../components/map/SelectedBlockCard.vue'
 import MapLegend from '../components/map/MapLegend.vue'
 import MapKey from '../components/map/MapKey.vue'
-import CollapsiblePanel from '../components/map/CollapsiblePanel.vue'
+import MapToolbar from '../components/map/MapToolbar.vue'
 import { useAuthStore } from '../stores/auth'
 import { useMapFocusStore } from '../stores/mapFocus'
 import { useFiltersStore } from '../stores/filters'
@@ -1053,7 +1053,9 @@ onUnmounted(function () {
 <template>
   <section>
     <h1 class="page-title serif">See it on <em>the map</em></h1>
-    <p class="page-sub">
+    <!-- Phones and tablets: two short instructions instead of the long sentence -->
+    <p class="page-sub d-lg-none">Tap a town bubble to zoom in. Tap a block to see its prices.</p>
+    <p class="page-sub d-none d-lg-block">
       <!-- Says which dots are shown ("Show") and what their colours mean ("Colour dots by"), both on the right -->
       Each dot is a block
       <span v-if="showWhich === 'shortlist'">from your shortlist (your filters are not used here)</span>
@@ -1070,13 +1072,26 @@ onUnmounted(function () {
 
     <!-- Bootstrap grid: the map takes 8 of 12 columns on laptops and 9 of 12 on big screens, the sidebar the rest.
          On phones and tablets (below lg) the sidebar goes under the map. -->
-    <div class="row g-4">
-      <div class="col-lg-8 col-xl-9">
+    <div class="row g-4 map-row">
+      <div class="col-lg-8 col-xl-9 map-col">
         <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
-        <MapSearchBar :searched="filterStore.filters.q" @search="searchFromMap" />
+        <MapSearchBar class="m-search" :searched="filterStore.filters.q" @search="searchFromMap" />
+
+        <!-- What the dots show and how they are coloured: right under the search, so it is easy to see and change -->
+        <MapToolbar
+          class="m-toolbar"
+          :show-which="showWhich"
+          :colour-by="colourBy"
+          :logged-in="auth.isLoggedIn"
+          :shortlist-count="shortlist.count"
+          :shown-flats="flatCount"
+          :shown-blocks="blockCount"
+          @change-show-which="changeShowWhich"
+          @change-colour-by="changeColourBy"
+        />
 
         <!-- The search from the Search page: the map shows the same flats. One click to see the whole island again. -->
-        <div v-if="showWhich === 'all' && filterStore.filters.q !== ''" class="search-strip small mb-2">
+        <div v-if="showWhich === 'all' && filterStore.filters.q !== ''" class="search-strip m-strip small mb-2">
           <span v-if="showAllFlats">
             Showing all of Singapore. Press <strong>Search</strong> to show your search
             <strong>"{{ filterStore.filters.q }}"</strong> again.
@@ -1104,16 +1119,17 @@ onUnmounted(function () {
         </div>
 
         <!-- position: relative, so the colour key can float in the map's bottom-left corner; overflow-hidden: on phones, the part of the key slid off to the left is not shown -->
-        <div class="position-relative overflow-hidden">
+        <div class="position-relative overflow-hidden m-map">
           <div id="mapBox" class="map-box"></div>
           <MapKey :colour-by="colourBy" :price-bands="priceBands" :no-score-colour="NO_SCORE_COLOUR" />
         </div>
       </div>
 
-      <div class="col-lg-4 col-xl-3">
+      <div class="col-lg-4 col-xl-3 map-col">
         <div class="map-sidebar">
           <!-- Selected block: appears when a dot is clicked -->
           <SelectedBlockCard
+            class="m-selected"
             v-if="selectedPlace !== null"
             :place="selectedPlace"
             :match-text="selectedMatchText()"
@@ -1124,47 +1140,34 @@ onUnmounted(function () {
             @hide-nearest="hideNearest"
           />
 
-
-
-
           <!-- Your Priorities FIRST, like Search: the dots are coloured by priority score by default, so it should
-               not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen. -->
-          <CollapsiblePanel title="Your Priorities" :start-open="isWideScreen">
-            <PreferencesPanel
-              :preferences="preferences"
-              on-map
-              @change-ticked="changeTicked"
-              @change-level="changeLevel"
-            />
-          </CollapsiblePanel>
+               not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen.
+               collapsible: "Hide / Show" sits in its own title row, so it folds down to one line (no extra header box) -->
+          <PreferencesPanel
+            class="mb-3 m-prio"
+            :preferences="preferences"
+            on-map
+            collapsible
+            :start-open="isWideScreen"
+            @change-ticked="changeTicked"
+            @change-level="changeLevel"
+          />
 
           <!-- Filters: the same panel as Search, near the top so it is easy to find. Closed at the start
-               (its title is in view: one click opens it), so the map options below are not pushed far down -->
-          <CollapsiblePanel title="Filters" :start-open="false">
-            <FilterPanel
-              :filters="filterStore.filters"
-              :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
-              @change-filter="setFilter"
-              @search="applyFilters"
-              @clear="clearFilters"
-            />
-          </CollapsiblePanel>
-
-          <!-- Map options: show all flats / my shortlist, colour dots by price / priority score, and the amenity tick boxes
-               (the colour key itself floats on the map: MapKey) -->
-          <MapLegend
-            :colour-by="colourBy"
-            :amenity-types="amenityTypes"
-            :shown-types="shownTypes"
-            :show-which="showWhich"
-            :logged-in="auth.isLoggedIn"
-            :shortlist-count="shortlist.count"
-            :shown-flats="flatCount"
-            :shown-blocks="blockCount"
-            @change-show-which="changeShowWhich"
-            @change-colour-by="changeColourBy"
-            @toggle-amenity="toggleAmenity"
+               (its title row is in view: one click opens it), so the map options below are not pushed far down -->
+          <FilterPanel
+            class="m-filters"
+            :filters="filterStore.filters"
+            :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
+            collapsible
+            :start-open="false"
+            @change-filter="setFilter"
+            @search="applyFilters"
+            @clear="clearFilters"
           />
+
+          <!-- Show amenities: the tick boxes (Show / Colour dots by are in the bar above the map) -->
+          <MapLegend class="m-legend" :amenity-types="amenityTypes" :shown-types="shownTypes" @toggle-amenity="toggleAmenity" />
 
         </div>
       </div>
@@ -1173,11 +1176,48 @@ onUnmounted(function () {
 </template>
 
 <style scoped>
+/* Phones and tablets (below Bootstrap's lg, 992px): Your Priorities and Filter Results go ABOVE the map
+   (closed, one line each), so you change them right above the dots they change. The selected block and
+   "Show amenities" stay under the map. Laptops keep the sidebar on the right.
+   ⚠️ NOT IN COURSE: display: contents. It makes the two Bootstrap columns (and the sidebar box) "disappear" for
+   layout, so their parts become items of ONE flex row, and the Flexbox order property (Week 2) can then put the
+   parts of both columns in any order. */
+@media (max-width: 991.98px) {
+  .map-row {
+    margin: 0;
+    row-gap: 10px;
+  }
+  .map-col,
+  .map-row .map-sidebar {
+    display: contents;
+  }
+  .m-search,
+  .m-toolbar,
+  .m-prio,
+  .m-filters,
+  .m-strip,
+  .m-map,
+  .m-selected,
+  .m-legend {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 0 !important;
+  }
+  .m-search { order: 1; }
+  .m-toolbar { order: 2; }
+  .m-prio { order: 3; }
+  .m-filters { order: 4; }
+  .m-strip { order: 5; }
+  .m-map { order: 6; }
+  .m-selected { order: 7; }
+  .m-legend { order: 8; }
+}
+
 /* The map needs a set height, otherwise it is 0 px tall.
-   100vh = the whole height of the browser window, minus room for the search bar and the "Showing your search" strip above the map,
+   100vh = the whole height of the browser window, minus room for the search bar, the Show / Colour bar and the "Showing your search" strip above the map,
    so when you scroll down to the map it fills the screen. Never shorter than 450px. */
 .map-box {
-  height: calc(100vh - 200px);
+  height: calc(100vh - 240px);
   min-height: 450px;
   border-radius: 18px;
   overflow: hidden;

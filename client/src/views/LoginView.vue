@@ -33,6 +33,11 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
+// Sent here by the Reset password page after the password was changed (/login?reset=1): say so above the form
+const justReset = computed(function () {
+  return route.query.reset === '1'
+})
+
 // Problems found by checkForm() below. Problems from the server are in auth.error.
 const errorMessage = ref('')
 
@@ -90,7 +95,11 @@ async function submit() {
     <!-- Page heading -->
     <div class="col-12 text-center mb-4">
       <h1 class="page-title serif">Welcome <em>home</em></h1>
-      <p class="page-sub">Log in to keep a shortlist and save your priorities.</p>
+      <!-- Sent here from a page that needs an account: say which, so the user knows why they are here -->
+      <p v-if="route.query.redirect === '/compare'" class="login-reason">Log in to compare your shortlisted flats.</p>
+      <p v-else-if="route.query.redirect === '/shortlist'" class="login-reason">Log in to open your shortlist.</p>
+      <p v-else-if="route.query.redirect === '/profile'" class="login-reason">Log in to see your profile.</p>
+      <p class="page-sub">Log in to keep a shortlist and save your priorities. After logging in, you go straight back.</p>
     </div>
     <div class="col-12 col-md-8 col-lg-5">
       <div class="card shadow-sm">
@@ -106,6 +115,11 @@ async function submit() {
             <p v-if="fromPresets" class="small text-muted mb-2">
               Create an account to keep your presets and shortlist on any device.
             </p>
+
+            <!-- After choosing a new password -->
+            <div v-if="justReset && mode === 'login'" class="alert alert-success py-2">
+              Your password was updated. Log in with the new one.
+            </div>
 
             <!-- Tabs: Log in / Create account -->
             <ul class="nav nav-tabs mb-3">
@@ -137,6 +151,10 @@ async function submit() {
                   autocomplete="current-password"
                 />
                 <div v-if="mode === 'register'" class="form-text">At least 8 characters.</div>
+                <!-- Only when logging in: for someone who cannot remember the password -->
+                <div v-else class="form-text">
+                  <RouterLink to="/forgot-password">Forgot password?</RouterLink>
+                </div>
               </div>
 
               <!-- Only when creating an account -->
@@ -151,8 +169,8 @@ async function submit() {
                 />
               </div>
 
-              <div v-if="errorMessage" class="alert alert-danger py-2">{{ errorMessage }}</div>
-              <div v-else-if="auth.error" class="alert alert-danger py-2">{{ auth.error }}</div>
+              <div v-if="errorMessage" class="alert alert-danger py-2" role="alert">{{ errorMessage }}</div>
+              <div v-else-if="auth.error" class="alert alert-danger py-2" role="alert">{{ auth.error }}</div>
 
               <button type="submit" class="btn btn-primary w-100" :disabled="auth.loading">
                 <span v-if="auth.loading">Please wait...</span>
@@ -166,3 +184,16 @@ async function submit() {
     </div>
   </section>
 </template>
+
+<style scoped>
+/* "Log in to compare your shortlisted flats." */
+.login-reason {
+  display: inline-block;
+  background: var(--beige);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 0 8px;
+}
+</style>

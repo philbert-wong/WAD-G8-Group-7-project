@@ -8,6 +8,8 @@ const router = express.Router(); // sub application
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
+// Forgot password: no login needed (they cannot log in). The email and a new password are enough.
+router.post('/reset-password', authController.resetPassword);
 // requireAuth runs first: only a logged-in user gets to their preferences
 router.get('/preferences', requireAuth, authController.getPreferences);
 router.put('/preferences', requireAuth, authController.savePreferences);

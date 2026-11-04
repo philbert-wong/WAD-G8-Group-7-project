@@ -34,6 +34,10 @@ function showOnMap() {
 // Price details (each sale) are shown when you press the "Price details" button
 const showPrices = ref(false)
 
+// Phones only: Street View, Price details and Amenities sit under "More details", so a card is calmer to read.
+// (From 576px wide they are always shown, see the style.) true = open
+const moreOpen = ref(false)
+
 // Nearby amenities are only fetched when you press the button
 const open = ref(false)
 const loading = ref(false)
@@ -148,9 +152,12 @@ function barWidth(score) {
 </script>
 
 <template>
+  <!-- Phones: compact card (small map thumbnail beside the title, ~2 flats per screen).
+       Laptops: the map fills a column on the left, the details on the right.
+       Same information and the same buttons on both; only the layout changes (CSS Grid, see the style below). -->
   <article class="bcard">
-    <div class="leftcol">
-      <div class="photo" :style="photoStyle(score)">
+    <!-- Map of the block (or the 🏢 if the map image cannot load) -->
+    <div class="photo" :style="photoStyle(score)">
       <img
         v-if="!imageFailed"
         class="photo-img"
@@ -163,69 +170,66 @@ function barWidth(score) {
       <span class="ph-tag">{{ block.town }}</span>
     </div>
 
-      <div class="map-actions">
-        <button class="act-btn" @click="showOnMap">📍 Show on map</button>
-        <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
-      </div>
+    <!-- Title, town and flat type -->
+    <div class="head">
+      <h3 class="serif">Blk {{ block.block }} {{ block.street }}</h3>
+      <div class="meta">{{ block.town }} · {{ block.flatType }}</div>
     </div>
 
     <div class="cbody">
-      <!-- Title + match score -->
-      <div class="d-flex justify-content-between gap-3 flex-wrap">
-        <div>
-          <h3 class="serif">Blk {{ block.block }} {{ block.street }}</h3>
-          <div class="meta">{{ block.town }} · {{ block.flatType }}</div>
+      <!-- Price (the headline of the card) and the priority score: side by side from tablets up, stacked on phones -->
+      <div class="summary">
+        <div class="price-block">
+          <div class="price-label">Past sale prices · last 12 months</div>
+          <div class="price serif">{{ formatRange(block.priceLow, block.priceHigh) }}</div>
+          <div class="price-sub">
+            Median {{ '$' + block.price.toLocaleString('en-SG') }} (the middle price) · {{ block.salesCount }} sale(s)
+          </div>
         </div>
-        <MatchScore v-if="showMatch" :score="score" :distances="block.distances" :weights="weights" />
+        <MatchScore v-if="showMatch" class="score-block" :score="score" :distances="block.distances" :weights="weights" />
       </div>
 
-      <!-- Price box -->
-      <div class="pricebox">
-        <div class="lab">Resale price range · last 12 months</div>
-        <div class="price serif">{{ formatRange(block.priceLow, block.priceHigh) }}</div>
-        <span class="pill green">{{ block.salesCount }} sale(s)</span>
-        <span class="pill dark ms-1">Median {{ '$' + block.price.toLocaleString('en-SG') }}</span>
-      </div>
-
-      <!-- Lease + MRT -->
-      <div class="d-flex gap-4 flex-wrap mb-3">
-        <div class="stat">
-          <span class="ic">⏳</span>
-          <div><b>{{ block.remainingLease }} years</b>Remaining lease</div>
-        </div>
-        <div class="stat">
-          <span class="ic">🚆</span>
-          <div><b>{{ block.mrtWalkMinutes }} min walk</b>to {{ block.mrtName }}</div>
-        </div>
+      <!-- Lease + MRT on one line -->
+      <div class="facts">
+        <span>⏳ <b>{{ block.remainingLease }} years</b> left on the lease</span>
+        <span>🚆 <b>{{ block.mrtWalkMinutes }} min walk</b> to {{ block.mrtName }}</span>
       </div>
 
       <!-- Tags -->
-      <div class="d-flex gap-2 flex-wrap mb-3">
+      <div class="tags">
         <span v-for="tag in makeTags(block)" :key="tag" class="tag"><b>✓</b> {{ tag }}</span>
       </div>
 
-      <!-- Buttons -->
-      <div class="d-flex gap-2 flex-wrap btn-row">
-        <div class="d-flex flex-wrap gap-2 btn-trio">
+      <!-- Buttons: Save is the main one; the other four are smaller -->
+      <div class="actions">
         <button
           v-if="showSave"
-          class="act-btn"
+          class="act-btn save-btn"
           :class="{ saved: saved, primary: !saved }"
           @click="$emit('toggle-save', block)"
         >
           <span v-if="saved">✓ Saved</span>
           <span v-else>+ Save to Shortlist</span>
         </button>
-        <button class="act-btn" @click="showPrices = !showPrices">
-          <span v-if="showPrices">Hide price details</span>
-          <span v-else>Price details</span>
-        </button>
+        <div class="more-btns">
+          <button class="act-btn" @click="showOnMap">📍 Show on map</button>
+          <!-- Phones: one button that opens the other three -->
+          <button class="act-btn more-toggle" :aria-expanded="moreOpen" @click="moreOpen = !moreOpen">
+            <span v-if="moreOpen">Less ▴</span>
+            <span v-else>More details ▾</span>
+          </button>
+          <div class="extra-btns" :class="{ open: moreOpen }">
+          <a class="act-btn" :href="streetViewUrl" target="_blank" rel="noopener">📷 Street View</a>
+          <button class="act-btn" :aria-expanded="showPrices" @click="showPrices = !showPrices">
+            <span v-if="showPrices">Hide price details</span>
+            <span v-else>💲 Price details</span>
+          </button>
+          <button class="act-btn" :aria-expanded="open" @click="toggleDetails">
+            <span v-if="open">Hide amenities ▴</span>
+            <span v-else>🏫 Amenities ▾</span>
+          </button>
+          </div>
         </div>
-
-        <button class="act-btn" @click="toggleDetails">
-          <span v-if="open">Hide amenities ▴</span>
-          <span v-else>Amenities ▾</span>
-        </button>
       </div>
 
       <PriceDetails v-if="showPrices" :block-id="block.id" />
@@ -244,42 +248,43 @@ function barWidth(score) {
 </template>
 
 <style scoped>
-/* The card: white, rounded, photo on the left and text on the right (Flexbox) */
+/* The card: white, rounded, with a soft shadow. CSS Grid places the three parts:
+   phones  -> [thumbnail | title]  then the details full width underneath
+   laptops -> [map | title] with the details under the title, the map filling the left column */
 .bcard {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
-  display: flex;
-  margin-bottom: 22px;
-}
-/* Soft shadow, and the card lifts up a little on hover (transform + transition) */
-.bcard {
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 14px 34px -18px rgba(80, 50, 30, 0.25);
+  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  grid-template-areas:
+    'photo head'
+    'body body';
+  column-gap: 14px;
+  padding: 14px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 12px 30px -20px rgba(30, 30, 80, 0.35);
   transition: transform 0.25s, box-shadow 0.25s;
 }
 .bcard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 22px 44px -20px rgba(80, 50, 30, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -22px rgba(30, 30, 80, 0.45);
 }
 
-/* Photo area: fills the left column (see .leftcol), icon centred with Grid */
+/* Map thumbnail (phones): a rounded square */
 .photo {
-  width: 100%;
-  flex: 1 1 auto;
-  min-height: 300px;
-  /* The map is 400x500 px. The column grows with the card (e.g. when Price details opens)
-     but stops at 500px, so the map is never blown up and no empty gradient is left below it. */
-  max-height: 500px;
-  flex-shrink: 0;
+  grid-area: photo;
   position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
   display: grid;
   place-items: center;
+  background: linear-gradient(160deg, #f3d9c4, #e7b89a 55%, #c98c6a); /* while the map loads, or if it fails */
 }
-.photo-icon {
-  font-size: 64px;
-}
-
 .photo-img {
   position: absolute;
   inset: 0;
@@ -287,143 +292,277 @@ function barWidth(score) {
   height: 100%;
   object-fit: cover;
 }
-
-a.act-btn {
-  text-decoration: none;
-  display: inline-block;
+.photo-icon {
+  font-size: 36px;
 }
-
-.btn-row {
-  gap: 8px;
-}
-.btn-row .act-btn {
-  padding: 8px 12px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.leftcol {
-  width: 32%;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* The two buttons share a row when there is room (phones, very wide screens) and wrap into a
-   column when the left column is narrow (Bootstrap lg and xl, where the column is only ~200-250px wide) */
-.map-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px;
-  border-top: 1px solid var(--line);
-}
-.map-actions .act-btn {
-  flex: 1 1 120px;
-  padding: 8px 12px;
-  font-size: 13px;
-  white-space: nowrap;
-  text-align: center;
-}
-
-
-.btn-pair {
-  gap: 8px;
-}
-
-.btn-trio {
-  gap: 8px;
-}
-
-
-
-/* Warm gradient as a stand-in for a real photo */
-.photo {
-  background: linear-gradient(160deg, #f3d9c4, #e7b89a 55%, #c98c6a);
-}
-/* Town label in the bottom-left corner of the photo (position: absolute) */
+/* Town label on the map: only on the big map (laptops), the thumbnail is too small for it */
 .ph-tag {
+  display: none;
   position: absolute;
   left: 12px;
   bottom: 12px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 12px;
   padding: 3px 8px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* Text side of the card */
-.cbody {
-  padding: 22px 24px;
-  flex: 1;
+/* Title */
+.head {
+  grid-area: head;
   min-width: 0;
+  align-self: center;
 }
-.cbody h3 {
-  font-size: 26px;
-  line-height: 1.15;
+.head h3 {
+  font-size: 20px;
+  line-height: 1.2;
   margin: 0;
 }
 .meta {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 4px;
 }
 
-/* Beige price box */
-.pricebox {
-  background: var(--beige);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin: 16px 0 14px;
+/* Details */
+.cbody {
+  grid-area: body;
+  min-width: 0;
+  padding-top: 14px;
 }
-.lab {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+
+/* ---------- Phones (the base styles) ----------
+   Written for older users too (40-60): big text, one fact per line, big buttons, nothing extra. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.summary .score-block {
+  width: 100%;
+}
+/* Bigger text inside the priority score on phones */
+.summary .score-block :deep(.row1) {
+  font-size: 14px;
+}
+.summary .score-block :deep(.bar) {
+  height: 9px;
+}
+.price-label {
+  font-size: 14px;
   color: var(--muted);
-  font-weight: 600;
 }
 .price {
-  font-size: 32px;
-  line-height: 1.1;
-  margin: 4px 0 10px;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 700;
 }
-
-/* Lease / MRT facts with an icon square */
-.stat {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  font-size: 13px;
+.price-sub {
   color: var(--muted);
-}
-.stat .ic {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: #fbede7;
-  display: grid;
-  place-items: center;
-  font-size: 16px;
-}
-.stat b {
-  display: block;
-  color: var(--char);
   font-size: 15px;
+  margin-top: 2px;
+}
+/* One fact per line on phones */
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 16px;
+  margin: 14px 0;
+}
+/* Tags only from tablets up: on a phone they repeat the facts above */
+.tags {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
 }
 
-/* Phones and tablets: photo on top instead of on the left (media query) */
-@media (max-width: 991px) {
+/* Buttons. Phones: a big Save button, then the other four in an even 2 x 2 grid */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.more-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+/* Phones: Street View / Price details / Amenities only show after "More details" (full width, one per line) */
+.extra-btns {
+  display: none;
+  grid-column: 1 / -1;
+  flex-direction: column;
+  gap: 10px;
+}
+.extra-btns.open {
+  display: flex;
+}
+.actions .act-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 48px; /* easy to tap */
+  padding: 8px 6px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.save-btn {
+  width: 100%;
+  font-size: 16px !important;
+}
+a.act-btn {
+  text-decoration: none;
+}
+
+/* ---------- Big phones (Bootstrap sm, 576px): a bigger thumbnail, price and score side by side ---------- */
+@media (min-width: 576px) {
   .bcard {
-    flex-direction: column;
+    grid-template-columns: 110px 1fr;
+    column-gap: 18px;
+    padding: 18px;
   }
-  .leftcol {
-    width: 100%;
+  .photo {
+    width: 110px;
+    height: 110px;
+  }
+  .head h3 {
+    font-size: 21px;
+  }
+  .meta {
+    font-size: 13px;
+  }
+  .summary {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+  }
+  /* The price never breaks onto two lines; the score bar takes the rest of the width (up to 320px) */
+  .price-block {
+    flex-shrink: 0;
+  }
+  .price {
+    font-size: 28px;
+    white-space: nowrap;
+  }
+  .price-label {
+    font-size: 13px;
+  }
+  .price-sub {
+    font-size: 14px;
+  }
+  .summary .score-block {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 190px;
+    max-width: 320px;
+  }
+  /* "Priority score" and "71/100 · Good" each stay on one line */
+  .summary .score-block :deep(.row1) {
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .summary .score-block :deep(.bar) {
+    height: 7px;
+  }
+  .facts {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    font-size: 14px;
+    margin: 10px 0 12px;
+  }
+  .tags {
+    display: flex;
+  }
+  /* All five buttons in rows that fill the card; display: contents lets the four join Save */
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .more-btns,
+  .extra-btns,
+  .extra-btns.open {
+    display: contents;
+  }
+  /* there is room for every button, so no "More details" */
+  .more-toggle {
+    display: none !important;
+  }
+  .actions .act-btn {
+    flex: 1 1 0;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  .save-btn {
+    width: auto;
+    font-size: 13px !important;
+    flex-grow: 1.4 !important; /* the main button is a bit wider */
+  }
+}
+
+/* ---------- Tablets and bigger (Bootstrap md, 768px): the map becomes a full-height column on the left,
+   the title and details sit on the right ---------- */
+@media (min-width: 768px) {
+  .bcard {
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'photo head'
+      'photo body';
+    column-gap: 22px;
+    padding: 0;
   }
   .photo {
     width: 100%;
-    min-height: 160px;
+    height: 100%;
+    min-height: 240px;
+    max-height: 520px;
+    border: 0;
+    border-right: 1px solid var(--line);
+    border-radius: 0;
+  }
+  .photo-icon {
+    font-size: 64px;
+  }
+  .ph-tag {
+    display: inline-block;
+  }
+  .head {
+    align-self: start;
+    padding: 20px 22px 0 0;
+  }
+  .head h3 {
+    font-size: 23px;
+  }
+  .cbody {
+    padding: 12px 22px 20px 0;
+  }
+}
+
+/* ---------- Laptops (Bootstrap lg, 992px): a wider map column, bigger price ---------- */
+@media (min-width: 992px) {
+  .bcard {
+    grid-template-columns: 230px 1fr;
+    column-gap: 24px;
+  }
+  .head {
+    padding: 22px 24px 0 0;
+  }
+  .head h3 {
+    font-size: 24px;
+  }
+  .cbody {
+    padding: 14px 24px 22px 0;
+  }
+  .price {
+    font-size: 30px;
   }
 }
 </style>

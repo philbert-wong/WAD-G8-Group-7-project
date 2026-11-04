@@ -20,6 +20,7 @@ import { useRoute, useRouter, RouterLink } from 'vue-router'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
+import { keepFocusInside } from '../utils/focusTrap.js'
 import { distanceMetres, PHG_NEAR_METRES } from '../utils/distance.js'
 
 // get the current route
@@ -41,6 +42,8 @@ const accountBannerClosed = ref(localStorage.getItem('accountBannerClosed') === 
 
 // true after a guest tries to save a flat: the message then shows even if it was closed before
 const accountPromptOpen = ref(false)
+// The flat a guest last tried to save (e.g. "Blk 225 PENDING RD"), so the message can name it. '' = none.
+const triedToSave = ref('')
 
 // The ONE "create an account" message, for someone who is not logged in. It shows when they have presets
 // saved on this device (unless they closed it), or when they just tried to save a flat.
@@ -67,6 +70,11 @@ const results = ref([])
 const total = ref(0)
 const loading = ref(false)
 const errorMessage = ref('')
+// Counts the searches. A slow answer to an older search must not replace the answer to a newer one
+// (e.g. the first search when the page opens, still running when the user searches something else).
+let latestSearch = 0
+// true when the page was opened by the calculator's "Apply Budget to Search": a summary is shown at the top
+const budgetJustApplied = ref(false)
 const area = ref([]) // town names, for the suggestions under the search box
 // Only after the user types: the preset town filled in on page load should not open the list
 const showSuggestions = ref(false)
@@ -87,7 +95,8 @@ const parentName = ref('')
 
 // PHG switch on, with a postal code: keep only the flats within 4 km of the parents (on top of the other filters).
 // Our server asks OneMap where the postal code is (/api/blocks/place). If it cannot be found, say so and keep every flat.
-async function keepNearParents() {
+// thisSearch is the number of the search that called it: if a newer search has started, the results are not touched.
+async function keepNearParents(thisSearch) {
   const postal = filterStore.filters.parentsPostal.trim()
   if (!filterStore.filters.phg || postal === '') {
     parentName.value = ''
@@ -99,6 +108,9 @@ async function keepNearParents() {
       parentSpot = { postal: postal, name: response.data.name, lat: response.data.lat, lng: response.data.lng }
     }
   } catch (error) {
+    if (thisSearch !== latestSearch) {
+      return // a newer search has started: its own answer decides what is shown
+    }
     parentName.value = ''
     // Switch the 4 km filter off, so the list never looks filtered when it is not
     filterStore.setFilter('phg', false)
@@ -111,6 +123,9 @@ async function keepNearParents() {
         'We could not find the postal code "' + postal + '", so the "within 4 km of my parents" filter is off.'
     }
     return
+  }
+  if (thisSearch !== latestSearch) {
+    return // a newer search has replaced the results: do not filter them
   }
   parentName.value = parentSpot.name
   results.value = results.value.filter(function (card) {
@@ -161,7 +176,7 @@ const placeName = ref('')
 
 // Flats near any place in Singapore: our server asks OneMap where the place is (/api/blocks/place),
 // then finds our flats within 1 km of it that fit the filters (/api/blocks/nearby).
-// Errors are caught by search() below.
+// Errors are caught by search() below. thisSearch is the number of the search that called it.
 async function searchNearPlace(text, thisSearch) {
   const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
   const place = placeResponse.data
@@ -176,9 +191,8 @@ async function searchNearPlace(text, thisSearch) {
     },
   })
 
-  // A newer search started while we were waiting: leave its results alone
-  if (thisSearch !== searchNumber) {
-    return
+  if (thisSearch !== latestSearch) {
+    return // a newer search has started: do not show this one's flats
   }
   results.value = nearbyResponse.data.results
   total.value = nearbyResponse.data.total
@@ -209,13 +223,9 @@ watch(
 //   1. Search our own data: town, street, block, full address ("Blk 314 Ang Mo Kio Ave 3") or postal code ("560323")
 //   2. Our data has nothing, but something was typed (e.g. "Northpoint City", or a condo's postal code):
 //      ask OneMap, flats near it
-// Every search gets the next number. A slow, older search that answers after a newer one must not
-// replace the newer results, so each search only shows its answer if it is still the newest one.
-let searchNumber = 0
-
 async function search() {
-  searchNumber = searchNumber + 1
-  const thisSearch = searchNumber
+  latestSearch = latestSearch + 1
+  const thisSearch = latestSearch // this search's own number: only the newest search may change what is shown
   loading.value = true
   errorMessage.value = ''
   placeName.value = ''
@@ -233,22 +243,24 @@ async function search() {
       minLease: filterStore.filters.minLease,
     }
     const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
-    if (thisSearch !== searchNumber) {
-      return // a newer search has started: its answer is the one to show
+    if (thisSearch !== latestSearch) {
+      return // a newer search has started: this answer is out of date
     }
-    if (response.data.total === 0 && typed !== '') {
+    if (response.data.total === 0 && typed !== '' && !area.value.includes(typed.toUpperCase())) {
+      // Not one of our towns: look for flats near that place instead (a town of ours with no flats in budget
+      // just shows the "No flats match these filters" box, with Edit filters / Clear all)
       await searchNearPlace(typed, thisSearch)
     } else {
       results.value = response.data.results
       total.value = response.data.total
     }
-    if (thisSearch !== searchNumber) {
-      return
+    if (thisSearch !== latestSearch) {
+      return // the place search may have been left behind too
     }
-    await keepNearParents()
+    await keepNearParents(thisSearch)
   } catch (error) {
-    if (thisSearch !== searchNumber) {
-      return // an older search failed after a newer one started: ignore it
+    if (thisSearch !== latestSearch) {
+      return // an old search that fails must not empty the newer search's results
     }
     // Nothing to show: empty the list, so old cards do not stay under the message
     results.value = []
@@ -267,7 +279,9 @@ async function search() {
       errorMessage.value = error.message
     }
   }
-  loading.value = false
+  if (thisSearch === latestSearch) {
+    loading.value = false // only the newest search turns "loading" off
+  }
 }
 
 // "Clear all": empty the search box and every filter (also on the Map, since they are shared), then search again
@@ -282,13 +296,38 @@ function clearFilters() {
 const filtersOpen = ref(false)
 
 // The "☰ Filters" button opens the drawer
+// ⚠️ NOT IN COURSE: document.addEventListener('keydown') and moving the keyboard focus (see utils/focusTrap.js).
+// While the drawer is open, Tab stays inside it and Esc closes it; closing puts the focus back on "☰ Filters".
+let filtersOpener = null
+
+function onDrawerKeyDown(event) {
+  if (event.key === 'Escape') {
+    closeFilters()
+    return
+  }
+  keepFocusInside(document.getElementById('filter-drawer'), event)
+}
+
 function openFilters() {
+  filtersOpener = document.activeElement
+  document.addEventListener('keydown', onDrawerKeyDown)
   filtersOpen.value = true
+  // Move the keyboard focus into the drawer, so Tab starts there and Esc can close it
+  setTimeout(function () {
+    const drawer = document.getElementById('filter-drawer')
+    if (drawer !== null) {
+      drawer.focus()
+    }
+  }, 50)
 }
 
 // The ✕ button and the dark backdrop close it
 function closeFilters() {
   filtersOpen.value = false
+  document.removeEventListener('keydown', onDrawerKeyDown)
+  if (filtersOpener !== null && document.body.contains(filtersOpener)) {
+    filtersOpener.focus()
+  }
 }
 
 // The filter panel asks for a search. The Apply button closes the drawer, so the new results are in view;
@@ -296,6 +335,7 @@ function closeFilters() {
 function searchFromFilters(kind) {
   if (kind !== 'live') {
     filtersOpen.value = false
+    document.removeEventListener('keydown', onDrawerKeyDown)
   }
   search()
 }
@@ -443,6 +483,7 @@ onMounted(function () {
   window.addEventListener('resize', onResize)
 })
 onUnmounted(function () {
+  document.removeEventListener('keydown', onDrawerKeyDown) // leaving the page with the drawer open
   window.removeEventListener('resize', onResize)
 })
 
@@ -497,6 +538,7 @@ function toggleSave(block) {
   // The shortlist belongs to an account, so you must log in first
   if (!auth.isLoggedIn) {
     accountPromptOpen.value = true // the one "create an account" message, under the search box
+    triedToSave.value = 'Blk ' + block.block + ' ' + block.street
     // The message is at the top of the page, and the card that was clicked may be far down: scroll up to it
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
@@ -523,6 +565,7 @@ function loadPage() {
 
   if (budget !== undefined) {
     filterStore.setFilter('maxPrice', String(budget))
+    budgetJustApplied.value = true
     // The budget from the calculator is used ONCE: take it out of the address (/?maxPrice=... becomes /),
     // so a refresh or Back does not put the old budget back over a newer one the user picked.
     // ⚠️ NOT IN COURSE: router.replace() changes the address without adding a new Back step
@@ -549,8 +592,16 @@ onMounted(loadPage)
 <template>
   <section>
     <!-- Hero title, then results (left) + sidebar (right) -->
+    <!-- Back from the calculator: say straight away that the budget was used, and how many flats fit -->
+    <div v-if="budgetJustApplied" class="budget-applied" role="status">
+      <span v-if="filterStore.filters.maxPrice !== ''">
+        <b>Budget applied: {{ '$' + Number(filterStore.filters.maxPrice).toLocaleString('en-SG') }}</b>
+      </span>
+      <span v-if="!loading"> · {{ total }} flat(s) match</span>
+      <a href="#results-top" class="ms-1">See them ↓</a>
+    </div>
     <h1 class="page-title serif">Homes that fit <em>how you live</em></h1>
-    <p class="page-sub">Search blocks, compare real sale prices, and keep a shortlist.</p>
+    <p class="page-sub">Explore HDB blocks using past resale prices, compare them, and keep a shortlist.</p>
 
     <div v-if="shortlistErrorMessage" class="alert alert-warning">
       {{ shortlistErrorMessage }}
@@ -584,21 +635,23 @@ onMounted(loadPage)
       role="status"
     >
       <span>
-        <RouterLink to="/createaccount"><strong>Create a free account</strong></RouterLink>
-        to save flats and keep your presets on any device.
-        Already have one? <RouterLink to="/login">Log in</RouterLink>.
+        <!-- After a guest pressed Save: name the flat, so the jump up to this message makes sense -->
+        <!-- Short on purpose (team feedback: the longer message was too wordy) -->
+        <RouterLink to="/login"><strong>Log in</strong></RouterLink> or
+        <RouterLink to="/createaccount"><strong>create a free account</strong></RouterLink>
+        to save<template v-if="triedToSave"> {{ triedToSave }}</template><template v-else> flats</template>.
       </span>
       <button type="button" class="btn-close" aria-label="Close" @click="closeAccountPrompt"></button>
     </div>
 
     <!-- Bootstrap grid: results take 8 of 12 columns, the sidebar 4 (stacked on phones) -->
     <div class="row g-4 mt-1">
-      <div class="col-lg-8 order-2 order-lg-1">
+      <div class="col-lg-8 order-2 order-lg-1 results-col">
         <!-- Results bar. Computers: count on the left, Sort on the right.
              Phones and tablets: "☰ Filters" and Sort side by side on top, the count on the line below.
              (order-1 / order-2 swap their places on small screens.) Always shown, so the filters can
              still be opened when a search found nothing. -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
+        <div id="results-top" class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 resbar">
           <span v-if="!loading && !errorMessage" class="results-count order-2 order-lg-1">
             <b>{{ total }} flat(s)</b> match your filters
           </span>
@@ -628,9 +681,46 @@ onMounted(loadPage)
           </div>
         </div>
 
-        <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <!-- What is being used to pick these flats, in words, so nobody has to remember what they set -->
+        <div class="active-filters mb-3" aria-label="Filters in use">
+          <span class="af-label">Showing:</span>
+          <span v-if="filterStore.filters.q" class="af-chip">"{{ filterStore.filters.q }}"</span>
+          <span class="af-chip">
+            <template v-if="filterStore.filters.maxPrice === ''">Any budget</template>
+            <template v-else>Up to {{ '$' + Number(filterStore.filters.maxPrice).toLocaleString('en-SG') }}</template>
+          </span>
+          <span class="af-chip">
+            <template v-if="filterStore.filters.flatType === ''">Any flat type</template>
+            <template v-else>{{ filterStore.filters.flatType.toLowerCase() }}</template>
+          </span>
+          <span class="af-chip">{{ filterStore.filters.minLease }}+ years left on lease</span>
+          <span v-if="parentName" class="af-chip">Near {{ parentName }}</span>
+          <button type="button" class="af-edit d-lg-none" @click="openFilters">Edit filters</button>
+        </div>
+
+        <div v-if="errorMessage" class="alert alert-danger" role="alert">
+          {{ errorMessage }}
+          <!-- The same two ways out as the "No flats match" box -->
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <!-- Edit filters only on phones / tablets: on a laptop the filters are always shown beside the results -->
+            <button type="button" class="act-btn d-lg-none" @click="openFilters">Edit filters</button>
+            <button type="button" class="act-btn" @click="clearFilters">Clear search and filters</button>
+          </div>
+        </div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
 
+        <!-- Nothing matched: say so plainly and offer the two ways out -->
+        <div v-else-if="total === 0" class="empty-panel" role="status">
+          <h2 class="h5 mb-1">No flats match these filters</h2>
+          <p class="mb-3">Try a higher budget, a shorter lease, or any flat type.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="act-btn primary" @click="openFilters">Edit filters</button>
+            <button type="button" class="act-btn" @click="clearFilters">Clear all filters</button>
+          </div>
+        </div>
+
+        <!-- results-list: lets a design look place the cards in a grid -->
+        <div class="results-list">
         <BlockCard
           v-for="item in visibleResults"
           :key="item.block.id"
@@ -641,6 +731,7 @@ onMounted(loadPage)
           show-match
           @toggle-save="toggleSave"
         />
+        </div>
 
         <nav v-if="totalPages > 1" class="d-flex justify-content-center align-items-center gap-2 mb-4">
           <button class="act-btn" type="button" :disabled="page === 1" @click="goToPage(page - 1)">
@@ -653,12 +744,19 @@ onMounted(loadPage)
         </nav>
       </div>
 
-      <div class="col-lg-4 order-1 order-lg-2">
+      <div class="col-lg-4 order-1 order-lg-2 side-col">
         <!-- Dark backdrop behind the open drawer; tapping it closes the drawer -->
         <div v-if="filtersOpen" class="drawer-backdrop d-lg-none" @click="closeFilters"></div>
 
         <!-- On a computer: the normal sidebar. On phones and tablets: a drawer from the left (see the CSS below) -->
-        <div id="filter-drawer" class="sidebar filter-drawer" :class="{ open: filtersOpen }">
+        <!-- Esc closes the drawer (phones / tablets) -->
+        <div
+          id="filter-drawer"
+          tabindex="-1"
+          class="sidebar filter-drawer"
+          :class="{ open: filtersOpen, 'budget-first': sortBy === 'price' }"
+          :aria-label="filtersOpen ? 'Filters' : null"
+        >
           <div class="d-flex justify-content-between align-items-center mb-3 d-lg-none">
             <strong>Filters</strong>
             <button type="button" class="btn-close" aria-label="Close filters" @click="closeFilters"></button>
@@ -666,19 +764,21 @@ onMounted(loadPage)
 
           <!-- Your Priorities first: the results are sorted by priority score by default, so it should not be
                hidden under the filters (mb-3: the gap before the filters card) -->
-          <PreferencesPanel
-            class="mb-3"
-            :preferences="preferences"
-            @change-ticked="changeTicked"
-            @change-level="changeLevel"
-          />
 
           <FilterPanel
+            class="drawer-filters"
             :filters="filterStore.filters"
             :phg-place-name="parentName"
             @change-filter="setFilter"
             @search="searchFromFilters"
             @clear="clearFilters"
+          />
+
+          <PreferencesPanel
+            class="mb-3 drawer-prio"
+            :preferences="preferences"
+            @change-ticked="changeTicked"
+            @change-level="changeLevel"
           />
         </div>
       </div>
@@ -751,4 +851,95 @@ onMounted(loadPage)
 
 
 
+
+/* "Showing: Up to $760,000 · Any flat type · 60+ years left on lease  [Edit filters]" */
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+.af-label {
+  color: var(--muted);
+  margin-right: 2px;
+}
+.af-chip {
+  background: var(--beige);
+  border-radius: 999px;
+  padding: 4px 12px;
+  text-transform: none;
+}
+.af-edit {
+  border: 0;
+  background: none;
+  color: var(--terra);
+  font-weight: 700;
+  text-decoration: underline;
+  min-height: 44px;
+  padding: 0 6px;
+}
+
+/* No results */
+.empty-panel {
+  background: #fff;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+/* The filters come first in the page (so phones read budget first, in the same order the keyboard moves).
+   Laptops show Your Priorities above the filters (team decision): CSS order moves it up there. */
+@media (min-width: 992px) {
+  .filter-drawer {
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer-prio {
+    order: 1;
+  }
+  .drawer-filters {
+    order: 2;
+  }
+}
+/* Phones and tablets: the sidebar column only holds the (fixed) drawer, so it should take no space at all */
+@media (max-width: 991.98px) {
+  .side-col {
+    margin-top: 0 !important;
+    padding-top: 0;
+    height: 0;
+  }
+}
+/* Phones and tablets: in the filter drawer, Your Priorities comes first (it sets the default sort, "Priority score").
+   When the list is sorted "Cheapest first" (class budget-first), the budget and flat type come first instead. */
+@media (max-width: 991.98px) {
+  .filter-drawer {
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer-prio {
+    order: 1;
+  }
+  .drawer-filters {
+    order: 2;
+    margin-bottom: 16px;
+  }
+  .filter-drawer.budget-first .drawer-filters {
+    order: 1;
+  }
+  .filter-drawer.budget-first .drawer-prio {
+    order: 2;
+  }
+}
+
+/* "Budget applied: $609,000 · 19 flat(s) match" at the top of the page */
+.budget-applied {
+  background: #e7f4ea;
+  border: 1px solid #a9d3b3;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 16px;
+}
 </style>

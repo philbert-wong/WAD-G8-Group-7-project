@@ -116,6 +116,11 @@ async function checkPhg() {
     if (error.response && error.response.status === 404) {
       // The server could not find the place
       errorMessage.value = 'We could not find "' + typed + '". Try a 6-digit postal code, or a block address.'
+    } else if (error.response && error.response.status >= 500) {
+      // The address lookup (OneMap) is not working right now: say what still works
+      errorMessage.value =
+        'We could not check this address right now. Please try again later, or try another postal code. ' +
+        'You can still go on: your grant estimate above does not depend on this check.'
     } else if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
     } else {
@@ -161,7 +166,7 @@ function formatDistance(metres) {
         </div>
       </form>
 
-      <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0">{{ errorMessage }}</div>
+      <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0" role="alert">{{ errorMessage }}</div>
       <p v-else-if="loading" class="text-muted mt-3 mb-0">Loading...</p>
 
       <div v-else-if="checked" class="mt-3">

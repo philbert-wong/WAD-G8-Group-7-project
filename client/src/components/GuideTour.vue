@@ -362,6 +362,22 @@ function backStep() {
 
 let autoStartTimer = null
 
+// First visit to a page: instead of starting the tour by itself, show a small invitation ("Take the tour" / "Skip tour"),
+// so a new visitor can look at the page first. true = the invitation is showing.
+const inviting = ref(false)
+
+// "Take the tour" in the invitation
+function acceptInvite() {
+  inviting.value = false
+  startTour()
+}
+
+// "Skip tour" in the invitation: the same as skipping the tour, so it is not offered again on this page
+function declineInvite() {
+  inviting.value = false
+  localStorage.setItem(seenKey(route.path), 'yes')
+}
+
 // First visit to a page that has a tour, and the presets popup is closed: start that page's tour.
 // It waits a moment first, so the page and its cards (or map dots) have loaded.
 function autoStartIfNew() {
@@ -370,13 +386,17 @@ function autoStartIfNew() {
   if (TOUR_STEPS[page] === undefined || auth.needsProfile || open.value) {
     return
   }
+  // Arriving from the calculator's "Apply Budget to Search": the user is in the middle of a task, so no invitation
+  if (route.query.maxPrice !== undefined) {
+    return
+  }
   if (localStorage.getItem(seenKey(page)) === 'yes') {
     return
   }
   autoStartTimer = setTimeout(function () {
     // Check again: the user may have moved to another page in the meantime
     if (route.path === page && !auth.needsProfile && !open.value) {
-      startTour()
+      inviting.value = true
     }
   }, 1200)
 }
@@ -391,6 +411,7 @@ watch(
     if (open.value) {
       closeTour()
     }
+    inviting.value = false
     autoStartIfNew()
   },
 )
@@ -442,6 +463,15 @@ onUnmounted(function () {
 
 <template>
   <!-- The round Help button, bottom-right on every page -->
+  <!-- First visit to a page: a small invitation above the "?" button (it does not cover the page) -->
+  <div v-if="inviting && !open" class="tour-invite" role="region" aria-label="Tour of this page">
+    <p><strong>New here?</strong><span class="invite-long"> A 30-second tour shows you around this page.</span></p>
+    <div class="d-flex gap-2 flex-shrink-0">
+      <button type="button" class="invite-yes" @click="acceptInvite">Take the tour</button>
+      <button type="button" class="invite-no" @click="declineInvite">Skip tour</button>
+    </div>
+  </div>
+
   <button
     v-if="!open"
     type="button"
@@ -509,6 +539,80 @@ onUnmounted(function () {
 }
 .help-btn:hover {
   background: var(--terra-d);
+}
+/* The first-visit invitation: one compact line at the top of the page (in the page, so it never covers
+   the map, the cards or the comparison) */
+.tour-invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  background: var(--beige);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+.tour-invite p {
+  margin: 0 !important;
+  flex: 1 1 220px;
+}
+.invite-yes,
+.invite-no {
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0 16px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.invite-yes {
+  border: 0;
+  background: var(--terra);
+  color: #fff;
+}
+.invite-no {
+  border: 1.5px solid var(--line);
+  background: #fff;
+  color: var(--char);
+}
+
+/* Small phones and phones held sideways: the invitation is one short line
+   ("New here? [Take the tour] [Skip tour]") to save space */
+@media (max-width: 575.98px), (max-height: 500px) {
+  .tour-invite {
+    flex-wrap: nowrap;
+    padding: 6px 8px 6px 12px;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tour-invite p {
+    flex: 1 1 auto;
+  }
+  .invite-long {
+    display: none;
+  }
+  .invite-yes,
+  .invite-no {
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+
+/* Phones held sideways: no invitation at all (the screen is too short; the "?" button still starts the tour) */
+@media (max-width: 991.98px) and (max-height: 500px) {
+  .tour-invite {
+    display: none;
+  }
+}
+
+/* Phones and tablets: lift the "?" above the page tab bar at the bottom (NavBar.vue) */
+@media (max-width: 991.98px) {
+  .help-btn {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Over the whole page, under the light and the card (above the presets popup's 2000, which is closed by now) */

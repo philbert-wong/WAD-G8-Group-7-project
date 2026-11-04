@@ -3,17 +3,25 @@
 // The page (SearchView) owns the choices and passes them in as a prop.
 // When the user clicks something, this panel tells the page with emit, and the page updates the choices.
 // The importance level is one dropdown per category, so it fits the narrow sidebar.
+import { ref } from 'vue'
 import { CATEGORIES, IMPORTANCE_LEVELS } from '../utils/matchScore.js'
 
-defineProps({
+const props = defineProps({
   preferences: Object, // { school: { ticked: true, level: 3 }, mrt: { ... }, ... }
   onMap: { type: Boolean, default: false }, // true on the Map page, which colours dots instead of sorting cards
   // The ids of the panel and its tick boxes. The presets form shows this panel too, so it gives its own ids:
   // two panels on the same page (the popup over Search) must not share ids.
   panelId: { type: String, default: 'priorities-panel' },
   idPrefix: { type: String, default: 'matters-' },
+  // The Map makes the card foldable: "Hide ▴ / Show ▾" next to the title folds it down to just the title row
+  // (Search leaves it always open)
+  collapsible: { type: Boolean, default: false },
+  startOpen: { type: Boolean, default: true }, // open or closed at the start, when collapsible
 })
 const emit = defineEmits(['change-ticked', 'change-level'])
+
+// Open or folded (only used when collapsible). Only this card needs it, so it lives here.
+const open = ref(props.startOpen)
 
 // A tick box was clicked: send the category and whether it is now ticked
 function onTickChange(key, event) {
@@ -27,8 +35,17 @@ function onLevelChange(key, event) {
 </script>
 
 <template>
-  <div :id="panelId" class="prio">
-    <h4 class="serif">Your Priorities</h4>
+  <div :id="panelId" class="prio" :class="{ folded: collapsible && !open }">
+    <!-- Title row; on the Map also the Hide / Show button (open = !open flips it, like the Week 4 vue-example) -->
+    <div class="d-flex justify-content-between align-items-center">
+      <h4 class="serif">Your Priorities</h4>
+      <button v-if="collapsible" type="button" class="fold-toggle" :aria-expanded="open" @click="open = !open">
+        {{ open ? 'Hide ▴' : 'Show ▾' }}
+      </button>
+    </div>
+
+    <!-- Everything under the title: folded away on the Map when closed (v-show keeps the choices while hidden) -->
+    <div v-show="!collapsible || open">
     <!-- How these change what you see: the sort on Search, the dot colours on the Map.
          "priority score" stands out (.key-word), so it is clear these set the score on every card / dot -->
     <div v-if="onMap" class="hint">
@@ -65,6 +82,7 @@ function onLevelChange(key, event) {
         </option>
       </select>
     </div>
+    </div>
   </div>
 </template>
 
@@ -86,7 +104,7 @@ function onLevelChange(key, event) {
 }
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 /* "priority score" in the hint: bold, in the accent colour, so the eye lands on it */
@@ -97,28 +115,57 @@ function onLevelChange(key, event) {
 /* One row per category: tick box on the left, dropdown on the right (Flexbox) */
 .prio-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+}
+.prio-row + .prio-row {
+  border-top: 1px solid var(--beige);
 }
 .chk {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
 }
 .chk input {
   width: 17px;
   height: 17px;
 }
+/* The dropdown sits under its name, lined up with the text (17px box + 10px gap = 27px) */
 .level {
-  width: 135px;
-  flex-shrink: 0;
+  width: calc(100% - 27px);
+  margin-left: 27px;
+  font-size: 14px;
+  min-height: 38px;
 }
 /* Green tick boxes (accent-color) */
 .chk input {
   accent-color: var(--sage);
+}
+
+/* Hide / Show next to the title (only when the page makes the card foldable, e.g. on the Map) */
+.fold-toggle {
+  border: none;
+  background: none;
+  padding: 4px 0 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--terra);
+  white-space: nowrap;
+}
+.fold-toggle:hover {
+  text-decoration: underline;
+}
+
+/* Folded (Map): a thin bar, just the title row with less padding and a smaller title */
+.prio.folded {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.prio.folded h4 {
+  font-size: 19px;
 }
 </style>

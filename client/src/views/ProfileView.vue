@@ -14,7 +14,7 @@ const saved = ref(false)
 
 // Your Priorities, as saved on the account (null until they have been asked for: the form waits for them)
 const priorities = ref(null)
-onMounted(async function () {
+onMounted(async () => {
   priorities.value = await auth.loadPriorities()
 })
 
@@ -40,15 +40,8 @@ async function onSave(answers) {
     <div class="col-12 col-md-8 col-lg-5">
       <div class="card shadow-sm">
         <div class="card-body">
-          <ProfileForm
-            v-if="priorities !== null"
-            :profile="auth.profile"
-            :priorities="priorities"
-            :saving="auth.profileSaving"
-            :error="auth.profileError"
-            button-text="Save changes"
-            @save="onSave"
-          />
+          <ProfileForm v-if="priorities !== null" :profile="auth.profile" :priorities="priorities"
+            :saving="auth.profileSaving" :error="auth.profileError" button-text="Save changes" @save="onSave" />
           <p v-else class="text-muted mb-0">Loading...</p>
 
           <div v-if="saved" class="alert alert-success py-2 mt-3 mb-0">
