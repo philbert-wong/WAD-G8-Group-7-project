@@ -177,9 +177,8 @@ function onClear() {
   padding: 22px;
   border-top: 4px solid var(--terra);
   margin-bottom: 18px;
-}
-/* Shadow under the sidebar */
-.filters {
+
+  /* Shadow under the sidebar */
   box-shadow: 0 14px 34px -20px rgba(80, 50, 30, 0.25);
 }
 .filters h4 {
@@ -209,7 +208,6 @@ function onClear() {
   font-size: 13px;
 }
 
-
 /* "Parents' postal code": dark like the other filter labels (not grey); the row already has a gap above */
 .parents-label {
   color: var(--char);
@@ -222,6 +220,7 @@ function onClear() {
   flex-wrap: wrap;
   gap: 6px;
 }
+
 .chip {
   flex: 1 1 28%;
   border: 1px solid var(--line);
@@ -232,6 +231,7 @@ function onClear() {
   font-weight: 600;
   color: #5c5449;
 }
+
 .chip.on {
   background: var(--char);
   color: #fff;
@@ -242,13 +242,16 @@ function onClear() {
 .form-range::-webkit-slider-thumb {
   background: var(--terra);
 }
+
 .form-range::-moz-range-thumb {
   background: var(--terra);
 }
+
 /* (kept as two rules: a browser ignores a whole rule if it does not know one of its selectors) */
 .form-range::-webkit-slider-runnable-track {
   background: var(--beige);
 }
+
 .form-range::-moz-range-track {
   background: var(--beige);
 }
@@ -273,9 +276,11 @@ function onClear() {
   font-weight: 600;
   margin-top: 18px;
 }
+
 .apply:hover {
   background: var(--terra-d);
 }
+
 .clear {
   display: block;
   width: 100%;

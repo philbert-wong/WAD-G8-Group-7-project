@@ -134,14 +134,8 @@ function distanceText(row) {
       <span>
         <b v-if="score === null">–</b>
         <b v-else>{{ score }}/100 · {{ scoreWord(score) }}</b>
-        <button
-          v-if="weights !== null"
-          type="button"
-          class="info-btn"
-          :aria-expanded="open"
-          aria-label="How is the priority score made?"
-          @click="toggleBox"
-        >
+        <button v-if="weights !== null" type="button" class="info-btn" :aria-expanded="open"
+          aria-label="How is the priority score made?" @click="toggleBox">
           i
         </button>
       </span>
@@ -152,55 +146,56 @@ function distanceText(row) {
          It floats over the card, so the card itself never moves.
          Teleport puts it at the end of <body>, so no card or table can cut it off. -->
     <Teleport to="body">
-      <div v-if="open" ref="boxEl" class="how" :style="boxStyle" role="dialog" aria-label="How the priority score is made">
-          <span class="how-arrow" :style="{ left: arrowLeft }"></span>
-          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-            <h5 class="serif mb-0">{{ titleText() }}</h5>
-            <button type="button" class="btn-close" aria-label="Close" @click="closeBox"></button>
-          </div>
-          <p v-if="score === null" class="mb-0">
-            No score: tick at least one category in Your Priorities.
+      <div v-if="open" ref="boxEl" class="how" :style="boxStyle" role="dialog"
+        aria-label="How the priority score is made">
+        <span class="how-arrow" :style="{ left: arrowLeft }"></span>
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+          <h5 class="serif mb-0">{{ titleText() }}</h5>
+          <button type="button" class="btn-close" aria-label="Close" @click="closeBox"></button>
+        </div>
+        <p v-if="score === null" class="mb-0">
+          No score: tick at least one category in Your Priorities.
+        </p>
+        <template v-else>
+          <p class="mb-2">
+            How close this flat is to what you ticked in <b>Your Priorities</b>.
+            Each one scores 100 right next door, down to 0 when it is too far to count.
           </p>
-          <template v-else>
-            <p class="mb-2">
-              How close this flat is to what you ticked in <b>Your Priorities</b>.
-              Each one scores 100 right next door, down to 0 when it is too far to count.
-            </p>
-            <table class="how-table">
-              <thead>
-                <tr>
-                  <th>Priority</th>
-                  <th class="num">Raw score</th>
-                  <th class="num">Weight</th>
-                  <th class="num">Weighted score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in breakdownRows()" :key="row.key">
-                  <td>
-                    {{ shortLabel(row.label) }}
-                    <div class="sub">{{ distanceText(row) }}</div>
-                  </td>
-                  <td class="num">{{ row.score }}</td>
-                  <td class="num">
-                    × {{ row.share.toFixed(2) }}
-                    <div class="sub">{{ row.level }}</div>
-                  </td>
-                  <td class="num">{{ row.weighted.toFixed(1) }}</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th colspan="3">Total (priority score)</th>
-                  <th class="num">{{ score }}/100</th>
-                </tr>
-              </tfoot>
-            </table>
-            <p class="mt-2 mb-0">
-              Weighted score = raw score × weight. A more important priority gets a bigger weight, and the
-              weights add up to 1. Change them in Your Priorities on the Search page.
-            </p>
-          </template>
+          <table class="how-table">
+            <thead>
+              <tr>
+                <th>Priority</th>
+                <th class="num">Raw score</th>
+                <th class="num">Weight</th>
+                <th class="num">Weighted score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in breakdownRows()" :key="row.key">
+                <td>
+                  {{ shortLabel(row.label) }}
+                  <div class="sub">{{ distanceText(row) }}</div>
+                </td>
+                <td class="num">{{ row.score }}</td>
+                <td class="num">
+                  × {{ row.share.toFixed(2) }}
+                  <div class="sub">{{ row.level }}</div>
+                </td>
+                <td class="num">{{ row.weighted.toFixed(1) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3">Total (priority score)</th>
+                <th class="num">{{ score }}/100</th>
+              </tr>
+            </tfoot>
+          </table>
+          <p class="mt-2 mb-0">
+            Weighted score = raw score × weight. A more important priority gets a bigger weight, and the
+            weights add up to 1. Change them in Your Priorities on the Search page.
+          </p>
+        </template>
       </div>
     </Teleport>
   </div>
@@ -213,6 +208,7 @@ function distanceText(row) {
   width: 250px;
   max-width: 100%;
 }
+
 .row1 {
   display: flex;
   justify-content: space-between;
@@ -222,9 +218,11 @@ function distanceText(row) {
   color: var(--muted);
   font-weight: 600;
 }
+
 .row1 b {
   color: var(--terra);
 }
+
 /* Small round "i" button */
 .info-btn {
   width: 18px;
@@ -241,10 +239,12 @@ function distanceText(row) {
   line-height: 16px;
   cursor: pointer;
 }
+
 .info-btn:hover {
   border-color: var(--terra);
   color: var(--terra);
 }
+
 .bar {
   height: 7px;
   background: var(--beige);
@@ -252,6 +252,7 @@ function distanceText(row) {
   overflow: hidden;
   margin-top: 6px;
 }
+
 /* Gradient fill that slides to its width (transition) */
 .bar i {
   display: block;
@@ -260,6 +261,7 @@ function distanceText(row) {
   background: linear-gradient(90deg, #d98a63, var(--terra));
   transition: width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
 /* The pop-up box: placed on the page (top/left from toggleBox), so it scrolls with the page */
 .how {
   position: absolute;
@@ -271,6 +273,7 @@ function distanceText(row) {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   font-size: 13px;
 }
+
 /* Little arrow on top of the box, pointing up at the "i" button */
 .how-arrow {
   position: absolute;
@@ -282,17 +285,20 @@ function distanceText(row) {
   border-top: 1px solid var(--beige);
   transform: rotate(45deg);
 }
+
 /* The breakdown table */
 .how-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .how-table th,
 .how-table td {
   padding: 5px 4px;
   border-top: 1px solid var(--beige);
   vertical-align: top;
 }
+
 .how-table thead th {
   border-top: none;
   font-size: 11px;
@@ -301,16 +307,19 @@ function distanceText(row) {
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
+
 /* Numbers line up on the right */
 .how-table .num {
   text-align: right;
   white-space: nowrap;
 }
+
 /* Small grey line under a name or weight: the distance, or the importance word */
 .how-table .sub {
   font-size: 11px;
   color: var(--muted);
 }
+
 /* The total row stands out */
 .how-table tfoot th {
   border-top: 2px solid var(--muted);

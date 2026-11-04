@@ -4,12 +4,14 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
+import axios from 'axios'
+
 import { calculateBudget, money } from '../utils/affordability.js'
 import { MAX_LOAN_YEARS, HDB_LOAN_INTEREST_RATE, HDB_LOAN_LTV_PERCENT, MSR_PERCENT } from '../utils/affordabilityRules.js'
-import PhgChecker from '../components/PhgChecker.vue'
-import axios from 'axios'
 import { BASE_URL } from '../config.js'
+
 import { useAuthStore } from '../stores/auth'
+import PhgChecker from '../components/PhgChecker.vue'
 
 const router = useRouter()
 

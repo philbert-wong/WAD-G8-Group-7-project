@@ -50,9 +50,6 @@ const streetViewUrl = computed(function () {
   return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${b.lat},${b.lng}`
 })
 
-
-// Price estimate from our regression model (/api/blocks/:id/estimate). null = not loaded, or none for this block.
-
 // The text after each amenity in the list. For the MRT: the block's nearest station by WALKING and its walking
 // distance (the same walk as the card's "min walk" and the match score). The others: straight-line metres.
 function amenityText(amenity) {
@@ -61,7 +58,6 @@ function amenityText(amenity) {
   }
   return amenity.name + ' (' + amenity.distance + ' m)'
 }
-
 
 // "Amenities" button: opens the list and gets it from the server, or closes it
 async function toggleDetails() {
@@ -88,10 +84,10 @@ async function toggleDetails() {
 
 // "$600,000 – $720,000", or one price when every sale was the same
 function formatRange(low, high) {
-  if (low === high) {
-    return '$' + low.toLocaleString('en-SG')
-  }
-  return '$' + low.toLocaleString('en-SG') + ' – ' + '$' + high.toLocaleString('en-SG')
+  const LowPrice = '$' + low.toLocaleString('en-SG')
+  const HighPrice = '$' + high.toLocaleString('en-SG')
+
+  return low === high ? LowPrice : `${LowPrice} – ${HighPrice}`
 }
 
 const categoryNames = {
@@ -136,32 +132,17 @@ function photoStyle(score) {
     background: `linear-gradient(160deg, color-mix(in oklab, ${c} 55%, white), color-mix(in oklab, ${c} 80%, white) 55%, ${c})`,
   }
 }
-
-
-// Width of the match bar, e.g. score 87 -> "87%"
-function barWidth(score) {
-  if (score === null) {
-    return '0%'
-  }
-  return score + '%'
-}
 </script>
 
 <template>
   <article class="bcard">
     <div class="leftcol">
       <div class="photo" :style="photoStyle(score)">
-      <img
-        v-if="!imageFailed"
-        class="photo-img"
-        :src="mapUrl"
-        :alt="`Map of Blk ${block.block} ${block.street}`"
-        loading="lazy"
-        @error="imageFailed = true"
-      />
-      <span v-else class="photo-icon">🏢</span>
-      <span class="ph-tag">{{ block.town }}</span>
-    </div>
+        <img v-if="!imageFailed" class="photo-img" :src="mapUrl" :alt="`Map of Blk ${block.block} ${block.street}`"
+          loading="lazy" @error="imageFailed = true" />
+        <span v-else class="photo-icon">🏢</span>
+        <span class="ph-tag">{{ block.town }}</span>
+      </div>
 
       <div class="map-actions">
         <button class="act-btn" @click="showOnMap">📍 Show on map</button>
@@ -207,19 +188,15 @@ function barWidth(score) {
       <!-- Buttons -->
       <div class="d-flex gap-2 flex-wrap btn-row">
         <div class="d-flex flex-wrap gap-2 btn-trio">
-        <button
-          v-if="showSave"
-          class="act-btn"
-          :class="{ saved: saved, primary: !saved }"
-          @click="$emit('toggle-save', block)"
-        >
-          <span v-if="saved">✓ Saved</span>
-          <span v-else>+ Save to Shortlist</span>
-        </button>
-        <button class="act-btn" @click="showPrices = !showPrices">
-          <span v-if="showPrices">Hide price details</span>
-          <span v-else>Price details</span>
-        </button>
+          <button v-if="showSave" class="act-btn" :class="{ saved: saved, primary: !saved }"
+            @click="$emit('toggle-save', block)">
+            <span v-if="saved">✓ Saved</span>
+            <span v-else>+ Save to Shortlist</span>
+          </button>
+          <button class="act-btn" @click="showPrices = !showPrices">
+            <span v-if="showPrices">Hide price details</span>
+            <span v-else>Price details</span>
+          </button>
         </div>
 
         <button class="act-btn" @click="toggleDetails">
@@ -252,12 +229,12 @@ function barWidth(score) {
   overflow: hidden;
   display: flex;
   margin-bottom: 22px;
-}
+
 /* Soft shadow, and the card lifts up a little on hover (transform + transition) */
-.bcard {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 14px 34px -18px rgba(80, 50, 30, 0.25);
   transition: transform 0.25s, box-shadow 0.25s;
 }
+
 .bcard:hover {
   transform: translateY(-3px);
   box-shadow: 0 22px 44px -20px rgba(80, 50, 30, 0.35);
@@ -275,7 +252,13 @@ function barWidth(score) {
   position: relative;
   display: grid;
   place-items: center;
+
+/* Warm gradient as a stand-in for a real photo */
+  background: linear-gradient(160deg, #f3d9c4, #e7b89a 55%, #c98c6a);
 }
+/* Town label in the bottom-left corner of the photo (position: absolute) */
+
+/* Town label in the bottom-left corner of the photo (position: absolute) */
 .photo-icon {
   font-size: 64px;
 }
@@ -296,6 +279,7 @@ a.act-btn {
 .btn-row {
   gap: 8px;
 }
+
 .btn-row .act-btn {
   padding: 8px 12px;
   font-size: 13px;
@@ -310,7 +294,7 @@ a.act-btn {
 }
 
 /* The two buttons share a row when there is room (phones, very wide screens) and wrap into a
-   column when the left column is narrow (Bootstrap lg and xl, where the column is only ~200-250px wide) */
+    column when the left column is narrow (Bootstrap lg and xl, where the column is only ~200-250px wide) */
 .map-actions {
   display: flex;
   flex-wrap: wrap;
@@ -318,6 +302,7 @@ a.act-btn {
   padding: 10px;
   border-top: 1px solid var(--line);
 }
+
 .map-actions .act-btn {
   flex: 1 1 120px;
   padding: 8px 12px;
@@ -327,21 +312,10 @@ a.act-btn {
 }
 
 
-.btn-pair {
-  gap: 8px;
-}
-
 .btn-trio {
   gap: 8px;
 }
 
-
-
-/* Warm gradient as a stand-in for a real photo */
-.photo {
-  background: linear-gradient(160deg, #f3d9c4, #e7b89a 55%, #c98c6a);
-}
-/* Town label in the bottom-left corner of the photo (position: absolute) */
 .ph-tag {
   position: absolute;
   left: 12px;
@@ -359,11 +333,13 @@ a.act-btn {
   flex: 1;
   min-width: 0;
 }
+
 .cbody h3 {
   font-size: 26px;
   line-height: 1.15;
   margin: 0;
 }
+
 .meta {
   color: var(--muted);
   font-size: 13px;
@@ -377,6 +353,7 @@ a.act-btn {
   padding: 14px 18px;
   margin: 16px 0 14px;
 }
+
 .lab {
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -384,6 +361,7 @@ a.act-btn {
   color: var(--muted);
   font-weight: 600;
 }
+
 .price {
   font-size: 32px;
   line-height: 1.1;
@@ -398,6 +376,7 @@ a.act-btn {
   font-size: 13px;
   color: var(--muted);
 }
+
 .stat .ic {
   width: 34px;
   height: 34px;
@@ -407,6 +386,7 @@ a.act-btn {
   place-items: center;
   font-size: 16px;
 }
+
 .stat b {
   display: block;
   color: var(--char);
@@ -418,9 +398,11 @@ a.act-btn {
   .bcard {
     flex-direction: column;
   }
+
   .leftcol {
     width: 100%;
   }
+
   .photo {
     width: 100%;
     min-height: 160px;

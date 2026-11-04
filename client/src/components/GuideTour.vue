@@ -442,14 +442,8 @@ onUnmounted(function () {
 
 <template>
   <!-- The round Help button, bottom-right on every page -->
-  <button
-    v-if="!open"
-    type="button"
-    class="help-btn"
-    aria-label="Help: a quick tour of this page"
-    title="Help"
-    @click="startTour"
-  >
+  <button v-if="!open" type="button" class="help-btn" aria-label="Help: a quick tour of this page" title="Help"
+    @click="startTour">
     ?
   </button>
 
@@ -459,32 +453,33 @@ onUnmounted(function () {
 
     <!-- The light and the card go straight into <body> (Teleport), so their page positions count from the top of the page -->
     <Teleport to="body">
-    <!-- The light: a see-through box around the part of the page; its huge shadow darkens everything else -->
-    <div v-if="spot !== null" class="tour-spot" :style="spotStyle"></div>
+      <!-- The light: a see-through box around the part of the page; its huge shadow darkens everything else -->
+      <div v-if="spot !== null" class="tour-spot" :style="spotStyle"></div>
 
-    <!-- The card: step number and dots, the title and text, Next / Done, Back and Skip -->
-    <div ref="card" class="tour-card" :class="{ 'on-screen': cardOnScreen }" :style="cardStyle" role="dialog" aria-modal="true" aria-labelledby="tour-title">
-      <div class="d-flex justify-content-between align-items-center">
-        <span class="tour-count">Step {{ stepIndex + 1 }} of {{ steps.length }}</span>
-        <span class="tour-dots">
-          <i v-for="(s, index) in steps" :key="index" :class="{ on: index === stepIndex }"></i>
-        </span>
+      <!-- The card: step number and dots, the title and text, Next / Done, Back and Skip -->
+      <div ref="card" class="tour-card" :class="{ 'on-screen': cardOnScreen }" :style="cardStyle" role="dialog"
+        aria-modal="true" aria-labelledby="tour-title">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="tour-count">Step {{ stepIndex + 1 }} of {{ steps.length }}</span>
+          <span class="tour-dots">
+            <i v-for="(s, index) in steps" :key="index" :class="{ on: index === stepIndex }"></i>
+          </span>
+        </div>
+
+        <h5 id="tour-title">{{ step.title }}</h5>
+        <p>{{ step.text }}</p>
+
+        <button ref="nextButton" type="button" class="tour-next" @click="nextStep">
+          <span v-if="isLastStep">Done</span>
+          <span v-else>Next →</span>
+        </button>
+
+        <div v-if="steps.length > 1" class="d-flex justify-content-between mt-2">
+          <button v-if="stepIndex > 0" type="button" class="tour-link" @click="backStep">← Back</button>
+          <span v-else></span>
+          <button v-if="!isLastStep" type="button" class="tour-link" @click="closeTour">Skip tour</button>
+        </div>
       </div>
-
-      <h5 id="tour-title">{{ step.title }}</h5>
-      <p>{{ step.text }}</p>
-
-      <button ref="nextButton" type="button" class="tour-next" @click="nextStep">
-        <span v-if="isLastStep">Done</span>
-        <span v-else>Next →</span>
-      </button>
-
-      <div v-if="steps.length > 1" class="d-flex justify-content-between mt-2">
-        <button v-if="stepIndex > 0" type="button" class="tour-link" @click="backStep">← Back</button>
-        <span v-else></span>
-        <button v-if="!isLastStep" type="button" class="tour-link" @click="closeTour">Skip tour</button>
-      </div>
-    </div>
     </Teleport>
   </template>
 </template>
@@ -507,6 +502,7 @@ onUnmounted(function () {
   font-weight: 700;
   box-shadow: 0 8px 20px rgba(30, 30, 60, 0.3);
 }
+
 .help-btn:hover {
   background: var(--terra-d);
 }
@@ -520,6 +516,7 @@ onUnmounted(function () {
   left: 0;
   z-index: 2100;
 }
+
 .tour-blocker.dim {
   background: rgba(15, 23, 42, 0.6);
 }
@@ -527,7 +524,8 @@ onUnmounted(function () {
 /* The light: a thin white ring, and a shadow 9999px wide that darkens the rest of the screen.
    It glides from one part to the next (see glide() above). Clicks go through it to the blocker. */
 .tour-spot {
-  position: absolute; /* a page position: it scrolls with the page */
+  position: absolute;
+  /* a page position: it scrolls with the page */
   z-index: 2101;
   border-radius: 12px;
   box-shadow:
@@ -538,7 +536,8 @@ onUnmounted(function () {
 
 /* The dark card (like the screenshots): 340px wide, or the screen width minus a margin on phones */
 .tour-card {
-  position: absolute; /* next to the light, on the page */
+  position: absolute;
+  /* next to the light, on the page */
   z-index: 2102;
   width: min(340px, calc(100vw - 24px));
   background: #0f172a;
@@ -547,6 +546,7 @@ onUnmounted(function () {
   padding: 18px 20px 14px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
+
 /* Nothing lit up: the card stays in the middle of the screen */
 .tour-card.on-screen {
   position: fixed;
@@ -565,12 +565,14 @@ onUnmounted(function () {
   display: flex;
   gap: 6px;
 }
+
 .tour-dots i {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: #475569;
 }
+
 .tour-dots i.on {
   background: #fff;
 }
@@ -580,6 +582,7 @@ onUnmounted(function () {
   font-weight: 700;
   margin: 10px 0 8px;
 }
+
 .tour-card p {
   font-size: 14.5px;
   line-height: 1.55;
@@ -597,6 +600,7 @@ onUnmounted(function () {
   color: #fff;
   font-weight: 600;
 }
+
 .tour-next:hover {
   background: #475569;
 }
@@ -609,8 +613,8 @@ onUnmounted(function () {
   font-size: 13px;
   padding: 2px 0;
 }
+
 .tour-link:hover {
   color: #fff;
 }
-
 </style>

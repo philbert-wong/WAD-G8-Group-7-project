@@ -23,7 +23,7 @@ import { BASE_URL } from '../config.js'
 import { distanceMetres, PHG_NEAR_METRES } from '../utils/distance.js'
 
 // get the current route
-const route = useRoute() 
+const route = useRoute()
 
 // Pinia stores (Week 11): who is logged in, and the shortlist (so each card knows if it shows ☆ Save or ★ Saved)
 const auth = useAuthStore()
@@ -521,12 +521,7 @@ onMounted(loadPage)
 
     <SearchBar :text="searchText" @change-text="setSearchText" @search="search" />
     <div v-if="searchText && showSuggestions && suggestions.length > 0" class="list-group mb-3">
-      <button
-        v-for="town in suggestions"
-        :key="town"
-        @click="selectArea(town)"
-        class="btn btn-light w-100 text-start"
-      >
+      <button v-for="town in suggestions" :key="town" @click="selectArea(town)" class="btn btn-light w-100 text-start">
         {{ town }}
       </button>
     </div>
@@ -538,11 +533,8 @@ onMounted(loadPage)
 
     <!-- The one "create an account" message for a guest: shown when they have saved presets, and when they try
          to save a flat (which also scrolls the page up to here). The same words and look both times. -->
-    <div
-      v-if="showAccountPrompt"
-      class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2"
-      role="status"
-    >
+    <div v-if="showAccountPrompt"
+      class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2" role="status">
       <span>
         <RouterLink to="/createaccount"><strong>Create a free account</strong></RouterLink>
         to save flats and keep your presets on any device.
@@ -563,25 +555,16 @@ onMounted(loadPage)
             <b>{{ total }} flat(s)</b> match your filters
           </span>
 
-          <div class="results-controls d-flex justify-content-between align-items-center gap-2 ms-auto order-1 order-lg-2">
+          <div
+            class="results-controls d-flex justify-content-between align-items-center gap-2 ms-auto order-1 order-lg-2">
             <!-- Phones and tablets only (d-lg-none): opens the filter drawer -->
-            <button
-              type="button"
-              class="act-btn d-lg-none"
-              aria-controls="filter-drawer"
-              :aria-expanded="filtersOpen"
-              @click="openFilters"
-            >
+            <button type="button" class="act-btn d-lg-none" aria-controls="filter-drawer" :aria-expanded="filtersOpen"
+              @click="openFilters">
               ☰ Filters
             </button>
 
-            <select
-              id="sort-by"
-              v-model="sortBy"
-              class="form-select form-select-sm cosy-input w-auto"
-              aria-label="Sort"
-              @change="saveChoices"
-            >
+            <select id="sort-by" v-model="sortBy" class="form-select form-select-sm cosy-input w-auto" aria-label="Sort"
+              @change="saveChoices">
               <option value="match">Sort: Priority score</option>
               <option value="price">Sort: Cheapest first</option>
             </select>
@@ -591,16 +574,9 @@ onMounted(loadPage)
         <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
         <p v-else-if="loading" class="text-muted">Loading...</p>
 
-        <BlockCard
-          v-for="item in visibleResults"
-          :key="item.block.id"
-          :block="item.block"
-          :saved="shortlist.isSaved(item.block.id)"
-          :score="item.score"
-          :weights="getWeights(preferences)"
-          show-match
-          @toggle-save="toggleSave"
-        />
+        <BlockCard v-for="item in visibleResults" :key="item.block.id" :block="item.block"
+          :saved="shortlist.isSaved(item.block.id)" :score="item.score" :weights="getWeights(preferences)" show-match
+          @toggle-save="toggleSave" />
 
         <nav v-if="totalPages > 1" class="d-flex justify-content-center align-items-center gap-2 mb-4">
           <button class="act-btn" type="button" :disabled="page === 1" @click="goToPage(page - 1)">
@@ -626,20 +602,11 @@ onMounted(loadPage)
 
           <!-- Your Priorities first: the results are sorted by priority score by default, so it should not be
                hidden under the filters (mb-3: the gap before the filters card) -->
-          <PreferencesPanel
-            class="mb-3"
-            :preferences="preferences"
-            @change-ticked="changeTicked"
-            @change-level="changeLevel"
-          />
+          <PreferencesPanel class="mb-3" :preferences="preferences" @change-ticked="changeTicked"
+            @change-level="changeLevel" />
 
-          <FilterPanel
-            :filters="filterStore.filters"
-            :phg-place-name="parentName"
-            @change-filter="setFilter"
-            @search="searchFromFilters"
-            @clear="clearFilters"
-          />
+          <FilterPanel :filters="filterStore.filters" :phg-place-name="parentName" @change-filter="setFilter"
+            @search="searchFromFilters" @clear="clearFilters" />
         </div>
       </div>
     </div>
@@ -652,6 +619,7 @@ onMounted(loadPage)
   font-size: 14px;
   color: var(--muted);
 }
+
 .resbar b {
   color: var(--char);
 }
@@ -673,6 +641,7 @@ onMounted(loadPage)
 /* Phones and tablets (narrower than Bootstrap's lg, 992px): the sidebar becomes a drawer on the left.
    It waits just off the screen (translateX(-100%)) and slides in when it has the "open" class. */
 @media (max-width: 991.98px) {
+
   /* Results bar: Filters + Sort fill the first line (Filters left, Sort right), the count gets its own line */
   .results-controls,
   .results-count {
@@ -689,11 +658,14 @@ onMounted(loadPage)
     overflow-y: auto;
     background: var(--cream);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-    z-index: 1045; /* above the page and the navbar */
+    z-index: 1045;
+    /* above the page and the navbar */
     transform: translateX(-100%);
-    visibility: hidden; /* while closed, its buttons cannot be reached with the Tab key */
+    visibility: hidden;
+    /* while closed, its buttons cannot be reached with the Tab key */
     transition: transform 0.25s ease, visibility 0.25s;
   }
+
   .filter-drawer.open {
     transform: translateX(0);
     visibility: visible;
@@ -707,8 +679,4 @@ onMounted(loadPage)
     z-index: 1040;
   }
 }
-
-
-
-
 </style>

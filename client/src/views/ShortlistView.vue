@@ -47,7 +47,7 @@ function removeItem(item) {
 }
 
 // When the page opens, get the latest shortlist from the server (only when logged in)
-onMounted(function () {
+onMounted(()=>{
   if (auth.isLoggedIn) {
     shortlist.fetchShortlist()
   }
