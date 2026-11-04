@@ -20,8 +20,8 @@ const route = useRoute()
   <ProfileModal v-if="auth.needsProfile" />
 
   <main class="container pt-4 pb-4 pb-lg-5" :class="{ 'wide-page': route.path === '/map' }">
-    <!-- Help: the round "?" button bottom-right on every page, the tour of the page, and (first visit to a page)
-         a one-line "Take the tour?" invitation at the top of the page, in the page itself so it never covers it -->
+    <!-- Help: the round "?" button bottom-right on every page, and the tour of the page (it starts by itself the
+         first time you open a page, once the presets popup is closed) -->
     <GuideTour />
     <RouterView/>
   </main>
