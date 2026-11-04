@@ -437,9 +437,10 @@ a.act-btn {
   }
   .summary {
     flex-direction: row;
+    flex-wrap: wrap; /* not enough room for both (narrow card, bigger text): the score goes under the price */
     justify-content: space-between;
     align-items: flex-end;
-    gap: 20px;
+    gap: 12px 20px;
   }
   /* The price never breaks onto two lines; the score bar takes the rest of the width (up to 320px) */
   .price-block {
