@@ -1,340 +1,231 @@
 HDB RESALE FINDER
-IS216 Web Application Development II, Section G8, Group 7
+IS216 Web Application Development II, G8 Group 7
 ==========================================================================================
 
-Helps HDB resale buyers decide WHERE to look, using real transacted prices (last 12 months)
-instead of asking prices. You search blocks (not listings), filter them, compare cards with a
-personal priority score, look at each block's recent sales and nearby amenities, keep a shortlist
-with notes, work out an affordable budget, and see every block on a map.
+Buying a resale HDB flat usually starts with "which area can we afford, and what is near it?".
+Listing sites show asking prices one flat at a time. Our app shows what blocks actually sold for in
+the last 12 months, so buyers can compare areas, check what they can afford, and keep a shortlist.
 
-Data store:     MongoDB (with Mongoose). Local MongoDB or MongoDB Atlas.
-External APIs:  OneMap (Singapore Land Authority): place search and walking routes to the nearest MRT.
-                data.gov.sg: live HDB resale prices for a block's price details.
-                OpenStreetMap: the map tiles on the Map page.
-Front end:      Vue 3 (Vite), Vue Router, Pinia, axios, Bootstrap 5, Leaflet (map), Chart.js (price chart)
-Back end:       Node.js, Express 5, Mongoose, JSON Web Tokens + bcrypt (login)
+What you can do:
+  - search blocks by town, street, block or postal code, and filter by budget, flat type and lease
+  - rank flats by what matters to you (schools, MRT, hawker centres, parks)
+  - see each block's recent sales, a price chart and the nearest amenities
+  - see every block on a map, including a 4 km circle around your parents (for the PHG grant)
+  - work out a maximum budget with HDB grants and an HDB loan, then search with it
+  - save flats, add notes, and compare 2 to 3 of them side by side
+
+Built with:
+  Front end   Vue 3 (Vite), Vue Router, Pinia, axios, Bootstrap 5, Leaflet (map), Chart.js (chart)
+  Back end    Node.js, Express 5, Mongoose, JWT + bcrypt for login
+  Data store  MongoDB (local, or MongoDB Atlas)
+  APIs        data.gov.sg (HDB resale prices), OneMap (address search and walking routes),
+              OpenStreetMap (map tiles)
 
 
 ------------------------------------------------------------------------------------------
 1. LINKS
 ------------------------------------------------------------------------------------------
 
-Deployed app:   [TODO: add the URL of the first page once deployed]
-Git repository: https://github.com/philbert-wong/WAD-G8-Group-7-project   [TODO: confirm it is shared with the teaching team]
-Video:          [TODO: add the YouTube link]
+Deployed app:   [fill in]
+Git repository: https://github.com/philbert-wong/WAD-G8-Group-7-project
+Video:          [fill in]
 
 
 ------------------------------------------------------------------------------------------
 2. SET UP (once)
 ------------------------------------------------------------------------------------------
 
-You need:
-  - Node.js 22 or newer
-  - pnpm  (install it once with:  npm install -g pnpm)
-  - MongoDB, either running on your own computer, or a free MongoDB Atlas database
+You need Node.js 22 or newer, pnpm (npm install -g pnpm) and MongoDB (on your computer or Atlas).
 
-The project has two parts, each in its own folder with its own package.json:
-  server/   the Express API      (http://localhost:8000)
-  client/   the Vue website      (http://localhost:5173)
+The app has two parts:
+  server/   the API       http://localhost:8000
+  client/   the website   http://localhost:5173
 
-Step 1. Install the server
-    cd server
-    pnpm install
+1. Install the server
+     cd server
+     pnpm install
 
-Step 2. Settings for the server
-    In the server folder, copy config.env.example to a new file called config.env, then edit it.
-    Every line is optional:
-      DB=...              MongoDB Atlas connection string. Leave it out to use MongoDB on this computer
-                          (mongodb://127.0.0.1:27017/check-in).
-      JWT_SECRET=...      any long random text (used to sign login tokens)
-      PORT=8000           port for the API (default 8000)
-      ONEMAP_EMAIL=...    a OneMap account (free at onemap.gov.sg). Needed for places and postal codes
-      ONEMAP_PASSWORD=... in the search box and the map's address and PHG search. Without it, those place
-                          searches show an error. (The walking routes are already saved in the data.)
-    config.env is never committed to git (it is in .gitignore).
+2. Make the settings file
+     Copy server/config.env.example to server/config.env and fill it in:
+       DB=...               MongoDB Atlas connection string (leave out to use MongoDB on this computer)
+       JWT_SECRET=...       any long random text
+       PORT=8000
+       ONEMAP_EMAIL=...     a free OneMap account (onemap.gov.sg). Needed to search places and postal
+       ONEMAP_PASSWORD=...  codes that are not in our data, and for the parents' postal code (PHG).
+     config.env is in .gitignore, so it is never uploaded.
 
-Step 3. Load the data into MongoDB
-    (still in the server folder)
-    pnpm seed
-    This loads server/data/blocks.json and amenities.json: 1,306 block + flat type cards (974 blocks)
-    in all 26 HDB towns, and 930 amenities.
+3. Load the data (still in server/)
+     pnpm seed
+   This loads 1,306 block + flat type records (974 blocks, all 26 HDB towns) and 930 amenities.
 
-Step 4. Install the website
-    cd ../client
-    pnpm install
+4. Install the website
+     cd ../client
+     pnpm install
 
 
 ------------------------------------------------------------------------------------------
 3. RUN
 ------------------------------------------------------------------------------------------
 
-Use two terminals.
-
-Terminal 1 (API):
-    cd server
-    pnpm dev
-    Wait for "MongoDB connected successfully" and "Server running at http://localhost:8000/".
-    (pnpm dev uses nodemon, which restarts the server when a server file is saved.
-     pnpm start runs it without nodemon.)
-
-Terminal 2 (website):
-    cd client
-    pnpm dev
-    Open http://localhost:5173
+Terminal 1:   cd server  then  pnpm dev
+              wait for "Server running at http://localhost:8000/"
+Terminal 2:   cd client  then  pnpm dev
+              open http://localhost:5173  (the first page is the Search page)
 
 Pages:
-    /            Search: one search box (town, street, block address, postal code or any place: our own
-                 data first, then OneMap for flats within 1 km of a place), filters (budget, flat type,
-                 remaining lease), Your Priorities and the priority score, block cards with price details,
-                 nearest amenities and "Show on map"
-    /map         Map: one dot per block, coloured by price or by priority score ("Colour dots by"),
-                 with the same filters and Your Priorities as Search; amenity layers (MRT, hawker,
-                 park, school); an address search; the PHG (Proximity Housing Grant) layer (type your
-                 parents' postal code to see only blocks within 4 km); click a dot for its flat types
-                 and its nearest amenities
-    /CPFCal      Affordability: calculator for a maximum budget, grants, PHG checker, "use this budget"
-    /compare     Compare 2 or 3 shortlisted flats side by side (needs login)
-    /shortlist   Your saved flats with notes (needs login)
-    /login       Log in or create an account
+  /            Search
+  /map         Map
+  /CPFCal      Affordability calculator
+  /compare     Compare saved flats (needs an account)
+  /shortlist   Saved flats with notes (needs an account)
+  /profile     Your saved answers (needs an account)
+  /login       Log in or create an account
 
 
 ------------------------------------------------------------------------------------------
-4. ACCOUNTS AND PASSWORDS
+4. ACCOUNTS
 ------------------------------------------------------------------------------------------
 
-There are no built-in accounts. Create one on the Login page (any email, password of at least
-8 characters). The shortlist, Compare and saved "What matters to you?" choices need an account.
+There is no built-in account. Create one on the Login page with any email and a password of at
+least 8 characters.
 
-OneMap: place search and walking routes need a OneMap login in server/config.env (see section 2).
-    [TODO (team decision): either give a shared OneMap account for marking here, or leave this
-     note so markers use their own free account.]
+Demo account on the deployed app:   email [fill in]   password [fill in]
+OneMap account for marking:         [fill in, or use your own free account]
 
 
 ------------------------------------------------------------------------------------------
-5. TEST
+5. TESTING
 ------------------------------------------------------------------------------------------
 
-Automated tests (server API):
-    cd server
-    pnpm test
+There are three kinds of tests, as in Week 10.
 
-    46 tests in server/tests/, run with Vitest and Supertest. Before the tests, the test setup
-    (server/tests/start-test-server.js) starts a throwaway MongoDB in memory and starts our real
-    server.js on port 8001 pointed at it, so the tests never touch your own database and can run
-    while pnpm dev is running. (The first run may take a while: it downloads a MongoDB program for
-    the in-memory database.)
+A. Unit and component tests (Vitest + Vue Test Utils) - client
+     cd client
+     pnpm test
+   103 tests in client/src/**/__tests__/ :
+     utils:       affordability maths (18), priorities (7), score words (5)
+     components:  BlockCard (11), BlockCard + MatchScore together (7), FilterPanel (15),
+                  PreferencesPanel (8), ProfileForm (13), SearchBar (5), CollapsiblePanel (6), PhgCard (8)
 
-    What they cover:
-      blocks.test.js     (19)  search and every filter, wrong input (400), nearby search (geospatial),
-                               one block, 404s, sales summary and price per m2, nearest amenities
-      auth.test.js       (5)   register, duplicate email (409), short password (400),
-                               login, wrong password (401)
-      shortlist.test.js  (11)  no token (401), create, read, update note, delete, no duplicates (409),
-                               missing blockId (400), unknown ids (404), note too long (400)
-      score.test.js      (11)  match score maths, preference weights, remaining lease, distance
+B. Server tests (Vitest + Supertest) - API
+     cd server
+     pnpm test
+   71 tests in server/tests/. They start their own MongoDB in memory and our server on port 8001,
+   so they never touch your real database. (The first run downloads MongoDB, so it is slower.)
+     auth (23)           register, login, wrong password, preferences, profile
+     blocks (21)         search, every filter, wrong input (400), nearby, sales, amenities, 404s
+     shortlist (11)      no token (401), create, read, change note, delete, duplicates (409)
+     score (11)          priority score maths and weights
+     affordability (5)   save and load the calculator answers, refuse wrong values (400)
 
-End-to-end tests:
-    [TODO: Playwright end-to-end tests of the main user journeys, with the command to run them.]
+C. End-to-end tests (Playwright) - the whole app in a real browser
+     First start the server and the website (section 3). Then:
+       cd e2e
+       pnpm install
+       pnpm exec playwright install chromium     (once)
+       pnpm exec playwright test
+       pnpm exec playwright show-report          (opens the results in the browser)
+   33 tests in e2e/tests/. Each test has three parts: setup, actions, assert.
+   They run in Chrome at laptop size (1280 x 720), and the tests in tests/mobile/ at phone size
+   (iPhone 6, 375 x 667).
 
-Manual check of the main user journeys (with both terminals running):
-    1. Search: type "Bishan", change the budget slider and flat type, press Search: cards update.
-    2. Same search box: type "Blk 314 Ang Mo Kio Ave 3" (its card), then "560314" or "Bishan MRT":
-       flats within 1 km of that place appear, still following the filters (needs OneMap login).
-    3. Open a card's price details: recent sales, median price, chart; nearest amenities and walk time.
-       Search "Ang Mo Kio" with Sort: Priority score and only Transport ticked: the "min walk" goes up down the list.
-    4. Click Shortlist while logged out: you are sent to Login; log in: you come back to Shortlist.
-    5. On Search press Save on 2 flats: the navbar shows "Shortlist (2)". Add a note on Shortlist.
-    6. Compare: tick the 2 flats and see them side by side.
-    7. Affordability: fill in the steps, then "use this budget": Search opens with that budget.
-    8. Map: dots coloured by price. Click 4-Rm in the filters: the dots change. Click a dot: its popup
-       and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
-    9. Map: tick "MRT / LRT stations": blue squares appear; untick: they go. Switch "Colour dots by" to
-       Colour dots by Priority score: dots change colour (red = weak ... blue/purple = excellent), using Your Priorities.
-   10. Map: type "560314" in the PHG box: a 4 km circle, and only the blocks inside it remain.
-       Type "Bishan MRT" in the search bar above the map: the map jumps there with a marker.
-   11. Refresh the page: you stay logged in. Logout: the shortlist count disappears.
+     auth.spec.js           create an account; common password refused; passwords do not match;
+                            wrong password; log in with an existing account; after a logout
+     search.spec.js         search a town; 4-room filter; nothing found; the account message
+                            for visitors who press Save
+     shortlist.spec.js      save a flat; keep a note; remove a flat
+     compare.spec.js        compare two saved flats; ask for 2 saved flats first
+     calculator.spec.js     max price and Apply Budget to Search; income needed; saved answers for a
+                            logged-in user; PHG checker (list, not found, empty box)
+     map.spec.js            open the map; "Show on map" from a flat
+     price-details.spec.js  open and close a flat's price details
+     profile.spec.js        save new answers; visitors are sent to log in
+     mobile/                filter drawer, card buttons, compare and PHG checker on a phone
+
+   Four tests (the PHG checker lists and the "nothing found" search) look up places on OneMap,
+   so they need the OneMap account in server/config.env.
+
+D. Manual check (both terminals running)
+     1. Search "Bishan", move the budget slider, pick 4-Rm: the flats update.
+     2. Open a flat's price details: recent sales, median and chart.
+     3. Press Save while logged out: you are asked to log in. Log in and save 2 flats.
+     4. Compare: tick both flats.
+     5. Affordability: fill in step 1, go to step 3, press Apply Budget to Search.
+     6. Map: click a dot to see the block; switch the colours to Priority score.
+     7. Refresh: you stay logged in. Logout: the shortlist count goes away.
 
 
 ------------------------------------------------------------------------------------------
 6. FOLDERS
 ------------------------------------------------------------------------------------------
 
-client/                     the website (made with pnpm create vue@latest, like class)
-  index.html, vite.config.js, package.json
-  src/main.js               starts Vue: Bootstrap, our design (assets/cosy.css), Pinia, the router
-  src/App.vue               page shell: navbar + <RouterView />
-  src/router/index.js       the pages, and the navigation guard for pages that need a login
-  src/stores/               Pinia stores: auth.js (who is logged in), shortlist.js (saved flats),
-                            filters.js (flat type, budget and lease, shared by Search and the Map),
-                            mapFocus.js (the block "Show on map" should zoom to)
-  src/views/                SearchView, MapView, CPFCalView, CompareView, ShortlistView, LoginView
-  src/components/           NavBar, SearchBar, FilterPanel, PreferencesPanel, BlockCard, PriceDetails,
-                            ShortlistItem, PhgChecker
-  src/components/map/       the map page's sidebar: MapSearchBar, SelectedBlockCard, MapLegend,
-                            CollapsiblePanel, PhgCard
-  src/utils/                matchScore.js (match score), affordability.js (calculator maths),
-                            affordabilityRules.js (every grant / loan number, with its source)
-  src/assets/cosy.css       the site's design
-
-server/                     the API (same layout as the class's blog-with-mongodb server)
-  server.js                 starts everything: config.env, Express, cors, routes, MongoDB, listen
-  routes/                   which address runs which function (blocks-, shortlist-, auth-, amenities-routes.js)
-  controllers/              the functions behind each address (blocks-, shortlist-, auth-, amenities-controller.js)
-  models/                   MongoDB data shapes: block-, amenity-, shortlist-, user-model.js
-  middleware/               requireAuth.js (login check), errorHandler.js (last safety net)
-  data/                     blocks.json and amenities.json (the real data)
-  seed.js                   loads data/ into MongoDB (pnpm seed)
-  tests/                    automated tests (pnpm test)
-  config.env.example        settings template (copy to config.env)
-
-prep/                       one-time scripts that BUILT server/data/*.json from data.gov.sg + OneMap
-                            (its own small project; the app does not run these, see section 9)
+client/src/
+  views/          the pages (Search, Map, CPFCal, Compare, Shortlist, Profile, Login)
+  components/     parts of pages (NavBar, FilterPanel, BlockCard, PriceDetails, PhgChecker, ...)
+  stores/         Pinia stores: auth, shortlist, filters, mapFocus
+  router/         the routes, and the guard for pages that need an account
+  utils/          matchScore.js, affordability.js, affordabilityRules.js (every grant and loan number,
+                  with its source)
+server/
+  server.js       starts Express and MongoDB
+  routes/, controllers/, models/, middleware/   same layout as the class's Express + MongoDB example
+  data/           blocks.json and amenities.json
+  seed.js         loads data/ into MongoDB
+  tests/          server tests
+e2e/              Playwright tests
+prep/             one-time scripts that built server/data/ from data.gov.sg and OneMap
 
 
 ------------------------------------------------------------------------------------------
-7. API (server, http://localhost:8000)
+7. API (http://localhost:8000)
 ------------------------------------------------------------------------------------------
 
-Errors always look like  { "message": "..." }
-  400 = a value is wrong (e.g. maxPrice=abc)   401 = not logged in   404 = not found
-  409 = already exists   500 = something went wrong on the server
-[login] = needs the header  Authorization: Bearer <token>  (the token comes from register / login)
+Errors look like { "message": "..." }. [login] = needs the header Authorization: Bearer <token>.
 
-GET    /api/health                   { status: "ok" }
-GET    /api/blocks                   search + filter. Query: q, flatType, maxPrice, minLease.
-                                     q matches a town, street or block, or a full address such as
-                                     "Blk 314 Ang Mo Kio Avenue 3" (full street words like Avenue / Bukit
-                                     also match HDB's short forms AVE / BT).
-                                     Returns { total, results: [card] }, cheapest first
-GET    /api/blocks/area              the town names (for the search suggestions)
-GET    /api/blocks/nearby            blocks near a point. Query: lat, lng (required), radius in metres
-                                     (default 1000, max 5000), limit (default 20, max 50), and the
-                                     optional filters flatType, maxPrice, minLease (same as the search).
-                                     Each result also has distance (metres)
-GET    /api/blocks/place             OneMap place search. Query: q (address, postal code or place).
-                                     Returns { name, lat, lng }. 404 if nothing is found
-GET    /api/blocks/:id               one block card
-GET    /api/blocks/:id/sales         the stored recent sales: { count, lowest, highest, medianPrice,
-                                     medianPricePerSqm, sales: [{ month, storey, areaSqm, price,
-                                     pricePerSqm }] }, newest first
-GET    /api/blocks/:id/live-sales    the same, fetched live from data.gov.sg; source is "live", or
-                                     "stored" when data.gov.sg cannot be reached
-GET    /api/blocks/:id/amenities     nearest MRT, hawker centre, park and school with distance (metres)
-GET    /api/blocks/:id/walk-to-mrt   (no page uses it now: the walks are saved in the data by prep/addWalks.js)
-                                     OneMap walking route to the nearest MRT:
-                                     { minutes, metres, source: "onemap" }, or { minutes, source: "estimate" }
-GET    /api/blocks/:id/estimate      price estimate from the regression model (prep/priceRegression.ipynb,
-                                     saved in server/data/priceModel.json). Query: storey (1 to 75) and
-                                     area in sqm (30 to 250), both optional (default: the block's latest sale).
-                                     Returns { blockId, estimate } rounded to $1,000. 400 for an invalid
-                                     value or an unsupported flat type, 404 if there are no sales.
-GET    /api/amenities                every MRT station/LRT Station, hawker centre, park and primary school (for the map).
-                                     Query: category (optional: mrt, hawker, park or school; anything else 400).
-                                     Returns { total, results: [{ name, category, lat, lng }] }
-POST   /api/auth/register            body { email, password (8+ characters) }. Returns { token, user: { id, email } } (201)
-POST   /api/auth/login               body { email, password }. Returns { token, user: { id, email } }
-GET    /api/auth/preferences         [login] the saved "What matters to you?" choices: { preferences }
-PUT    /api/auth/preferences         [login] replace them. Body { preferences: { panel, sortBy } }
-GET    /api/shortlist                [login] your saved items, newest first: [{ id, note, createdAt, block: card }]
-POST   /api/shortlist                [login] save a block. Body { blockId, note (optional) } (201)
-PATCH  /api/shortlist/:id            [login] change the note. Body { note }
-DELETE /api/shortlist/:id            [login] remove an item (204, no body)
-
-A block card looks like:
-  { id, block: "233C", street: "SUMANG LANE", town: "PUNGGOL", flatType: "4 ROOM",
-    price: 680000 (median), priceLow: 650000, priceHigh: 720000, salesCount: 3,
-    remainingLease: 91, mrtName: "Punggol MRT", mrtWalkMinutes: 4,
-    distances: { school, mrt, hawker, park } (metres), lat: 1.405, lng: 103.903 }
+GET    /api/blocks                 search. Query: q, flatType, maxPrice, minLease
+GET    /api/blocks/area            town names
+GET    /api/blocks/nearby          blocks near lat, lng (radius in metres)
+GET    /api/blocks/place           OneMap place search. Query: q
+GET    /api/blocks/:id             one block
+GET    /api/blocks/:id/sales       its recent sales
+GET    /api/blocks/:id/live-sales  its sales from data.gov.sg (falls back to the stored ones)
+GET    /api/blocks/:id/amenities   nearest MRT, hawker centre, park and school
+GET    /api/blocks/:id/estimate    price from our regression model. Query: storey, area
+GET    /api/amenities              amenities for the map. Query: category
+POST   /api/auth/register          { email, password }
+POST   /api/auth/login             { email, password }
+GET    /api/auth/preferences       [login] saved priorities
+PUT    /api/auth/preferences       [login]
+GET    /api/auth/profile           [login] saved answers (town, parents' postal code, filters)
+PUT    /api/auth/profile           [login]
+GET    /api/affordability          [login] saved calculator answers
+PUT    /api/affordability          [login]
+GET    /api/shortlist              [login] saved flats
+POST   /api/shortlist              [login] { blockId, note }
+PATCH  /api/shortlist/:id          [login] { note }
+DELETE /api/shortlist/:id          [login]
 
 
 ------------------------------------------------------------------------------------------
-8. HOW SOME PARTS WORK
+8. DATA AND LIMITS
 ------------------------------------------------------------------------------------------
 
-Geospatial search
-  Every block and amenity stores its position as a GeoJSON point [longitude, latitude] with a
-  2dsphere index, so MongoDB's $geoNear can sort by distance:
-    /api/blocks/nearby uses $geoNear on blocks (with a maximum distance),
-    /api/blocks/:id/amenities uses $geoNear on amenities (the closest one of each category).
-  The walk to the nearest MRT / LRT is a REAL walking route: prep/addWalks.js asked OneMap's walking
-  routes once for every block (to its nearest station, and to the second-nearest when that is almost
-  as close) and saved the shortest walk in blocks.json. The seed turns it into the station name,
-  the walking minutes (walking metres / 80 metres per minute) and the MRT distance of the priority score,
-  so all three come from the same walk. (A block without a route falls back to straight-line x 1.3.)
+Data: HDB resale sales from the last 12 months (data.gov.sg), the 40 busiest blocks in each of the
+26 towns. Coordinates from OneMap; MRT/LRT stations, hawker centres, parks and schools from
+data.gov.sg. The scripts in prep/ built server/data/ once (see the comment at the top of each
+script); after rebuilding, run pnpm seed again.
 
-Priority score ("Your Priorities"; called matchScore in the code)
-  The seed script stores the distance from each block to its nearest school, hawker centre and park
-  (straight line) and MRT / LRT station (walking route, see above). The browser scores every card itself
-  (client/src/utils/matchScore.js), so changing the panel updates the scores straight away.
-    Sub-score per category = 100 x (max - distance) / max, or 0 if further than max
-    Max distances: school 1000 m, MRT 1300 m walking (about 1000 m in a straight line), hawker 800 m, park 800 m
-    Weights: not ticked 0, Low 1, Moderate 2, Important 3, Very 4, Extremely 5
-    Score = (sum of weight x sub-score) / (sum of weights), rounded. All weights 0 = no score
-
-The map (Leaflet + OpenStreetMap tiles)
-  Search and the map share their filters (flat type, budget, lease) through the Pinia filters store, so a
-  change on one page also applies on the other. The map loads the blocks with them (no search text: it
-  always shows the whole island), then groups the cards by address, so each
-  block is ONE dot (its flat types would otherwise sit on top of each other). A dot's colour is the
-  price band of its cheapest flat type, or its priority score on a rainbow scale (red 0 ... purple 100).
-  The PHG layer looks up the parents' address with OneMap and keeps only the blocks within 4 km
-  (Leaflet's map.distance, straight-line), on top of the filters. Amenities come from /api/amenities
-  and are drawn as small squares in their own layer.
-
-Login and shared state
-  Register / login return a token (JWT, valid 7 days). The Pinia auth store keeps it in the
-  browser's localStorage (so a refresh keeps you logged in) and sends it with every request.
-  The Pinia shortlist store is shared by Search, Shortlist, Compare and the navbar count, and the
-  filters store by Search and the Map.
-  A navigation guard sends logged-out users from /shortlist and /compare to /login and back.
-  The server checks the token again on every shortlist and preferences request.
+Limits:
+  - Not every block in Singapore, only the 40 busiest per town.
+  - The walk to the MRT is a real walking route; schools, hawker centres and parks use straight-line
+    distance.
+  - Grant and loan numbers were checked against hdb.gov.sg / cpf.gov.sg in Nov 2026 (sources in
+    client/src/utils/affordabilityRules.js). The calculator gives an estimate, not an HFE letter.
+  - Login lasts 7 days.
 
 
 ------------------------------------------------------------------------------------------
-9. DATA AND REFRESHING IT (optional)
+9. USE OF AI TOOLS
 ------------------------------------------------------------------------------------------
 
-Real HDB resale sales from the last 12 months (data.gov.sg), grouped per block and flat type,
-for up to the 40 busiest blocks in each of the 26 HDB towns of Singapore.
-Coordinates come from OneMap; MRT stations, hawker centres, parks and primary schools from data.gov.sg.
-LRT stations (Punggol, Sengkang and Bukit Panjang LRT) are stored with the MRT stations (category "mrt"), so the
-nearest-station walk and the priority score's Transport part count them too.
-
-The prep/ scripts built the two JSON files once. To rebuild them:
-    cd prep
-    pnpm install
-    node makeData.js "/path/to/resale-prices.csv"   rebuilds both files from the resale CSV
-                                                     (download it from data.gov.sg). Looks up coordinates
-                                                     on OneMap (cached in prep/geocode-cache.json).
-    node addSales.js "/path/to/resale-prices.csv"   only refreshes the sales and price ranges of the
-                                                     blocks already in blocks.json (no OneMap calls)
-    node addLrt.js                                  adds the Punggol, Sengkang and Bukit Panjang LRT stations to
-                                                     amenities.json (run it again after makeData.js)
-    node addWalks.js                                measures each block's real walk to its nearest station
-                                                     with OneMap walking routes (needs the OneMap login in
-                                                     server/config.env; about 30 minutes the first time,
-                                                     cached in prep/walk-cache.json). Run it last.
-Then run  pnpm seed  in the server folder.
-
-
-------------------------------------------------------------------------------------------
-10. KNOWN LIMITS
-------------------------------------------------------------------------------------------
-
-- Only the 40 busiest blocks in each of the 26 towns (974 blocks), not every block in Singapore.
-- The priority score uses straight-line distances for schools, hawker centres and parks (only the MRT uses a
-  real walking route). Walking routes end at the station's centre point, not its nearest exit.
-- Distances to an amenity are measured to ONE point per amenity (from the NParks / data.gov.sg
-  datasets). Big parks are split into a few sections with their own points (e.g. Bishan-Ang Mo Kio
-  Park), but a block on a park's edge can still be closer to the park than the distance shown.
-- The login token lasts 7 days; after that, log in again.
-- The affordability numbers (grants, loan limits) must be checked against hdb.gov.sg / cpf.gov.sg;
-  each one is listed with its source in client/src/utils/affordabilityRules.js.
-- OneMap features need a OneMap account in server/config.env.
-
-
-------------------------------------------------------------------------------------------
-11. AI USE DECLARATION (brief FAQ 20)
-------------------------------------------------------------------------------------------
-
-[TODO: each member writes the parts they relied on AI/LLM for.]
+[each member: fill in]

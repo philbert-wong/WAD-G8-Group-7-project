@@ -52,15 +52,17 @@ function onBudgetChange(event) {
 }
 
 // A flat type chip was clicked: set it and search straight away.
+// 'live' tells the page this is an instant update: on a phone the filter drawer stays open, so more filters can
+// be changed (only the Apply button closes it)
 function chooseFlatType(value) {
   emit('change-filter', 'flatType', value)
-  emit('search')
+  emit('search', 'live')
 }
 
 // The PHG switch was flipped: send true / false up, and apply it straight away (like the flat type chips)
 function onPhgChange(event) {
   emit('change-filter', 'phg', event.target.checked)
-  emit('search')
+  emit('search', 'live')
 }
 
 // The "Apply filters" button

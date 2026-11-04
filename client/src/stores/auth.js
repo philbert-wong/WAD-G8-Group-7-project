@@ -115,7 +115,7 @@ export const useAuthStore = defineStore('auth', function () {
       // The account's copy is only used on a device that has none yet.
       if (profile.value === null) {
         profile.value = response.data.profile
-        useFiltersStore().applyProfile(profile.value)
+        useFiltersStore().applyProfile(profile.value, true)
       } else if (response.data.profile === null) {
         // Just signed up (or an account that never had presets): copy the presets entered on this device to the account
         await axios.put(`${BASE_URL}/api/auth/profile`, { profile: profile.value })
@@ -235,7 +235,7 @@ export const useAuthStore = defineStore('auth', function () {
     // The next person to log in on this computer starts with their own profile and the normal filters
     profile.value = null
     profileLoaded.value = false
-    useFiltersStore().clearFilters()
+    useFiltersStore().resetToDefaults()
     // ...and is asked the presets popup again straight away (not only after a refresh)
     presetsAsked.value = false
     presetsSkipped.value = false
@@ -261,7 +261,7 @@ export const useAuthStore = defineStore('auth', function () {
   if (savedPresets !== null) {
     try {
       profile.value = JSON.parse(savedPresets)
-      useFiltersStore().applyProfile(profile.value)
+      useFiltersStore().applyProfile(profile.value, true)
     } catch (e) {
       localStorage.removeItem('presets') // not valid JSON: forget it
     }

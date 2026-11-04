@@ -93,3 +93,32 @@ test('should tell a visitor without an account that saving a flat needs one', as
   await expect(page.getByText('to save flats and keep your presets on any device')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Create a free account' })).toBeVisible();
 });
+
+test('should keep the chosen filters after the page is refreshed', async ({ page }) => {
+  // setup
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await page.getByRole('button', { name: 'Skip tour' }).click();
+  await expect(page.getByText('flat(s) match your filters')).toBeVisible();
+
+  // actions: choose 4-room flats, then refresh the page
+  await page.getByRole('button', { name: '4-Rm' }).click();
+  await expect(page.getByText('flat(s) match your filters')).toBeVisible();
+  await page.reload();
+
+  // assert: 4-room is still the chosen flat type, and no 3-room flat is shown
+  await expect(page.getByText('flat(s) match your filters')).toBeVisible();
+  await expect(page.getByText('3 ROOM')).not.toBeVisible();
+});
+
+test('should use the budget from the calculator once, then take it out of the address', async ({ page }) => {
+  // setup: open Search the way the calculator's "Apply budget" button does
+  await page.goto('/?maxPrice=500000');
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await page.getByRole('button', { name: 'Skip tour' }).click();
+
+  // assert: the budget is applied ...
+  await expect(page.getByText('$500,000').first()).toBeVisible();
+  // ... and the address no longer has ?maxPrice, so a refresh cannot put an old budget back
+  expect(page.url()).not.toContain('maxPrice');
+});

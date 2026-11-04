@@ -6,12 +6,10 @@
 // "Skip for now" closes it without using what is typed above, keeps the saved presets, and opens Search.
 // A guest can open it again any time with the "Presets" button in the top bar (NavBar.vue): then it says
 // "Your presets", saves with "Save presets", closes with "Cancel", and stays on the page they are on.
-import { useRouter } from 'vue-router'
 import ProfileForm from './ProfileForm.vue'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
-const router = useRouter()
 
 // Opened from the "Presets" button (true), or the first-visit welcome (false)..
 // Read once: App.vue makes a new popup each time it opens.
@@ -22,18 +20,16 @@ const reopened = auth.presetsOpen
 // auth.presetsVersion and reload with them). Creating an account later copies them to the account.
 async function onSave(answers) {
   await auth.saveProfile(answers)
-  if (!reopened) {
-    router.push('/')
-  }
+  // Stay on the page the visitor opened (e.g. the login page for Compare), so they do not lose it.
+  // On the first page ('/') the Search page reloads with the new presets by itself.
 }
 
 // "Skip for now": close the popup (the form's answers are not used) and go to Search.
 // "Cancel" (opened from the button): just close it, on the same page.
 function onSkip() {
   auth.skipPresets()
-  if (!reopened) {
-    router.push('/')
-  }
+  // Stay on the page the visitor opened (e.g. the login page for Compare), so they do not lose it.
+  // On the first page ('/') the Search page reloads with the new presets by itself.
 }
 </script>
 

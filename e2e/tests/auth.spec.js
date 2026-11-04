@@ -101,3 +101,26 @@ test('should ask the next visitor what they are looking for after a logout', asy
   // assert
   await expect(page.getByRole('button', { name: 'Skip for now' })).toBeVisible();
 });
+
+test('should log in with an account that already exists', async ({ page }) => {
+  // setup: make an account, log out, and go back to the login page
+  const email = 'e2e-' + Date.now() + '-' + Math.floor(Math.random() * 1000000) + '@example.com';
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await page.getByRole('button', { name: 'Skip tour' }).click();
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('button', { name: 'Create account' }).click();
+  await page.locator('#login-email').fill(email);
+  await page.locator('#login-password').fill('goodpass123');
+  await page.locator('#login-confirm').fill('goodpass123');
+  await page.locator('#login-confirm').press('Enter');
+  await page.getByRole('button', { name: 'Logout' }).click();
+
+  // actions: log in with the same email and password
+  await page.locator('#login-email').fill(email);
+  await page.locator('#login-password').fill('goodpass123');
+  await page.locator('#login-password').press('Enter');
+
+  // assert: the user is logged in again
+  await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
+});

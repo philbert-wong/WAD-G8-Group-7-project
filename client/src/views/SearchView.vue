@@ -16,14 +16,15 @@ import {
   matchScore,
   MAX_DISTANCES,
 } from '../utils/matchScore.js'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 
 // Our Express server's address, from one shared place (see config.js; it changes for deployment)
 import { BASE_URL } from '../config.js'
 import { distanceMetres, PHG_NEAR_METRES } from '../utils/distance.js'
 
 // get the current route
-const route = useRoute() 
+const route = useRoute()
+const router = useRouter()
 
 // Pinia stores (Week 11): who is logged in, and the shortlist (so each card knows if it shows ☆ Save or ★ Saved)
 const auth = useAuthStore()
@@ -99,7 +100,16 @@ async function keepNearParents() {
     }
   } catch (error) {
     parentName.value = ''
-    errorMessage.value = 'Could not find the parents postal code "' + postal + '", so the PHG filter is not used.'
+    // Switch the 4 km filter off, so the list never looks filtered when it is not
+    filterStore.setFilter('phg', false)
+    if (error.response && error.response.status >= 500) {
+      errorMessage.value =
+        'We could not find your parents\' address right now, so the "within 4 km of my parents" filter is off ' +
+        'and all matching flats are shown. Please try again later.'
+    } else {
+      errorMessage.value =
+        'We could not find the postal code "' + postal + '", so the "within 4 km of my parents" filter is off.'
+    }
     return
   }
   parentName.value = parentSpot.name
@@ -152,7 +162,7 @@ const placeName = ref('')
 // Flats near any place in Singapore: our server asks OneMap where the place is (/api/blocks/place),
 // then finds our flats within 1 km of it that fit the filters (/api/blocks/nearby).
 // Errors are caught by search() below.
-async function searchNearPlace(text) {
+async function searchNearPlace(text, thisSearch) {
   const placeResponse = await axios.get(`${BASE_URL}/api/blocks/place`, { params: { q: text } })
   const place = placeResponse.data
 
@@ -166,6 +176,10 @@ async function searchNearPlace(text) {
     },
   })
 
+  // A newer search started while we were waiting: leave its results alone
+  if (thisSearch !== searchNumber) {
+    return
+  }
   results.value = nearbyResponse.data.results
   total.value = nearbyResponse.data.total
   placeName.value = place.name
@@ -195,7 +209,13 @@ watch(
 //   1. Search our own data: town, street, block, full address ("Blk 314 Ang Mo Kio Ave 3") or postal code ("560323")
 //   2. Our data has nothing, but something was typed (e.g. "Northpoint City", or a condo's postal code):
 //      ask OneMap, flats near it
+// Every search gets the next number. A slow, older search that answers after a newer one must not
+// replace the newer results, so each search only shows its answer if it is still the newest one.
+let searchNumber = 0
+
 async function search() {
+  searchNumber = searchNumber + 1
+  const thisSearch = searchNumber
   loading.value = true
   errorMessage.value = ''
   placeName.value = ''
@@ -213,20 +233,32 @@ async function search() {
       minLease: filterStore.filters.minLease,
     }
     const response = await axios.get(`${BASE_URL}/api/blocks`, { params: params })
+    if (thisSearch !== searchNumber) {
+      return // a newer search has started: its answer is the one to show
+    }
     if (response.data.total === 0 && typed !== '') {
-      await searchNearPlace(typed)
+      await searchNearPlace(typed, thisSearch)
     } else {
       results.value = response.data.results
       total.value = response.data.total
     }
+    if (thisSearch !== searchNumber) {
+      return
+    }
     await keepNearParents()
   } catch (error) {
+    if (thisSearch !== searchNumber) {
+      return // an older search failed after a newer one started: ignore it
+    }
     // Nothing to show: empty the list, so old cards do not stay under the message
     results.value = []
     total.value = 0
     if (error.response && error.response.status === 404) {
       // OneMap could not find the place either
       errorMessage.value = 'Nothing found for "' + typed + '". Try a town, a street, a block address or a postal code.'
+    } else if (error.response && error.response.status >= 500 && typed !== '') {
+      // The place lookup (OneMap) is not working right now: say so in plain words, and what still works
+      errorMessage.value = 'We could not look up "' + typed + '" right now. Try a town, a street, a block address or a postal code instead.'
     } else if (error.response && error.response.data && error.response.data.message) {
       // Show our server's message if it sent one
       errorMessage.value = error.response.data.message
@@ -259,9 +291,12 @@ function closeFilters() {
   filtersOpen.value = false
 }
 
-// "Search" in the filter panel: close the drawer, so the new results are in view, then search
-function searchFromFilters() {
-  filtersOpen.value = false
+// The filter panel asks for a search. The Apply button closes the drawer, so the new results are in view;
+// an instant update (a flat type chip, the PHG switch: kind = 'live') keeps it open for more changes.
+function searchFromFilters(kind) {
+  if (kind !== 'live') {
+    filtersOpen.value = false
+  }
   search()
 }
 
@@ -488,6 +523,11 @@ function loadPage() {
 
   if (budget !== undefined) {
     filterStore.setFilter('maxPrice', String(budget))
+    // The budget from the calculator is used ONCE: take it out of the address (/?maxPrice=... becomes /),
+    // so a refresh or Back does not put the old budget back over a newer one the user picked.
+    // ⚠️ NOT IN COURSE: router.replace() changes the address without adding a new Back step
+    // (router.push, taught in Week 4, would add one). The query string itself is also not in the course.
+    router.replace({ path: route.path })
   }
   // Back from the Map (or another page): keep the last search. Nothing searched yet: start with the preset town.
   if (filterStore.filters.q !== '') {

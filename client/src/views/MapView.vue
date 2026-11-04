@@ -501,6 +501,12 @@ async function loadBlocks() {
     // If we came from Search's "Show on map", zoom to that block (first load only)
     focusOnRequestedBlock(shown)
   } catch (error) {
+    // The place lookup (OneMap) is down: plain words instead of "Something went wrong"
+    if (error.response && error.response.status >= 500 && filterStore.filters.q !== '') {
+      errorMessage.value = 'We could not search "' + filterStore.filters.q + '" right now. ' +
+        'Try a town, street, block or postal code from our data, or press "Show all of Singapore".'
+      return
+    }
     // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
     if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
@@ -907,12 +913,17 @@ async function searchParent(text) {
   try {
     parentPlace.value = await findPlaceFor(text)
   } catch (error) {
-    if (error.response && error.response.status === 500) {
-      // The server could not log in to OneMap (or something else broke there)
-      errorMessage.value = 'Place search failed. Check the OneMap login in server/config.env'
+    // The 4 km filter cannot be used without the parents' location: switch it off, so the map never looks
+    // filtered when it is not
+    filterStore.setFilter('phg', false)
+    if (error.response && error.response.status >= 500) {
+      // The address lookup (OneMap) is not working right now
+      errorMessage.value =
+        'We could not find your parents\' address right now, so the "within 4 km of my parents" filter is off ' +
+        'and the map shows all flats. Please try again later.'
     } else if (error.response && error.response.data && error.response.data.message) {
       // e.g. "Place not found" (404)
-      errorMessage.value = error.response.data.message
+      errorMessage.value = error.response.data.message + '. The "within 4 km of my parents" filter is off.'
     } else {
       errorMessage.value = error.message
     }
@@ -1070,6 +1081,16 @@ onUnmounted(function () {
             Showing all of Singapore. Press <strong>Search</strong> to show your search
             <strong>"{{ filterStore.filters.q }}"</strong> again.
           </span>
+          <!-- The search failed: say the map still shows the earlier flats, not the new search -->
+          <template v-else-if="errorMessage !== ''">
+            <span>
+              Could not show <strong>"{{ filterStore.filters.q }}"</strong>: the map below still shows your earlier
+              flats.
+            </span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" @click="showAllOfSingapore">
+              Show all of Singapore
+            </button>
+          </template>
           <template v-else>
             <span>
               Showing your search <strong>"{{ filterStore.filters.q }}"</strong>

@@ -101,10 +101,14 @@ async function loadDetails() {
 }
 
 onMounted(loadDetails)
+// What the auto-save is doing, shown next to the Next button: '' (nothing yet), 'saving', 'saved' or 'error'
+const saveStatus = ref('')
+
 async function saveDetails() {
   if (!auth.isLoggedIn) {
     return
   }
+  saveStatus.value = 'saving'
   try {
     await axios.put(`${BASE_URL}/api/affordability`, {
       buyerType: buyerType.value,
@@ -115,8 +119,10 @@ async function saveDetails() {
       phgOption: phgOption.value,
       loanYears: loanYears.value
     })
+    saveStatus.value = 'saved'
   } catch (error) {
-    console.log('Cannot save affordability details')
+    // Show it on the page (not only in the console), so the user knows their answers were not kept
+    saveStatus.value = 'error'
   }
 }
 
@@ -349,7 +355,15 @@ function applyBudget() {
 
           <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0">{{ errorMessage }}</div>
 
-          <button type="button" class="btn btn-primary mt-3" @click="goToStep2">Next</button>
+          <div class="d-flex flex-wrap align-items-center gap-3 mt-3">
+            <button type="button" class="btn btn-primary" @click="goToStep2">Next</button>
+            <!-- Logged in: your answers are saved to your account as you type (role="status": screen readers hear it) -->
+            <span v-if="auth.isLoggedIn" class="small" role="status">
+              <span v-if="saveStatus === 'saving'" class="text-muted">Saving…</span>
+              <span v-else-if="saveStatus === 'saved'" class="text-success">Saved ✓ (kept in your account)</span>
+              <span v-else-if="saveStatus === 'error'" class="text-danger">Could not save your answers. They are still here; try again later.</span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
