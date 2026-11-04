@@ -1,0 +1,55 @@
+{
+  "trainedOn": "HDB resale prices (data.gov.sg), 26 towns, 2021-01 to Oct 2026, 156183 sales",
+  "startMonth": "2021-01",
+  "intercept": 8.593791,
+  "weights": {
+    "storey": 0.007696,
+    "lease_years": 0.009983,
+    "months_since_start": 0.005702,
+    "log_area": 0.826054
+  },
+  "town": {
+    "ANG MO KIO": 0,
+    "BEDOK": -0.033267,
+    "BISHAN": 0.153442,
+    "BUKIT BATOK": -0.182705,
+    "BUKIT MERAH": 0.127239,
+    "BUKIT PANJANG": -0.233704,
+    "BUKIT TIMAH": 0.273897,
+    "CENTRAL AREA": 0.240758,
+    "CHOA CHU KANG": -0.298134,
+    "CLEMENTI": 0.042628,
+    "GEYLANG": 0.050871,
+    "HOUGANG": -0.127336,
+    "JURONG EAST": -0.165837,
+    "JURONG WEST": -0.25353,
+    "KALLANG/WHAMPOA": 0.086726,
+    "MARINE PARADE": 0.206146,
+    "PASIR RIS": -0.153444,
+    "PUNGGOL": -0.215955,
+    "QUEENSTOWN": 0.135427,
+    "SEMBAWANG": -0.273387,
+    "SENGKANG": -0.23416,
+    "SERANGOON": 0.02977,
+    "TAMPINES": -0.074922,
+    "TOA PAYOH": 0.063897,
+    "WOODLANDS": -0.262368,
+    "YISHUN": -0.195842
+  },
+  "flatType": {
+    "2 ROOM": 0,
+    "3 ROOM": 0.00387,
+    "4 ROOM": 0.018118,
+    "5 ROOM": 0.036952,
+    "EXECUTIVE": 0.144351
+  },
+  "typical": {
+    "storey": 8.0,
+    "lease_years": 72.8,
+    "areaSqm": 93.0
+  },
+  "accuracy": {
+    "r2Test": 0.904,
+    "maeDollars": 46311
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "prep",
+  "private": true,
+  "description": "One-time scripts that built server/data/*.json from data.gov.sg resale prices + OneMap. The app does not run these.",
+  "type": "module",
+  "scripts": {
+    "make-data": "node makeData.js",
+    "add-sales": "node addSales.js"
+  },
+  "dependencies": {
+    "csv-parse": "^7.0.3"
+  }
+}
