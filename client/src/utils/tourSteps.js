@@ -52,7 +52,7 @@ export const TOUR_STEPS = {
     {
       title: 'What the dots show',
       text: 'Show all flats or just your shortlist, and colour the dots by price or by priority score.',
-      target: '.map-sidebar > .cosy-card:has(#colour-price)',
+      target: '.map-toolbar',
     },
     {
       title: 'Same filters as Search',
@@ -61,8 +61,8 @@ export const TOUR_STEPS = {
     },
     {
       title: 'Living near your parents?',
-      text: "Type their postal code to draw the 4 km Proximity Housing Grant circle.",
-      target: '.map-sidebar > .cosy-card:has(> h5)',
+      text: 'In Filters, type their postal code and switch on PHG to draw the 4 km Proximity Housing Grant circle.',
+      target: '#filters-panel',
     },
   ],
 
