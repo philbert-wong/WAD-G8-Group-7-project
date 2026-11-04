@@ -5,3 +5,6 @@ config.env
 client/dist/
 prep/geocode-cache.json
 prep/walk-cache.json
+
+playwright-report/
+test-results/
