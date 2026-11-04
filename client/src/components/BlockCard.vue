@@ -510,6 +510,12 @@ a.act-btn {
 /* ---------- Tablets and bigger (Bootstrap md, 768px): the map becomes a full-height column on the left,
    the title and details sit on the right ---------- */
 @media (min-width: 768px) {
+  /* Tablets and laptops: when the price and the priority score do not fit side by side (a narrow card, e.g. next
+     to the Filter Results sidebar), the score moves under the price instead of being cut off at the card's edge */
+  .summary {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
   .bcard {
     grid-template-columns: 200px 1fr;
     grid-template-rows: auto 1fr;
