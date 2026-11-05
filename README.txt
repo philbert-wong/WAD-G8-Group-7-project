@@ -511,8 +511,7 @@ Used Claude Code (Anthropic) for:
 - Explaining concepts and reviewing my own back-end code (search and geospatial endpoints, score). I wrote
   the core endpoint logic myself.
 - Test cases: some server, client component and Playwright end-to-end tests, which I ran and checked.
-- The Save button inside the map popups and the "Note saved" message on the Shortlist page.
-- Some front end bugs when changing from different view ports
+- Identifying some front end bugs when changing from different view ports
 - The Search race-condition fix.
 
 Wing Yee (front end, back end)
