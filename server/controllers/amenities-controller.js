@@ -7,9 +7,7 @@ const amenityModel = require('../models/amenity-model');
 const Amenity = amenityModel.Amenity;
 const CATEGORIES = amenityModel.CATEGORIES; // ['mrt', 'hawker', 'park', 'school']
 
-// =====================================================================
 // Helpers (only used in this file)
-// =====================================================================
 
 // Used in the catch block: sends the right error answer to the frontend.
 function sendError(res, error) {
@@ -24,9 +22,7 @@ function sendError(res, error) {
   res.status(500).json({ message: 'Something went wrong' });
 }
 
-// =====================================================================
 // Controller functions (one per address, see routes/amenities-routes.js)
-// =====================================================================
 
 // GET /api/amenities              every amenity
 // GET /api/amenities?category=mrt only one category (mrt, hawker, park or school)

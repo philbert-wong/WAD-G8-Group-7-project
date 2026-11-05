@@ -262,7 +262,7 @@ function applyBudget() {
     <p class="text-muted small mb-4">Step {{ currentStep }} of 3 · an estimate for a resale flat with an HDB loan</p>
     <div v-if="saveMessage !== ''" class="alert alert-warning" role="alert">{{ saveMessage }}</div>
 
-    <!-- ===================== STEP 1: Household (FEATURE 1 + FEATURE 2) ===================== -->
+    <!-- STEP 1: Household (FEATURE 1 + FEATURE 2) -->
     <div v-if="currentStep === 1">
       <h4 class="mb-3">Step 1: Household finances</h4>
 
@@ -377,7 +377,7 @@ function applyBudget() {
       </div>
     </div>
 
-    <!-- ===================== STEP 2: Grants (FEATURE 3 + FEATURE 6) ===================== -->
+    <!-- STEP 2: Grants (FEATURE 3 + FEATURE 6) -->
     <div v-if="currentStep === 2 && result">
       <h4 class="mb-3">Step 2: Estimated housing grants</h4>
 
@@ -429,7 +429,7 @@ function applyBudget() {
       </div>
     </div>
 
-    <!-- ===================== STEP 3: Budget (FEATURE 4 + FEATURE 5 + FEATURE 7) ===================== -->
+    <!-- STEP 3: Budget (FEATURE 4 + FEATURE 5 + FEATURE 7) -->
     <div v-if="currentStep === 3 && result">
       <h4 class="mb-3">Step 3: Your max flat price</h4>
 

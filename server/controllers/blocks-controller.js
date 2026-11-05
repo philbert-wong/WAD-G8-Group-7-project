@@ -21,9 +21,7 @@ if (process.env.ONEMAP_PASSWORD) {
   oneMapPassword = process.env.ONEMAP_PASSWORD;
 }
 
-// =====================================================================
 // Helpers (only used in this file)
-// =====================================================================
 
 // ---------- Error answer ----------
 
@@ -527,9 +525,7 @@ function compareByPrice(a, b) {
   return a.price - b.price;
 }
 
-// =====================================================================
 // Controller functions (one per address, see routes/blocks-routes.js)
-// =====================================================================
 
 // GET /api/blocks?q=punggol&flatType=4 ROOM&maxPrice=700000&minLease=60
 // Search + filter. Sends every matching block (we only have a few hundred), cheapest first.

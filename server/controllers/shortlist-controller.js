@@ -8,9 +8,7 @@ const Shortlist = shortlistModel.Shortlist;
 const Block = blockModel.Block;
 const toCard = blockModel.toCard;
 
-// =====================================================================
 // Helpers (only used in this file)
-// =====================================================================
 
 // Used in the catch block of every route: sends the right error answer to the frontend.
 function sendError(res, error) {
@@ -46,9 +44,7 @@ function compareNewestFirst(a, b) {
   return b.createdAt - a.createdAt;
 }
 
-// =====================================================================
 // Controller functions (one per address, see routes/shortlist-routes.js)
-// =====================================================================
 
 // READ   GET /api/shortlist
 // Every saved flat, newest first

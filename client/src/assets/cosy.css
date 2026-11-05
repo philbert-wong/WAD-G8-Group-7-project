@@ -1,8 +1,5 @@
-/* =====================================================================================
-   "COSY PROFESSIONAL" DESIGN: shared styles for the whole site
-
-   Based on Jihao's mockup hdb_cosy_professional.html.
-   ===================================================================================== */
+/* "COSY PROFESSIONAL" DESIGN: shared styles for the whole site
+   Based on Jihao's mockup hdb_cosy_professional.html. */
 
 /* Design tokens: CSS custom properties ("variables") so every colour is defined once.
    Not taught: var(--name). The course way would be to repeat the hex colour everywhere. */

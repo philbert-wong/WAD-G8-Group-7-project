@@ -1,15 +1,14 @@
-// The /api/auth controller: register and login (both answer with a token the frontend sends back later),
-// the logged-in user's saved preferences, and their profile (the sign-up popup / profile page answers).
-// routes/auth-routes.js decides which address runs which function below.
-// bcrypt hashes passwords; jsonwebtoken makes and checks login tokens
+// Auth controller: register, login, saved preferences, profile and forgot password.
+// Register and login send back a token, which the frontend sends with its later requests.
+// routes/auth-routes.js decides which URL runs which function.
+// bcrypt hashes the passwords, jsonwebtoken makes the login tokens.
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user-model');
 
 const User = userModel.User;
 
-// Secret used to sign login tokens: JWT_SECRET from config.env, otherwise a development-only default.
-// (middleware/requireAuth.js reads the same setting to check tokens.)
+// JWT_SECRET from config.env, or a default for development only (middleware/requireAuth.js uses the same one)
 let jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) {
   if (process.env.NODE_ENV === 'production') {
@@ -18,24 +17,21 @@ if (!jwtSecret) {
   jwtSecret = 'dev-secret-change-me'; // development and tests only
 }
 
-// =====================================================================
 // Helpers (only used in this file)
-// =====================================================================
 
-// Used in the catch block of every route: sends the right error answer to the frontend.
-// The 3 security questions for "Forgot password" (the website shows the same 3, in client/src/utils/securityQuestions.js)
+// The 3 security questions for Forgot password (the same 3 are in client/src/utils/securityQuestions.js)
 const SECURITY_QUESTIONS = [
   'What was the name of your best childhood friend?',
   'Who was your favorite childhood teacher?',
   'What was the name of the hospital where you were born?',
 ];
 
-// Answers are compared lowercase and without spaces at the ends, so "KK Hospital " = "kk hospital"
+// Answers ignore capital letters and spaces at the ends: "KK Hospital " matches "kk hospital"
 function cleanAnswer(answer) {
   return answer.trim().toLowerCase();
 }
 
-// Checks the answers sent: a list with one text answer per question, none empty. Returns a message, or '' if fine.
+// Needs one non-empty text answer per question. Returns an error message, or '' if fine.
 function securityAnswersProblem(answers) {
   if (!Array.isArray(answers) || answers.length !== SECURITY_QUESTIONS.length) {
     return 'Please answer all 3 security questions';
@@ -48,7 +44,7 @@ function securityAnswersProblem(answers) {
   return '';
 }
 
-// Hashes each answer (like the password), so the answers themselves are never stored
+// Hash each answer like a password, so the answers are never stored
 async function hashAnswers(answers) {
   const hashes = [];
   for (const answer of answers) {
@@ -57,6 +53,7 @@ async function hashAnswers(answers) {
   return hashes;
 }
 
+// Used in every catch block: sends the error answer to the frontend
 function sendError(res, error) {
   // MongoDB could not understand an id
   if (error.name === 'CastError') {
@@ -75,21 +72,19 @@ function sendError(res, error) {
   res.status(500).json({ message: 'Something went wrong' });
 }
 
-// Makes a token that says "this request is from user <id>". It stops working after 7 days.
+// A token that says which user a request is from. Expires after 7 days.
 function makeToken(user) {
   return jwt.sign({ id: user._id}, jwtSecret, { expiresIn: '7d'});
 
 }
 
-// ---------------------------------------------------------------------
-// Stricter register checks (used by register() below; tested in tests/auth.test.js, "register input checks")
-// ---------------------------------------------------------------------
+// Extra register checks (tested in tests/auth.test.js, "register input checks")
 
-// The longest password bcrypt really uses, counted in BYTES (not characters)
+// bcrypt only uses the first 72 bytes of a password (bytes, not characters)
 const MAX_PASSWORD_BYTES = 72;
 
-// Very common passwords, all lowercase: register refuses them.
-// 'password123' is left out on purpose: the other tests and tests/helpers.js use it.
+// Common passwords (lowercase) that register refuses.
+// 'password123' is not listed because the other tests use it.
 const COMMON_PASSWORDS = [
   'password',
   '12345678',
@@ -101,8 +96,8 @@ const COMMON_PASSWORDS = [
   'welcome1'
 ];
 
-// True when the text looks like an email: no spaces, exactly one "@", something before it,
-// and a "." in the part after the "@" with something before and after the dot.
+// Does the text look like an email? No spaces, one "@", something before it,
+// and a "." after it that is not the first or last character.
 function isValidEmail(text) {
   if (typeof text !== 'string') return false;
 
@@ -128,9 +123,7 @@ function isValidEmail(text) {
   return true;
 }
 
-// =====================================================================
 // Controller functions (one per address, see routes/auth-routes.js)
-// =====================================================================
 
 // REGISTER POST /api/auth/register   body: { "email": "a@b.com", "password": "password123" }
 exports.register = async (req, res) => {
@@ -283,9 +276,7 @@ exports.savePreferences = async (req, res) => {
   }
 };
 
-// =====================================================================
 // Profile: the answers from the sign-up popup and the profile page
-// =====================================================================
 
 // An answer as trimmed text: "  PUNGGOL " -> "PUNGGOL", a number 600000 -> "600000", anything else -> ''
 function asText(value) {
@@ -382,11 +373,9 @@ exports.saveProfile = async (req, res) => {
   }
 };
 
-// =====================================================================
-// Forgot password: create a new password from just the email
-// =====================================================================
+// Forgot password: reset with the email and the 3 security answers
 
-// The same rules register() applies to a password. Returns the message to show, or '' when the password is fine.
+// Same password rules as register. Returns an error message, or '' if fine.
 function newPasswordProblem(password, email) {
   if (password.length < 8) {
     return 'Password must be at least 8 characters';
@@ -427,7 +416,7 @@ exports.resetPassword = async (req, res) => {
   }
 
   try {
-    // Every answer must match (same message for any problem, so emails cannot be guessed)
+    // Every answer must match. The same message for any problem, so nobody can find out which emails exist.
     const user = await User.findOne({ email: email });
     let answersOk = false;
     if (user !== null && user.securityAnswerHashes.length === SECURITY_QUESTIONS.length) {
