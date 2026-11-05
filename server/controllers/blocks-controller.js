@@ -23,7 +23,7 @@ if (process.env.ONEMAP_PASSWORD) {
 
 // Helpers (only used in this file)
 
-// ---------- Error answer ----------
+// Error answer
 
 // Used in the catch block of every route: sends the right error answer to the frontend.
 function sendError(res, error) {
@@ -44,7 +44,7 @@ function sendError(res, error) {
   res.status(500).json({ message: 'Something went wrong' });
 }
 
-// ---------- Number checks ----------
+// Number checks
 // Helpers for numbers that arrive in the URL, e.g. ?maxPrice=600000
 // (everything in a URL arrives as text at first)
 
@@ -61,7 +61,7 @@ function isNumber(value) {
   return Number.isFinite(Number(value));
 }
 
-// ---------- Search filter ----------
+// Search filter
 
 // Characters that have a special meaning in a MongoDB text pattern ($regex)
 const SPECIAL_CHARACTERS = '.*+?^${}()|[]\\';
@@ -79,7 +79,7 @@ function escapeSearchText(text) {
   return safeText;
 }
 
-// ---------- Address text ----------
+// Address text
 // Helpers so a typed address like "Blk 314 Ang Mo Kio Avenue 3" finds our block "314", "ANG MO KIO AVE 3"
 
 // HDB writes street names short ("ANG MO KIO AVE 3", "BT BATOK ST 21"), but people often type the full words.
@@ -239,7 +239,7 @@ function buildFilter(query) {
   return filter;
 }
 
-// ---------- Sales summary ----------
+// Sales summary
 
 // Used by .sort() to put numbers from small to big
 function compareNumbers(a, b) {
@@ -317,7 +317,7 @@ function salesSummary(sales) {
   };
 }
 
-// ---------- Price estimate ----------
+// Price estimate
 // Uses the weights trained in prep/priceRegression.ipynb (saved in data/priceModel.json)
 // "04 TO 06" -> one number
 function storeyToNumber(storeyRange) {
@@ -487,7 +487,7 @@ function buildTrend(features) {
 }
 
 
-// ---------- OneMap token ----------
+// OneMap token
 // Gets (and remembers) a OneMap token. It lasts about 3 days, so we ask again a bit early.
 
 let token = null;
@@ -518,7 +518,7 @@ async function getOneMapToken() {
   return token;
 }
 
-// ---------- Sorting ----------
+// Sorting
 
 // Used by .sort() to put the cheapest block first
 function compareByPrice(a, b) {

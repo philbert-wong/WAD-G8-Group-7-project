@@ -240,7 +240,7 @@ function blend(a, b, t) {
   return Math.round(a + (b - a) * t)
 }
 
-// The rainbow colour for a score, e.g. 62 → between yellow (50) and green (75), about half way
+// The rainbow colour for a score, e.g. 62 is between yellow (50) and green (75), about half way
 function matchColour(score) {
   if (score === null) {
     return NO_SCORE_COLOUR
@@ -290,9 +290,8 @@ function priceColour(price) {
   return 'grey'
 }
 
-// The short text inside a dot's popup: the address, the town, then one line per flat type with its median
-// (a block has at most a few flat types). More details are in the "Selected block" card in the sidebar.
-// Bootstrap classes work here because Bootstrap's CSS applies to the whole page.
+// The text inside a dot's popup: address, town, and a line per flat type with its median price.
+// The rest is in the "Selected block" card. Bootstrap classes work in here because its CSS covers the whole page.
 function popupText(place) {
   const first = place.cards[0]
   let text =
@@ -320,11 +319,11 @@ function popupText(place) {
   return text
 }
 
-// ---------- Save buttons inside a dot's popup ----------
-// A popup is plain HTML text for Leaflet (not a Vue component), so its buttons cannot use @click. The map's box
-// listens for clicks instead (onMapClick, set up in onMounted) and reads which flat a button belongs to from its data-id.
-// Every popup's text is a function (popupText), so popup.update() makes it again from the shortlist as it is now.
-// ⚠️ NOT IN COURSE: addEventListener on an element, closest and dataset (finding the button that was pressed).
+// Save buttons inside a dot's popup.
+// Leaflet popups are plain HTML, not Vue, so @click does not work on their buttons. The map listens for clicks
+// instead (onMapClick) and finds the flat from the button's data-id. The popup text is a function (popupText),
+// so popup.update() redraws the buttons from the current shortlist.
+// NOT IN COURSE: addEventListener on an element, closest and dataset.
 
 // The flats whose Save buttons are in a popup: { flat id: card }, filled in by popupText
 const popupCards = {}
@@ -333,7 +332,7 @@ let openPopup = null
 // true after a visitor without an account pressed Save: their popup then shows the "Log in ..." line
 let loginHintShown = false
 
-// "✓ Saved" or "+ Save", and the words a screen reader says (the flat type is named: a block can have several buttons)
+// The button text, and its label for screen readers (it names the flat type, as a popup can have several buttons)
 function saveButtonText(saved) {
   return saved ? '✓ Saved' : '+ Save'
 }
@@ -350,15 +349,14 @@ function saveButtonHtml(card) {
   )
 }
 
-// Makes the open popup again from the shortlist as it is now (after a flat was saved or removed, here or in the
-// sidebar card, so its Save buttons are right)
+// Redraws the open popup so its buttons match the shortlist (after a save or remove, here or in the sidebar card)
 function refreshPopup() {
   if (openPopup !== null) {
     openPopup.update()
   }
 }
 
-// A click anywhere on the map: only the Save buttons and the two links in a popup matter here
+// Any click on the map. Only the Save buttons and the two links in a popup do anything.
 async function onMapClick(event) {
   // "Log in" / "create a free account" in the popup: go there without reloading the page
   const link = event.target.closest('.popup-link')

@@ -1,11 +1,10 @@
-// AFFORDABILITY RULES: every grant amount, income ceiling and loan number  
-//  
-//  
-// Household types used below (same as the calculator's "Buying as"):  
-//   family = couple / family, ALL first-timers  
-//   single = one single buyer (Single Singapore Citizen scheme, 35 or older) 
-//   joint  = 2 to 4 singles buying together (Joint Singles Scheme) 
-//   mixed  = couple where one is a first-timer and the other a second-timer 
+// Affordability rules: every grant amount, income ceiling and loan number, each with its source
+//
+// Household types used below (same as the calculator's "Buying as"):
+//   family = couple / family, ALL first-timers
+//   single = one single buyer (Single Singapore Citizen scheme, 35 or older)
+//   joint  = 2 to 4 singles buying together (Joint Singles Scheme)
+//   mixed  = couple where one is a first-timer and the other a second-timer
 
 // --- Sources ---
 // Official sources
@@ -46,23 +45,23 @@
 
 // --- HDB housing loan ---
 
-// ✅ [CPF-LOAN] HDB loan interest rate, % per year ("currently fixed at 2.6%", reviewed every quarter)
+// [CPF-LOAN] HDB loan interest rate, % per year ("currently fixed at 2.6%", reviewed every quarter)
 export const HDB_LOAN_INTEREST_RATE = 2.6
 
-// ✅ [MAS-2022] HDB works out how much you can borrow using a 3% "floor" rate,
+// [MAS-2022] HDB works out how much you can borrow using a 3% "floor" rate,
 // even though you are charged 2.6% ("an interest rate floor of 3% p.a. to compute a borrower's eligible housing loan amount")
 export const HDB_LOAN_ASSESSMENT_RATE = 3.0
 
-// ✅ [HDB-AR2025] Loan-to-Value limit for HDB loans: you can borrow at most 75% of the price
+// [HDB-AR2025] Loan-to-Value limit for HDB loans: you can borrow at most 75% of the price
 export const HDB_LOAN_LTV_PERCENT = 75
 
-// ✅ [MAS-LOANS] Mortgage Servicing Ratio: at most 30% of gross monthly income on the monthly repayment
+// [MAS-LOANS] Mortgage Servicing Ratio: at most 30% of gross monthly income on the monthly repayment
 export const MSR_PERCENT = 30
 
-// ✅ [NICE-LOANS] Longest HDB loan: 25 years
+// [NICE-LOANS] Longest HDB loan: 25 years
 export const MAX_LOAN_YEARS = 25
 
-// ✅ [HDB-NEWS-2026] Income ceiling (average gross monthly household income) to get an HDB loan
+// [HDB-NEWS-2026] Income ceiling (average gross monthly household income) to get an HDB loan
 export const HDB_LOAN_INCOME_CEILING = {
   family: 16000, // also used for "mixed" couples (see loanGroup in affordability.js)
   single: 8000, // Single Singapore Citizen scheme
@@ -71,7 +70,7 @@ export const HDB_LOAN_INCOME_CEILING = {
 
 // --- Grants ---
 
-// ✅ [HDB-CPFHG] + [SGW-CPFHG] Income ceiling for the CPF Housing Grant on a resale flat
+// [HDB-CPFHG] + [SGW-CPFHG] Income ceiling for the CPF Housing Grant on a resale flat
 export const CPF_HOUSING_GRANT_INCOME_CEILING = {
   family: 16000,
   mixed: 16000, // mixed couples get the Family Grant, so the same ceiling
@@ -80,10 +79,10 @@ export const CPF_HOUSING_GRANT_INCOME_CEILING = {
 }
 
 // CPF Housing Grant for first-timers buying a resale flat, by flat size
-//   family = ✅ [HDB-CPFHG] + [SGW-CPFHG] $80,000 (2- to 4-room), $50,000 (5-room or bigger)
-//   mixed  = ✅ [HDB-CPFHG] "First-timer and second-timer couples": $40,000 and $25,000
-//   single = ✅ [SGW-CPFHG] $40,000 (2- to 4-room), $25,000 (5-room only, see below)
-//   joint  = ✅ [HDB-CPFHG-SIN] "up to 2 Singles Grant applicants": $40,000 each for 2- to 4-room ("a total of
+//   family = [HDB-CPFHG] + [SGW-CPFHG] $80,000 (2- to 4-room), $50,000 (5-room or bigger)
+//   mixed  = [HDB-CPFHG] "First-timer and second-timer couples": $40,000 and $25,000
+//   single = [SGW-CPFHG] $40,000 (2- to 4-room), $25,000 (5-room only, see below)
+//   joint  = [HDB-CPFHG-SIN] "up to 2 Singles Grant applicants": $40,000 each for 2- to 4-room ("a total of
 //            $80,000 for 2 singles"), $25,000 each for 5-room or bigger ("a total of $50,000"). Any flat type.
 export const CPF_HOUSING_GRANT = {
   family: { upTo4Room: 80000, room5OrBigger: 50000 },
@@ -92,10 +91,10 @@ export const CPF_HOUSING_GRANT = {
   joint: { upTo4Room: 80000, room5OrBigger: 50000 },
 }
 
-// ✅ [NICE-GRANTS] + [SGW-CPFHG] A single gets the CPF Housing Grant only up to a 5-room flat (not EXECUTIVE)
+// [NICE-GRANTS] + [SGW-CPFHG] A single gets the CPF Housing Grant only up to a 5-room flat (not EXECUTIVE)
 export const CPF_HOUSING_GRANT_SINGLE_FLAT_TYPES = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM']
 
-// ✅ [CPF-GUIDE] + [HDB-EHG-FAM] + [HDB-EHG-SIN] Enhanced CPF Housing Grant (EHG): income ceiling
+// [CPF-GUIDE] + [HDB-EHG-FAM] + [HDB-EHG-SIN] Enhanced CPF Housing Grant (EHG): income ceiling
 export const EHG_INCOME_CEILING = {
   family: 9000,
   single: 4500,
@@ -105,17 +104,17 @@ export const EHG_INCOME_CEILING = {
   mixed: 4500,
 }
 
-// ✅ [HDB-EHG-FAM] + [HDB-EHG-SIN] For a RESALE flat, "you must first qualify for the CPF Housing Grants for
+// [HDB-EHG-FAM] + [HDB-EHG-SIN] For a RESALE flat, "you must first qualify for the CPF Housing Grants for
 // resale flats ... before you may be eligible for the EHG". affordability.js checks this in checkGrants().
 
-// ✅ [HDB-EHG-FAM] + [HDB-EHG-SIN] EHG needs the applicant(s) to have "worked continuously for at least 12 months"
+// [HDB-EHG-FAM] + [HDB-EHG-SIN] EHG needs the applicant(s) to have "worked continuously for at least 12 months"
 export const EHG_MONTHS_EMPLOYED = 12
 
 // EHG amount by average gross monthly household income, lowest income first (lower income = bigger grant)
-//   family = ✅ [EHG] page 1. Also used for joint singles: [HDB-EHG-SIN] "up to 2 singles may each be eligible
+//   family = [EHG] page 1. Also used for joint singles: [HDB-EHG-SIN] "up to 2 singles may each be eligible
 //            for an EHG (Singles), i.e., a total of up to $120,000", on the "Income of all persons"
-//   single = ✅ [EHG] page 2 for mixed couples (on HALF the household income), and
-//            ✅ [EHG-SIN] page 1 for one single on their own income. ([EHG-SIN] page 3, "two or more
+//   single = [EHG] page 2 for mixed couples (on HALF the household income), and
+//            [EHG-SIN] page 1 for one single on their own income. ([EHG-SIN] page 3, "two or more
 //            first-timer singles", is the same as the family table.)
 export const EHG_TIERS = {
   family: [
@@ -156,26 +155,26 @@ export const EHG_TIERS = {
   ],
 }
 
-// ✅ [CPF-GUIDE] + [NICE-GRANTS] Proximity Housing Grant (PHG). No income ceiling. Second-timers can get it too.
+// [CPF-GUIDE] + [NICE-GRANTS] Proximity Housing Grant (PHG). No income ceiling. Second-timers can get it too.
 // Couples (including mixed) use "family"; one single uses "single".
-// ✅ [HDB-PHG-SIN] Joint singles also use "single" (singles "on their own or with other single citizens").
+// [HDB-PHG-SIN] Joint singles also use "single" (singles "on their own or with other single citizens").
 export const PHG_AMOUNT = {
   family: { liveWith: 30000, liveNear: 20000 },
   single: { liveWith: 15000, liveNear: 10000 },
 }
 
-// ✅ [CPF-GUIDE] "Live near" means within 4 km of parents / child
+// [CPF-GUIDE] "Live near" means within 4 km of parents / child
 export const PHG_NEAR_DISTANCE_METRES = 4000
 
-// ✅ [CPF-GUIDE] Singles living NEAR parents only get PHG for a 2- to 5-room resale flat
+// [CPF-GUIDE] Singles living NEAR parents only get PHG for a 2- to 5-room resale flat
 export const PHG_SINGLE_NEAR_FLAT_TYPES = ['2 ROOM', '3 ROOM', '4 ROOM', '5 ROOM']
 
 // Flat types that count as "up to 4-room" for the CPF Housing Grant (5 ROOM and EXECUTIVE are bigger)
 export const UP_TO_4_ROOM_FLAT_TYPES = ['2 ROOM', '3 ROOM', '4 ROOM']
 
-// ---------- Buyer's stamp duty ----------
+// Buyer's stamp duty
 
-// ✅ [IRAS-BSD] Buyer's stamp duty on a home, one slice of the price at a time:
+// [IRAS-BSD] Buyer's stamp duty on a home, one slice of the price at a time:
 // "First $180,000: 1%", "Next $180,000: 2%", "Next $640,000: 3%", "Next $500,000: 4%",
 // "Next $1,500,000: 5%", "Remaining amount: 6%". slice = null means "everything that is left".
 export const BSD_TIERS = [

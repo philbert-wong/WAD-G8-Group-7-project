@@ -21,7 +21,7 @@ function sendTokenWithEveryRequest(token) {
 }
 
 export const useAuthStore = defineStore('auth', function () {
-  // ---------- state ----------
+  // state
   const user = ref(null) // { id, email }, or null = logged out
   const token = ref(null)
   const loading = ref(false)
@@ -44,7 +44,7 @@ export const useAuthStore = defineStore('auth', function () {
   const profileSaving = ref(false)
   const profileError = ref('')
 
-  // ---------- getters ----------
+  // getters
   const isLoggedIn = computed(function () {
     return token.value !== null
   })
@@ -60,7 +60,7 @@ export const useAuthStore = defineStore('auth', function () {
     return presetsOpen.value || (!presetsAsked.value && profile.value === null && !presetsSkipped.value)
   })
 
-  // ---------- actions ----------
+  // actions
 
   // Remembers a login: in the store, in localStorage, and in every axios request
   function saveLogin(newToken, newUser) {

@@ -1,4 +1,4 @@
-// AFFORDABILITY CALCULATOR + GRANT RULES 
+// Affordability calculator and grant rules
 
 // Every number (grant amounts, ceilings, loan rules) comes from affordabilityRules.js.
 // This file only does the maths, so if HDB changes a number we only edit the rules file.
@@ -126,7 +126,7 @@ export function householdType(buyerType, totals) {
   return 'other'
 }
 
-// ---------- Grants ----------
+// Grants
 // Each grant function gives back one row for the results table:
 // { name, amount, status, reason }
 //   status 'yes'     = eligible, amount is counted in the budget

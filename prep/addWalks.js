@@ -37,7 +37,7 @@ for (const amenity of amenities) {
   }
 }
 
-// ---------- Saved answers ----------
+// Saved answers
 // { "1.36791,103.84771 > Ang Mo Kio MRT": 646, ... }  (null = OneMap found no route)
 let cache = {};
 if (existsSync(CACHE_FILE)) {
@@ -49,7 +49,7 @@ function saveCache() {
   writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 1));
 }
 
-// ---------- OneMap login ----------
+// OneMap login
 let token = null;
 
 async function getToken() {
@@ -65,7 +65,7 @@ async function getToken() {
   return data.access_token;
 }
 
-// ---------- One walk ----------
+// One walk
 
 // Walking metres from a block to a station along real paths, or null when OneMap has no route.
 // OneMap wants "lat,lng" for both ends.
@@ -102,7 +102,7 @@ async function walkingMetres(block, station) {
   return metres;
 }
 
-// ---------- Which stations to measure ----------
+// Which stations to measure
 
 // The nearest station in a straight line, plus the second-nearest if it is almost as close
 function stationsToTry(block) {
@@ -132,7 +132,7 @@ function stationsToTry(block) {
   return list;
 }
 
-// ---------- Main ----------
+// Main
 
 // Every flat type of a block is at the same spot, so group the cards by address and measure each block once
 const addresses = {}; // { "314|ANG MO KIO AVE 3": [card, card], ... }

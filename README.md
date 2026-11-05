@@ -7,17 +7,21 @@ uses real resale transactions from data.gov.sg: search blocks, filter by budget,
 them against what matters to you, see each block's recent sales and a price-model estimate, check grants
 and affordability, and see every block on a map.
 
-**Course:** IS216 Web Application Development II, Section G8, Group 7 · **Live app:** _<link>_ · **Video:** _<link>_
+**Course:** IS216 Web Application Development II, Section G8, Group 7 · **Live app:** https://wad-g8-group-7-project-2.onrender.com · **Video:** _<link>_
+
+> The live app is on Render's free plan, so the API goes to sleep when nobody uses it. The first search after a
+> quiet spell can take up to a minute; after that it is fast.
 
 ### At a glance
 
 | | |
 |---|---|
 | Coverage | **26 HDB towns**, up to 40 busiest blocks each: **974 blocks**, **1,306 block + flat type cards**, **930 amenities** |
+| Source data | **243,874** resale records in the data.gov.sg CSV (Jan 2017 onwards, as of 2 Nov 2026); **7,154** sales from the last 12 months are stored across the blocks |
 | Prices | Real transacted prices from the last 12 months (data.gov.sg), plus a live data.gov.sg lookup per block |
 | Price model | Multiple linear regression on log(price), trained on **156,183 sales** (Jan 2021 to Oct 2026) |
 | Model accuracy | **R² 0.904** on unseen sales · average miss **$46,311** (7.8%) · **3.2x better** than guessing the median |
-| Automated tests | **211 tests** in 3 layers: 76 server API + 103 client component/unit + 32 browser end-to-end |
+| Automated tests | **223 tests** in 3 layers: 76 server API + 113 client component/unit + 34 browser end-to-end |
 
 ---
 
@@ -55,6 +59,24 @@ weeks of viewings, and anchoring on an inflated asking price costs real money at
 
 The data is prepared **once, offline**, then loaded into MongoDB. The live app only reads from MongoDB,
 except for place search (OneMap) and the live sales lookup (data.gov.sg).
+
+**How it differs from a listings site**
+
+| | Listing portals | HDB Resale Finder |
+|---|---|---|
+| Price basis | Asking price | Actual sold prices |
+| Comparing areas | One listing at a time | The whole dataset at once (cards, map, scores) |
+| Your priorities | Fixed filters, simple cut-offs | A weighted priority score from 0 to 100 |
+| Affordability | A separate step on other sites | Calculator and PHG checker in the same app |
+
+**What runs when.** Looking up coordinates and MRT walks for 974 blocks live would be slow and hit OneMap's
+limits, so that work is done once at build time and saved in the data files. Cards then load instantly.
+
+| | Runtime (live calls) | Build time (done once, saved in `server/data/`) |
+|---|---|---|
+| OneMap | Place and postal-code search, the PHG checker's address lookup | Block coordinates, walking routes to the nearest MRT / LRT |
+| data.gov.sg | Live resale prices for a block; if it cannot be reached, the stored sales are shown and labelled "Source: Stored data" | The resale CSV, hawker centres, parks and schools |
+| OpenStreetMap | Map tiles (through Leaflet) | none |
 
 ### Architecture
 
@@ -294,7 +316,7 @@ class node_buyer,node_hdb_data,node_onemap,node_data_gov,node_map_tiles toneIndi
 |---|---|
 | `client/src/views/` | The pages: `SearchView`, `MapView`, `CPFCalView` (affordability), `CompareView`, `ShortlistView`, `LoginView`, `ProfileView`, `ForgotPasswordView` |
 | `client/src/components/` | `BlockCard`, `PriceDetails` (sales chart + estimate), `FilterPanel`, `PreferencesPanel`, `MatchScore`, `PhgChecker`, `GuideTour`, `NavBar`, ...; `map/` holds the map sidebar parts |
-| `client/src/stores/` | Pinia: `auth` (who is logged in), `shortlist`, `filters` (shared by Search and Map), `mapFocus` |
+| `client/src/stores/` | Pinia, 4 stores: `auth` (who is logged in), `shortlist` (saved in MongoDB, not localStorage), `filters` (shared by Search, Map and Compare, so a budget set on one page applies on all), `mapFocus` |
 | `client/src/utils/` | `matchScore.js` (priority score), `affordability.js` + `affordabilityRules.js` (calculator maths and every grant number with its source) |
 | `server/` | `server.js`, `routes/`, `controllers/`, `models/` (Mongoose), `middleware/` (`requireAuth`, `errorHandler`), `seed.js` |
 | `server/data/` | `blocks.json`, `amenities.json`, `priceModel.json` |
@@ -306,22 +328,35 @@ class node_buyer,node_hdb_data,node_onemap,node_data_gov,node_map_tiles toneIndi
 - **Search** (`/`): one box for a town, street, block address, postal code or any place (our data first, then
   OneMap for flats within 1 km). Filters for budget, flat type and remaining lease; they stay after a page
   refresh, and "Clear all" removes every filter. Block cards with price range, median, lease left and walk to
-  MRT / LRT.
+  MRT / LRT, sorted by priority score or cheapest first.
 - **Your Priorities and the priority score:** tick and weight school, MRT / LRT, hawker centre and park; every card
   is scored in the browser, so changing a weight re-sorts instantly.
-- **Price details:** the block's recent sales, median price and price per m², a chart, the model's estimate,
-  and which factors (floor, lease, size, town) push the price up or down.
-- **Map** (`/map`): one dot per block, coloured by price band (with the band number 1-4 inside each dot) or
-  priority score; amenity layers (MRT/LRT,
-  hawker, park, school); address search; a **PHG layer** that keeps only blocks within 4 km of the parents.
+- **Price details:** the block's recent sales, median price and price per m², a chart with every sale as a dot
+  over the model's price line since Jan 2021, the model's estimate, how the flat compares with a typical flat
+  (the median), and which factors (floor, lease, size, town) push the price up or down, with the market trend
+  and lease ageing in % per year.
+- **Map** (`/map`): one dot per block, coloured by priority score (the default) or by price band (with the
+  band number 1-4 inside each dot); amenity layers (MRT/LRT, hawker, park, school); address search; a **PHG layer** that keeps
+  only blocks within 4 km of the parents; a switch to show only your shortlist. Click a dot for a popup with a
+  **Save** button for each flat type (a visitor without an account is asked to log in), and the same Save
+  buttons are on the "Selected block" card in the sidebar.
 - **Affordability** (`/CPFCal`): maximum budget from income and loan, grants (including mixed couples and
   joint singles), stamp duty, PHG checker, and "use this budget" to search with it. A refresh keeps the step
   you were on, and a failed save to the account is shown on the page.
 - **Accounts:** register / login (JWT + bcrypt), forgot password (needs the answers to 3 security questions set at
   sign-up, which can be changed on the Profile page), saved priorities and household details.
-- **Shortlist and Compare:** save flats with notes; compare 2 or 3 side by side (the ticked flats stay after
-  a refresh).
-- **Phone layout:** bottom tab bar, filter drawer, stacked Compare cards; a guided tour on first visit.
+- **Presets:** the town, flat type, budget, parents' postal code and minimum lease you give in the first-visit
+  popup become the starting filters on Search and the Map. Change them any time on the Profile page.
+- **Shortlist and Compare:** save flats with notes ("Note saved" shows once the server has it); compare 2 or 3
+  side by side (the ticked flats stay after a refresh).
+- **Responsive layout (375 px phones to 1440 px laptops):** bottom tab bar on phones and tablets; on Search the
+  filters become a "☰ Filters" drawer and a page shows 6 cards instead of 12 (below 992 px); Compare is a table
+  on computers and stacked bordered cards below 768 px; the calculator and the PHG list follow the same
+  pattern; the Map toolbar stacks on narrow screens. Numbered map dots, bigger text and keyboard support
+  (Tab stays inside popups and drawers) are there for accessibility.
+- **First visit:** a welcome popup asks for a town, flat type, budget, the parents' postal code and minimum
+  lease ("Skip for now" closes it). A guided tour starts by itself the first time you open each page, the round
+  "?" button starts it again, and a "Back to top" button appears on long pages.
   "Skip for now" on the first-visit popup keeps you on the page you opened. The popup, the filter drawer and
   the tour keep the keyboard (Tab) inside them while open. A "Back to top" button appears on long pages.
 
@@ -385,6 +420,7 @@ lease runs low); the trend is one straight line from 2021; no flat model, renova
 | Price model | Python, pandas, NumPy, scikit-learn, matplotlib (Jupyter) | Training the regression offline |
 | Data prep | Node.js, csv-parse | Building `blocks.json` and `amenities.json` |
 | Testing | Vitest, Supertest, mongodb-memory-server, @vue/test-utils, jsdom, Playwright | Section 7 |
+| Hosting | Render (static site for the website, web service for the API) | The live app, Section 6 |
 | Package manager | pnpm | Every sub-project |
 | API: OneMap (SLA) | Search and routing | Geocoding, place search, walking routes to MRT |
 | API: data.gov.sg | Datasets and live API | HDB resale prices; MRT stations, hawker centres, parks, primary schools |
@@ -445,6 +481,12 @@ cd ../server && pnpm seed
 To retrain the price model, open `prep/priceRegression.ipynb` in its conda environment and run all cells;
 Step 8 writes `server/data/priceModel.json` and checks the JSON gives the same answer as the Python model.
 
+**Deployment.** The live version runs on Render: the website as a static site and the API as a web service
+(`https://wad-g8-group-7-project-1.onrender.com`, try `/api/health`), with the data in MongoDB Atlas. The API gets
+the same settings as `config.env` (`DB`, `JWT_SECRET`, `ONEMAP_EMAIL`, `ONEMAP_PASSWORD`) as environment
+variables on Render, and the website is built with `VITE_API_URL` set to the API's address (see
+`client/src/config.js`). Render reads those settings from its dashboard, never from the repository.
+
 Every API endpoint, the pages and the manual test journeys are in [`README.txt`](README.txt) (sections 3, 5 and 7).
 
 ## 7. Testing
@@ -454,10 +496,10 @@ Three layers, from fastest to closest to a real user:
 | Layer | Where | Tools | Tests | Needs | Run |
 |---|---|---|---|---|---|
 | **Server API** | `server/tests/` | Vitest + Supertest, in-memory MongoDB | **76** | nothing (downloads a MongoDB binary on first run) | `cd server && pnpm test` |
-| **Client components and utils** | `client/src/**/__tests__/` | Vitest + Vue Test Utils + jsdom | **103** | nothing | `cd client && pnpm test` |
-| **End-to-end** | `e2e/tests/` | Playwright (Chromium) | **32** (27 desktop + 5 phone) | API and website running, seeded DB, OneMap login | `cd e2e && pnpm exec playwright test` |
+| **Client components and utils** | `client/src/**/__tests__/` | Vitest + Vue Test Utils + jsdom | **113** | nothing | `cd client && pnpm test` |
+| **End-to-end** | `e2e/tests/` | Playwright (Chromium) | **34** (29 desktop + 5 phone) | API and website running, seeded DB, OneMap login | `cd e2e && pnpm exec playwright test` |
 
-Last local run (4 Nov 2026): server **70/70 passed**, client **103/103 passed**.
+Last local run (5 Nov 2026): server **76/76 passed**, client **113/113 passed**, end-to-end **34/34 passed**.
 
 **Server API.** The test setup (`server/tests/start-test-server.js`) starts a throwaway MongoDB in memory
 and our real `server.js` on port 8001 pointed at it, so the tests never touch the database in `DB` and can
@@ -483,8 +525,8 @@ Before running them:
 
 ```bash
 cd e2e
-pnpm exec playwright test                       # all 32 tests, both screen sizes
-pnpm exec playwright test --project=desktop     # 27 desktop tests (1280 x 720)
+pnpm exec playwright test                       # all 34 tests, both screen sizes
+pnpm exec playwright test --project=desktop     # 29 desktop tests (1280 x 720)
 pnpm exec playwright test --project=iphone-6    # 5 phone tests in tests/mobile/ (375 x 667)
 pnpm exec playwright test tests/search.spec.js  # one file
 pnpm exec playwright show-report                # open the HTML report of the last run
@@ -497,6 +539,16 @@ the first-visit popup and the page tour. Elements are found the way a user finds
 name, e.g. the "Logout" button) or by a fixed id (e.g. `#login-email`), never by layout or CSS classes.
 Both screen sizes run in Chromium, because the app is marked in Chrome; the phone size is the iPhone 6,
 the smallest screen in the responsive check.
+
+Journeys covered: account, search, price details, shortlist, Compare, map, calculator and phone layouts.
+
+Two examples of the tests doing their job:
+- **Test first.** The register password rules were written as failing tests before the code: the 7 "rejects"
+  tests in `server/tests/auth.test.js` (email without `@`, only spaces, a very common password, the same as the
+  email, too long for bcrypt) failed until `register()` checked them.
+- **A real bug.** Writing the browser tests for Search exposed a race condition: an older, slower search could
+  arrive after a newer one and replace its results. It was reproduced with a delayed request, fixed with a
+  request counter (`latestSearch` in `SearchView.vue`), and checked before and after the fix.
 
 What every test file covers, with test counts, is listed in [`README.txt`](README.txt), section 5.
 
@@ -511,6 +563,10 @@ What every test file covers, with test counts, is listed in [`README.txt`](READM
 - Grant and loan numbers must be checked against hdb.gov.sg / cpf.gov.sg; each has its source in
   `client/src/utils/affordabilityRules.js`.
 - OneMap features need a OneMap account in `server/config.env`. Login tokens last 7 days.
+- Forgot password uses the 3 security questions set at sign-up, not an email link. Render's free plan blocks
+  outgoing email, and the questions need no extra service.
+- The website does not log you out by itself when a login token expires. Until you log in again, the pages
+  that need an account show a "Please log in" message.
 
 ## 9. Team
 

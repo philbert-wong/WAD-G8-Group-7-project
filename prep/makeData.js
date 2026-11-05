@@ -66,7 +66,7 @@ function realPostal(text) {
   return text;
 }
 
-// ---------- 1. blocks: prices from the CSV, coordinates from OneMap ----------
+// 1. blocks: prices from the CSV, coordinates from OneMap
 console.log('1/3 Reading the resale CSV...');
 const rows = parse(readFileSync(csvPath, 'utf8'), { columns: true, skip_empty_lines: true });
 const summary = summariseResale(rows, { towns: TOWNS, blocksPerTown: BLOCKS_PER_TOWN });
@@ -136,7 +136,7 @@ for (const listing of listings) {
   }
 }
 
-// ---------- 2. amenities ----------
+// 2. amenities
 console.log('2/3 Amenities...');
 const amenities = [];
 
@@ -183,7 +183,7 @@ for (const school of schools) {
 }
 saveCache();
 
-// ---------- 3. keep only amenities near our blocks, and write the files ----------
+// 3. keep only amenities near our blocks, and write the files
 console.log('3/3 Writing files...');
 
 // Is this amenity within 3 km of at least one of our blocks?

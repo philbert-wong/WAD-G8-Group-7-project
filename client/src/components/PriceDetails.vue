@@ -1,7 +1,7 @@
 <script setup>
 // The "Price details" panel inside a card: median prices, the price model's trend and factors, and recent sales
 // Price chart: the model's price line for this flat since Jan 2021, with every real sale as a dot.
-// ⚠️ NOT IN OUR COURSE: the Chart.js library (new npm package), nextTick, and drawing on a <canvas>.
+// NOT IN OUR COURSE: the Chart.js library (new npm package), nextTick, and drawing on a <canvas>.
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import axios from 'axios'

@@ -1,5 +1,5 @@
 <script setup>
-// HDB AFFORDABILITY CALCULATOR 
+// The HDB affordability calculator
 // All the maths is in utils/affordability.js and every number in utils/affordabilityRules.js.
 
 import { ref, computed, onMounted } from 'vue'

@@ -6,10 +6,10 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useMapFocusStore = defineStore('mapFocus', function () {
-  // ---------- state ----------
+  // state
   const blockId = ref(null) // the block card's id to show on the map, or null = nothing to show
 
-  // ---------- actions ----------
+  // actions
 
   // "Show on map" was pressed for this block
   function showOnMap(id) {

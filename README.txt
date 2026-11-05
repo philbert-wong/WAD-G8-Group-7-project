@@ -19,7 +19,10 @@ Back end:       Node.js, Express 5, Mongoose, JSON Web Tokens + bcrypt (login)
 1. LINKS
 ------------------------------------------------------------------------------------------
 
-Deployed app:   [TODO: add the URL of the first page once deployed]
+Deployed app:   https://wad-g8-group-7-project-2.onrender.com
+                (on Render's free plan the API sleeps when nobody uses it: the first search after a quiet
+                 spell can take up to a minute, then it is fast. The API is at
+                 https://wad-g8-group-7-project-1.onrender.com/api/health)
 Git repository: https://github.com/philbert-wong/WAD-G8-Group-7-project   [TODO: confirm it is shared with the teaching team]
 Video:          [TODO: add the YouTube link]
 
@@ -96,19 +99,28 @@ Pages:
     /            Search: one search box (town, street, block address, postal code or any place: our own
                  data first, then OneMap for flats within 1 km of a place), filters (budget, flat type,
                  remaining lease), Your Priorities and the priority score, block cards with price details,
-                 nearest amenities and "Show on map". The filters stay after a page refresh;
+                 nearest amenities and "Show on map". Sort: priority score first or cheapest first.
+                 12 cards a page; below 992 px (phones and tablets) 6 a page, and the filters move into
+                 a "☰ Filters" drawer. The filters stay after a page refresh;
                  "Clear all" removes every filter (any budget, any flat type, any lease, PHG off)
     /map         Map: one dot per block, coloured by price (band number 1-4 inside each dot) or by
                  priority score ("Colour dots by"), with the same filters and Your Priorities as Search;
                  amenity layers (MRT / LRT, hawker,
                  park, school); an address search; the PHG (Proximity Housing Grant) layer (type your
-                 parents' postal code to see only blocks within 4 km); click a dot for its flat types
-                 and its nearest amenities
+                 parents' postal code to see only blocks within 4 km); "Show": all flats or only your
+                 shortlist; click a dot for a popup with its flat types and a Save button for each (a visitor
+                 without an account is asked to log in), and its nearest amenities in the "Selected block" card
     /CPFCal      Affordability: calculator for a maximum budget, grants, PHG checker, "use this budget";
                  a refresh keeps the step you were on
     /compare     Compare 2 or 3 shortlisted flats side by side (needs login); the ticks stay after a refresh
-    /shortlist   Your saved flats with notes (needs login)
-    /login       Log in or create an account
+    /shortlist   Your saved flats with notes (needs login); "Note saved" shows once a note is stored
+    /profile     Your presets (town, parents' postal code, starting filters) and your 3 security
+                 questions (needs login)
+    /login       Log in or create an account (/createaccount opens the same page on "Create account")
+    /forgot-password   Choose a new password by answering the 3 security questions
+
+    A first-time visitor gets a presets popup ("Skip for now" closes it), and a guided tour starts by itself
+    the first time each page is opened. The round "?" button in the bottom-right corner starts it again.
 
 
 ------------------------------------------------------------------------------------------
@@ -120,22 +132,22 @@ There are no built-in accounts. Create one on the Login page (any email, passwor
 to you?" choices need an account.
 
 OneMap: place search and walking routes need a OneMap login in server/config.env (see section 2).
-    [TODO (team decision): either give a shared OneMap account for marking here, or leave this
-     note so markers use their own free account.]
+
 
 
 ------------------------------------------------------------------------------------------
 5. TEST
 ------------------------------------------------------------------------------------------
 
-There are 3 layers of automated tests, 211 tests in all, from fastest to closest to a real user:
+There are 3 layers of automated tests, 223 tests in all, from fastest to closest to a real user:
 
     Layer                         Folder                        Tests   Command
     1. Server API                 server/tests/                   76    cd server  then  pnpm test
-    2. Client components + utils  client/src/**/__tests__/       103    cd client  then  pnpm test
-    3. End-to-end (browser)       e2e/tests/                      32    cd e2e     then  pnpm exec playwright test
+    2. Client components + utils  client/src/**/__tests__/       113    cd client  then  pnpm test
+    3. End-to-end (browser)       e2e/tests/                      34    cd e2e     then  pnpm exec playwright test
 
 Layers 1 and 2 need nothing running. Layer 3 needs both terminals of section 3 running.
+Last local run (5 Nov 2026): 76 of 76, 113 of 113 and 34 of 34 passed.
 
 1. Server API tests (Vitest + Supertest)
     cd server
@@ -183,6 +195,9 @@ Layers 1 and 2 need nothing running. Layer 3 needs both terminals of section 3 r
       components/map/__tests__/CollapsiblePanel.spec.js  (6)  open / close, content kept while closed
       components/map/__tests__/PhgCard.spec.js           (8)  radius text, place found, block count,
                                                               search and clear
+      components/map/__tests__/SelectedBlockCard.spec.js (10)  a Save button per flat type, the click sent
+                                                              up, the log-in line for a visitor, a
+                                                              problem from the shortlist
       utils/__tests__/affordability.spec.js             (18)  monthly repayment, loan for a repayment,
                                                               monthly cost, household totals and type
       utils/__tests__/priorities.spec.js                 (7)  reading saved priorities, broken or
@@ -206,8 +221,8 @@ Layers 1 and 2 need nothing running. Layer 3 needs both terminals of section 3 r
 
     Run them:
       cd e2e
-      pnpm exec playwright test                       all 32 tests (both screen sizes)
-      pnpm exec playwright test --project=desktop     only the 27 desktop tests (1280 x 720)
+      pnpm exec playwright test                       all 34 tests (both screen sizes)
+      pnpm exec playwright test --project=desktop     only the 29 desktop tests (1280 x 720)
       pnpm exec playwright test --project=iphone-6    only the 5 phone tests in tests/mobile/ (375 x 667)
       pnpm exec playwright test tests/search.spec.js  one file
       pnpm exec playwright show-report                open the report of the last run in the browser
@@ -223,16 +238,27 @@ Layers 1 and 2 need nothing running. Layer 3 needs both terminals of section 3 r
     the first-visit popup and the page tour. The tests find things the way a user does (by role and
     visible name, e.g. the "Logout" button) or by a fixed id (e.g. #login-email), not by layout or CSS.
 
+    Two examples of the tests doing their job:
+      Test first:  the register password rules were written as failing tests before the code (the 7
+                   "rejects" tests in server/tests/auth.test.js) and fail until register() checks them.
+      A real bug:  writing the Search browser tests exposed a race condition (an older, slower search
+                   could arrive after a newer one and replace its results). It was reproduced with a
+                   delayed request, fixed with a request counter (latestSearch in SearchView.vue), and
+                   checked before and after the fix.
+
     What they cover (in e2e/tests/):
       auth.spec.js           (6)  create an account, a very common password is refused, the two
                                   passwords do not match, unknown account, logout, a forgotten
                                   password is only reset with the right security answers
       search.spec.js         (5)  search a town, the 4-Rm filter, clear message when nothing matches,
                                   saving a flat needs an account (one message, not two)
-      shortlist.spec.js      (3)  save a flat when logged in, keep a note on it, remove it
+      shortlist.spec.js      (3)  save a flat when logged in, keep a note on it ("Note saved" shows),
+                                  remove it
       compare.spec.js        (2)  compare two saved flats; asks for at least 2 saved flats
       price-details.spec.js  (2)  open a flat's price details, and hide them again
-      map.spec.js            (3)  open the map from the menu, Show on map, log in offer for My shortlist
+      map.spec.js            (5)  open the map from the menu, Show on map, log in offer for My shortlist,
+                                  save a flat from the dot popup when logged in, a visitor is asked to
+                                  log in from the popup
       calculator.spec.js     (6)  PHG blocks near the parents a page at a time, postal code not found,
                                   empty box, max flat price sent to Search, income needed first,
                                   household details remembered for a logged-in user
@@ -254,6 +280,8 @@ Manual check of the main user journeys (with both terminals running):
     7. Affordability: fill in the steps, then "use this budget": Search opens with that budget.
     8. Map: dots coloured by price. Click 4-Rm in the filters: the dots change. Click a dot: its popup
        and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
+       Logged in, press "+ Save" in the popup: it turns into "✓ Saved" and the card and "My shortlist (1)"
+       agree. Logged out, "+ Save" asks you to log in or create an account.
     9. Map: tick "MRT / LRT stations": blue squares appear; untick: they go. Switch "Colour dots by" to
        Colour dots by Priority score: dots change colour (red = weak ... blue/purple = excellent), using Your Priorities.
    10. Map: type "560314" in the PHG box: a 4 km circle, and only the blocks inside it remain.
@@ -271,24 +299,29 @@ client/                     the website (made with pnpm create vue@latest, like 
   src/App.vue               page shell: navbar + <RouterView />
   src/router/index.js       the pages, and the navigation guard for pages that need a login
   src/stores/               Pinia stores: auth.js (who is logged in), shortlist.js (saved flats),
-                            filters.js (flat type, budget and lease, shared by Search and the Map),
+                            filters.js (flat type, budget and lease, shared by Search, the Map and Compare),
                             mapFocus.js (the block "Show on map" should zoom to)
-  src/views/                SearchView, MapView, CPFCalView, CompareView, ShortlistView, LoginView
+  src/views/                SearchView, MapView, CPFCalView, CompareView, ShortlistView, LoginView,
+                            ProfileView, ForgotPasswordView
   src/components/           NavBar, SearchBar, FilterPanel, PreferencesPanel, BlockCard, PriceDetails,
-                            ShortlistItem, PhgChecker
-  src/components/map/       the map page's sidebar: MapSearchBar, SelectedBlockCard, MapLegend,
-                            CollapsiblePanel, PhgCard
+                            MatchScore, ShortlistItem, PhgChecker, ProfileModal (first-visit presets),
+                            ProfileForm, GuideTour (the "?" tour), BackToTop
+  src/components/map/       the map page's parts: MapSearchBar, MapToolbar, MapKey, SelectedBlockCard,
+                            MapLegend, CollapsiblePanel, PhgCard
   src/utils/                matchScore.js (match score), affordability.js (calculator maths),
-                            affordabilityRules.js (every grant / loan number, with its source)
+                            affordabilityRules.js (every grant / loan number, with its source),
+                            priorities.js (saved priorities), securityQuestions.js, tourSteps.js
+                            (the tour's steps), focusTrap.js (keeps Tab inside a popup), distance.js
   src/assets/cosy.css       the site's design
   src/**/__tests__/         client tests (pnpm test), next to the code they test
   vitest.config.js          settings for the client tests
 
 server/                    the API (same layout as the class's blog-with-mongodb server)
   server.js                 starts everything: config.env, Express, cors, routes, MongoDB, listen
-  routes/                   which address runs which function (blocks-, shortlist-, auth-, amenities-routes.js)
+  routes/                   which address runs which function (blocks-, shortlist-, auth-, amenities-,
+                            affordability-routes.js)
   controllers/              the functions behind each address (blocks-, shortlist-, auth-, amenities-controller.js)
-  models/                   MongoDB data shapes: block-, amenity-, shortlist-, user-model.js
+  models/                   MongoDB data shapes: block-, amenity-, shortlist-, user-, affordability-model.js
   middleware/               requireAuth.js (login check), errorHandler.js (last safety net)
   data/                     blocks.json and amenities.json (the real data)
   seed.js                   loads data/ into MongoDB (pnpm seed)
@@ -352,6 +385,12 @@ POST   /api/auth/reset-password      Forgot password. Body { email, securityAnsw
                                      401 (same message) if the email is unknown or any answer is wrong
 GET    /api/auth/security-questions  [login] { hasAnswers }: whether the 3 answers are saved (never the answers)
 PUT    /api/auth/security-questions  [login] add or change them. Body { securityAnswers: [3 answers] }
+GET    /api/auth/profile             [login] the presets { profile: { town, parentsPostal, flatType, maxPrice,
+                                     minLease, showPhg } }, or { profile: null } if never answered
+PUT    /api/auth/profile             [login] save them. Body { profile: { ... } }, or { profile: { skipped: true } }
+                                     ("Skip for now": remember they were asked, so the popup does not come back)
+GET    /api/affordability            [login] the saved calculator details (household, flat type, loan years...)
+PUT    /api/affordability            [login] save them, so the calculator is filled in on any device
 GET    /api/shortlist                [login] your saved items, newest first: [{ id, note, createdAt, block: card }]
 POST   /api/shortlist                [login] save a block. Body { blockId, note (optional) } (201)
 PATCH  /api/shortlist/:id            [login] change the note. Body { note }
@@ -395,6 +434,9 @@ The map (Leaflet + OpenStreetMap tiles)
   block is ONE dot (its flat types would otherwise sit on top of each other). A dot's colour is the
   price band of its cheapest flat type (with the band number 1-4 printed inside, so colour is not the only
   clue), or its priority score on a rainbow scale (red 0 ... purple 100).
+  A dot's popup is plain HTML for Leaflet, not a Vue component, so its Save buttons cannot use @click:
+  the map listens for clicks on itself and finds the flat from the button's data-id. The popup text is a
+  function, so popup.update() redraws the buttons whenever the shortlist changes (here or in the card).
   The PHG layer looks up the parents' address with OneMap and keeps only the blocks within 4 km
   (Leaflet's map.distance, straight-line), on top of the filters. Amenities come from /api/amenities
   and are drawn as small squares in their own layer.
@@ -403,9 +445,10 @@ Login and shared state
   Register / login return a token (JWT, valid 7 days). The Pinia auth store keeps it in the
   browser's localStorage (so a refresh keeps you logged in) and sends it with every request.
   The Pinia shortlist store is shared by Search, Shortlist, Compare and the navbar count, and the
-  filters store by Search and the Map. The filters store also saves the filters in localStorage, so a
+  filters store by Search, the Map and Compare (Compare reads the Max budget from it). The shortlist is
+  kept in MongoDB, not in localStorage. The filters store also saves the filters in localStorage, so a
   refresh keeps them; logging out goes back to the starting filters.
-  A navigation guard sends logged-out users from /shortlist and /compare to /login and back.
+  A navigation guard sends logged-out users from /shortlist, /compare and /profile to /login and back.
   The server checks the token again on every shortlist and preferences request.
 
 
@@ -414,7 +457,9 @@ Login and shared state
 ------------------------------------------------------------------------------------------
 
 Real HDB resale sales from the last 12 months (data.gov.sg), grouped per block and flat type,
-for up to the 40 busiest blocks in each of the 26 HDB towns of Singapore.
+for up to the 40 busiest blocks in each of the 26 HDB towns of Singapore: 7,154 sales in all, picked from the
+243,874 records in the CSV (Jan 2017 onwards, as of 2 Nov 2026). The price model uses the 156,183 of them
+since Jan 2021.
 Coordinates come from OneMap; MRT stations, hawker centres, parks and primary schools from data.gov.sg.
 LRT stations (Punggol, Sengkang and Bukit Panjang LRT) are stored with the MRT stations (category "mrt"), so the
 nearest-station walk and the priority score's Transport part count them too.
@@ -446,7 +491,11 @@ Then run  pnpm seed  in the server folder.
 - Distances to an amenity are measured to ONE point per amenity (from the NParks / data.gov.sg
   datasets). Big parks are split into a few sections with their own points (e.g. Bishan-Ang Mo Kio
   Park), but a block on a park's edge can still be closer to the park than the distance shown.
-- The login token lasts 7 days; after that, log in again.
+- The login token lasts 7 days; after that, log in again. The website does not log you out by itself: until
+  you do, the pages that need an account show a "Please log in" message.
+- Forgot password uses the 3 security questions set at sign-up, not an email link (Render's free plan blocks
+  outgoing email).
+- On Render's free plan the API sleeps when nobody uses it, so the first request can take up to a minute.
 - The affordability numbers (grants, loan limits) must be checked against hdb.gov.sg / cpf.gov.sg;
   each one is listed with its source in client/src/utils/affordabilityRules.js.
 - OneMap features need a OneMap account in server/config.env.
@@ -456,4 +505,14 @@ Then run  pnpm seed  in the server folder.
 11. AI USE DECLARATION (brief FAQ 20)
 ------------------------------------------------------------------------------------------
 
-[TODO: each member writes the parts they relied on AI/LLM for.]
+
+Philbert (back end, deployment, tests)
+Used Claude Code (Anthropic) for:
+- Explaining concepts and reviewing my own back-end code (search and geospatial endpoints, score). I wrote
+  the core endpoint logic myself.
+- Test cases: some server, client component and Playwright end-to-end tests, which I ran and checked.
+- The Save button inside the map popups and the "Note saved" message on the Shortlist page.
+- Some front end bugs when changing from different view ports
+- The Search race-condition fix.
+
+[Other members: add your own entry below, in the same way.]

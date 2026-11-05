@@ -4,7 +4,7 @@
 // It also starts by itself the first time you open each page (once per page), once the presets popup has been closed.
 // Same idea as the old guide pet tour (guide-pet-backup/GuidePet.vue), without the pet.
 //
-// ⚠️ NOT IN OUR COURSE:
+// NOT IN OUR COURSE:
 //   - document.querySelectorAll, getBoundingClientRect, getComputedStyle (find a part of the page and where it is)
 //   - window.addEventListener for 'scroll', 'resize' and 'keydown' (keep the light on it when the page moves; Esc closes)
 //   - scrollIntoView and focus({ preventScroll }) (scroll the part into view, put the keyboard on the Next button)
@@ -80,7 +80,7 @@ const spotStyle = computed(function () {
   }
 })
 
-// ---------- Finding the part of the page ----------
+// Finding the part of the page
 
 // The first element that matches the selector AND can be seen on this screen (not display: none, not hidden),
 // or null when there is none (e.g. no cards on an empty shortlist). That is how one step can point at the
@@ -108,7 +108,7 @@ function findTarget(selector) {
   return null
 }
 
-// ---------- Placing the light and the card ----------
+// Placing the light and the card
 
 // Puts the light around the lit-up part and the card next to it.
 // getBoundingClientRect gives screen positions; adding how far the page is scrolled (scrollX / scrollY) turns them
@@ -212,7 +212,7 @@ function placeCard() {
   }
 }
 
-// ---------- The steps ----------
+// The steps
 
 // Shows this step: the light glides in a straight line from the last part to this one, while the page scrolls
 // smoothly to it at the same time (both move together, so the light never wanders).
@@ -261,7 +261,7 @@ async function showStep() {
   }
 }
 
-// ---------- One smooth move ----------
+// One smooth move
 
 const GLIDE_MS = 450
 let glideFrame = null // the requestAnimationFrame waiting to run, so a newer step can cancel an older glide
@@ -377,7 +377,7 @@ function backStep() {
   }
 }
 
-// ---------- Starting by itself on a first visit ----------
+// Starting by itself on a first visit
 
 let autoStartTimer = null
 
@@ -428,7 +428,7 @@ watch(
   autoStartIfNew,
 )
 
-// ---------- Keeping the light in place ----------
+// Keeping the light in place
 
 // The window changed size: put the light and card in their new places at once (no gliding)
 function onResize() {

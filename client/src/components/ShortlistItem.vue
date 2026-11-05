@@ -13,8 +13,8 @@ const emit = defineEmits(['remove', 'change-note'])
 // What is typed in the box. "item.note" is what is already saved.
 const draft = ref(props.item.note)
 
-// "Note saved" message next to the buttons. The store only changes item.note once the server has accepted the
-// note, so that is the moment to show it. It goes away after 3 seconds, or as soon as the box is edited again.
+// The "Note saved" message. item.note only changes once the server has accepted the note, so that is when it shows.
+// It goes away after 3 seconds, or when the box is edited again.
 const justSaved = ref(false)
 let hideTimer = null
 
@@ -71,7 +71,7 @@ function removeItem() {
             Save note
           </button>
           <button class="act-btn ghost" @click="removeItem">Remove</button>
-          <!-- role="status" makes a screen reader read the message out when it appears -->
+          <!-- role="status": a screen reader reads this out when it appears -->
           <span v-if="justSaved" class="note-saved" role="status">✓ Note saved</span>
         </div>
       </div>

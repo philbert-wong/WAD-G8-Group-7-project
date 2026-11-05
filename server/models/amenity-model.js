@@ -18,7 +18,7 @@ amenitySchema.index({ location: '2dsphere' });
 const Amenity = mongoose.model('Amenity', amenitySchema);
 exports.Amenity = Amenity;
 
-// ---------- Nearest amenities (used by the blocks controller) ----------
+// Nearest amenities (used by the blocks controller)
 
 // GEOSPATIAL: for one location, find the closest amenity of each category (mrt, hawker, park, school).
 //
@@ -54,7 +54,7 @@ exports.findNearestAmenities = async function (location) {
   return results;
 };
 
-// ---------- Straight-line distance (used by seed.js) ----------
+// Straight-line distance (used by seed.js)
 
 // Straight-line distance in metres between two points on the earth (the "haversine" formula).
 // Only the seed script uses this (prep/ has its own copy); the API uses MongoDB's $geoNear instead.

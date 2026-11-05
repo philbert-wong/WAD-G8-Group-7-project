@@ -45,7 +45,7 @@ blockSchema.index({ location: '2dsphere' });
 const Block = mongoose.model('Block', blockSchema);
 exports.Block = Block;
 
-// ---------- Lease helpers (used by toCard below and by the search filter) ----------
+// Lease helpers (used by toCard below and by the search filter)
 
 // HDB leases are 99 years long.
 const LEASE_YEARS = 99;
@@ -62,7 +62,7 @@ exports.earliestCommenceYear = function (minLease) {
   return thisYear - LEASE_YEARS + minLease;
 };
 
-// ---------- Card (used by the blocks and shortlist controllers) ----------
+// Card (used by the blocks and shortlist controllers)
 
 // Turns a block from MongoDB into the simple object the frontend shows on a card.
 exports.toCard = function (block) {

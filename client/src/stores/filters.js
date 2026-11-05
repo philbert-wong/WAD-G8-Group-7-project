@@ -41,7 +41,7 @@ function readSavedFilters() {
 }
 
 export const useFiltersStore = defineStore('filters', function () {
-  // ---------- state ----------
+  // state
   // { q, flatType, maxPrice, minLease }: q = the search box text, '' = not used
   const saved = readSavedFilters()
   // true when the filters came back from before a refresh (then the profile does not replace them)
@@ -52,7 +52,7 @@ export const useFiltersStore = defineStore('filters', function () {
     localStorage.setItem(SAVE_KEY, JSON.stringify(filters.value))
   }
 
-  // ---------- actions ----------
+  // actions
 
   // One filter changed, e.g. ('maxPrice', '600000')
   function setFilter(name, value) {

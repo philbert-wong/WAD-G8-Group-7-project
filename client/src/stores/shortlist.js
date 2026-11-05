@@ -9,18 +9,18 @@ import { defineStore } from 'pinia'
 import { BASE_URL } from '../config.js'
 
 export const useShortlistStore = defineStore('shortlist', function () {
-  // ---------- state ----------
+  // state
   // Each item looks like { id, note, createdAt, block: { id, block, street, ... } }
   const items = ref([])
   const loading = ref(false)
   const error = ref('')
 
-  // ---------- getters ----------
+  // getters
   const count = computed(function () {
     return items.value.length
   })
 
-  // ---------- actions ----------
+  // actions
 
   // Gets every saved flat from the server
   async function fetchShortlist() {
