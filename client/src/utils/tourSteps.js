@@ -120,9 +120,14 @@ export const TOUR_STEPS = {
   // Profile page
   '/profile': [
     {
-      title: 'Your presets',
-      text: 'Your town, your parents\' postal code and your starting filters. Saved to your account.',
-      target: '.card',
+      title: 'Your preferences',
+      text: 'Your town, flat type, budget and priorities. Press Show to change them; they are saved to your account.',
+      target: '.prefs-card',
+    },
+    {
+      title: 'Security questions',
+      text: 'Your answers to 3 questions. You need them to reset your password if you forget it. Press Show to change them.',
+      target: '.security-card',
     },
   ],
 

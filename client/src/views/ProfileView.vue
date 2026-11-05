@@ -87,7 +87,7 @@ async function onSave(answers) {
 
     <div class="col-12 col-md-8 col-lg-5">
       <!-- Preferences: click the title to open or close -->
-      <div class="card shadow-sm">
+      <div class="card shadow-sm prefs-card">
         <button type="button" class="section-toggle" :aria-expanded="preferencesOpen"
           @click="preferencesOpen = !preferencesOpen">
           <span>
@@ -110,7 +110,7 @@ async function onSave(answers) {
       </div>
 
       <!-- Security questions: needed to reset a forgotten password. Click the title to open or close -->
-      <div class="card shadow-sm mt-3">
+      <div class="card shadow-sm mt-3 security-card">
         <button type="button" class="section-toggle" :aria-expanded="securityOpen" @click="securityOpen = !securityOpen">
           <span>
             <span class="h5 serif d-block mb-0">Security questions</span>
