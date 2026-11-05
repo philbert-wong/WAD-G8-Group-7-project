@@ -15,6 +15,10 @@ const auth = useAuthStore()
 // true after a successful save, to show the green message
 const saved = ref(false)
 
+// Which sections are open (both start closed, so both titles are in view)
+const preferencesOpen = ref(false)
+const securityOpen = ref(false)
+
 // Your Priorities, as saved on the account (null until they have been asked for: the form waits for them)
 const priorities = ref(null)
 onMounted(async () => {
@@ -31,6 +35,10 @@ async function loadSecurityStatus() {
   try {
     const response = await axios.get(`${BASE_URL}/api/auth/security-questions`)
     hasAnswers.value = response.data.hasAnswers
+    // No answers yet: open the section, so the user sees it needs answering
+    if (hasAnswers.value === false) {
+      securityOpen.value = true
+    }
   } catch (error) {
     securityError.value = 'Could not check your security questions. Please refresh the page.'
   }
@@ -78,8 +86,18 @@ async function onSave(answers) {
     </div>
 
     <div class="col-12 col-md-8 col-lg-5">
+      <!-- Preferences: click the title to open or close -->
       <div class="card shadow-sm">
-        <div class="card-body">
+        <button type="button" class="section-toggle" :aria-expanded="preferencesOpen"
+          @click="preferencesOpen = !preferencesOpen">
+          <span>
+            <span class="h5 serif d-block mb-0">Preferences</span>
+            <span class="small text-muted">Town, flat type, budget and your priorities</span>
+          </span>
+          <span v-if="preferencesOpen" class="state">Hide ▴</span>
+          <span v-else class="state">Show ▾</span>
+        </button>
+        <div v-show="preferencesOpen" class="card-body pt-0">
           <ProfileForm v-if="priorities !== null" :profile="auth.profile" :priorities="priorities"
             :saving="auth.profileSaving" :error="auth.profileError" button-text="Save changes" @save="onSave" />
           <p v-else class="text-muted mb-0">Loading...</p>
@@ -91,10 +109,17 @@ async function onSave(answers) {
         </div>
       </div>
 
-      <!-- Security questions: needed to reset a forgotten password -->
-      <div class="card shadow-sm mt-4">
-        <div class="card-body">
-          <h2 class="h5 serif">Security questions</h2>
+      <!-- Security questions: needed to reset a forgotten password. Click the title to open or close -->
+      <div class="card shadow-sm mt-3">
+        <button type="button" class="section-toggle" :aria-expanded="securityOpen" @click="securityOpen = !securityOpen">
+          <span>
+            <span class="h5 serif d-block mb-0">Security questions</span>
+            <span class="small text-muted">Used to reset a forgotten password</span>
+          </span>
+          <span v-if="securityOpen" class="state">Hide ▴</span>
+          <span v-else class="state">Show ▾</span>
+        </button>
+        <div v-show="securityOpen" class="card-body pt-0">
           <p v-if="hasAnswers === false" class="alert alert-warning py-2 small">
             Your account has no security questions yet, so a forgotten password cannot be reset. Answer them below.
           </p>
@@ -116,3 +141,24 @@ async function onSave(answers) {
     </div>
   </section>
 </template>
+
+<style scoped>
+/* The title row of each section: the whole row is one big button */
+.section-toggle {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.state {
+  color: var(--terra);
+  font-weight: 600;
+  white-space: nowrap;
+}
+</style>
