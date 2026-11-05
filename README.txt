@@ -544,8 +544,16 @@ Used Claude Code (Anthropic) for:
 - Used to find errors in mine and teammates code so we could quickly fix them
 
 Yu Jia (back end, code clean up)
-- Used AI to assist with code cleanup and improve readability.
+- Used AI to suggest where and how to improve code readability.
 - Used AI to explain coding errors and provide debugging suggestions.
 
 
-[Other members: add your own entry below, in the same way.]
+Shaun (Price Trend Analysis):
+Handwrote the entire priceRegression.ipynb (mainly because I was interested in learning ML)
+Used Claude only to:
+- facilitate in my learning of how to clean the data, how to decide the features (weights) 
+- teach me how to implement the py libraries (matplotlib, numpy, pandas, etc)
+- explain why to use a Multiple Linear Regression model instead of a gradient-boosted tree 
+- explain to me how to implement the shaded area on the price trend when displaying it under price details
+
+I did not use any AI to do any core implementation tasks and problem solving.
