@@ -515,4 +515,9 @@ Used Claude Code (Anthropic) for:
 - Some front end bugs when changing from different view ports
 - The Search race-condition fix.
 
+Wing Yee (front end, back end)
+Used Claude Code (Anthropic) for:
+- Ideation for frontend desgin and theme
+- To explain and give hints on how to do certain logics
+
 [Other members: add your own entry below, in the same way.]
