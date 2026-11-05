@@ -70,6 +70,8 @@ test('should keep a note on a saved flat', async ({ page }) => {
   // actions: write a note and save it, then leave the page and come back
   await page.getByRole('textbox').fill('near my parents');
   await page.getByRole('button', { name: 'Save note' }).click();
+  // the page confirms the save (this message only stays for 3 seconds, so check it before leaving)
+  await expect(page.getByText('Note saved')).toBeVisible();
   await page.getByRole('link', { name: 'Search' }).click();
   await expect(page.getByText('flat(s) match your filters')).toBeVisible();
   await page.getByRole('link', { name: 'Shortlist' }).click();

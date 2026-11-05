@@ -1,6 +1,6 @@
 <script setup>
 // One saved flat on the Shortlist page: its card plus a note box
-import { ref } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import BlockCard from './BlockCard.vue'
 
 const props = defineProps({
@@ -12,6 +12,34 @@ const emit = defineEmits(['remove', 'change-note'])
 
 // What is typed in the box. "item.note" is what is already saved.
 const draft = ref(props.item.note)
+
+// "Note saved" message next to the buttons. The store only changes item.note once the server has accepted the
+// note, so that is the moment to show it. It goes away after 3 seconds, or as soon as the box is edited again.
+const justSaved = ref(false)
+let hideTimer = null
+
+watch(
+  function () {
+    return props.item.note
+  },
+  function (savedNote) {
+    if (savedNote === draft.value) {
+      justSaved.value = true
+      clearTimeout(hideTimer)
+      hideTimer = setTimeout(function () {
+        justSaved.value = false
+      }, 3000)
+    }
+  },
+)
+
+watch(draft, function () {
+  justSaved.value = false
+})
+
+onBeforeUnmount(function () {
+  clearTimeout(hideTimer)
+})
 
 // "Save note" button: send the item and the new note to the page
 function saveNote() {
@@ -38,11 +66,13 @@ function removeItem() {
           :aria-label="'My note for Blk ' + item.block.block + ' ' + item.block.street"
           placeholder="e.g. near my parents, viewing on Sunday"></textarea>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap align-items-center gap-2">
           <button class="act-btn primary" :disabled="draft === item.note" @click="saveNote">
             Save note
           </button>
           <button class="act-btn ghost" @click="removeItem">Remove</button>
+          <!-- role="status" makes a screen reader read the message out when it appears -->
+          <span v-if="justSaved" class="note-saved" role="status">✓ Note saved</span>
         </div>
       </div>
     </div>
@@ -53,5 +83,11 @@ function removeItem() {
 /* Pull the note box up so it tucks under the flat card */
 .note-card {
   margin-top: -10px;
+}
+/* The green "saved" message (sage passes the 4.5:1 contrast check on white) */
+.note-saved {
+  color: var(--sage);
+  font-size: 14px;
+  font-weight: 600;
 }
 </style>
