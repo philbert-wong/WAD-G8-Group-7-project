@@ -537,6 +537,12 @@ using phone and tablet scenarios. These AI-generated assessments provided sugges
 The core affordability calculations and grant eligibility logic were developed by me, with subsequent AI assistance used for review and simplification suggestions. 
 I take responsibility for my submitted work and the assistance disclosed above.
 
+Jiun Wei 
+Used Claude Code (Anthropic) for:
+- How to work with Leaflet to make the map
+- Help for reviewing code for my map and search features and how we could potentially go about implementing certain features we wanted like the map town's bubbles when zoomed out
+- Used to find errors in mine and teammates code so we could quickly fix them
+
 Yu Jia (back end, code clean up)
 - Used AI to assist with code cleanup and improve readability.
 - Used AI to explain coding errors and provide debugging suggestions.
