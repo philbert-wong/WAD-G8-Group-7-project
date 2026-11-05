@@ -537,4 +537,9 @@ using phone and tablet scenarios. These AI-generated assessments provided sugges
 The core affordability calculations and grant eligibility logic were developed by me, with subsequent AI assistance used for review and simplification suggestions. 
 I take responsibility for my submitted work and the assistance disclosed above.
 
+Yu Jia (back end, code clean up)
+- Used AI to assist with code cleanup and improve readability.
+- Used AI to explain coding errors and provide debugging suggestions.
+
+
 [Other members: add your own entry below, in the same way.]
