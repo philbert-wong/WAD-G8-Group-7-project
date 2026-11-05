@@ -522,3 +522,5 @@ manual test journeys) is in [`README.txt`](README.txt).
 ## 10. AI Use Declaration
 
 Declared per member in [`README.txt`](README.txt), section 11 (IS216 brief FAQ 20).
+
+| Yu Jia | Code cleanup, debugging assistance and error explanations
