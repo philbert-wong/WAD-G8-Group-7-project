@@ -3,6 +3,7 @@
 // Your Priorities as Search, amenity layers, an address search, and the PHG (Proximity Housing Grant) layer:
 // type your parents' postal code to see the blocks within 4 km. Click a dot for the "Selected block" card.
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -167,6 +168,8 @@ const preferences = ref(loadSavedPreferences())
 
 // Who is logged in (Pinia store), so a change to Your Priorities can also be saved to the account, like Search does
 const auth = useAuthStore()
+// To open the Login page from a link inside a dot's popup (see onMapClick)
+const router = useRouter()
 
 // Saves Your Priorities the same way Search does: in this browser (localStorage), and on the account when
 // logged in. That way Search and the map always use the same priorities.
@@ -296,13 +299,90 @@ function popupText(place) {
     '<b>Blk ' + first.block + ' ' + first.street + '</b><br>' +
     '<span class="small text-muted">' + first.town + '</span>'
   for (const card of place.cards) {
-    text = text + '<br>' + card.flatType + ': median $' + card.price.toLocaleString('en-SG')
+    popupCards[card.id] = card // so onMapClick can find the flat of a button that was pressed
+    text =
+      text +
+      '<div class="popup-row"><span>' + card.flatType + ': median $' + card.price.toLocaleString('en-SG') + '</span>' +
+      saveButtonHtml(card) + '</div>'
   }
   // When the dots are coloured by match, show the score too
   if (colourBy.value === 'match') {
     text = text + '<br><b>Priority score: ' + scoreText(place) + '</b>'
   }
+  // A visitor without an account: this line shows once they have pressed a Save button (see onMapClick)
+  if (!auth.isLoggedIn) {
+    text =
+      text +
+      '<div class="popup-login small"' + (loginHintShown ? '' : ' hidden') + '>' +
+      '<a class="popup-link" href="/login"><b>Log in</b></a> or ' +
+      '<a class="popup-link" href="/createaccount"><b>create a free account</b></a> to save flats.</div>'
+  }
   return text
+}
+
+// ---------- Save buttons inside a dot's popup ----------
+// A popup is plain HTML text for Leaflet (not a Vue component), so its buttons cannot use @click. The map's box
+// listens for clicks instead (onMapClick, set up in onMounted) and reads which flat a button belongs to from its data-id.
+// Every popup's text is a function (popupText), so popup.update() makes it again from the shortlist as it is now.
+// ⚠️ NOT IN COURSE: addEventListener on an element, closest and dataset (finding the button that was pressed).
+
+// The flats whose Save buttons are in a popup: { flat id: card }, filled in by popupText
+const popupCards = {}
+// The popup that is open now (Leaflet's popupopen / popupclose events)
+let openPopup = null
+// true after a visitor without an account pressed Save: their popup then shows the "Log in ..." line
+let loginHintShown = false
+
+// "✓ Saved" or "+ Save", and the words a screen reader says (the flat type is named: a block can have several buttons)
+function saveButtonText(saved) {
+  return saved ? '✓ Saved' : '+ Save'
+}
+function saveButtonLabel(card, saved) {
+  return saved ? 'Saved ' + card.flatType + ' (press to remove)' : 'Save ' + card.flatType + ' to shortlist'
+}
+
+// The button as HTML text, for popupText
+function saveButtonHtml(card) {
+  const saved = shortlist.isSaved(card.id)
+  return (
+    '<button type="button" class="popup-save' + (saved ? ' saved' : '') + '" data-id="' + card.id + '"' +
+    ' aria-label="' + saveButtonLabel(card, saved) + '">' + saveButtonText(saved) + '</button>'
+  )
+}
+
+// Makes the open popup again from the shortlist as it is now (after a flat was saved or removed, here or in the
+// sidebar card, so its Save buttons are right)
+function refreshPopup() {
+  if (openPopup !== null) {
+    openPopup.update()
+  }
+}
+
+// A click anywhere on the map: only the Save buttons and the two links in a popup matter here
+async function onMapClick(event) {
+  // "Log in" / "create a free account" in the popup: go there without reloading the page
+  const link = event.target.closest('.popup-link')
+  if (link !== null) {
+    event.preventDefault()
+    router.push(link.getAttribute('href'))
+    return
+  }
+
+  const button = event.target.closest('.popup-save')
+  if (button === null) {
+    return
+  }
+  const card = popupCards[button.dataset.id]
+  if (card === undefined) {
+    return
+  }
+  // The shortlist belongs to an account: a visitor is asked to log in instead
+  if (!auth.isLoggedIn) {
+    loginHintShown = true
+    refreshPopup() // the popup shows the "Log in ..." line now
+    return
+  }
+  await toggleSave(card)
 }
 
 // A block dot was clicked: show that block in the "Selected block" card
@@ -643,7 +723,10 @@ function drawBlocks() {
       })
     }
     dot
-      .bindPopup(popupText(place))
+      .bindPopup(function () {
+        // A function: the text is made when the popup opens, so its Save buttons are up to date
+        return popupText(place)
+      })
       // Leaflet's own click event (Vue's @click cannot be used on map dots): show this block in the sidebar
       .on('click', function () {
         selectPlace(place)
@@ -721,7 +804,12 @@ function drawTownBubbles() {
 // L.popup (Leaflet) opens a popup at a spot without needing the dot itself, with the same text as the dot's.
 function focusPlace(place) {
   map.setView([place.lat, place.lng], 17) // 17 = street level
-  L.popup().setLatLng([place.lat, place.lng]).setContent(popupText(place)).openOn(map)
+  L.popup()
+    .setLatLng([place.lat, place.lng])
+    .setContent(function () {
+      return popupText(place)
+    })
+    .openOn(map)
   selectPlace(place)
 }
 
@@ -883,11 +971,13 @@ function showHiddenBlock(hiddenBlock) {
     fillColor: '#9e9e9e',
     fillOpacity: 1,
   })
-    .bindPopup(
-      popupText(hiddenBlock) +
+    .bindPopup(function () {
+      return (
+        popupText(hiddenBlock) +
         '<br><span class="text-danger">Does not fit your current filters, so it is not on the map.</span>' +
-        '<br><span class="small text-muted">Press "Clear all" under Filters to see it.</span>',
-    )
+        '<br><span class="small text-muted">Press "Clear all" under Filters to see it.</span>'
+      )
+    })
     .addTo(map)
   map.setView([hiddenBlock.lat, hiddenBlock.lng], 17) // 17 = street level, like a found block
   searchMarker.openPopup()
@@ -979,6 +1069,35 @@ function selectedMatchText() {
   return ''
 }
 
+// The ids of the flats (a block + flat type) in the shortlist: the Selected block card shows "✓ Saved" for these
+function savedBlockIds() {
+  const ids = []
+  for (const item of shortlist.items) {
+    ids.push(item.block.id)
+  }
+  return ids
+}
+
+// "+ Save" / "✓ Saved" on a flat type in the Selected block card: saves the flat, or takes it out of the shortlist.
+// (A visitor without an account is asked to log in by the card itself, so this only runs when logged in.)
+async function toggleSave(card) {
+  if (shortlist.isSaved(card.id)) {
+    for (const item of shortlist.items) {
+      if (item.block.id === card.id) {
+        await shortlist.removeFromShortlist(item.id)
+        break
+      }
+    }
+  } else {
+    await shortlist.addToShortlist(card.id)
+  }
+  // "My shortlist" shows only the saved flats, so draw the dots again (a flat that was just removed leaves the map)
+  if (showWhich.value === 'shortlist') {
+    await loadBlocks()
+  }
+  refreshPopup() // the Save buttons in an open popup follow the shortlist too
+}
+
 // New presets were saved in the popup while the map is open: redraw with them (PHG circle or not), then zoom to the town
 watch(
   function () {
@@ -1036,6 +1155,16 @@ onMounted(async function () {
   // Leaflet's zoomend event: after every zoom in / out, redraw as dots or town bubbles (see drawBlocks)
   map.on('zoomend', drawBlocks)
 
+  // The popup that is open now, and a click on the Save buttons inside popups
+  map.on('popupopen', function (event) {
+    openPopup = event.popup
+  })
+  map.on('popupclose', function () {
+    openPopup = null
+    loginHintShown = false
+  })
+  map.getContainer().addEventListener('click', onMapClick)
+
   // Coming from Search's "Show on map" button, the map zooms to that block instead of the profile's town
   const comingFromSearch = mapFocus.blockId !== null
 
@@ -1057,6 +1186,7 @@ onMounted(async function () {
 // (Week 5 slide 8: onUnmounted is for cleanup)
 onUnmounted(function () {
   if (map !== null) {
+    map.getContainer().removeEventListener('click', onMapClick)
     map.remove()
   }
 })
@@ -1082,10 +1212,11 @@ onUnmounted(function () {
 
     <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
-    <!-- Bootstrap grid: the map takes 8 of 12 columns on laptops and 9 of 12 on big screens, the sidebar the rest.
+    <!-- Bootstrap grid: the map takes 8 of 12 columns on laptops and 9 of 12 on very big screens (1400px and up), the sidebar the rest.
+         (Not 9 of 12 from 1200px: the sidebar card and its Save buttons would be squeezed too small there.)
          On phones and tablets (below lg) the sidebar goes under the map. -->
     <div class="row g-4 map-row">
-      <div class="col-lg-8 col-xl-9 map-col">
+      <div class="col-lg-8 col-xxl-9 map-col">
         <!-- Address search: move the map to any address or postal code (looked up by OneMap) -->
         <MapSearchBar class="m-search" :searched="filterStore.filters.q" @search="searchFromMap" />
 
@@ -1127,7 +1258,7 @@ onUnmounted(function () {
         </div>
       </div>
 
-      <div class="col-lg-4 col-xl-3 map-col">
+      <div class="col-lg-4 col-xxl-3 map-col">
         <div class="map-sidebar">
           <!-- Selected block: appears when a dot is clicked -->
           <SelectedBlockCard
@@ -1135,8 +1266,12 @@ onUnmounted(function () {
             v-if="selectedPlace !== null"
             :place="selectedPlace"
             :match-text="selectedMatchText()"
+            :logged-in="auth.isLoggedIn"
+            :saved-ids="savedBlockIds()"
+            :save-error="shortlist.error"
             :nearest-amenities="nearestAmenities"
             :amenity-types="amenityTypes"
+            @toggle-save="toggleSave"
             @close="closePlace"
             @show-nearest="showNearest"
             @hide-nearest="hideNearest"
@@ -1253,6 +1388,54 @@ onUnmounted(function () {
     top: 20px;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
+  }
+}
+</style>
+
+<!-- Not scoped: the popup is made by Leaflet from plain HTML text, which scoped styles cannot reach -->
+<style>
+/* The popup's text: bigger than Leaflet's 13px, in the same font as the rest of the page */
+.leaflet-popup-content {
+  font-family: "Cactus Classical Serif", serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.popup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+.popup-save {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1.5px solid var(--terra);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--terra);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.popup-save:hover {
+  background: var(--beige);
+}
+.popup-save.saved {
+  background: var(--terra);
+  color: #fff;
+}
+.popup-login {
+  margin-top: 8px;
+}
+/* Phones and tablets: a bigger button to tap */
+@media (max-width: 991.98px) {
+  .popup-save {
+    min-height: 42px;
+    padding: 0 16px;
+    font-size: 15px;
   }
 }
 </style>
