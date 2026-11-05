@@ -5,7 +5,7 @@ IS216 Web Application Development II, Section G8, Group 7
 Helps HDB resale buyers decide WHERE to look, using real transacted prices (last 12 months)
 instead of asking prices. You search blocks (not listings), filter them, compare cards with a
 personal priority score, look at each block's recent sales and nearby amenities, keep a shortlist
-with notes, work out an affordable budget, and see every block on a map.
+with notes, work out an affordable budget, and see the blocks on a map.
 
 Data store:     MongoDB Atlas (cloud), with Mongoose. A local MongoDB also works for development.
 External APIs:  OneMap (Singapore Land Authority): place search and walking routes to the nearest MRT.
@@ -23,8 +23,8 @@ Deployed app:   https://wad-g8-group-7-project-2.onrender.com
                 (on Render's free plan the API sleeps when nobody uses it: the first search after a quiet
                  spell can take up to a minute, then it is fast. The API is at
                  https://wad-g8-group-7-project-1.onrender.com/api/health)
-Git repository: https://github.com/philbert-wong/WAD-G8-Group-7-project   [TODO: confirm it is shared with the teaching team]
-Video:          [TODO: add the YouTube link]
+Git repository: https://github.com/philbert-wong/WAD-G8-Group-7-project 
+Video:          https://www.youtube.com/watch?v=NFfHCbX44hE
 
 
 ------------------------------------------------------------------------------------------
@@ -278,7 +278,7 @@ Manual check of the main user journeys (with both terminals running):
     5. On Search press Save on 2 flats: the navbar shows "Shortlist (2)". Add a note on Shortlist.
     6. Compare: tick the 2 flats and see them side by side.
     7. Affordability: fill in the steps, then "use this budget": Search opens with that budget.
-    8. Map: dots coloured by price. Click 4-Rm in the filters: the dots change. Click a dot: its popup
+    8. Map: switch "Colour dots by" to Price (the default is Priority score). Click 4-Rm in the filters: the dots change. Click a dot: its popup
        and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
        Logged in, press "+ Save" in the popup: it turns into "✓ Saved" and the card and "My shortlist (1)"
        agree. Logged out, "+ Save" asks you to log in or create an account.
