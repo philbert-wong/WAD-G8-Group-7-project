@@ -511,8 +511,10 @@ async function loadBlocks() {
     // If we came from Search's "Show on map", zoom to that block (first load only)
     focusOnRequestedBlock(shown)
   } catch (error) {
-    // Show our server's message if it sent one, otherwise axios's own (e.g. "Network Error")
-    if (error.response && error.response.data && error.response.data.message) {
+    if (error.response && error.response.status >= 500 && filterStore.filters.q !== '') {
+      // The place lookup (OneMap) is not working right now: say so in plain words
+      errorMessage.value = 'We could not look up "' + filterStore.filters.q + '" right now. Try a town, street, block or postal code, or press Show all of Singapore.'
+    } else if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
     } else {
       errorMessage.value = error.message
@@ -931,7 +933,7 @@ async function searchParent(text) {
   } catch (error) {
     if (error.response && error.response.status === 500) {
       // The server could not log in to OneMap (or something else broke there)
-      errorMessage.value = 'Place search failed. Check the OneMap login in server/config.env'
+      errorMessage.value = 'We could not check this address right now. Please try again later.'
     } else if (error.response && error.response.data && error.response.data.message) {
       // e.g. "Place not found" (404)
       errorMessage.value = error.response.data.message
@@ -1143,8 +1145,10 @@ onUnmounted(function () {
           <!-- Your Priorities FIRST, like Search: the dots are coloured by priority score by default, so it should
                not be hidden at the bottom. Same panel as Search (they share the saved choices). Open on a wide screen.
                collapsible: "Hide / Show" sits in its own title row, so it folds down to one line (no extra header box) -->
+          <!-- Your Priorities + Filter Results in one box, so the tour can light up both together -->
+          <div class="map-choices mb-3">
           <PreferencesPanel
-            class="mb-3 m-prio"
+            class="mb-3"
             :preferences="preferences"
             on-map
             collapsible
@@ -1156,7 +1160,6 @@ onUnmounted(function () {
           <!-- Filters: the same panel as Search, near the top so it is easy to find. Closed at the start
                (its title row is in view: one click opens it), so the map options below are not pushed far down -->
           <FilterPanel
-            class="m-filters"
             :filters="filterStore.filters"
             :phg-place-name="parentPlace !== null ? parentPlace.name : ''"
             collapsible
@@ -1165,6 +1168,7 @@ onUnmounted(function () {
             @search="applyFilters"
             @clear="clearFilters"
           />
+          </div>
 
           <!-- Show amenities: the tick boxes (Show / Colour dots by are in the bar above the map) -->
           <MapLegend class="m-legend" :amenity-types="amenityTypes" :shown-types="shownTypes" @toggle-amenity="toggleAmenity" />
@@ -1188,8 +1192,7 @@ onUnmounted(function () {
   }
   .m-search,
   .m-toolbar,
-  .m-prio,
-  .m-filters,
+  .map-choices,
   .m-strip,
   .m-map,
   .m-selected,
@@ -1200,8 +1203,8 @@ onUnmounted(function () {
   }
   .m-search { order: 1; }
   .m-toolbar { order: 2; }
-  .m-prio { order: 3; }
-  .m-filters { order: 4; }
+  .map-choices { order: 3; }
+  .map-choices > :last-child { margin-bottom: 0 !important; }
   .m-strip { order: 5; }
   .m-map { order: 6; }
   .m-selected { order: 7; }

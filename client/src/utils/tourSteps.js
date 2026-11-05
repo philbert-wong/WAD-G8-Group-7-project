@@ -55,9 +55,9 @@ export const TOUR_STEPS = {
       target: '.map-toolbar',
     },
     {
-      title: 'Same filters as Search',
-      text: 'Changing them here changes them on Search too.',
-      target: '#filters-panel',
+      title: 'Same priorities and filters as Search',
+      text: 'Your Priorities and Filter Results are shared with Search: changing them here changes them on Search too.',
+      target: '.map-choices',
     },
     {
       title: 'Living near your parents?',
