@@ -110,7 +110,7 @@ Pages:
                  parents' postal code to see only blocks within 4 km); "Show": all flats or only your
                  shortlist; click a dot for a popup with its flat types and a Save button for each (a visitor
                  without an account is asked to log in), and its nearest amenities in the "Selected block" card
-    /CPFCal      Affordability: calculator for a maximum budget, grants, PHG checker, "use this budget";
+    /CPFCal      Affordability: calculator for a maximum budget, grants, PHG checker, "Apply Budget to Search";
                  a refresh keeps the step you were on
     /compare     Compare 2 or 3 shortlisted flats side by side (needs login); the ticks stay after a refresh
     /shortlist   Your saved flats with notes (needs login); "Note saved" shows once a note is stored
@@ -277,7 +277,7 @@ Manual check of the main user journeys (with both terminals running):
     4. Click Shortlist while logged out: you are sent to Login; log in: you come back to Shortlist.
     5. On Search press Save on 2 flats: the navbar shows "Shortlist (2)". Add a note on Shortlist.
     6. Compare: tick the 2 flats and see them side by side.
-    7. Affordability: fill in the steps, then "use this budget": Search opens with that budget.
+    7. Affordability: fill in the steps, then "Apply Budget to Search": Search opens with that budget.
     8. Map: switch "Colour dots by" to Price (the default is Priority score). Click 4-Rm in the filters: the dots change. Click a dot: its popup
        and the "Selected block" card (flat types, median, lease); "Show nearest amenities" lists them.
        Logged in, press "+ Save" in the popup: it turns into "✓ Saved" and the card and "My shortlist (1)"
@@ -458,8 +458,9 @@ Login and shared state
 
 Real HDB resale sales from the last 12 months (data.gov.sg), grouped per block and flat type,
 for up to the 40 busiest blocks in each of the 26 HDB towns of Singapore: 7,154 sales in all, picked from the
-243,874 records in the CSV (Jan 2017 onwards, as of 2 Nov 2026). The price model uses the 156,183 of them
-since Jan 2021.
+243,874 records in the CSV (Jan 2017 onwards, as of 2 Nov 2026).
+The price model is trained on the 156,183 of the 243,874 records dated Jan 2021 onwards (the 5 common
+flat types; 1-room and multi-generation flats are left out).
 Coordinates come from OneMap; MRT stations, hawker centres, parks and primary schools from data.gov.sg.
 LRT stations (Punggol, Sengkang and Bukit Panjang LRT) are stored with the MRT stations (category "mrt"), so the
 nearest-station walk and the priority score's Transport part count them too.
