@@ -520,4 +520,21 @@ Used Claude Code (Anthropic) for:
 - Ideation for frontend desgin and theme
 - To explain and give hints on how to do certain logics
 
+Ji Hao (Affordability, front end)
+I used Claude and OpenAI Codex to assist with research summaries, UI/UX design exploration, and review of existing work. 
+I independently researched housing grants, including the CPF Housing Grant (CPFHG), Proximity Housing Grant (PHG), Enhanced CPF Housing Grant (EHG),etc 
+and identified the relevant websites. I then asked Claude to summarise the information from those sources. 
+I wrote the affordability calculation logic and grant eligibility rules myself. After completing these functions, 
+I asked Claude to review them and suggest ways to streamline or shorten parts of the code.
+
+For the frontend, I provided my own ideas and consulted my groupmate about how to present the information. 
+AI helped explore layouts and suggest improvements to the presentation. After the team completed its respective parts, 
+I used Codex to review individual components and pages for intuitiveness, and Claude to suggest and make UI refinements based on the feedback.
+
+I also asked Codex to evaluate user journeys through simulated personas representing different age groups and levels of technical familiarity, 
+using phone and tablet scenarios. These AI-generated assessments provided suggestions for improving the interface; they were not usability tests conducted with actual participants.
+
+The core affordability calculations and grant eligibility logic were developed by me, with subsequent AI assistance used for review and simplification suggestions. 
+I take responsibility for my submitted work and the assistance disclosed above.
+
 [Other members: add your own entry below, in the same way.]
